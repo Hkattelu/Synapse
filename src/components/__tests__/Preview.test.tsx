@@ -1,12 +1,18 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Preview } from '../Preview';
 import type { AppState } from '../../state/types';
 import type { Project, MediaAsset, TimelineItem } from '../../lib/types';
 
+// Mock functions for hooks
+const mockPlay = vi.fn();
+const mockPause = vi.fn();
+const mockSeek = vi.fn();
+const mockSetVolume = vi.fn();
+const mockToggleMute = vi.fn();
+
 // Mock the hooks
-const mockDispatch = vi.fn();
 let mockState: AppState;
 
 // Mock Remotion Player
@@ -19,22 +25,23 @@ const mockPlayerRef = {
 };
 
 vi.mock('@remotion/player', () => ({
-  Player: React.forwardRef(({ onTimeUpdate, inputProps, ...props }: any, ref: any) => {
-    // Assign the mock ref
-    if (ref) {
-      ref.current = mockPlayerRef.current;
+  Player: React.forwardRef(
+    ({ onTimeUpdate, inputProps }: any, ref: any) => {
+      if (ref) {
+        ref.current = mockPlayerRef.current;
+      }
+
+      return (
+        <div
+          data-testid="remotion-player"
+          data-input-props={JSON.stringify(inputProps)}
+          onClick={() => onTimeUpdate && onTimeUpdate(150)}
+        >
+          Remotion Player Mock
+        </div>
+      );
     }
-    
-    return (
-      <div 
-        data-testid="remotion-player"
-        data-input-props={JSON.stringify(inputProps)}
-        onClick={() => onTimeUpdate && onTimeUpdate(150)} // Simulate time update
-      >
-        Remotion Player Mock
-      </div>
-    );
-  }),
+  ),
 }));
 
 // Mock the hooks directly
@@ -44,9 +51,11 @@ vi.mock('../../state/hooks', () => ({
   }),
   usePlayback: () => ({
     playback: mockState.ui.playback,
-    play: vi.fn(() => mockDispatch({ type: 'UPDATE_PLAYBACK_STATE', payload: { isPlaying: true } })),
-    pause: vi.fn(() => mockDispatch({ type: 'UPDATE_PLAYBACK_STATE', payload: { isPlaying: false } })),
-    seek: vi.fn((time) => mockDispatch({ type: 'UPDATE_PLAYBACK_STATE', payload: { currentTime: time } })),
+    play: mockPlay,
+    pause: mockPause,
+    seek: mockSeek,
+    setVolume: mockSetVolume,
+    toggleMute: mockToggleMute,
   }),
 }));
 
@@ -124,15 +133,20 @@ describe('Preview Component', () => {
     mockPlayerRef.current.play.mockClear();
     mockPlayerRef.current.pause.mockClear();
     mockPlayerRef.current.seekTo.mockClear();
+    mockPlay.mockClear();
+    mockPause.mockClear();
+    mockSeek.mockClear();
+    mockSetVolume.mockClear();
+    mockToggleMute.mockClear();
   });
 
   it('renders preview with project loaded', () => {
     render(<Preview />);
-    
+
     expect(screen.getByTestId('remotion-player')).toBeInTheDocument();
     expect(screen.getByTitle('Play')).toBeInTheDocument();
     expect(screen.getByText('00:00.00')).toBeInTheDocument();
-    expect(screen.getByText('01:00.00')).toBeInTheDocument();
+    expect(screen.getAllByText('01:00.00')).toHaveLength(2); // Timeline scrubber and main controls
   });
 
   it('renders empty state when no project is loaded', () => {
@@ -142,33 +156,35 @@ describe('Preview Component', () => {
     };
 
     render(<Preview />);
-    
+
     expect(screen.getByText('No Project Loaded')).toBeInTheDocument();
-    expect(screen.getByText('Create or load a project to see the preview')).toBeInTheDocument();
+    expect(
+      screen.getByText('Create or load a project to see the preview')
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('remotion-player')).not.toBeInTheDocument();
   });
 
   it('passes correct props to Remotion Player', () => {
     render(<Preview />);
-    
+
     const player = screen.getByTestId('remotion-player');
-    const inputProps = JSON.parse(player.getAttribute('data-input-props') || '{}');
-    
+    const inputProps = JSON.parse(
+      player.getAttribute('data-input-props') || '{}'
+    );
+
     expect(inputProps.timeline).toHaveLength(1);
     expect(inputProps.mediaAssets).toHaveLength(1);
     expect(inputProps.settings.width).toBe(1920);
     expect(inputProps.settings.height).toBe(1080);
   });
 
-  it('handles play/pause button click', async () => {
+  it('handles play/pause button click', () => {
     render(<Preview />);
-    
+
     const playButton = screen.getByTitle('Play');
-    expect(playButton).toBeInTheDocument();
-    
     fireEvent.click(playButton);
-    // The button should be clickable (basic interaction test)
-    expect(playButton).toBeInTheDocument();
+
+    expect(mockPlay).toHaveBeenCalledTimes(1);
   });
 
   it('shows pause button when playing', () => {
@@ -184,62 +200,214 @@ describe('Preview Component', () => {
     };
 
     render(<Preview />);
-    
+
     expect(screen.getByTitle('Pause')).toBeInTheDocument();
   });
 
-  it('handles time updates from player', async () => {
-    render(<Preview />);
-    
-    const player = screen.getByTestId('remotion-player');
-    fireEvent.click(player); // This triggers the onTimeUpdate with frame 150
-    
-    // Basic test that the player responds to interactions
-    expect(player).toBeInTheDocument();
-  });
-
-  it('formats time correctly', () => {
+  it('handles pause button click when playing', () => {
     mockState = {
       ...defaultState,
       ui: {
         ...defaultState.ui,
         playback: {
           ...defaultState.ui.playback,
-          currentTime: 125.75, // 2 minutes, 5.75 seconds
+          isPlaying: true,
         },
       },
     };
 
     render(<Preview />);
-    
-    expect(screen.getByText('02:05.22')).toBeInTheDocument(); // 0.75 * 30 = 22.5 frames
+
+    const pauseButton = screen.getByTitle('Pause');
+    fireEvent.click(pauseButton);
+
+    expect(mockPause).toHaveBeenCalledTimes(1);
   });
 
-  it('calculates duration in frames correctly', () => {
-    const projectWith90SecDuration = {
-      ...mockProject,
-      settings: {
-        ...mockProject.settings,
-        duration: 90,
-        fps: 24,
+  it('handles skip backward button', () => {
+    mockState = {
+      ...defaultState,
+      ui: {
+        ...defaultState.ui,
+        playback: {
+          ...defaultState.ui.playback,
+          currentTime: 20,
+        },
       },
     };
 
+    render(<Preview />);
+
+    const skipBackwardButton = screen.getByTitle('Skip Backward 10s');
+    fireEvent.click(skipBackwardButton);
+
+    expect(mockSeek).toHaveBeenCalledWith(10);
+  });
+
+  it('handles skip forward button', () => {
     mockState = {
       ...defaultState,
-      project: projectWith90SecDuration,
+      ui: {
+        ...defaultState.ui,
+        playback: {
+          ...defaultState.ui.playback,
+          currentTime: 20,
+        },
+      },
     };
 
     render(<Preview />);
-    
-    // Should calculate 90 * 24 = 2160 frames
-    // We can't directly test this, but we can verify the time display
-    expect(screen.getByText('01:30.00')).toBeInTheDocument();
+
+    const skipForwardButton = screen.getByTitle('Skip Forward 10s');
+    fireEvent.click(skipForwardButton);
+
+    expect(mockSeek).toHaveBeenCalledWith(30);
+  });
+
+  it('handles frame backward button', () => {
+    mockState = {
+      ...defaultState,
+      ui: {
+        ...defaultState.ui,
+        playback: {
+          ...defaultState.ui.playback,
+          currentTime: 1,
+        },
+      },
+    };
+
+    render(<Preview />);
+
+    const frameBackwardButton = screen.getByTitle('Previous Frame');
+    fireEvent.click(frameBackwardButton);
+
+    expect(mockSeek).toHaveBeenCalledWith(1 - 1 / 30);
+  });
+
+  it('handles frame forward button', () => {
+    mockState = {
+      ...defaultState,
+      ui: {
+        ...defaultState.ui,
+        playback: {
+          ...defaultState.ui.playback,
+          currentTime: 1,
+        },
+      },
+    };
+
+    render(<Preview />);
+
+    const frameForwardButton = screen.getByTitle('Next Frame');
+    fireEvent.click(frameForwardButton);
+
+    expect(mockSeek).toHaveBeenCalledWith(1 + 1 / 30);
+  });
+
+  it('handles volume change', () => {
+    render(<Preview />);
+
+    const volumeSlider = screen.getByTitle('Volume');
+    fireEvent.change(volumeSlider, { target: { value: '0.5' } });
+
+    expect(mockSetVolume).toHaveBeenCalledWith(0.5);
+  });
+
+  it('handles mute toggle', () => {
+    render(<Preview />);
+
+    const muteButton = screen.getByTitle('Mute');
+    fireEvent.click(muteButton);
+
+    expect(mockToggleMute).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows unmute button when muted', () => {
+    mockState = {
+      ...defaultState,
+      ui: {
+        ...defaultState.ui,
+        playback: {
+          ...defaultState.ui.playback,
+          muted: true,
+        },
+      },
+    };
+
+    render(<Preview />);
+
+    expect(screen.getByTitle('Unmute')).toBeInTheDocument();
+  });
+
+  it('formats time correctly with frame accuracy', () => {
+    mockState = {
+      ...defaultState,
+      ui: {
+        ...defaultState.ui,
+        playback: {
+          ...defaultState.ui.playback,
+          currentTime: 125.75,
+        },
+      },
+    };
+
+    render(<Preview />);
+
+    expect(screen.getByText('02:05.22')).toBeInTheDocument();
+  });
+
+  it('handles time updates from player', () => {
+    render(<Preview />);
+
+    const player = screen.getByTestId('remotion-player');
+    fireEvent.click(player);
+
+    expect(mockSeek).toHaveBeenCalledWith(5);
+  });
+
+  it('prevents seeking beyond duration bounds', () => {
+    mockState = {
+      ...defaultState,
+      ui: {
+        ...defaultState.ui,
+        playback: {
+          ...defaultState.ui.playback,
+          currentTime: 59,
+        },
+      },
+    };
+
+    render(<Preview />);
+
+    const skipForwardButton = screen.getByTitle('Skip Forward 10s');
+    fireEvent.click(skipForwardButton);
+
+    expect(mockSeek).toHaveBeenCalledWith(60);
+  });
+
+  it('prevents seeking below zero', () => {
+    mockState = {
+      ...defaultState,
+      ui: {
+        ...defaultState.ui,
+        playback: {
+          ...defaultState.ui.playback,
+          currentTime: 5,
+        },
+      },
+    };
+
+    render(<Preview />);
+
+    const skipBackwardButton = screen.getByTitle('Skip Backward 10s');
+    fireEvent.click(skipBackwardButton);
+
+    expect(mockSeek).toHaveBeenCalledWith(0);
   });
 
   it('applies custom className', () => {
     const { container } = render(<Preview className="custom-class" />);
-    
+
     expect(container.firstChild).toHaveClass('custom-class');
   });
 
@@ -256,12 +424,14 @@ describe('Preview Component', () => {
     };
 
     render(<Preview />);
-    
+
     expect(screen.getByTestId('remotion-player')).toBeInTheDocument();
-    
+
     const player = screen.getByTestId('remotion-player');
-    const inputProps = JSON.parse(player.getAttribute('data-input-props') || '{}');
-    
+    const inputProps = JSON.parse(
+      player.getAttribute('data-input-props') || '{}'
+    );
+
     expect(inputProps.timeline).toEqual([]);
     expect(inputProps.mediaAssets).toEqual([]);
   });

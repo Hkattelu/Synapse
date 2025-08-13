@@ -90,7 +90,13 @@
   - Test basic video rendering with mock timeline data
   - _Requirements: 4.1, 4.2_
 
-- [ ] 8. Implement video preview and playback controls
+- [x] 8. Implement video preview and playback controls
+
+
+
+
+
+
   - Create Preview component with Remotion Player integration
   - Add playback controls (play, pause, seek, timeline scrubbing)
   - Implement real-time preview updates when timeline changes
@@ -98,7 +104,11 @@
   - Write tests for preview functionality and state synchronization
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-- [ ] 9. Build property inspector and clip editing
+- [x] 9. Build property inspector and clip editing
+
+
+
+
   - Create Inspector component for displaying selected clip properties
   - Implement property editing forms with real-time validation
   - Add clip metadata display (duration, type, source file)

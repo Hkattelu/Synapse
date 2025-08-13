@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Player, PlayerRef } from '@remotion/player';
 import { useProject, usePlayback } from '../state/hooks';
 import { MainComposition } from '../remotion/MainComposition';
@@ -10,8 +10,10 @@ interface PreviewProps {
 
 export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   const { project } = useProject();
-  const { playback, play, pause, seek } = usePlayback();
+  const { playback, play, pause, seek, setVolume, toggleMute } = usePlayback();
   const playerRef = React.useRef<PlayerRef>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartTime, setDragStartTime] = useState(0);
 
   // Prepare composition props from project state
   const compositionProps: MainCompositionProps = useMemo(() => {
@@ -62,9 +64,11 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
 
   // Handle player time updates
   const handleTimeUpdate = useCallback((frame: number) => {
-    const timeInSeconds = frame / compositionProps.settings.fps;
-    seek(timeInSeconds);
-  }, [seek, compositionProps.settings.fps]);
+    if (!isDragging) {
+      const timeInSeconds = frame / compositionProps.settings.fps;
+      seek(timeInSeconds);
+    }
+  }, [seek, compositionProps.settings.fps, isDragging]);
 
   // Handle player play/pause
   const handlePlayPause = useCallback(() => {
@@ -74,6 +78,80 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
       play();
     }
   }, [playback.isPlaying, play, pause]);
+
+  // Handle seeking to specific time
+  const handleSeek = useCallback((time: number) => {
+    const clampedTime = Math.max(0, Math.min(time, compositionProps.settings.duration));
+    seek(clampedTime);
+    
+    if (playerRef.current) {
+      const frame = Math.round(clampedTime * compositionProps.settings.fps);
+      playerRef.current.seekTo(frame);
+    }
+  }, [seek, compositionProps.settings.duration, compositionProps.settings.fps]);
+
+  // Handle timeline scrubbing
+  const handleTimelineScrub = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const percentage = x / rect.width;
+    const time = percentage * compositionProps.settings.duration;
+    handleSeek(time);
+  }, [handleSeek, compositionProps.settings.duration]);
+
+  // Handle timeline drag start
+  const handleTimelineDragStart = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    setDragStartTime(playback.currentTime);
+    handleTimelineScrub(event);
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const percentage = Math.max(0, Math.min(1, x / rect.width));
+      const time = percentage * compositionProps.settings.duration;
+      handleSeek(time);
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [handleSeek, handleTimelineScrub, playback.currentTime, compositionProps.settings.duration]);
+
+  // Handle volume change
+  const handleVolumeChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const volume = parseFloat(event.target.value);
+    setVolume(volume);
+  }, [setVolume]);
+
+  // Handle skip forward/backward
+  const handleSkipBackward = useCallback(() => {
+    const newTime = Math.max(0, playback.currentTime - 10);
+    handleSeek(newTime);
+  }, [playback.currentTime, handleSeek]);
+
+  const handleSkipForward = useCallback(() => {
+    const newTime = Math.min(compositionProps.settings.duration, playback.currentTime + 10);
+    handleSeek(newTime);
+  }, [playback.currentTime, compositionProps.settings.duration, handleSeek]);
+
+  // Handle frame-by-frame navigation
+  const handleFrameBackward = useCallback(() => {
+    const frameTime = 1 / compositionProps.settings.fps;
+    const newTime = Math.max(0, playback.currentTime - frameTime);
+    handleSeek(newTime);
+  }, [playback.currentTime, compositionProps.settings.fps, handleSeek]);
+
+  const handleFrameForward = useCallback(() => {
+    const frameTime = 1 / compositionProps.settings.fps;
+    const newTime = Math.min(compositionProps.settings.duration, playback.currentTime + frameTime);
+    handleSeek(newTime);
+  }, [playback.currentTime, compositionProps.settings.fps, compositionProps.settings.duration, handleSeek]);
 
   if (!project) {
     return (
@@ -122,29 +200,143 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
         </div>
       </div>
 
+      {/* Timeline Scrubber */}
+      <div className="bg-gray-800 border-t border-gray-700 px-4 py-2">
+        <div className="relative">
+          <div
+            className="h-2 bg-gray-600 rounded-full cursor-pointer"
+            onMouseDown={handleTimelineDragStart}
+            onClick={handleTimelineScrub}
+          >
+            <div
+              className="h-full bg-blue-600 rounded-full relative"
+              style={{
+                width: `${(playback.currentTime / compositionProps.settings.duration) * 100}%`,
+              }}
+            >
+              <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow-lg" />
+            </div>
+          </div>
+          
+          {/* Timeline markers */}
+          <div className="flex justify-between text-xs text-gray-400 mt-1">
+            <span>0:00</span>
+            <span>{formatTime(compositionProps.settings.duration)}</span>
+          </div>
+        </div>
+      </div>
+
       {/* Preview Controls */}
       <div className="bg-gray-800 border-t border-gray-700 p-4">
-        <div className="flex items-center justify-center space-x-4">
-          <button
-            onClick={handlePlayPause}
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors"
-            title={playback.isPlaying ? 'Pause' : 'Play'}
-          >
-            {playback.isPlaying ? (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6" />
+        <div className="flex items-center justify-between">
+          {/* Left controls */}
+          <div className="flex items-center space-x-2">
+            {/* Frame backward */}
+            <button
+              onClick={handleFrameBackward}
+              className="text-gray-300 hover:text-white p-2 rounded transition-colors"
+              title="Previous Frame"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
               </svg>
-            ) : (
-              <svg className="w-6 h-6 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-              </svg>
-            )}
-          </button>
+            </button>
 
-          <div className="flex items-center space-x-2 text-sm text-gray-300">
-            <span>{formatTime(playback.currentTime)}</span>
-            <span>/</span>
-            <span>{formatTime(compositionProps.settings.duration)}</span>
+            {/* Skip backward */}
+            <button
+              onClick={handleSkipBackward}
+              className="text-gray-300 hover:text-white p-2 rounded transition-colors"
+              title="Skip Backward 10s"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Center controls */}
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={handlePlayPause}
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors"
+              title={playback.isPlaying ? 'Pause' : 'Play'}
+            >
+              {playback.isPlaying ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                </svg>
+              )}
+            </button>
+
+            <div className="flex items-center space-x-2 text-sm text-gray-300">
+              <span>{formatTime(playback.currentTime, compositionProps.settings.fps)}</span>
+              <span>/</span>
+              <span>{formatTime(compositionProps.settings.duration, compositionProps.settings.fps)}</span>
+            </div>
+          </div>
+
+          {/* Right controls */}
+          <div className="flex items-center space-x-2">
+            {/* Skip forward */}
+            <button
+              onClick={handleSkipForward}
+              className="text-gray-300 hover:text-white p-2 rounded transition-colors"
+              title="Skip Forward 10s"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 4v16l6-8-6-8zM11 4v16l6-8-6-8z" />
+              </svg>
+            </button>
+
+            {/* Frame forward */}
+            <button
+              onClick={handleFrameForward}
+              className="text-gray-300 hover:text-white p-2 rounded transition-colors"
+              title="Next Frame"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 4v16l6-8-6-8zM11 4v16l6-8-6-8z" />
+              </svg>
+            </button>
+
+            {/* Volume controls */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={toggleMute}
+                className="text-gray-300 hover:text-white p-2 rounded transition-colors"
+                title={playback.muted ? 'Unmute' : 'Mute'}
+              >
+                {playback.muted || playback.volume === 0 ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                  </svg>
+                )}
+              </button>
+              
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={playback.muted ? 0 : playback.volume}
+                onChange={handleVolumeChange}
+                className="w-16 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
+                style={{
+                  '--value': `${(playback.muted ? 0 : playback.volume) * 100}%`,
+                } as React.CSSProperties}
+                title="Volume"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -152,10 +344,10 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   );
 };
 
-// Helper function to format time
-function formatTime(seconds: number): string {
+// Helper function to format time with frame accuracy
+function formatTime(seconds: number, fps: number = 30): string {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
-  const frames = Math.floor((seconds % 1) * 30); // Assuming 30fps
+  const frames = Math.floor((seconds % 1) * fps);
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${frames.toString().padStart(2, '0')}`;
 }
