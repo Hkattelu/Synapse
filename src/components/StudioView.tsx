@@ -1,4 +1,7 @@
 import { useProject, useUI } from '../state/hooks';
+import { MediaBin } from './MediaBin';
+import { Timeline } from './Timeline';
+import { Preview } from './Preview';
 
 export function StudioView() {
   const { project } = useProject();
@@ -108,53 +111,16 @@ export function StudioView() {
         {/* Main Editor Area */}
         <main className="flex-1 flex flex-col">
           {/* Preview Area */}
-          <div className="flex-1 bg-black flex items-center justify-center border-b border-gray-700">
-            <div className="text-center text-gray-400">
-              <div className="w-16 h-16 bg-gray-800 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <p className="text-lg font-medium">Preview Area</p>
-              <p className="text-sm">Video preview will appear here</p>
-            </div>
-          </div>
+          <Preview className="flex-1 border-b border-gray-700" />
 
           {/* Timeline Area */}
-          <div className="h-64 bg-gray-800 border-t border-gray-700">
-            <div className="h-full flex items-center justify-center text-gray-400">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-gray-700 rounded-lg mx-auto mb-3 flex items-center justify-center">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <p className="font-medium">Timeline</p>
-                <p className="text-sm">Drag clips here to build your video</p>
-              </div>
-            </div>
-          </div>
+          <Timeline className="h-64" />
         </main>
 
         {/* Media Bin */}
         {ui.mediaBinVisible && (
-          <aside className="w-80 bg-gray-800 border-l border-gray-700 flex flex-col">
-            <div className="p-4 border-b border-gray-700">
-              <h3 className="font-semibold text-sm text-gray-300 uppercase tracking-wide">Media Bin</h3>
-            </div>
-            <div className="flex-1 p-4">
-              <div className="h-full flex items-center justify-center text-gray-400">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-gray-700 rounded-lg mx-auto mb-3 flex items-center justify-center">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                  </div>
-                  <p className="font-medium">No Media</p>
-                  <p className="text-sm">Upload files to get started</p>
-                </div>
-              </div>
-            </div>
+          <aside className="w-80 bg-gray-800 border-l border-gray-700">
+            <MediaBin />
           </aside>
         )}
 

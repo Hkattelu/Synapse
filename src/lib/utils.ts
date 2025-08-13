@@ -155,6 +155,36 @@ export const formatFileSize = (bytes: number): string => {
   return `${size.toFixed(1)} ${units[unitIndex]}`;
 };
 
+// Media duration formatting
+export const formatDuration = (seconds: number): string => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  return `${minutes}:${secs.toString().padStart(2, '0')}`;
+};
+
+// File type detection utilities
+export const getFileExtension = (filename: string): string => {
+  const parts = filename.split('.');
+  return parts.length > 1 ? parts.pop()?.toLowerCase() || '' : '';
+};
+
+export const isVideoFile = (mimeType: string): boolean => {
+  return mimeType.startsWith('video/');
+};
+
+export const isImageFile = (mimeType: string): boolean => {
+  return mimeType.startsWith('image/');
+};
+
+export const isAudioFile = (mimeType: string): boolean => {
+  return mimeType.startsWith('audio/');
+};
+
 // Project utilities
 export const createDefaultProject = (name: string): Project => {
   const now = new Date();
