@@ -1,6 +1,7 @@
 import React from 'react';
 import { AbsoluteFill, useVideoConfig } from 'remotion';
 import { VideoSequence } from './VideoSequence';
+import { CodeSequence } from './CodeSequence';
 import type { MainCompositionProps } from './types';
 
 export const MainComposition: React.FC<MainCompositionProps> = ({
@@ -12,11 +13,24 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
 
   // Convert timeline items to Remotion sequences
   const sequences = timeline.map((item) => {
-    const asset = mediaAssets.find((a) => a.id === item.assetId);
-    if (!asset) return null;
-
     const startFrame = Math.round(item.startTime * fps);
     const durationInFrames = Math.round(item.duration * fps);
+
+    // Handle code sequences differently - they don't need an asset
+    if (item.type === 'code') {
+      return (
+        <CodeSequence
+          key={item.id}
+          item={item}
+          startFrame={startFrame}
+          durationInFrames={durationInFrames}
+        />
+      );
+    }
+
+    // For other types, find the associated asset
+    const asset = mediaAssets.find((a) => a.id === item.assetId);
+    if (!asset) return null;
 
     return (
       <VideoSequence

@@ -233,16 +233,52 @@ export function MediaBin({ className = '' }: MediaBinProps) {
 
   // Handle double-click to add to timeline
   const handleDoubleClick = useCallback((asset: MediaAsset) => {
-    addTimelineItem({
-      assetId: asset.id,
-      startTime: 0,
-      duration: asset.duration || 5, // Default 5 seconds for images
-      track: 0,
-      type: asset.type === 'image' ? 'video' : asset.type, // Images become video clips
-      properties: {},
-      animations: [],
-    });
+    if (asset.type === 'code') {
+      // For code assets, create a code timeline item
+      addTimelineItem({
+        assetId: asset.id,
+        startTime: 0,
+        duration: 10, // Default 10 seconds for code clips
+        track: 0,
+        type: 'code',
+        properties: {
+          text: asset.metadata.codeContent || '// Your code here',
+          language: asset.metadata.language || 'javascript',
+          theme: 'dark',
+          fontSize: 16,
+        },
+        animations: [],
+      });
+    } else {
+      addTimelineItem({
+        assetId: asset.id,
+        startTime: 0,
+        duration: asset.duration || 5, // Default 5 seconds for images
+        track: 0,
+        type: asset.type === 'image' ? 'video' : asset.type, // Images become video clips
+        properties: {},
+        animations: [],
+      });
+    }
   }, [addTimelineItem]);
+
+  // Create a new code clip
+  const createCodeClip = useCallback(() => {
+    const codeAsset: Omit<MediaAsset, 'id' | 'createdAt'> = {
+      name: `Code Clip ${mediaAssets.filter(a => a.type === 'code').length + 1}`,
+      type: 'code',
+      url: '', // Code clips don't need URLs
+      duration: 10, // Default 10 seconds
+      metadata: {
+        fileSize: 0,
+        mimeType: 'text/plain',
+        codeContent: '// Your code here\nconsole.log("Hello, World!");',
+        language: 'javascript',
+      },
+    };
+
+    addMediaAsset(codeAsset);
+  }, [addMediaAsset, mediaAssets]);
 
   // Open file dialog
   const openFileDialog = useCallback(() => {
@@ -273,13 +309,22 @@ export function MediaBin({ className = '' }: MediaBinProps) {
           <h3 className="font-semibold text-sm text-gray-300 uppercase tracking-wide">
             Media Bin
           </h3>
-          <button
-            onClick={openFileDialog}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-1 px-3 rounded transition-colors"
-            disabled={isUploading}
-          >
-            {isUploading ? 'Uploading...' : 'Add Media'}
-          </button>
+          <div className="flex space-x-2">
+            <button
+              onClick={openFileDialog}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-1 px-3 rounded transition-colors"
+              disabled={isUploading}
+            >
+              {isUploading ? 'Uploading...' : 'Add Media'}
+            </button>
+            <button
+              onClick={createCodeClip}
+              className="bg-green-600 hover:bg-green-700 text-white text-xs font-medium py-1 px-3 rounded transition-colors"
+              title="Create a new code clip"
+            >
+              Add Code
+            </button>
+          </div>
         </div>
         
         {/* Upload errors */}
@@ -381,6 +426,16 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                           </svg>
+                        )}
+                        {asset.type === 'code' && (
+                          <div className="text-center">
+                            <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            </svg>
+                            <div className="text-xs font-mono bg-gray-900 px-2 py-1 rounded">
+                              {asset.metadata.language || 'js'}
+                            </div>
+                          </div>
                         )}
                       </div>
                     )}

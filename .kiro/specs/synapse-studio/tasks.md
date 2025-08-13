@@ -109,6 +109,7 @@
 
 
 
+
   - Create Inspector component for displaying selected clip properties
   - Implement property editing forms with real-time validation
   - Add clip metadata display (duration, type, source file)
@@ -117,6 +118,10 @@
   - _Requirements: 7.1, 7.2, 7.4_
 
 - [ ] 10. Implement animated code sequence functionality
+
+
+
+
   - Create CodeSequence Remotion component with syntax highlighting
   - Add code editor interface in Inspector for code clips
   - Implement typing animation effects using Remotion's interpolate

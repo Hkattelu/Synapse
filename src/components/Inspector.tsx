@@ -284,6 +284,13 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
 
   const renderCodeProperties = () => (
     <div className="space-y-3">
+      <TextInput
+        label="Code Content"
+        value={localProperties.text ?? ''}
+        onChange={(value) => updateProperty('text', value)}
+        error={validationErrors.text}
+        multiline
+      />
       <SelectInput
         label="Language"
         value={localProperties.language ?? 'javascript'}
@@ -612,10 +619,11 @@ function TextInput({ label, value, onChange, error, multiline = false }: TextInp
           id={inputId}
           value={value}
           onChange={handleChange}
-          rows={3}
+          rows={label === 'Code Content' ? 8 : 3}
           className={inputClasses}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}
+          style={label === 'Code Content' ? { fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace' } : undefined}
         />
       ) : (
         <input

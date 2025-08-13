@@ -12,6 +12,9 @@ export interface AssetMetadata {
   bitrate?: number;
   fileSize: number;
   mimeType: string;
+  // Code-specific metadata
+  codeContent?: string;
+  language?: string;
 }
 
 export interface MediaAsset {
