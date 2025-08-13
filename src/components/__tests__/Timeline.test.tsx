@@ -44,9 +44,11 @@ const defaultState: AppState = {
       fps: 30,
       duration: 60,
       backgroundColor: '#000000',
+      audioSampleRate: 48000,
     },
     version: '1.0.0',
   },
+  projects: [],
   ui: {
     currentView: 'studio',
     sidebarVisible: true,
@@ -69,6 +71,7 @@ const defaultState: AppState = {
   },
   lastSaved: null,
   isDirty: false,
+  isLoading: false,
 };
 
 // Mock media asset

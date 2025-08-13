@@ -2,6 +2,7 @@ import React from 'react';
 import { AbsoluteFill, useVideoConfig } from 'remotion';
 import { VideoSequence } from './VideoSequence';
 import { CodeSequence } from './CodeSequence';
+import { TitleSequence } from './TitleSequence';
 import type { MainCompositionProps } from './types';
 
 export const MainComposition: React.FC<MainCompositionProps> = ({
@@ -16,10 +17,21 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
     const startFrame = Math.round(item.startTime * fps);
     const durationInFrames = Math.round(item.duration * fps);
 
-    // Handle code sequences differently - they don't need an asset
+    // Handle sequences that don't need assets
     if (item.type === 'code') {
       return (
         <CodeSequence
+          key={item.id}
+          item={item}
+          startFrame={startFrame}
+          durationInFrames={durationInFrames}
+        />
+      );
+    }
+
+    if (item.type === 'title') {
+      return (
+        <TitleSequence
           key={item.id}
           item={item}
           startFrame={startFrame}

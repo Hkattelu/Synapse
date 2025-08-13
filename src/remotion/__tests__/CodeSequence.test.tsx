@@ -6,8 +6,8 @@ import type { TimelineItem } from '../../lib/types';
 
 // Mock Remotion hooks
 vi.mock('remotion', () => ({
-  AbsoluteFill: ({ children, style }: any) => <div style={style}>{children}</div>,
-  Sequence: ({ children }: any) => <div>{children}</div>,
+  AbsoluteFill: ({ children, style }: any) => <div style={style} data-testid="absolute-fill">{children}</div>,
+  Sequence: ({ children, from, durationInFrames }: any) => <div data-testid="sequence" data-from={from} data-duration={durationInFrames}>{children}</div>,
   interpolate: vi.fn((frame, input, output) => {
     const progress = (frame - input[0]) / (input[1] - input[0]);
     return Math.max(0, Math.min(1, progress));
@@ -75,7 +75,7 @@ describe('CodeSequence', () => {
   });
 
   it('applies correct theme colors', () => {
-    const { container } = render(
+    const { getByTestId } = render(
       <CodeSequence
         item={{
           ...mockItem,
@@ -89,14 +89,14 @@ describe('CodeSequence', () => {
       />
     );
 
-    const codeContainer = container.firstChild as HTMLElement;
-    expect(codeContainer.style.backgroundColor).toBe('#ffffff');
-    expect(codeContainer.style.color).toBe('#24292e');
+    const codeContainer = getByTestId('absolute-fill');
+    expect(codeContainer.style.backgroundColor).toBe('rgb(255, 255, 255)');
+    expect(codeContainer.style.color).toBe('rgb(36, 41, 46)');
   });
 
   it('applies correct font size', () => {
     const fontSize = 20;
-    const { container } = render(
+    const { getByTestId } = render(
       <CodeSequence
         item={{
           ...mockItem,
@@ -110,12 +110,12 @@ describe('CodeSequence', () => {
       />
     );
 
-    const codeContainer = container.firstChild as HTMLElement;
+    const codeContainer = getByTestId('absolute-fill');
     expect(codeContainer.style.fontSize).toBe(`${fontSize}px`);
   });
 
   it('applies transform properties correctly', () => {
-    const { container } = render(
+    const { getByTestId } = render(
       <CodeSequence
         item={{
           ...mockItem,
@@ -133,7 +133,7 @@ describe('CodeSequence', () => {
       />
     );
 
-    const codeContainer = container.firstChild as HTMLElement;
+    const codeContainer = getByTestId('absolute-fill');
     expect(codeContainer.style.transform).toBe('translate(100px, 50px) scale(1.5) rotate(45deg)');
     expect(codeContainer.style.opacity).toBe('0.8');
   });
@@ -181,7 +181,7 @@ describe('CodeSequence', () => {
     const themes = ['dark', 'light', 'monokai', 'github', 'dracula'];
     
     themes.forEach(theme => {
-      const { container } = render(
+      const { getByTestId, unmount } = render(
         <CodeSequence
           item={{
             ...mockItem,
@@ -195,9 +195,11 @@ describe('CodeSequence', () => {
         />
       );
 
-      expect(container).toBeInTheDocument();
-      const codeContainer = container.firstChild as HTMLElement;
+      const codeContainer = getByTestId('absolute-fill');
       expect(codeContainer.style.backgroundColor).toBeTruthy();
+      
+      // Clean up to prevent multiple elements in DOM
+      unmount();
     });
   });
 });

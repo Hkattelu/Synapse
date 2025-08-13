@@ -2,28 +2,236 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom styles for volume slider */
+/* =================================================
+   SYNAPSE STUDIO - CATPPUCCIN MACCHIATO THEME
+   ================================================= */
+
+:root {
+  /* ===== CATPPUCCIN MACCHIATO PALETTE ===== */
+  /* Accent Colors */
+  --synapse-rosewater: #f4dbd6;
+  --synapse-flamingo: #f0c6c6;
+  --synapse-pink: #f5bde6;
+  --synapse-mauve: #c6a0f6;
+  --synapse-red: #ed8796;
+  --synapse-maroon: #ee99a0;
+  --synapse-peach: #f5a97f;
+  --synapse-yellow: #eed49f;
+  --synapse-green: #a6da95;
+  --synapse-teal: #8bd5ca;
+  --synapse-sky: #91d7e3;
+  --synapse-sapphire: #7dc4e4;
+  --synapse-blue: #8aadf4;
+  --synapse-lavender: #b7bdf8;
+  
+  /* Neutral Colors */
+  --synapse-text: #cad3f5;
+  --synapse-subtext1: #b8c0e0;
+  --synapse-subtext0: #a5adcb;
+  --synapse-overlay2: #939ab7;
+  --synapse-overlay1: #8087a2;
+  --synapse-overlay0: #6e738d;
+  --synapse-surface2: #5b6078;
+  --synapse-surface1: #494d64;
+  --synapse-surface0: #363a4f;
+  --synapse-base: #24273a;
+  --synapse-mantle: #1e2030;
+  --synapse-crust: #181926;
+  
+  /* ===== SEMANTIC COLOR TOKENS ===== */
+  /* Brand Colors */
+  --synapse-primary: var(--synapse-blue);
+  --synapse-primary-hover: var(--synapse-sapphire);
+  --synapse-primary-active: var(--synapse-sky);
+  
+  /* Interface Colors */
+  --synapse-background: var(--synapse-base);
+  --synapse-background-alt: var(--synapse-mantle);
+  --synapse-surface: var(--synapse-surface0);
+  --synapse-surface-hover: var(--synapse-surface1);
+  --synapse-surface-active: var(--synapse-surface2);
+  
+  /* Border Colors */
+  --synapse-border: var(--synapse-surface2);
+  --synapse-border-hover: var(--synapse-overlay0);
+  --synapse-border-focus: var(--synapse-primary);
+  
+  /* Text Colors */
+  --synapse-text-primary: var(--synapse-text);
+  --synapse-text-secondary: var(--synapse-subtext1);
+  --synapse-text-muted: var(--synapse-subtext0);
+  --synapse-text-inverse: var(--synapse-crust);
+  
+  /* Status Colors */
+  --synapse-success: var(--synapse-green);
+  --synapse-warning: var(--synapse-yellow);
+  --synapse-error: var(--synapse-red);
+  --synapse-info: var(--synapse-blue);
+  
+  /* Creative Tool Colors */
+  --synapse-timeline-bg: var(--synapse-surface1);
+  --synapse-timeline-track: var(--synapse-surface2);
+  --synapse-clip-video: var(--synapse-mauve);
+  --synapse-clip-audio: var(--synapse-green);
+  --synapse-clip-text: var(--synapse-yellow);
+  --synapse-clip-code: var(--synapse-lavender);
+  --synapse-playhead: var(--synapse-peach);
+  
+  /* Shadow Colors */
+  --synapse-shadow-sm: 0 1px 2px rgba(24, 25, 38, 0.2);
+  --synapse-shadow-md: 0 4px 6px -1px rgba(24, 25, 38, 0.3), 0 2px 4px -1px rgba(24, 25, 38, 0.1);
+  --synapse-shadow-lg: 0 10px 15px -3px rgba(24, 25, 38, 0.4), 0 4px 6px -2px rgba(24, 25, 38, 0.1);
+  --synapse-shadow-xl: 0 20px 25px -5px rgba(24, 25, 38, 0.5), 0 10px 10px -5px rgba(24, 25, 38, 0.1);
+  
+  /* ===== SPACING & SIZING ===== */
+  --synapse-border-radius-sm: 0.375rem;
+  --synapse-border-radius: 0.5rem;
+  --synapse-border-radius-lg: 0.75rem;
+  --synapse-border-radius-xl: 1rem;
+  
+  /* ===== TYPOGRAPHY ===== */
+  --synapse-font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  
+  /* ===== ANIMATIONS ===== */
+  --synapse-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --synapse-transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --synapse-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== FUTURE LIGHT MODE SUPPORT ===== */
+/* This structure allows easy addition of light mode later */
+[data-theme="light"] {
+  /* Light mode variables would go here */
+  /* For now, we'll keep the Macchiato theme as default */
+}
+
+/* ===== BASE STYLES ===== */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  color: var(--synapse-text-primary);
+}
+
+body {
+  margin: 0;
+  background-color: var(--synapse-background);
+  color: var(--synapse-text-primary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* ===== ENHANCED SLIDER COMPONENT ===== */
 .slider {
-  background: linear-gradient(to right, #3b82f6 0%, #3b82f6 var(--value, 0%), #4b5563 var(--value, 0%), #4b5563 100%);
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: var(--synapse-border-radius-sm);
+  background: linear-gradient(
+    to right, 
+    var(--synapse-primary) 0%, 
+    var(--synapse-primary) var(--value, 0%), 
+    var(--synapse-surface2) var(--value, 0%), 
+    var(--synapse-surface2) 100%
+  );
+  outline: none;
+  transition: all var(--synapse-transition-normal);
+}
+
+.slider:hover {
+  background: linear-gradient(
+    to right, 
+    var(--synapse-primary-hover) 0%, 
+    var(--synapse-primary-hover) var(--value, 0%), 
+    var(--synapse-surface-hover) var(--value, 0%), 
+    var(--synapse-surface-hover) 100%
+  );
 }
 
 .slider::-webkit-slider-thumb {
   appearance: none;
-  height: 12px;
-  width: 12px;
+  height: 16px;
+  width: 16px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: var(--synapse-primary);
   cursor: pointer;
-  border: 2px solid #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid var(--synapse-background);
+  box-shadow: var(--synapse-shadow-sm);
+  transition: all var(--synapse-transition-fast);
+}
+
+.slider:hover::-webkit-slider-thumb {
+  background: var(--synapse-primary-hover);
+  box-shadow: var(--synapse-shadow-md);
+  transform: scale(1.1);
 }
 
 .slider::-moz-range-thumb {
-  height: 12px;
-  width: 12px;
+  height: 16px;
+  width: 16px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: var(--synapse-primary);
   cursor: pointer;
-  border: 2px solid #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid var(--synapse-background);
+  box-shadow: var(--synapse-shadow-sm);
+  transition: all var(--synapse-transition-fast);
+}
+
+.slider:hover::-moz-range-thumb {
+  background: var(--synapse-primary-hover);
+  box-shadow: var(--synapse-shadow-md);
+  transform: scale(1.1);
+}
+
+/* ===== FOCUS STYLES ===== */
+.slider:focus-visible {
+  outline: 2px solid var(--synapse-border-focus);
+  outline-offset: 2px;
+}
+
+/* ===== UTILITY CLASSES ===== */
+.synapse-glass {
+  background: rgba(54, 58, 79, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(202, 211, 245, 0.1);
+}
+
+.synapse-glow {
+  box-shadow: 0 0 20px rgba(138, 173, 244, 0.3);
+}
+
+.synapse-brand-gradient {
+  background: linear-gradient(135deg, var(--synapse-blue), var(--synapse-mauve));
+}
+
+.synapse-text-gradient {
+  background: linear-gradient(135deg, var(--synapse-text), var(--synapse-subtext1));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* ===== SCROLLBAR STYLES ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--synapse-surface0);
+  border-radius: var(--synapse-border-radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--synapse-overlay0);
+  border-radius: var(--synapse-border-radius-sm);
+  transition: background var(--synapse-transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--synapse-overlay1);
 }

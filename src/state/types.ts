@@ -1,13 +1,21 @@
 // State management types for Synapse Studio
 
 import type { Project, TimelineItem, MediaAsset, UIState } from '../lib/types';
+import type { StoredProject } from '../lib/projectManager';
 
 // Action types for state management
 export type ProjectAction =
   | { type: 'CREATE_PROJECT'; payload: { name: string } }
   | { type: 'LOAD_PROJECT'; payload: Project }
+  | { type: 'LOAD_PROJECTS_LIST'; payload: StoredProject[] }
+  | { type: 'SWITCH_PROJECT'; payload: string }
   | { type: 'UPDATE_PROJECT'; payload: Partial<Project> }
   | { type: 'SAVE_PROJECT' }
+  | { type: 'DELETE_PROJECT'; payload: string }
+  | { type: 'DUPLICATE_PROJECT'; payload: string }
+  | { type: 'RENAME_PROJECT'; payload: { id: string; name: string } }
+  | { type: 'IMPORT_PROJECT'; payload: Project }
+  | { type: 'EXPORT_PROJECT'; payload: string }
   | { type: 'RESET_PROJECT' };
 
 export type TimelineAction =
@@ -38,10 +46,18 @@ export type AppAction = ProjectAction | TimelineAction | MediaAction | UIAction;
 
 // Combined application state
 export interface AppState {
+  // Current active project
   project: Project | null;
+  // Collection of all saved projects
+  projects: StoredProject[];
+  // UI state
   ui: UIState;
+  // Project state tracking
   lastSaved: Date | null;
   isDirty: boolean;
+  // Loading states
+  isLoading: boolean;
+  loadingMessage?: string;
 }
 
 // Context types

@@ -2,6 +2,8 @@
 
 import type { AppState, AppAction, ProjectAction, TimelineAction, MediaAction, UIAction } from './types';
 import type { Project, ProjectSettings, UIState } from '../lib/types';
+import type { StoredProject } from '../lib/projectManager';
+import { ProjectManager, downloadProjectFile } from '../lib/projectManager';
 import { generateId } from '../lib/utils';
 
 // Default project settings
@@ -39,9 +41,11 @@ const defaultUIState: UIState = {
 // Initial application state
 export const initialState: AppState = {
   project: null,
+  projects: [],
   ui: defaultUIState,
   lastSaved: null,
   isDirty: false,
+  isLoading: false,
 };
 
 // Project reducer
@@ -92,6 +96,128 @@ function projectReducer(state: AppState, action: ProjectAction): AppState {
         lastSaved: new Date(),
         isDirty: false,
       };
+
+    case 'LOAD_PROJECTS_LIST':
+      return {
+        ...state,
+        projects: action.payload,
+        isLoading: false,
+      };
+
+    case 'SWITCH_PROJECT': {
+      const storedProject = state.projects.find(p => p.project.id === action.payload);
+      if (!storedProject) return state;
+      
+      return {
+        ...state,
+        project: storedProject.project,
+        isDirty: false,
+        lastSaved: storedProject.lastOpened,
+        ui: { ...state.ui, currentView: 'studio' },
+      };
+    }
+
+    case 'DELETE_PROJECT': {
+      const updatedProjects = state.projects.filter(p => p.project.id !== action.payload);
+      const currentProjectDeleted = state.project?.id === action.payload;
+      
+      return {
+        ...state,
+        projects: updatedProjects,
+        project: currentProjectDeleted ? null : state.project,
+        isDirty: currentProjectDeleted ? false : state.isDirty,
+        lastSaved: currentProjectDeleted ? null : state.lastSaved,
+        ui: currentProjectDeleted ? { ...state.ui, currentView: 'dashboard' } : state.ui,
+      };
+    }
+
+    case 'DUPLICATE_PROJECT': {
+      const originalProject = state.projects.find(p => p.project.id === action.payload)?.project;
+      if (!originalProject) return state;
+      
+      // Create duplicated project with new ID
+      const duplicatedProject: Project = {
+        ...originalProject,
+        id: generateId(),
+        name: `${originalProject.name} (Copy)`,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        timeline: originalProject.timeline.map(item => ({ ...item, id: generateId() })),
+        mediaAssets: originalProject.mediaAssets.map(asset => ({
+          ...asset,
+          id: generateId(),
+          createdAt: new Date(),
+        })),
+      };
+      
+      const newStoredProject: StoredProject = {
+        project: duplicatedProject,
+        lastOpened: new Date(),
+      };
+      
+      return {
+        ...state,
+        projects: [newStoredProject, ...state.projects],
+        project: duplicatedProject,
+        isDirty: true,
+        ui: { ...state.ui, currentView: 'studio' },
+      };
+    }
+
+    case 'RENAME_PROJECT': {
+      const updatedProjects = state.projects.map(p => 
+        p.project.id === action.payload.id
+          ? {
+              ...p,
+              project: {
+                ...p.project,
+                name: action.payload.name,
+                updatedAt: new Date(),
+              },
+              lastOpened: new Date(),
+            }
+          : p
+      );
+      
+      const updatedCurrentProject = state.project?.id === action.payload.id
+        ? { ...state.project, name: action.payload.name, updatedAt: new Date() }
+        : state.project;
+      
+      return {
+        ...state,
+        projects: updatedProjects,
+        project: updatedCurrentProject,
+        isDirty: state.project?.id === action.payload.id ? true : state.isDirty,
+      };
+    }
+
+    case 'IMPORT_PROJECT': {
+      const newStoredProject: StoredProject = {
+        project: action.payload,
+        lastOpened: new Date(),
+      };
+      
+      return {
+        ...state,
+        projects: [newStoredProject, ...state.projects],
+        project: action.payload,
+        isDirty: true,
+        ui: { ...state.ui, currentView: 'studio' },
+      };
+    }
+
+    case 'EXPORT_PROJECT': {
+      if (!state.project) return state;
+      
+      // Trigger file download (side effect handled outside reducer)
+      try {
+        downloadProjectFile(state.project);
+      } catch (error) {
+        console.error('Failed to export project:', error);
+      }
+      
+      return state;
+    }
 
     case 'RESET_PROJECT':
       return {
@@ -371,8 +497,15 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     // Project actions
     case 'CREATE_PROJECT':
     case 'LOAD_PROJECT':
+    case 'LOAD_PROJECTS_LIST':
+    case 'SWITCH_PROJECT':
     case 'UPDATE_PROJECT':
     case 'SAVE_PROJECT':
+    case 'DELETE_PROJECT':
+    case 'DUPLICATE_PROJECT':
+    case 'RENAME_PROJECT':
+    case 'IMPORT_PROJECT':
+    case 'EXPORT_PROJECT':
     case 'RESET_PROJECT':
       return projectReducer(state, action as ProjectAction);
 

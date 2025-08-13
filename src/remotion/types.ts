@@ -18,3 +18,9 @@ export interface CodeSequenceProps {
   startFrame: number;
   durationInFrames: number;
 }
+
+export interface TitleSequenceProps {
+  item: TimelineItem;
+  startFrame: number;
+  durationInFrames: number;
+}

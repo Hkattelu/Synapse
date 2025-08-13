@@ -37,6 +37,45 @@ export interface AnimationPreset {
   easing?: string;
 }
 
+// Keyframe system types
+export interface Keyframe {
+  id: string;
+  time: number; // Time in seconds relative to timeline item start
+  properties: Partial<ItemProperties>;
+  easing?: 'linear' | 'easeIn' | 'easeOut' | 'easeInOut' | 'bounce' | 'elastic';
+}
+
+export interface PropertyKeyframes {
+  property: keyof ItemProperties;
+  keyframes: Keyframe[];
+}
+
+export interface TrackGroup {
+  id: string;
+  name: string;
+  tracks: number[];
+  color?: string;
+  collapsed?: boolean;
+  muted?: boolean;
+  solo?: boolean;
+}
+
+export interface TimelineMarker {
+  id: string;
+  time: number;
+  label: string;
+  color?: string;
+}
+
+export interface TimelineRegion {
+  id: string;
+  startTime: number;
+  endTime: number;
+  label: string;
+  color?: string;
+  locked?: boolean;
+}
+
 export interface ItemProperties {
   // Transform properties
   x?: number;
@@ -70,8 +109,13 @@ export interface TimelineItem {
   type: TimelineItemType;
   properties: ItemProperties;
   animations: AnimationPreset[];
+  keyframes: Keyframe[]; // Keyframe animations
   locked?: boolean;
   muted?: boolean;
+  solo?: boolean;
+  visible?: boolean;
+  label?: string;
+  color?: string;
 }
 
 export interface ProjectSettings {
@@ -92,6 +136,10 @@ export interface Project {
   mediaAssets: MediaAsset[];
   settings: ProjectSettings;
   version: string;
+  // Advanced timeline features
+  trackGroups?: TrackGroup[];
+  markers?: TimelineMarker[];
+  regions?: TimelineRegion[];
 }
 
 // UI State types
@@ -109,6 +157,12 @@ export interface TimelineViewState {
   selectedItems: string[];
   snapToGrid: boolean;
   gridSize: number;
+  // Advanced timeline view options
+  showKeyframes: boolean;
+  trackHeight: number;
+  selectedKeyframes: string[];
+  timelineMode: 'standard' | 'advanced' | 'keyframe';
+  verticalScrollPosition: number;
 }
 
 export interface UIState {

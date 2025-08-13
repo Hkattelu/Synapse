@@ -405,38 +405,19 @@ interface AnimationSettingsProps {
 
 function AnimationSettings({ item, onUpdateAnimations }: AnimationSettingsProps) {
   const [selectedPreset, setSelectedPreset] = useState<string>('');
+  const [selectedType, setSelectedType] = useState<'entrance' | 'exit' | 'emphasis' | 'transition'>('entrance');
 
-  // Mock animation presets - in a real app, these would come from a service
-  const availablePresets: AnimationPreset[] = [
-    {
-      id: 'fade-in',
-      name: 'Fade In',
-      type: 'entrance',
-      parameters: { opacity: { from: 0, to: 1 } },
-      duration: 0.5,
-    },
-    {
-      id: 'slide-in-left',
-      name: 'Slide In Left',
-      type: 'entrance',
-      parameters: { x: { from: -100, to: 0 } },
-      duration: 0.8,
-    },
-    {
-      id: 'scale-in',
-      name: 'Scale In',
-      type: 'entrance',
-      parameters: { scale: { from: 0, to: 1 } },
-      duration: 0.6,
-    },
-    {
-      id: 'fade-out',
-      name: 'Fade Out',
-      type: 'exit',
-      parameters: { opacity: { from: 1, to: 0 } },
-      duration: 0.5,
-    },
-  ];
+  // Import animation presets from the comprehensive system
+  const { ANIMATION_PRESETS, getAnimationsByType, getCompatibleAnimations } = React.useMemo(() => {
+    // Dynamic import to avoid circular dependencies
+    const presets = require('../lib/animationPresets');
+    return presets;
+  }, []);
+
+  // Get available presets filtered by type
+  const availablePresets = React.useMemo(() => {
+    return getAnimationsByType(selectedType);
+  }, [selectedType, getAnimationsByType]);
 
   const addAnimation = useCallback(() => {
     if (!selectedPreset) return;
@@ -487,16 +468,40 @@ function AnimationSettings({ item, onUpdateAnimations }: AnimationSettingsProps)
       {/* Add Animation */}
       <div>
         <h5 className="text-sm font-medium text-gray-300 mb-2">Add Animation</h5>
+        
+        {/* Animation Type Selector */}
+        <div className="mb-3">
+          <div className="flex space-x-1 bg-gray-700 rounded p-1">
+            {(['entrance', 'exit', 'emphasis', 'transition'] as const).map((type) => (
+              <button
+                key={type}
+                onClick={() => {
+                  setSelectedType(type);
+                  setSelectedPreset(''); // Reset selection when changing type
+                }}
+                className={`flex-1 px-2 py-1 text-xs font-medium rounded capitalize transition-colors ${
+                  selectedType === type
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-600'
+                }`}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Animation Selector and Add Button */}
         <div className="flex space-x-2">
           <select
             value={selectedPreset}
             onChange={(e) => setSelectedPreset(e.target.value)}
             className="flex-1 bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
           >
-            <option value="">Select animation...</option>
+            <option value="">Select {selectedType} animation...</option>
             {availablePresets.map((preset) => (
               <option key={preset.id} value={preset.id}>
-                {preset.name} ({preset.type})
+                {preset.name} • {preset.duration}s
               </option>
             ))}
           </select>

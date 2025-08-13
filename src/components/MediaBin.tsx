@@ -280,6 +280,24 @@ export function MediaBin({ className = '' }: MediaBinProps) {
     addMediaAsset(codeAsset);
   }, [addMediaAsset, mediaAssets]);
 
+  // Create a new title clip
+  const createTitleClip = useCallback(() => {
+    const titleAsset: Omit<MediaAsset, 'id' | 'createdAt'> = {
+      name: `Title ${mediaAssets.filter(a => a.metadata.mimeType === 'text/title').length + 1}`,
+      type: 'code', // We use 'code' type for title assets to avoid creating a new asset type
+      url: '', // Title clips don't need URLs
+      duration: 5, // Default 5 seconds
+      metadata: {
+        fileSize: 0,
+        mimeType: 'text/title', // Special mime type to distinguish title clips
+        codeContent: 'Your Title Text',
+        language: 'title',
+      },
+    };
+
+    addMediaAsset(titleAsset);
+  }, [addMediaAsset, mediaAssets]);
+
   // Open file dialog
   const openFileDialog = useCallback(() => {
     fileInputRef.current?.click();
@@ -323,6 +341,13 @@ export function MediaBin({ className = '' }: MediaBinProps) {
               title="Create a new code clip"
             >
               Add Code
+            </button>
+            <button
+              onClick={createTitleClip}
+              className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium py-1 px-3 rounded transition-colors"
+              title="Create a new title clip"
+            >
+              Add Title
             </button>
           </div>
         </div>

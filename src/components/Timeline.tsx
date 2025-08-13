@@ -1,6 +1,7 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useTimeline, useMediaAssets, useUI } from '../state/hooks';
-import type { TimelineItem, MediaAsset } from '../lib/types';
+import type { TimelineItem, MediaAsset, Keyframe } from '../lib/types';
+import { KeyframeManager } from '../lib/keyframes';
 import { generateId } from '../lib/utils';
 
 interface TimelineProps {
@@ -99,6 +100,7 @@ export function Timeline({ className = '' }: TimelineProps) {
       type: asset.type === 'image' ? 'video' : asset.type, // Images become video clips
       properties: {},
       animations: [],
+      keyframes: [], // Initialize with empty keyframes
     };
 
     addTimelineItem(newItem);

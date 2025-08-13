@@ -1,42 +1,121 @@
+/* =================================================
+   SYNAPSE STUDIO - APPLICATION STYLES
+   ================================================= */
+
+/* Root container with responsive layout */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  min-height: 100vh;
+  background-color: var(--synapse-background);
+  color: var(--synapse-text-primary);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Synapse brand logo styling */
+.synapse-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--synapse-text-primary);
+  transition: all var(--synapse-transition-normal);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.synapse-logo:hover {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 1rem var(--synapse-primary));
+}
+
+.synapse-logo-symbol {
+  font-size: 1.5em;
+  background: var(--synapse-brand-gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Synapse brand animations */
+@keyframes synapse-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 0.5rem var(--synapse-primary));
   }
-  to {
-    transform: rotate(360deg);
+  50% {
+    filter: drop-shadow(0 0 1rem var(--synapse-primary));
   }
 }
 
+@keyframes synapse-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Reduced motion preferences */
 @media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+  .synapse-logo-symbol {
+    animation: synapse-pulse 3s ease-in-out infinite;
+  }
+  
+  .synapse-feature-icon {
+    transition: transform var(--synapse-transition-normal);
+  }
+  
+  .synapse-feature-icon:hover {
+    animation: synapse-glow 1s ease-in-out;
   }
 }
 
-.card {
-  padding: 2em;
+/* Card styling for consistent component appearance */
+.synapse-card {
+  background: var(--synapse-surface);
+  border: 1px solid var(--synapse-border);
+  border-radius: var(--synapse-border-radius-lg);
+  padding: 1.5rem;
+  transition: all var(--synapse-transition-normal);
 }
 
-.read-the-docs {
-  color: #888;
+.synapse-card:hover {
+  border-color: var(--synapse-border-hover);
+  box-shadow: var(--synapse-shadow-md);
+  transform: translateY(-2px);
+}
+
+/* Interactive elements */
+.synapse-interactive {
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--synapse-transition-fast);
+}
+
+.synapse-interactive:active {
+  transform: scale(0.98);
+}
+
+/* Accessibility improvements */
+.synapse-focus:focus-visible {
+  outline: 2px solid var(--synapse-border-focus);
+  outline-offset: 2px;
+  border-radius: var(--synapse-border-radius-sm);
+}
+
+/* Loading states */
+.synapse-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Brand voice - friendly but professional */
+.synapse-welcome-text {
+  color: var(--synapse-text-secondary);
+  line-height: 1.6;
+}
+
+/* Small details that make the experience special */
+.synapse-sparkle::before {
+  content: '✦';
+  color: var(--synapse-primary);
+  margin-right: 0.5rem;
 }

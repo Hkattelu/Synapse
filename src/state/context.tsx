@@ -4,7 +4,7 @@ import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { AppState, AppAction, AppContextType } from './types';
 import { appReducer, initialState } from './reducers';
-import { saveToLocalStorage, loadFromLocalStorage } from './persistence';
+import { ProjectManager } from '../lib/projectManager';
 
 // Create the context
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -18,26 +18,40 @@ interface AppProviderProps {
 
 // Context provider component
 export function AppProvider({ children }: AppProviderProps) {
-  // Initialize state from localStorage if available
-  const [state, dispatch] = useReducer(appReducer, initialState, (initial) => {
-    const savedState = loadFromLocalStorage(STORAGE_KEY);
-    return savedState || initial;
-  });
+  // Initialize state with project manager integration
+  const [state, dispatch] = useReducer(appReducer, initialState);
 
-  // Auto-save to localStorage when state changes
+  // Load projects on app startup
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      saveToLocalStorage(STORAGE_KEY, state);
-    }, 1000); // Debounce saves by 1 second
+    async function loadInitialData() {
+      try {
+        // Load all projects
+        const projects = await ProjectManager.getAllProjects();
+        dispatch({ type: 'LOAD_PROJECTS_LIST', payload: projects });
 
-    return () => clearTimeout(timeoutId);
-  }, [state]);
+        // Load current project if exists
+        const currentProject = ProjectManager.getCurrentProject();
+        if (currentProject) {
+          dispatch({ type: 'LOAD_PROJECT', payload: currentProject.project });
+        }
+      } catch (error) {
+        console.error('Failed to load initial data:', error);
+      }
+    }
+
+    loadInitialData();
+  }, []);
 
   // Auto-save project when it becomes dirty
   useEffect(() => {
     if (state.isDirty && state.project) {
-      const autoSaveTimeout = setTimeout(() => {
-        dispatch({ type: 'SAVE_PROJECT' });
+      const autoSaveTimeout = setTimeout(async () => {
+        try {
+          await ProjectManager.saveProject(state.project!);
+          dispatch({ type: 'SAVE_PROJECT' });
+        } catch (error) {
+          console.error('Failed to auto-save project:', error);
+        }
       }, 5000); // Auto-save after 5 seconds of inactivity
 
       return () => clearTimeout(autoSaveTimeout);

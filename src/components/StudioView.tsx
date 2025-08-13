@@ -10,13 +10,13 @@ export function StudioView() {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-synapse-background text-synapse-text-primary flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">No Project Loaded</h2>
-          <p className="text-gray-400 mb-6">Please create or load a project to start editing</p>
+          <p className="text-synapse-text-secondary mb-6">Please create or load a project to start editing</p>
           <button
             onClick={() => setCurrentView('dashboard')}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+            className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse font-medium py-2 px-4 rounded-synapse transition-colors duration-synapse-fast"
           >
             Go to Dashboard
           </button>
@@ -26,13 +26,13 @@ export function StudioView() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+    <div className="min-h-screen bg-synapse-background text-synapse-text-primary flex flex-col">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between">
+      <header className="bg-synapse-surface border-b border-synapse-border px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <button
             onClick={() => setCurrentView('dashboard')}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-synapse-text-muted hover:text-synapse-text-primary transition-colors duration-synapse-fast p-1 rounded-synapse hover:bg-synapse-surface-hover"
             title="Back to Dashboard"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,8 +40,8 @@ export function StudioView() {
             </svg>
           </button>
           <div>
-            <h1 className="text-lg font-semibold">{project.name}</h1>
-            <p className="text-xs text-gray-400">
+            <h1 className="text-lg font-semibold text-synapse-text-primary">{project.name}</h1>
+            <p className="text-xs text-synapse-text-muted">
               {project.timeline.length} clips • {project.mediaAssets.length} assets
             </p>
           </div>
@@ -51,7 +51,11 @@ export function StudioView() {
         <div className="flex items-center space-x-2">
           <button
             onClick={toggleSidebar}
-            className={`p-2 rounded ${ui.sidebarVisible ? 'bg-blue-600' : 'bg-gray-700'} hover:bg-blue-700 transition-colors`}
+            className={`p-2 rounded-synapse transition-all duration-synapse-fast ${
+              ui.sidebarVisible 
+                ? 'bg-synapse-primary text-synapse-text-inverse shadow-synapse-sm' 
+                : 'bg-synapse-surface-hover text-synapse-text-secondary hover:bg-synapse-surface-active hover:text-synapse-text-primary'
+            }`}
             title="Toggle Sidebar"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,7 +64,11 @@ export function StudioView() {
           </button>
           <button
             onClick={toggleMediaBin}
-            className={`p-2 rounded ${ui.mediaBinVisible ? 'bg-blue-600' : 'bg-gray-700'} hover:bg-blue-700 transition-colors`}
+            className={`p-2 rounded-synapse transition-all duration-synapse-fast ${
+              ui.mediaBinVisible 
+                ? 'bg-synapse-primary text-synapse-text-inverse shadow-synapse-sm' 
+                : 'bg-synapse-surface-hover text-synapse-text-secondary hover:bg-synapse-surface-active hover:text-synapse-text-primary'
+            }`}
             title="Toggle Media Bin"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,7 +77,11 @@ export function StudioView() {
           </button>
           <button
             onClick={toggleInspector}
-            className={`p-2 rounded ${ui.inspectorVisible ? 'bg-blue-600' : 'bg-gray-700'} hover:bg-blue-700 transition-colors`}
+            className={`p-2 rounded-synapse transition-all duration-synapse-fast ${
+              ui.inspectorVisible 
+                ? 'bg-synapse-primary text-synapse-text-inverse shadow-synapse-sm' 
+                : 'bg-synapse-surface-hover text-synapse-text-secondary hover:bg-synapse-surface-active hover:text-synapse-text-primary'
+            }`}
             title="Toggle Inspector"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,24 +95,24 @@ export function StudioView() {
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
         {ui.sidebarVisible && (
-          <aside className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
-            <div className="p-4 border-b border-gray-700">
-              <h3 className="font-semibold text-sm text-gray-300 uppercase tracking-wide">Navigation</h3>
+          <aside className="w-64 bg-synapse-surface border-r border-synapse-border flex flex-col">
+            <div className="p-4 border-b border-synapse-border">
+              <h3 className="font-semibold text-sm text-synapse-text-secondary uppercase tracking-wide">Navigation</h3>
             </div>
             <nav className="flex-1 p-4">
               <ul className="space-y-2">
                 <li>
-                  <button className="w-full text-left px-3 py-2 rounded bg-gray-700 text-white">
+                  <button className="w-full text-left px-3 py-2 rounded-synapse bg-synapse-surface-active text-synapse-text-primary">
                     Timeline
                   </button>
                 </li>
                 <li>
-                  <button className="w-full text-left px-3 py-2 rounded text-gray-400 hover:bg-gray-700 hover:text-white transition-colors">
+                  <button className="w-full text-left px-3 py-2 rounded-synapse text-synapse-text-muted hover:bg-synapse-surface-hover hover:text-synapse-text-primary transition-all duration-synapse-fast">
                     Media Assets
                   </button>
                 </li>
                 <li>
-                  <button className="w-full text-left px-3 py-2 rounded text-gray-400 hover:bg-gray-700 hover:text-white transition-colors">
+                  <button className="w-full text-left px-3 py-2 rounded-synapse text-synapse-text-muted hover:bg-synapse-surface-hover hover:text-synapse-text-primary transition-all duration-synapse-fast">
                     Export
                   </button>
                 </li>
@@ -112,7 +124,7 @@ export function StudioView() {
         {/* Main Editor Area */}
         <main className="flex-1 flex flex-col">
           {/* Preview Area */}
-          <Preview className="flex-1 border-b border-gray-700" />
+          <Preview className="flex-1 border-b border-synapse-border" />
 
           {/* Timeline Area */}
           <Timeline className="h-64" />
@@ -120,14 +132,14 @@ export function StudioView() {
 
         {/* Media Bin */}
         {ui.mediaBinVisible && (
-          <aside className="w-80 bg-gray-800 border-l border-gray-700">
+          <aside className="w-80 bg-synapse-surface border-l border-synapse-border">
             <MediaBin />
           </aside>
         )}
 
         {/* Inspector Panel */}
         {ui.inspectorVisible && (
-          <aside className="w-80 bg-gray-800 border-l border-gray-700">
+          <aside className="w-80 bg-synapse-surface border-l border-synapse-border">
             <Inspector />
           </aside>
         )}

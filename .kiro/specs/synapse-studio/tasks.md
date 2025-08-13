@@ -116,8 +116,8 @@
   - Connect inspector changes to timeline state updates
   - Write tests for property editing and validation
   - _Requirements: 7.1, 7.2, 7.4_
+- [x] 10. Implement animated code sequence functionality
 
-- [ ] 10. Implement animated code sequence functionality
 
 
 
@@ -130,7 +130,7 @@
   - Write tests for code animation and syntax highlighting
   - _Requirements: 5.1, 5.2, 5.3, 5.4_
 
-- [ ] 11. Add animation presets and effects system
+- [x] 11. Add animation presets and effects system
   - Create AnimationPreset data model and storage
   - Implement preset selection interface in Inspector
   - Create TitleSequence component with text animations

@@ -102,6 +102,7 @@ const mockProject: Project = {
 
 const defaultState: AppState = {
   project: mockProject,
+  projects: [],
   ui: {
     currentView: 'studio',
     sidebarVisible: true,
@@ -124,6 +125,7 @@ const defaultState: AppState = {
   },
   lastSaved: null,
   isDirty: false,
+  isLoading: false,
 };
 
 describe('Preview Component', () => {
