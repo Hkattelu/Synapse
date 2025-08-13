@@ -34,7 +34,12 @@ const defaultUIState: UIState = {
     scrollPosition: 0,
     selectedItems: [],
     snapToGrid: true,
-    gridSize: 1,
+    gridSize: 0.5,
+    showKeyframes: true,
+    trackHeight: 80,
+    selectedKeyframes: [],
+    timelineMode: 'standard' as const,
+    verticalScrollPosition: 0,
   },
 };
 

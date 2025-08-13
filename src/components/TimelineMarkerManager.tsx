@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { useProjects, useTimeline } from '../state/hooks';
+import { useProject, useTimeline } from '../state/hooks';
 import type { TimelineMarker, TimelineRegion } from '../lib/types';
 import { generateId } from '../lib/utils';
 
@@ -27,7 +27,7 @@ export function TimelineMarkerManager({
   onMarkerSelect,
   onRegionSelect 
 }: TimelineMarkerManagerProps) {
-  const { currentProject, updateProject } = useProjects();
+  const { project: currentProject, updateProject } = useProject();
   const { timelineDuration } = useTimeline();
   
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['markers']));
@@ -67,7 +67,7 @@ export function TimelineMarkerManager({
     };
 
     const updatedMarkers = [...markers, newMarker].sort((a, b) => a.time - b.time);
-    updateProject(currentProject.id, { markers: updatedMarkers });
+    updateProject({ markers: updatedMarkers });
     
     setNewMarkerName('');
     setShowAddMarker(false);
@@ -90,7 +90,7 @@ export function TimelineMarkerManager({
     };
 
     const updatedRegions = [...regions, newRegion].sort((a, b) => a.startTime - b.startTime);
-    updateProject(currentProject.id, { regions: updatedRegions });
+    updateProject({ regions: updatedRegions });
     
     setNewRegionName('');
     setNewRegionStart(0);
@@ -106,7 +106,7 @@ export function TimelineMarkerManager({
       marker.id === markerId ? { ...marker, ...updates } : marker
     ).sort((a, b) => a.time - b.time);
 
-    updateProject(currentProject.id, { markers: updatedMarkers });
+    updateProject({ markers: updatedMarkers });
   }, [markers, currentProject, updateProject]);
 
   // Update region
@@ -117,7 +117,7 @@ export function TimelineMarkerManager({
       region.id === regionId ? { ...region, ...updates } : region
     ).sort((a, b) => a.startTime - b.startTime);
 
-    updateProject(currentProject.id, { regions: updatedRegions });
+    updateProject({ regions: updatedRegions });
   }, [regions, currentProject, updateProject]);
 
   // Delete marker
@@ -125,7 +125,7 @@ export function TimelineMarkerManager({
     if (!currentProject) return;
 
     const updatedMarkers = markers.filter(marker => marker.id !== markerId);
-    updateProject(currentProject.id, { markers: updatedMarkers });
+    updateProject({ markers: updatedMarkers });
   }, [markers, currentProject, updateProject]);
 
   // Delete region
@@ -133,7 +133,7 @@ export function TimelineMarkerManager({
     if (!currentProject) return;
 
     const updatedRegions = regions.filter(region => region.id !== regionId);
-    updateProject(currentProject.id, { regions: updatedRegions });
+    updateProject({ regions: updatedRegions });
   }, [regions, currentProject, updateProject]);
 
   // Jump to marker/region

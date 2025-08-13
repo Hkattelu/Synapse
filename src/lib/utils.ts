@@ -236,6 +236,7 @@ export const createTimelineItemFromAsset = (
     type: itemType as TimelineItemType,
     properties: createDefaultItemProperties(itemType),
     animations: [],
+    keyframes: [],
     locked: false,
     muted: false,
   };

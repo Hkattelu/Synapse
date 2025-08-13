@@ -17,20 +17,20 @@ export function Inspector({ className = '' }: InspectorProps) {
 
   if (!selectedItem) {
     return (
-      <div className={`inspector bg-gray-800 ${className}`}>
-        <div className="p-4 border-b border-gray-700">
-          <h3 className="font-semibold text-sm text-gray-300 uppercase tracking-wide">Inspector</h3>
+      <div className={`inspector bg-background-secondary ${className}`}>
+        <div className="p-4 border-b border-border-subtle">
+          <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">Inspector</h3>
         </div>
         <div className="flex-1 p-4">
-          <div className="h-full flex items-center justify-center text-gray-400">
+          <div className="h-full flex items-center justify-center text-text-secondary">
             <div className="text-center">
-              <div className="w-12 h-12 bg-gray-700 rounded-lg mx-auto mb-3 flex items-center justify-center">
+              <div className="w-12 h-12 bg-background-tertiary rounded-lg mx-auto mb-3 flex items-center justify-center">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <p className="font-medium">No Selection</p>
+              <p className="font-medium text-text-primary">No Selection</p>
               <p className="text-sm">Select a clip to edit properties</p>
             </div>
           </div>
@@ -40,10 +40,10 @@ export function Inspector({ className = '' }: InspectorProps) {
   }
 
   return (
-    <div className={`inspector bg-gray-800 flex flex-col ${className}`}>
-      <div className="p-4 border-b border-gray-700">
-        <h3 className="font-semibold text-sm text-gray-300 uppercase tracking-wide">Inspector</h3>
-        <p className="text-xs text-gray-500 mt-1">
+    <div className={`inspector bg-background-secondary flex flex-col ${className}`}>
+      <div className="p-4 border-b border-border-subtle">
+        <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">Inspector</h3>
+        <p className="text-xs text-text-tertiary mt-1">
           {selectedTimelineItems.length} item{selectedTimelineItems.length !== 1 ? 's' : ''} selected
         </p>
       </div>
@@ -115,43 +115,43 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
   };
 
   return (
-    <div className="p-4 border-b border-gray-700">
-      <h4 className="font-medium text-white mb-3">Clip Information</h4>
+    <div className="p-4 border-b border-border-subtle">
+      <h4 className="font-medium text-text-primary mb-3">Clip Information</h4>
       
       <div className="space-y-3">
         <div className="flex items-center space-x-2">
-          <div className="text-gray-400">
+          <div className="text-text-secondary">
             {getTypeIcon(item.type)}
           </div>
           <div>
-            <p className="text-sm font-medium text-white">{asset?.name || 'Unknown Asset'}</p>
-            <p className="text-xs text-gray-400 capitalize">{item.type} clip</p>
+            <p className="text-sm font-medium text-text-primary">{asset?.name || 'Unknown Asset'}</p>
+            <p className="text-xs text-text-tertiary capitalize">{item.type} clip</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <p className="text-gray-400">Duration</p>
-            <p className="text-white font-mono">{formatDuration(item.duration)}</p>
+            <p className="text-text-secondary">Duration</p>
+            <p className="text-text-primary font-mono">{formatDuration(item.duration)}</p>
           </div>
           <div>
-            <p className="text-gray-400">Start Time</p>
-            <p className="text-white font-mono">{formatDuration(item.startTime)}</p>
+            <p className="text-text-secondary">Start Time</p>
+            <p className="text-text-primary font-mono">{formatDuration(item.startTime)}</p>
           </div>
           <div>
-            <p className="text-gray-400">Track</p>
-            <p className="text-white">Track {item.track + 1}</p>
+            <p className="text-text-secondary">Track</p>
+            <p className="text-text-primary">Track {item.track + 1}</p>
           </div>
           <div>
-            <p className="text-gray-400">End Time</p>
-            <p className="text-white font-mono">{formatDuration(item.startTime + item.duration)}</p>
+            <p className="text-text-secondary">End Time</p>
+            <p className="text-text-primary font-mono">{formatDuration(item.startTime + item.duration)}</p>
           </div>
         </div>
 
         {asset && (
-          <div className="pt-2 border-t border-gray-700">
-            <p className="text-xs text-gray-400 mb-2">Source File</p>
-            <div className="text-xs text-gray-300">
+          <div className="pt-2 border-t border-border-subtle">
+            <p className="text-xs text-text-tertiary mb-2">Source File</p>
+            <div className="text-xs text-text-secondary">
               <p>Size: {(asset.metadata.fileSize / 1024 / 1024).toFixed(1)} MB</p>
               <p>Type: {asset.metadata.mimeType}</p>
               {asset.metadata.width && asset.metadata.height && (
@@ -362,34 +362,34 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
   );
 
   return (
-    <div className="border-b border-gray-700">
+    <div className="border-b border-border-subtle">
       <div className="p-4">
-        <h4 className="font-medium text-white mb-3">Properties</h4>
+        <h4 className="font-medium text-text-primary mb-3">Properties</h4>
         
         {/* Transform Properties - Always shown */}
         <div className="mb-4">
-          <h5 className="text-sm font-medium text-gray-300 mb-2">Transform</h5>
+          <h5 className="text-sm font-medium text-text-secondary mb-2">Transform</h5>
           {renderTransformProperties()}
         </div>
 
         {/* Type-specific Properties */}
         {(item.type === 'video' || item.type === 'audio') && (
           <div className="mb-4">
-            <h5 className="text-sm font-medium text-gray-300 mb-2">Media</h5>
+            <h5 className="text-sm font-medium text-text-secondary mb-2">Media</h5>
             {renderVideoProperties()}
           </div>
         )}
 
         {item.type === 'code' && (
           <div className="mb-4">
-            <h5 className="text-sm font-medium text-gray-300 mb-2">Code</h5>
+            <h5 className="text-sm font-medium text-text-secondary mb-2">Code</h5>
             {renderCodeProperties()}
           </div>
         )}
 
         {item.type === 'title' && (
           <div className="mb-4">
-            <h5 className="text-sm font-medium text-gray-300 mb-2">Text</h5>
+            <h5 className="text-sm font-medium text-text-secondary mb-2">Text</h5>
             {renderTitleProperties()}
           </div>
         )}
@@ -437,22 +437,22 @@ function AnimationSettings({ item, onUpdateAnimations }: AnimationSettingsProps)
 
   return (
     <div className="p-4">
-      <h4 className="font-medium text-white mb-3">Animations</h4>
+      <h4 className="font-medium text-text-primary mb-3">Animations</h4>
       
       {/* Current Animations */}
       {item.animations.length > 0 && (
         <div className="mb-4">
-          <h5 className="text-sm font-medium text-gray-300 mb-2">Applied Animations</h5>
+          <h5 className="text-sm font-medium text-text-secondary mb-2">Applied Animations</h5>
           <div className="space-y-2">
             {item.animations.map((animation, index) => (
-              <div key={index} className="flex items-center justify-between bg-gray-700 rounded p-2">
+              <div key={index} className="flex items-center justify-between bg-background-tertiary rounded p-2 border border-border-subtle">
                 <div>
-                  <p className="text-sm font-medium text-white">{animation.name}</p>
-                  <p className="text-xs text-gray-400 capitalize">{animation.type} • {animation.duration}s</p>
+                  <p className="text-sm font-medium text-text-primary">{animation.name}</p>
+                  <p className="text-xs text-text-tertiary capitalize">{animation.type} • {animation.duration}s</p>
                 </div>
                 <button
                   onClick={() => removeAnimation(index)}
-                  className="text-red-400 hover:text-red-300 transition-colors"
+                  className="text-status-error hover:text-status-error/80 transition-colors"
                   title="Remove Animation"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -467,11 +467,11 @@ function AnimationSettings({ item, onUpdateAnimations }: AnimationSettingsProps)
 
       {/* Add Animation */}
       <div>
-        <h5 className="text-sm font-medium text-gray-300 mb-2">Add Animation</h5>
+        <h5 className="text-sm font-medium text-text-secondary mb-2">Add Animation</h5>
         
         {/* Animation Type Selector */}
         <div className="mb-3">
-          <div className="flex space-x-1 bg-gray-700 rounded p-1">
+          <div className="flex space-x-1 bg-background-tertiary rounded p-1">
             {(['entrance', 'exit', 'emphasis', 'transition'] as const).map((type) => (
               <button
                 key={type}
@@ -481,8 +481,8 @@ function AnimationSettings({ item, onUpdateAnimations }: AnimationSettingsProps)
                 }}
                 className={`flex-1 px-2 py-1 text-xs font-medium rounded capitalize transition-colors ${
                   selectedType === type
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-300 hover:text-white hover:bg-gray-600'
+                    ? 'bg-primary-600 text-white shadow-glow'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-neutral-700'
                 }`}
               >
                 {type}
@@ -496,7 +496,7 @@ function AnimationSettings({ item, onUpdateAnimations }: AnimationSettingsProps)
           <select
             value={selectedPreset}
             onChange={(e) => setSelectedPreset(e.target.value)}
-            className="flex-1 bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+            className="flex-1 bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
           >
             <option value="">Select {selectedType} animation...</option>
             {availablePresets.map((preset) => (
@@ -508,7 +508,7 @@ function AnimationSettings({ item, onUpdateAnimations }: AnimationSettingsProps)
           <button
             onClick={addAnimation}
             disabled={!selectedPreset}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-3 py-2 rounded text-sm transition-colors"
+            className="bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 text-white px-3 py-2 rounded text-sm transition-colors shadow-glow"
           >
             Add
           </button>
@@ -561,7 +561,7 @@ function NumberInput({ label, value, onChange, error, min, max, step = 1, suffix
 
   return (
     <div>
-      <label htmlFor={inputId} className="block text-sm font-medium text-gray-300 mb-1">
+      <label htmlFor={inputId} className="block text-sm font-medium text-text-secondary mb-1">
         {label}
       </label>
       <div className="relative">
@@ -574,20 +574,20 @@ function NumberInput({ label, value, onChange, error, min, max, step = 1, suffix
           min={min}
           max={max}
           step={step}
-          className={`w-full bg-gray-700 border rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 ${
-            error ? 'border-red-500' : 'border-gray-600'
+          className={`w-full bg-background-tertiary border rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500 ${
+            error ? 'border-status-error' : 'border-border-subtle'
           }`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}
         />
         {suffix && (
-          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
+          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-tertiary text-sm">
             {suffix}
           </span>
         )}
       </div>
       {error && (
-        <p id={`${inputId}-error`} className="text-red-400 text-xs mt-1" role="alert">
+        <p id={`${inputId}-error`} className="text-status-error text-xs mt-1" role="alert">
           {error}
         </p>
       )}
@@ -610,13 +610,13 @@ function TextInput({ label, value, onChange, error, multiline = false }: TextInp
     onChange(e.target.value);
   };
 
-  const inputClasses = `w-full bg-gray-700 border rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 ${
-    error ? 'border-red-500' : 'border-gray-600'
+  const inputClasses = `w-full bg-background-tertiary border rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500 ${
+    error ? 'border-status-error' : 'border-border-subtle'
   }`;
 
   return (
     <div>
-      <label htmlFor={inputId} className="block text-sm font-medium text-gray-300 mb-1">
+      <label htmlFor={inputId} className="block text-sm font-medium text-text-secondary mb-1">
         {label}
       </label>
       {multiline ? (
@@ -642,7 +642,7 @@ function TextInput({ label, value, onChange, error, multiline = false }: TextInp
         />
       )}
       {error && (
-        <p id={`${inputId}-error`} className="text-red-400 text-xs mt-1" role="alert">
+        <p id={`${inputId}-error`} className="text-status-error text-xs mt-1" role="alert">
           {error}
         </p>
       )}
@@ -663,15 +663,15 @@ function SelectInput({ label, value, onChange, options, error }: SelectInputProp
   
   return (
     <div>
-      <label htmlFor={inputId} className="block text-sm font-medium text-gray-300 mb-1">
+      <label htmlFor={inputId} className="block text-sm font-medium text-text-secondary mb-1">
         {label}
       </label>
       <select
         id={inputId}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`w-full bg-gray-700 border rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 ${
-          error ? 'border-red-500' : 'border-gray-600'
+        className={`w-full bg-background-tertiary border rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500 ${
+          error ? 'border-status-error' : 'border-border-subtle'
         }`}
         aria-invalid={error ? 'true' : 'false'}
         aria-describedby={error ? `${inputId}-error` : undefined}
@@ -683,7 +683,7 @@ function SelectInput({ label, value, onChange, options, error }: SelectInputProp
         ))}
       </select>
       {error && (
-        <p id={`${inputId}-error`} className="text-red-400 text-xs mt-1" role="alert">
+        <p id={`${inputId}-error`} className="text-status-error text-xs mt-1" role="alert">
           {error}
         </p>
       )}
@@ -726,7 +726,7 @@ function ColorInput({ label, value, onChange, error }: ColorInputProps) {
 
   return (
     <div>
-      <label htmlFor={inputId} className="block text-sm font-medium text-gray-300 mb-1">
+      <label htmlFor={inputId} className="block text-sm font-medium text-text-secondary mb-1">
         {label}
       </label>
       <div className="flex space-x-2">
@@ -735,7 +735,7 @@ function ColorInput({ label, value, onChange, error }: ColorInputProps) {
           type="color"
           value={localValue.startsWith('#') ? localValue : '#ffffff'}
           onChange={handleColorChange}
-          className="w-12 h-10 bg-gray-700 border border-gray-600 rounded cursor-pointer"
+          className="w-12 h-10 bg-background-tertiary border border-border-subtle rounded cursor-pointer"
           aria-label={`${label} color picker`}
         />
         <input
@@ -744,15 +744,15 @@ function ColorInput({ label, value, onChange, error }: ColorInputProps) {
           value={localValue}
           onChange={handleTextChange}
           placeholder="#ffffff"
-          className={`flex-1 bg-gray-700 border rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 ${
-            error ? 'border-red-500' : 'border-gray-600'
+          className={`flex-1 bg-background-tertiary border rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500 ${
+            error ? 'border-status-error' : 'border-border-subtle'
           }`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}
         />
       </div>
       {error && (
-        <p id={`${inputId}-error`} className="text-red-400 text-xs mt-1" role="alert">
+        <p id={`${inputId}-error`} className="text-status-error text-xs mt-1" role="alert">
           {error}
         </p>
       )}

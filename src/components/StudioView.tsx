@@ -1,12 +1,15 @@
+import React, { useState } from 'react';
 import { useProject, useUI } from '../state/hooks';
 import { MediaBin } from './MediaBin';
 import { Timeline } from './Timeline';
+import { EnhancedTimelineView } from './EnhancedTimelineView';
 import { Preview } from './Preview';
 import { Inspector } from './Inspector';
 
 export function StudioView() {
   const { project } = useProject();
   const { ui, setCurrentView, toggleSidebar, toggleInspector, toggleMediaBin } = useUI();
+  const [timelineMode, setTimelineMode] = useState<'standard' | 'enhanced'>('enhanced');
 
   if (!project) {
     return (
@@ -26,122 +29,128 @@ export function StudioView() {
   }
 
   return (
-    <div className="min-h-screen bg-synapse-background text-synapse-text-primary flex flex-col">
-      {/* Header */}
-      <header className="bg-synapse-surface border-b border-synapse-border px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => setCurrentView('dashboard')}
-            className="text-synapse-text-muted hover:text-synapse-text-primary transition-colors duration-synapse-fast p-1 rounded-synapse hover:bg-synapse-surface-hover"
-            title="Back to Dashboard"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <div>
-            <h1 className="text-lg font-semibold text-synapse-text-primary">{project.name}</h1>
-            <p className="text-xs text-synapse-text-muted">
-              {project.timeline.length} clips • {project.mediaAssets.length} assets
-            </p>
+    <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
+      {/* Simplified Header */}
+      <header className="bg-gray-800 border-b border-gray-700 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setCurrentView('dashboard')}
+              className="text-gray-400 hover:text-gray-200 p-2 rounded-md hover:bg-gray-700 transition-colors"
+              title="Back to Dashboard"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-lg font-semibold">{project.name}</h1>
+              <p className="text-sm text-gray-400">
+                {project.timeline.length} clips • {project.mediaAssets.length} assets
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* View Controls */}
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={toggleSidebar}
-            className={`p-2 rounded-synapse transition-all duration-synapse-fast ${
-              ui.sidebarVisible 
-                ? 'bg-synapse-primary text-synapse-text-inverse shadow-synapse-sm' 
-                : 'bg-synapse-surface-hover text-synapse-text-secondary hover:bg-synapse-surface-active hover:text-synapse-text-primary'
-            }`}
-            title="Toggle Sidebar"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <button
-            onClick={toggleMediaBin}
-            className={`p-2 rounded-synapse transition-all duration-synapse-fast ${
-              ui.mediaBinVisible 
-                ? 'bg-synapse-primary text-synapse-text-inverse shadow-synapse-sm' 
-                : 'bg-synapse-surface-hover text-synapse-text-secondary hover:bg-synapse-surface-active hover:text-synapse-text-primary'
-            }`}
-            title="Toggle Media Bin"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
-          </button>
-          <button
-            onClick={toggleInspector}
-            className={`p-2 rounded-synapse transition-all duration-synapse-fast ${
-              ui.inspectorVisible 
-                ? 'bg-synapse-primary text-synapse-text-inverse shadow-synapse-sm' 
-                : 'bg-synapse-surface-hover text-synapse-text-secondary hover:bg-synapse-surface-active hover:text-synapse-text-primary'
-            }`}
-            title="Toggle Inspector"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </button>
+          <div className="flex items-center space-x-3">
+            {/* Timeline Mode Toggle */}
+            <div className="flex bg-gray-700 rounded-lg p-1">
+              <button
+                onClick={() => setTimelineMode('standard')}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                  timelineMode === 'standard' 
+                    ? 'bg-blue-600 text-white shadow-sm' 
+                    : 'text-gray-300 hover:text-white hover:bg-gray-600'
+                }`}
+                title="Standard Timeline"
+              >
+                Standard
+              </button>
+              <button
+                onClick={() => setTimelineMode('enhanced')}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                  timelineMode === 'enhanced' 
+                    ? 'bg-blue-600 text-white shadow-sm' 
+                    : 'text-gray-300 hover:text-white hover:bg-gray-600'
+                }`}
+                title="Enhanced Timeline with Keyframes"
+              >
+                Enhanced
+              </button>
+            </div>
+
+            {/* Panel Controls */}
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={toggleMediaBin}
+                className={`p-2 rounded-md transition-colors ${
+                  ui.mediaBinVisible 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+                title="Toggle Media Bin"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </button>
+              <button
+                onClick={toggleInspector}
+                className={`p-2 rounded-md transition-colors ${
+                  ui.inspectorVisible 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+                title="Toggle Properties Panel"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100-4m0 4v2m0-6V4" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
-        {ui.sidebarVisible && (
-          <aside className="w-64 bg-synapse-surface border-r border-synapse-border flex flex-col">
-            <div className="p-4 border-b border-synapse-border">
-              <h3 className="font-semibold text-sm text-synapse-text-secondary uppercase tracking-wide">Navigation</h3>
-            </div>
-            <nav className="flex-1 p-4">
-              <ul className="space-y-2">
-                <li>
-                  <button className="w-full text-left px-3 py-2 rounded-synapse bg-synapse-surface-active text-synapse-text-primary">
-                    Timeline
-                  </button>
-                </li>
-                <li>
-                  <button className="w-full text-left px-3 py-2 rounded-synapse text-synapse-text-muted hover:bg-synapse-surface-hover hover:text-synapse-text-primary transition-all duration-synapse-fast">
-                    Media Assets
-                  </button>
-                </li>
-                <li>
-                  <button className="w-full text-left px-3 py-2 rounded-synapse text-synapse-text-muted hover:bg-synapse-surface-hover hover:text-synapse-text-primary transition-all duration-synapse-fast">
-                    Export
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          </aside>
-        )}
-
         {/* Main Editor Area */}
-        <main className="flex-1 flex flex-col">
-          {/* Preview Area */}
-          <Preview className="flex-1 border-b border-synapse-border" />
-
-          {/* Timeline Area */}
-          <Timeline className="h-64" />
+        <main className="flex-1 flex flex-col bg-gray-850">
+          <div className="flex-1 flex">
+            {/* Preview Area */}
+            <div className="flex-1 bg-black border-r border-gray-700">
+              <Preview className="h-full" />
+            </div>
+            
+            {/* Timeline Area - Always visible */}
+            <div className="w-96 border-r border-gray-700">
+              {timelineMode === 'enhanced' ? (
+                <EnhancedTimelineView className="h-full bg-gray-800" />
+              ) : (
+                <div className="h-full bg-gray-800">
+                  <Timeline className="h-full" />
+                </div>
+              )}
+            </div>
+          </div>
         </main>
 
-        {/* Media Bin */}
-        {ui.mediaBinVisible && (
-          <aside className="w-80 bg-synapse-surface border-l border-synapse-border">
-            <MediaBin />
-          </aside>
-        )}
+        {/* Right Panels */}
+        {(ui.mediaBinVisible || ui.inspectorVisible) && (
+          <div className="w-80 flex flex-col border-l border-gray-700">
+            {/* Media Bin */}
+            {ui.mediaBinVisible && (
+              <div className="flex-1 bg-gray-800 border-b border-gray-700">
+                <MediaBin />
+              </div>
+            )}
 
-        {/* Inspector Panel */}
-        {ui.inspectorVisible && (
-          <aside className="w-80 bg-synapse-surface border-l border-synapse-border">
-            <Inspector />
-          </aside>
+            {/* Inspector Panel */}
+            {ui.inspectorVisible && (
+              <div className="flex-1 bg-gray-800">
+                <Inspector />
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>

@@ -30,12 +30,13 @@ export function StateDemo() {
     if (mediaAssets.length > 0) {
       addTimelineItem({
         assetId: mediaAssets[0].id,
-        startTime: timeline.length * 5,
+        startTime: 0,
         duration: 5,
         track: 0,
         type: 'video',
         properties: {},
         animations: [],
+        keyframes: [],
       });
     }
   };

@@ -1,6 +1,6 @@
 // Custom hooks for state management
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useAppContext } from './context';
 import type { TimelineItem, MediaAsset, Project } from '../lib/types';
 import { generateId } from '../lib/utils';
@@ -8,7 +8,7 @@ import { generateId } from '../lib/utils';
 // Hook for project operations
 export function useProject() {
   const { state, dispatch } = useAppContext();
-
+  
   const createProject = useCallback((name: string) => {
     dispatch({ type: 'CREATE_PROJECT', payload: { name } });
   }, [dispatch]);
@@ -29,26 +29,60 @@ export function useProject() {
     dispatch({ type: 'RESET_PROJECT' });
   }, [dispatch]);
 
+  const switchProject = useCallback((projectId: string) => {
+    dispatch({ type: 'SWITCH_PROJECT', payload: projectId });
+  }, [dispatch]);
+
+  const deleteProject = useCallback((projectId: string) => {
+    dispatch({ type: 'DELETE_PROJECT', payload: projectId });
+  }, [dispatch]);
+
+  const duplicateProject = useCallback((projectId: string) => {
+    dispatch({ type: 'DUPLICATE_PROJECT', payload: projectId });
+  }, [dispatch]);
+
+  const renameProject = useCallback((projectId: string, name: string) => {
+    dispatch({ type: 'RENAME_PROJECT', payload: { id: projectId, name } });
+  }, [dispatch]);
+
+  const importProject = useCallback((project: Project) => {
+    dispatch({ type: 'IMPORT_PROJECT', payload: project });
+  }, [dispatch]);
+
+  const exportProject = useCallback(() => {
+    dispatch({ type: 'EXPORT_PROJECT' });
+  }, [dispatch]);
+
   return {
     project: state.project,
+    projects: state.projects,
     isDirty: state.isDirty,
     lastSaved: state.lastSaved,
+    isLoading: state.isLoading,
     createProject,
     loadProject,
     updateProject,
     saveProject,
     resetProject,
+    switchProject,
+    deleteProject,
+    duplicateProject,
+    renameProject,
+    importProject,
+    exportProject,
   };
 }
 
 // Hook for timeline operations
 export function useTimeline() {
   const { state, dispatch } = useAppContext();
+  const [currentTime, setCurrentTime] = useState(0);
 
   const addTimelineItem = useCallback((item: Omit<TimelineItem, 'id'>) => {
     const newItem: TimelineItem = {
       ...item,
       id: generateId(),
+      keyframes: item.keyframes || [],
     };
     dispatch({ type: 'ADD_TIMELINE_ITEM', payload: newItem });
     return newItem.id;
@@ -110,6 +144,8 @@ export function useTimeline() {
     selectedItems,
     selectedTimelineItems,
     timelineDuration,
+    currentTime,
+    setCurrentTime,
     addTimelineItem,
     removeTimelineItem,
     updateTimelineItem,

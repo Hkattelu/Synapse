@@ -233,25 +233,25 @@ export function Timeline({ className = '' }: TimelineProps) {
   }, [dragState.isDragging, handleMouseMove, handleMouseUp]);
 
   return (
-    <div className={`timeline bg-gray-800 border-t border-gray-700 ${className}`}>
+    <div className={`timeline bg-background-secondary border-t border-border-subtle ${className}`}>
       {/* Timeline Header */}
-      <div className="timeline-header bg-gray-900 border-b border-gray-700 p-2 flex items-center justify-between">
+      <div className="timeline-header bg-background-tertiary border-b border-border-subtle p-2 flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-400">Timeline</span>
+          <span className="text-sm text-text-secondary">Timeline</span>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => handleZoom(-0.2)}
-              className="p-1 text-gray-400 hover:text-white transition-colors"
+              className="p-1 text-text-secondary hover:text-text-primary transition-colors hover:bg-neutral-700 rounded"
               title="Zoom Out"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
               </svg>
             </button>
-            <span className="text-xs text-gray-500">{Math.round(ui.timeline.zoom * 100)}%</span>
+            <span className="text-xs text-text-tertiary">{Math.round(ui.timeline.zoom * 100)}%</span>
             <button
               onClick={() => handleZoom(0.2)}
-              className="p-1 text-gray-400 hover:text-white transition-colors"
+              className="p-1 text-text-secondary hover:text-text-primary transition-colors hover:bg-neutral-700 rounded"
               title="Zoom In"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -261,14 +261,14 @@ export function Timeline({ className = '' }: TimelineProps) {
           </div>
           <button
             onClick={() => updateTimelineView({ snapToGrid: !ui.timeline.snapToGrid })}
-            className={`px-2 py-1 text-xs rounded ${
-              ui.timeline.snapToGrid ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'
-            } hover:bg-blue-700 transition-colors`}
+            className={`px-2 py-1 text-xs rounded transition-colors ${
+              ui.timeline.snapToGrid ? 'bg-primary-600 text-white shadow-glow' : 'bg-neutral-700 text-text-secondary hover:bg-neutral-600'
+            }`}
           >
             Snap
           </button>
         </div>
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-text-tertiary">
           Duration: {Math.round(timelineDuration * 10) / 10}s
         </div>
       </div>
@@ -297,7 +297,7 @@ export function Timeline({ className = '' }: TimelineProps) {
               {Array.from({ length: Math.ceil(maxDuration / ui.timeline.gridSize) }).map((_, i) => (
                 <div
                   key={i}
-                  className="absolute top-0 bottom-0 border-l border-gray-700 opacity-30"
+                  className="absolute top-0 bottom-0 border-l border-border-subtle opacity-30"
                   style={{ left: `${timeToPixels(i * ui.timeline.gridSize)}px` }}
                 />
               ))}
@@ -308,13 +308,13 @@ export function Timeline({ className = '' }: TimelineProps) {
           {Array.from({ length: maxTrack + 1 }).map((_, trackIndex) => (
             <div
               key={trackIndex}
-              className="absolute left-0 right-0 border-b border-gray-700 opacity-50"
+              className="absolute left-0 right-0 border-b border-border-subtle opacity-50"
               style={{ 
                 top: `${trackIndex * TRACK_HEIGHT}px`,
                 height: `${TRACK_HEIGHT}px`
               }}
             >
-              <div className="absolute left-2 top-2 text-xs text-gray-500">
+              <div className="absolute left-2 top-2 text-xs text-text-tertiary">
                 Track {trackIndex + 1}
               </div>
             </div>
@@ -361,11 +361,11 @@ interface TimelineClipProps {
 function TimelineClip({ item, asset, isSelected, isDragging, style, onMouseDown }: TimelineClipProps) {
   const getClipColor = (type: string) => {
     switch (type) {
-      case 'video': return 'bg-blue-600';
-      case 'audio': return 'bg-green-600';
-      case 'code': return 'bg-purple-600';
-      case 'title': return 'bg-orange-600';
-      default: return 'bg-gray-600';
+      case 'video': return 'bg-accent-blue';
+      case 'audio': return 'bg-accent-green';
+      case 'code': return 'bg-accent-mauve';
+      case 'title': return 'bg-accent-peach';
+      default: return 'bg-neutral-600';
     }
   };
 
@@ -374,16 +374,16 @@ function TimelineClip({ item, asset, isSelected, isDragging, style, onMouseDown 
       className={`
         absolute rounded cursor-move select-none border-2 transition-all
         ${getClipColor(item.type)}
-        ${isSelected ? 'border-yellow-400 shadow-lg' : 'border-transparent'}
+        ${isSelected ? 'border-accent-yellow shadow-glow' : 'border-transparent'}
         ${isDragging ? 'opacity-75 z-10' : 'opacity-100'}
-        hover:border-gray-300
+        hover:border-text-secondary
       `}
       style={style}
       onMouseDown={onMouseDown}
     >
       {/* Resize Handles */}
-      <div className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize bg-white bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
-      <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize bg-white bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
+      <div className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize bg-text-primary bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
+      <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize bg-text-primary bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
       
       {/* Clip Content */}
       <div className="p-2 h-full flex flex-col justify-between text-white text-xs overflow-hidden">

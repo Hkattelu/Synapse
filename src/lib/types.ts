@@ -56,24 +56,27 @@ export interface TrackGroup {
   tracks: number[];
   color?: string;
   collapsed?: boolean;
+  visible?: boolean;
+  locked?: boolean;
   muted?: boolean;
   solo?: boolean;
 }
 
 export interface TimelineMarker {
   id: string;
+  name: string;
   time: number;
-  label: string;
-  color?: string;
+  color: string;
+  description?: string;
 }
 
 export interface TimelineRegion {
   id: string;
+  name: string;
   startTime: number;
   endTime: number;
-  label: string;
-  color?: string;
-  locked?: boolean;
+  color: string;
+  description?: string;
 }
 
 export interface ItemProperties {

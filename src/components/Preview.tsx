@@ -155,9 +155,9 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
 
   if (!project) {
     return (
-      <div className={`bg-black flex items-center justify-center ${className}`}>
-        <div className="text-center text-gray-400">
-          <div className="w-16 h-16 bg-gray-800 rounded-lg mx-auto mb-4 flex items-center justify-center">
+      <div className={`bg-background-primary flex items-center justify-center ${className}`}>
+        <div className="text-center text-text-secondary">
+          <div className="w-16 h-16 bg-background-secondary rounded-lg mx-auto mb-4 flex items-center justify-center">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path 
                 strokeLinecap="round" 
@@ -167,7 +167,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               />
             </svg>
           </div>
-          <p className="text-lg font-medium">No Project Loaded</p>
+          <p className="text-lg font-medium text-text-primary">No Project Loaded</p>
           <p className="text-sm">Create or load a project to see the preview</p>
         </div>
       </div>
@@ -175,7 +175,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   }
 
   return (
-    <div className={`bg-black flex flex-col ${className}`}>
+    <div className={`bg-background-primary flex flex-col ${className}`}>
       {/* Preview Area */}
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full h-full max-w-4xl max-h-full">
@@ -201,25 +201,25 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
       </div>
 
       {/* Timeline Scrubber */}
-      <div className="bg-gray-800 border-t border-gray-700 px-4 py-2">
+      <div className="bg-background-secondary border-t border-border-subtle px-4 py-2">
         <div className="relative">
           <div
-            className="h-2 bg-gray-600 rounded-full cursor-pointer"
+            className="h-2 bg-neutral-600 rounded-full cursor-pointer"
             onMouseDown={handleTimelineDragStart}
             onClick={handleTimelineScrub}
           >
             <div
-              className="h-full bg-blue-600 rounded-full relative"
+              className="h-full bg-primary-600 rounded-full relative"
               style={{
                 width: `${(playback.currentTime / compositionProps.settings.duration) * 100}%`,
               }}
             >
-              <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow-lg" />
+              <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-primary-600 rounded-full border-2 border-background-primary shadow-lg" />
             </div>
           </div>
           
           {/* Timeline markers */}
-          <div className="flex justify-between text-xs text-gray-400 mt-1">
+          <div className="flex justify-between text-xs text-text-secondary mt-1">
             <span>0:00</span>
             <span>{formatTime(compositionProps.settings.duration)}</span>
           </div>
@@ -227,14 +227,14 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
       </div>
 
       {/* Preview Controls */}
-      <div className="bg-gray-800 border-t border-gray-700 p-4">
+      <div className="bg-background-secondary border-t border-border-subtle p-4">
         <div className="flex items-center justify-between">
           {/* Left controls */}
           <div className="flex items-center space-x-2">
             {/* Frame backward */}
             <button
               onClick={handleFrameBackward}
-              className="text-gray-300 hover:text-white p-2 rounded transition-colors"
+              className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
               title="Previous Frame"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -245,7 +245,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             {/* Skip backward */}
             <button
               onClick={handleSkipBackward}
-              className="text-gray-300 hover:text-white p-2 rounded transition-colors"
+              className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
               title="Skip Backward 10s"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -259,7 +259,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
           <div className="flex items-center space-x-4">
             <button
               onClick={handlePlayPause}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors"
+              className="bg-primary-600 hover:bg-primary-700 text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors shadow-glow"
               title={playback.isPlaying ? 'Pause' : 'Play'}
             >
               {playback.isPlaying ? (
@@ -273,7 +273,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               )}
             </button>
 
-            <div className="flex items-center space-x-2 text-sm text-gray-300">
+            <div className="flex items-center space-x-2 text-sm text-text-secondary">
               <span>{formatTime(playback.currentTime, compositionProps.settings.fps)}</span>
               <span>/</span>
               <span>{formatTime(compositionProps.settings.duration, compositionProps.settings.fps)}</span>
@@ -285,7 +285,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             {/* Skip forward */}
             <button
               onClick={handleSkipForward}
-              className="text-gray-300 hover:text-white p-2 rounded transition-colors"
+              className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
               title="Skip Forward 10s"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -296,7 +296,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             {/* Frame forward */}
             <button
               onClick={handleFrameForward}
-              className="text-gray-300 hover:text-white p-2 rounded transition-colors"
+              className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
               title="Next Frame"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -308,7 +308,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             <div className="flex items-center space-x-2">
               <button
                 onClick={toggleMute}
-                className="text-gray-300 hover:text-white p-2 rounded transition-colors"
+                className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
                 title={playback.muted ? 'Unmute' : 'Mute'}
               >
                 {playback.muted || playback.volume === 0 ? (

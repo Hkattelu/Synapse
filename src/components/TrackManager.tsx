@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { useTimeline, useProjects } from '../state/hooks';
+import { useTimeline, useProject } from '../state/hooks';
 import type { TrackGroup, TimelineItem } from '../lib/types';
 import { generateId } from '../lib/utils';
 
@@ -10,7 +10,7 @@ interface TrackManagerProps {
 
 export function TrackManager({ className = '', onTrackGroupChange }: TrackManagerProps) {
   const { timeline, selectedItems, selectTimelineItems } = useTimeline();
-  const { currentProject, updateProject } = useProjects();
+  const { project: currentProject, updateProject } = useProject();
   
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [newGroupName, setNewGroupName] = useState('');
@@ -67,7 +67,7 @@ export function TrackManager({ className = '', onTrackGroupChange }: TrackManage
     const updatedGroups = [...trackGroups, newGroup];
     
     if (currentProject) {
-      updateProject(currentProject.id, { trackGroups: updatedGroups });
+      updateProject({ trackGroups: updatedGroups });
     }
     
     onTrackGroupChange?.(updatedGroups);
@@ -84,7 +84,7 @@ export function TrackManager({ className = '', onTrackGroupChange }: TrackManage
     );
 
     if (currentProject) {
-      updateProject(currentProject.id, { trackGroups: updatedGroups });
+      updateProject({ trackGroups: updatedGroups });
     }
     
     onTrackGroupChange?.(updatedGroups);
@@ -99,7 +99,7 @@ export function TrackManager({ className = '', onTrackGroupChange }: TrackManage
     );
 
     if (currentProject) {
-      updateProject(currentProject.id, { trackGroups: updatedGroups });
+      updateProject({ trackGroups: updatedGroups });
     }
     
     onTrackGroupChange?.(updatedGroups);
@@ -112,7 +112,7 @@ export function TrackManager({ className = '', onTrackGroupChange }: TrackManage
     );
 
     if (currentProject) {
-      updateProject(currentProject.id, { trackGroups: updatedGroups });
+      updateProject({ trackGroups: updatedGroups });
     }
     
     onTrackGroupChange?.(updatedGroups);
@@ -123,7 +123,7 @@ export function TrackManager({ className = '', onTrackGroupChange }: TrackManage
     const updatedGroups = trackGroups.filter(group => group.id !== groupId);
 
     if (currentProject) {
-      updateProject(currentProject.id, { trackGroups: updatedGroups });
+      updateProject({ trackGroups: updatedGroups });
     }
     
     onTrackGroupChange?.(updatedGroups);
