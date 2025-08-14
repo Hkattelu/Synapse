@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useProject, useUI } from '../state/hooks';
 import { MediaBin } from './MediaBin';
@@ -6,15 +6,31 @@ import { Timeline } from './Timeline';
 import { EnhancedTimelineView } from './EnhancedTimelineView';
 import { Preview } from './Preview';
 import { Inspector } from './Inspector';
+import { ExportDialog } from './ExportDialog';
+import { ExportProvider } from '../state/exportContext';
 import { ArrowLeft, Sparkles, Settings, Archive, Eye } from 'lucide-react';
 
-export function StudioView() {
+function StudioViewContent() {
   const { project } = useProject();
   const { ui, setCurrentView, toggleSidebar, toggleInspector, toggleMediaBin } =
     useUI();
   const [timelineMode, setTimelineMode] = useState<'standard' | 'enhanced'>(
     'enhanced'
   );
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+
+  // Listen for export dialog open event from Preview component
+  useEffect(() => {
+    const handleOpenExportDialog = () => {
+      setIsExportDialogOpen(true);
+    };
+
+    window.addEventListener('openExportDialog', handleOpenExportDialog);
+    
+    return () => {
+      window.removeEventListener('openExportDialog', handleOpenExportDialog);
+    };
+  }, []);
 
   if (!project) {
     return (
@@ -183,6 +199,21 @@ export function StudioView() {
           </motion.div>
         )}
       </motion.div>
+
+      {/* Export Dialog */}
+      <ExportDialog
+        isOpen={isExportDialogOpen}
+        onClose={() => setIsExportDialogOpen(false)}
+      />
     </div>
+  );
+}
+
+// Wrapper component with ExportProvider
+export function StudioView() {
+  return (
+    <ExportProvider>
+      <StudioViewContent />
+    </ExportProvider>
   );
 }

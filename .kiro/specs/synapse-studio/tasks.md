@@ -100,7 +100,7 @@
   - Write tests for project lifecycle management
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 13. Add video export and rendering capabilities
+- [x] 13. Add video export and rendering capabilities
   - Implement video export functionality using Remotion's rendering API
   - Create export settings interface (format, quality, resolution)
   - Add progress tracking and user feedback during export
