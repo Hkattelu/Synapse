@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Player, PlayerRef } from '@remotion/player';
+import { Player, type PlayerRef } from '@remotion/player';
 import { useProject, usePlayback } from '../state/hooks';
 import { MainComposition } from '../remotion/MainComposition';
 import type { MainCompositionProps } from '../remotion/types';
@@ -227,6 +227,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full h-full max-w-4xl max-h-full">
           <Player
+            acknowledgeRemotionLicense
             ref={playerRef}
             component={MainComposition}
             inputProps={compositionProps}
@@ -242,7 +243,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             loop={false}
             showVolumeControls={false}
             clickToPlay={false}
-            onTimeUpdate={handleTimeUpdate}
+            // onTimeUpdate={handleTimeUpdate}
           />
         </div>
       </div>
@@ -386,7 +387,9 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
           <div className="flex items-center space-x-2">
             {/* Export button */}
             <button
-              onClick={() => window.dispatchEvent(new CustomEvent('openExportDialog'))}
+              onClick={() =>
+                window.dispatchEvent(new CustomEvent('openExportDialog'))
+              }
               className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
               title="Export Video"
             >

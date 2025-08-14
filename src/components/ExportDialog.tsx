@@ -1,22 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useProject } from '../state/hooks';
-import { useExport, useExportSettings, useExportStatus } from '../state/exportContext';
-import type { ExportPreset, ExportQuality, VideoFormat, VideoCodec, AudioCodec } from '../lib/types';
-import { formatFileSize, formatDuration } from '../lib/exportManager';
+import {
+  useExport,
+  useExportSettings,
+  useExportStatus,
+} from '../state/exportContext';
+import type {
+  ExportPreset,
+  ExportQuality,
+  VideoFormat,
+  VideoCodec,
+  AudioCodec,
+} from '../lib/types';
+import { formatFileSize, formatDuration } from '../lib/exportManagerClient';
 
 interface ExportDialogProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) => {
+export const ExportDialog: React.FC<ExportDialogProps> = ({
+  isOpen,
+  onClose,
+}) => {
   const { project } = useProject();
   const { startExport, cancelExport, getEstimatedFileSize } = useExport();
-  const { settings, presets, updateSettings, applyPreset } = useExportSettings();
+  const { settings, presets, updateSettings, applyPreset } =
+    useExportSettings();
   const { isExporting, progress, canStartExport } = useExportStatus();
-  
+
   const [activeTab, setActiveTab] = useState<'presets' | 'custom'>('presets');
-  const [selectedPresetId, setSelectedPresetId] = useState<string>('youtube-1080p');
+  const [selectedPresetId, setSelectedPresetId] =
+    useState<string>('youtube-1080p');
 
   // Calculate estimated file size
   const estimatedSize = project ? getEstimatedFileSize(project) : 0;
@@ -51,7 +66,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
       const timer = setTimeout(() => {
         onClose();
       }, 3000); // Auto-close after 3 seconds
-      
+
       return () => clearTimeout(timer);
     }
   }, [progress?.status, onClose]);
@@ -64,7 +79,9 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border-subtle">
           <div>
-            <h2 className="text-xl font-semibold text-text-primary">Export Video</h2>
+            <h2 className="text-xl font-semibold text-text-primary">
+              Export Video
+            </h2>
             <p className="text-sm text-text-secondary mt-1">
               Export "{project.name}" as video file
             </p>
@@ -74,8 +91,18 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
               onClick={onClose}
               className="text-text-secondary hover:text-text-primary p-1 rounded transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           )}
@@ -99,10 +126,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
                     {Math.round(progress?.progress || 0)}%
                   </span>
                 </div>
-                
+
                 {/* Progress Bar */}
                 <div className="w-full bg-neutral-700 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-primary-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${progress?.progress || 0}%` }}
                   />
@@ -120,16 +147,18 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
                       </span>
                     </div>
                   )}
-                  
+
                   {progress.estimatedTimeRemaining && (
                     <div>
-                      <span className="text-text-secondary">Time remaining:</span>
+                      <span className="text-text-secondary">
+                        Time remaining:
+                      </span>
                       <span className="text-text-primary ml-2">
                         {formatDuration(progress.estimatedTimeRemaining)}
                       </span>
                     </div>
                   )}
-                  
+
                   {progress.averageFrameTime && (
                     <div>
                       <span className="text-text-secondary">Frame time:</span>
@@ -144,7 +173,9 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
               {/* Error Message */}
               {progress?.status === 'failed' && progress.errorMessage && (
                 <div className="mt-4 p-3 bg-red-900/20 border border-red-700 rounded">
-                  <p className="text-red-400 text-sm">{progress.errorMessage}</p>
+                  <p className="text-red-400 text-sm">
+                    {progress.errorMessage}
+                  </p>
                 </div>
               )}
 
@@ -152,14 +183,16 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
               {progress?.status === 'completed' && (
                 <div className="mt-4 p-3 bg-green-900/20 border border-green-700 rounded">
                   <p className="text-green-400 text-sm">
-                    Export completed successfully! The file will be available in your downloads.
+                    Export completed successfully! The file will be available in
+                    your downloads.
                   </p>
                 </div>
               )}
 
               {/* Action Buttons */}
               <div className="flex justify-end gap-3 mt-6">
-                {(progress?.status === 'preparing' || progress?.status === 'rendering') && (
+                {(progress?.status === 'preparing' ||
+                  progress?.status === 'rendering') && (
                   <button
                     onClick={handleCancelExport}
                     className="px-4 py-2 text-text-secondary hover:text-text-primary border border-border-subtle rounded hover:bg-background-secondary transition-colors"
@@ -167,8 +200,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
                     Cancel Export
                   </button>
                 )}
-                
-                {(progress?.status === 'completed' || progress?.status === 'failed' || progress?.status === 'cancelled') && (
+
+                {(progress?.status === 'completed' ||
+                  progress?.status === 'failed' ||
+                  progress?.status === 'cancelled') && (
                   <button
                     onClick={onClose}
                     className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded transition-colors"
@@ -221,14 +256,24 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
                       >
                         <div className="flex items-start justify-between">
                           <div>
-                            <h3 className="font-medium text-text-primary">{preset.name}</h3>
-                            <p className="text-sm text-text-secondary mt-1">{preset.description}</p>
+                            <h3 className="font-medium text-text-primary">
+                              {preset.name}
+                            </h3>
+                            <p className="text-sm text-text-secondary mt-1">
+                              {preset.description}
+                            </p>
                             <div className="flex items-center gap-4 mt-2 text-xs text-text-secondary">
-                              <span>{preset.settings.format?.toUpperCase()}</span>
+                              <span>
+                                {preset.settings.format?.toUpperCase()}
+                              </span>
                               <span>{preset.settings.quality}</span>
-                              {preset.settings.width && preset.settings.height && (
-                                <span>{preset.settings.width}×{preset.settings.height}</span>
-                              )}
+                              {preset.settings.width &&
+                                preset.settings.height && (
+                                  <span>
+                                    {preset.settings.width}×
+                                    {preset.settings.height}
+                                  </span>
+                                )}
                             </div>
                           </div>
                           <div className="flex items-center">
@@ -247,7 +292,9 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
                   <div className="space-y-6">
                     {/* Video Settings */}
                     <div>
-                      <h3 className="text-sm font-medium text-text-primary mb-3">Video Settings</h3>
+                      <h3 className="text-sm font-medium text-text-primary mb-3">
+                        Video Settings
+                      </h3>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-medium text-text-secondary mb-1">
@@ -255,7 +302,11 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
                           </label>
                           <select
                             value={settings.format}
-                            onChange={(e) => updateSettings({ format: e.target.value as VideoFormat })}
+                            onChange={(e) =>
+                              updateSettings({
+                                format: e.target.value as VideoFormat,
+                              })
+                            }
                             className="w-full p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
                           >
                             <option value="mp4">MP4</option>
@@ -263,14 +314,18 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
                             <option value="mov">MOV</option>
                           </select>
                         </div>
-                        
+
                         <div>
                           <label className="block text-xs font-medium text-text-secondary mb-1">
                             Codec
                           </label>
                           <select
                             value={settings.codec}
-                            onChange={(e) => updateSettings({ codec: e.target.value as VideoCodec })}
+                            onChange={(e) =>
+                              updateSettings({
+                                codec: e.target.value as VideoCodec,
+                              })
+                            }
                             className="w-full p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
                           >
                             <option value="h264">H.264</option>
@@ -279,14 +334,18 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
                             <option value="vp9">VP9</option>
                           </select>
                         </div>
-                        
+
                         <div>
                           <label className="block text-xs font-medium text-text-secondary mb-1">
                             Quality
                           </label>
                           <select
                             value={settings.quality}
-                            onChange={(e) => updateSettings({ quality: e.target.value as ExportQuality })}
+                            onChange={(e) =>
+                              updateSettings({
+                                quality: e.target.value as ExportQuality,
+                              })
+                            }
                             className="w-full p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
                           >
                             <option value="low">Low</option>
@@ -295,7 +354,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
                             <option value="ultra">Ultra</option>
                           </select>
                         </div>
-                        
+
                         <div>
                           <label className="block text-xs font-medium text-text-secondary mb-1">
                             Resolution
@@ -304,15 +363,25 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
                             <input
                               type="number"
                               value={settings.width || project.settings.width}
-                              onChange={(e) => updateSettings({ width: parseInt(e.target.value) })}
+                              onChange={(e) =>
+                                updateSettings({
+                                  width: parseInt(e.target.value),
+                                })
+                              }
                               className="flex-1 p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
                               placeholder="Width"
                             />
-                            <span className="flex items-center text-text-secondary">×</span>
+                            <span className="flex items-center text-text-secondary">
+                              ×
+                            </span>
                             <input
                               type="number"
                               value={settings.height || project.settings.height}
-                              onChange={(e) => updateSettings({ height: parseInt(e.target.value) })}
+                              onChange={(e) =>
+                                updateSettings({
+                                  height: parseInt(e.target.value),
+                                })
+                              }
                               className="flex-1 p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
                               placeholder="Height"
                             />
@@ -323,7 +392,9 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
 
                     {/* Audio Settings */}
                     <div>
-                      <h3 className="text-sm font-medium text-text-primary mb-3">Audio Settings</h3>
+                      <h3 className="text-sm font-medium text-text-primary mb-3">
+                        Audio Settings
+                      </h3>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-medium text-text-secondary mb-1">
@@ -331,7 +402,11 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
                           </label>
                           <select
                             value={settings.audioCodec}
-                            onChange={(e) => updateSettings({ audioCodec: e.target.value as AudioCodec })}
+                            onChange={(e) =>
+                              updateSettings({
+                                audioCodec: e.target.value as AudioCodec,
+                              })
+                            }
                             className="w-full p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
                           >
                             <option value="aac">AAC</option>
@@ -339,7 +414,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
                             <option value="opus">Opus</option>
                           </select>
                         </div>
-                        
+
                         <div>
                           <label className="block text-xs font-medium text-text-secondary mb-1">
                             Audio Bitrate (kbps)
@@ -347,7 +422,11 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
                           <input
                             type="number"
                             value={settings.audioBitrate || 128}
-                            onChange={(e) => updateSettings({ audioBitrate: parseInt(e.target.value) })}
+                            onChange={(e) =>
+                              updateSettings({
+                                audioBitrate: parseInt(e.target.value),
+                              })
+                            }
                             className="w-full p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
                             min="64"
                             max="320"
@@ -367,10 +446,20 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({ isOpen, onClose }) =
         {!isExporting && (
           <div className="flex items-center justify-between p-6 border-t border-border-subtle bg-background-secondary">
             <div className="text-sm text-text-secondary">
-              <div>Estimated file size: <span className="text-text-primary">{formatFileSize(estimatedSize)}</span></div>
-              <div className="mt-1">Duration: <span className="text-text-primary">{formatDuration(project.settings.duration)}</span></div>
+              <div>
+                Estimated file size:{' '}
+                <span className="text-text-primary">
+                  {formatFileSize(estimatedSize)}
+                </span>
+              </div>
+              <div className="mt-1">
+                Duration:{' '}
+                <span className="text-text-primary">
+                  {formatDuration(project.settings.duration)}
+                </span>
+              </div>
             </div>
-            
+
             <div className="flex gap-3">
               <button
                 onClick={onClose}

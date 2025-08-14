@@ -4,11 +4,8 @@ import type {
   TimelineItem,
   MediaAsset,
   Keyframe,
-  TrackGroup,
-  TimelineMarker,
 } from '../lib/types';
 import { KeyframeManager, createKeyframe } from '../lib/keyframes';
-import { generateId } from '../lib/utils';
 
 interface AdvancedTimelineProps {
   className?: string;
@@ -28,9 +25,7 @@ interface DragState {
 
 const TRACK_HEIGHT = 80; // Increased for keyframe editing
 const PIXELS_PER_SECOND = 100;
-const MIN_CLIP_DURATION = 0.1;
-const SNAP_THRESHOLD = 10;
-const KEYFRAME_SIZE = 8;
+
 
 export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
   const {

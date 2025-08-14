@@ -39,7 +39,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
   const getMediaType = (mimeType: string): MediaAssetType | null => {
     if (SUPPORTED_FILE_TYPES.video.includes(mimeType as any)) return 'video';
     if (SUPPORTED_FILE_TYPES.image.includes(mimeType as any)) return 'image';
-    if (SUPPORTED_FILE_TYPES.audio.includes(mimeType as unknown))
+    if (SUPPORTED_FILE_TYPES.audio.includes(mimeType as any))
       return 'audio';
     return null;
   };

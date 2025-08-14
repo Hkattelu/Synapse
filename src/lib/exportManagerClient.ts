@@ -1,17 +1,11 @@
-import { bundle } from '@remotion/bundler';
-import { renderMedia, getCompositions } from '@remotion/renderer';
-import type { 
-  ExportSettings, 
-  ExportProgress, 
-  ExportJob, 
-  ExportStatus, 
+import type {
+  ExportSettings,
+  ExportProgress,
+  ExportJob,
   Project,
   ExportPreset,
-  VideoCodec,
-  AudioCodec,
-  ExportQuality 
+  ExportQuality,
 } from './types';
-import type { MainCompositionProps } from '../remotion/types';
 
 // Export presets for common use cases
 export const DEFAULT_EXPORT_PRESETS: ExportPreset[] = [
@@ -118,22 +112,26 @@ const getQualitySettings = (quality: ExportQuality) => {
 };
 
 // Generate output filename
-const generateOutputFilename = (project: Project, settings: ExportSettings): string => {
+const generateOutputFilename = (
+  project: Project,
+  settings: ExportSettings
+): string => {
   const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-');
-  const qualityLabel = settings.quality.charAt(0).toUpperCase() + settings.quality.slice(1);
+  const qualityLabel =
+    settings.quality.charAt(0).toUpperCase() + settings.quality.slice(1);
   const resolution = `${settings.width || project.settings.width}x${settings.height || project.settings.height}`;
-  
+
   return `${project.name}_${qualityLabel}_${resolution}_${timestamp}.${settings.format}`;
 };
 
 // Create export job
 export const createExportJob = (
-  project: Project, 
+  project: Project,
   settings: ExportSettings,
   maxRetries: number = 3
 ): ExportJob => {
   const jobId = `export_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  
+
   return {
     id: jobId,
     projectId: project.id,
@@ -152,8 +150,8 @@ export const createExportJob = (
 // Progress callback type
 export type ProgressCallback = (progress: ExportProgress) => void;
 
-// Export manager class
-export class ExportManager {
+// Browser-compatible export manager class
+export class ClientExportManager {
   private currentJob: ExportJob | null = null;
   private isExporting = false;
   private progressCallback: ProgressCallback | null = null;
@@ -185,8 +183,11 @@ export class ExportManager {
     this.progressCallback?.(this.currentJob.progress);
   }
 
-  // Start export process
-  public async startExport(project: Project, settings: ExportSettings): Promise<string> {
+  // Start export process (browser version - will communicate with server)
+  public async startExport(
+    project: Project,
+    settings: ExportSettings
+  ): Promise<string> {
     if (this.isExporting) {
       throw new Error('Export already in progress');
     }
@@ -196,174 +197,53 @@ export class ExportManager {
     this.abortController = new AbortController();
 
     try {
-      this.updateProgress({ 
-        status: 'preparing', 
-        progress: 0, 
-        startTime: new Date() 
+      this.updateProgress({
+        status: 'preparing',
+        progress: 0,
+        startTime: new Date(),
       });
 
-      // Prepare composition props
-      const compositionProps: MainCompositionProps = {
-        timeline: project.timeline,
-        mediaAssets: project.mediaAssets,
-        settings: project.settings,
+      // Generate output filename
+      const outputFilename = generateOutputFilename(project, settings);
+
+      // Prepare export payload for server
+      const exportPayload = {
+        project: {
+          id: project.id,
+          name: project.name,
+          timeline: project.timeline,
+          mediaAssets: project.mediaAssets,
+          settings: project.settings,
+        },
+        settings,
+        outputFilename,
+        jobId: this.currentJob.id,
       };
 
-      // Apply export settings overrides
-      if (settings.width || settings.height || settings.fps) {
-        compositionProps.settings = {
-          ...compositionProps.settings,
-          width: settings.width || compositionProps.settings.width,
-          height: settings.height || compositionProps.settings.height,
-          fps: settings.fps || compositionProps.settings.fps,
-        };
-      }
+      this.updateProgress({ status: 'preparing', progress: 20 });
 
-      // Bundle the project
-      this.updateProgress({ status: 'preparing', progress: 10 });
-      
-      const bundleLocation = await bundle({
-        entryPoint: './src/remotion/index.ts',
-        // Enable watch mode for development
-        enableCaching: true,
-        webpackOverride: (config) => {
-          // Add any webpack customizations here
-          return config;
-        },
-      });
-
-      this.updateProgress({ status: 'preparing', progress: 30 });
-
-      // Get compositions from bundle
-      const compositions = await getCompositions(bundleLocation);
-      const composition = compositions.find(c => c.id === 'MainComposition');
-
-      if (!composition) {
-        throw new Error('MainComposition not found in bundle');
-      }
-
-      // Calculate frame range
-      const totalDuration = settings.endTime || project.settings.duration;
-      const startFrame = Math.floor((settings.startTime || 0) * compositionProps.settings.fps);
-      const endFrame = Math.floor(totalDuration * compositionProps.settings.fps);
-      const totalFrames = endFrame - startFrame;
-
-      // Generate output filename and path
-      const outputFilename = generateOutputFilename(project, settings);
-      const outputPath = `./exports/${outputFilename}`;
-
-      // Ensure exports directory exists
-      try {
-        const fs = await import('fs');
-        await fs.promises.mkdir('./exports', { recursive: true });
-      } catch (error) {
-        console.warn('Could not create exports directory:', error);
-      }
-
-      this.updateProgress({ 
-        status: 'rendering', 
-        progress: 40,
-        totalFrames,
-        renderedFrames: 0,
-        currentFrame: startFrame,
-      });
-
-      // Get quality settings
-      const qualitySettings = getQualitySettings(settings.quality);
-
-      // Start rendering
-      this.currentJob.startedAt = new Date();
-      
-      const renderStart = Date.now();
-      
-      await renderMedia({
-        composition: {
-          ...composition,
-          durationInFrames: totalFrames,
-          fps: compositionProps.settings.fps,
-          width: compositionProps.settings.width,
-          height: compositionProps.settings.height,
-        },
-        serveUrl: bundleLocation,
-        codec: this.mapVideoCodec(settings.codec),
-        outputLocation: outputPath,
-        inputProps: compositionProps,
-        
-        // Video quality settings
-        crf: settings.crf || qualitySettings.crf,
-        videoBitrate: settings.bitrate ? `${settings.bitrate}k` : undefined,
-        
-        // Audio settings
-        audioCodec: this.mapAudioCodec(settings.audioCodec),
-        audioBitrate: settings.audioBitrate ? `${settings.audioBitrate}k` : undefined,
-        
-        // Frame range
-        frameRange: settings.frameRange || [startFrame, endFrame - 1],
-        
-        // Performance settings
-        concurrency: settings.concurrency || 4,
-        
-        // Progress callback
-        onProgress: ({ renderedFrames, encodedFrames }) => {
-          const progress = Math.min(
-            40 + (renderedFrames / totalFrames) * 50,
-            90
-          );
-          
-          const now = Date.now();
-          const elapsed = now - renderStart;
-          const averageFrameTime = elapsed / Math.max(renderedFrames, 1);
-          const remainingFrames = totalFrames - renderedFrames;
-          const estimatedTimeRemaining = (remainingFrames * averageFrameTime) / 1000;
-
-          this.updateProgress({
-            status: 'rendering',
-            progress,
-            currentFrame: startFrame + renderedFrames,
-            renderedFrames,
-            averageFrameTime,
-            estimatedTimeRemaining,
-          });
-        },
-
-        // Error handling
-        onStart: () => {
-          console.log('Rendering started');
-        },
-      });
-
-      // Finalize export
-      this.updateProgress({ status: 'finalizing', progress: 95 });
-
-      // Get file size
-      let outputSize: number | undefined;
-      try {
-        const fs = await import('fs');
-        const stats = await fs.promises.stat(outputPath);
-        outputSize = stats.size;
-      } catch (error) {
-        console.warn('Could not get output file size:', error);
-      }
+      // In the future, this will send the job to a server worker
+      // For now, we'll simulate the export process
+      await this.simulateExportProcess(outputFilename);
 
       // Complete the export
-      this.currentJob.outputPath = outputPath;
-      this.currentJob.outputSize = outputSize;
+      this.currentJob.outputPath = `./exports/${outputFilename}`;
       this.currentJob.completedAt = new Date();
 
-      this.updateProgress({ 
-        status: 'completed', 
+      this.updateProgress({
+        status: 'completed',
         progress: 100,
         endTime: new Date(),
       });
 
-      console.log(`Export completed: ${outputPath}`);
-      return outputPath;
-
+      console.log(`Export completed: ${outputFilename}`);
+      return this.currentJob.outputPath;
     } catch (error) {
       console.error('Export failed:', error);
-      
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      
+
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+
       this.updateProgress({
         status: 'failed',
         errorMessage,
@@ -371,13 +251,18 @@ export class ExportManager {
       });
 
       // Check if we should retry
-      if (this.currentJob && this.currentJob.retryCount < this.currentJob.maxRetries) {
-        console.log(`Retrying export (attempt ${this.currentJob.retryCount + 1}/${this.currentJob.maxRetries})`);
+      if (
+        this.currentJob &&
+        this.currentJob.retryCount < this.currentJob.maxRetries
+      ) {
+        console.log(
+          `Retrying export (attempt ${this.currentJob.retryCount + 1}/${this.currentJob.maxRetries})`
+        );
         this.currentJob.retryCount++;
-        
+
         // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
         return this.startExport(project, settings);
       }
 
@@ -388,6 +273,35 @@ export class ExportManager {
     }
   }
 
+  // Simulate export process (placeholder for actual server communication)
+  private async simulateExportProcess(filename: string): Promise<void> {
+    const totalSteps = 10;
+    
+    for (let step = 1; step <= totalSteps; step++) {
+      // Check if cancelled
+      if (this.abortController?.signal.aborted) {
+        throw new Error('Export cancelled');
+      }
+
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const progress = 20 + (step / totalSteps) * 70; // 20-90%
+      
+      this.updateProgress({
+        status: step <= 8 ? 'rendering' : 'finalizing',
+        progress,
+        currentFrame: step * 30, // Simulate frame progress
+        renderedFrames: step * 30,
+        totalFrames: totalSteps * 30,
+      });
+    }
+
+    // Simulate final processing
+    await new Promise(resolve => setTimeout(resolve, 500));
+    this.updateProgress({ status: 'finalizing', progress: 95 });
+  }
+
   // Cancel current export
   public cancelExport(): void {
     if (!this.isExporting || !this.currentJob) {
@@ -395,9 +309,9 @@ export class ExportManager {
     }
 
     console.log('Cancelling export...');
-    
+
     this.abortController?.abort();
-    
+
     this.currentJob.cancelledAt = new Date();
     this.updateProgress({
       status: 'cancelled',
@@ -408,8 +322,8 @@ export class ExportManager {
     this.abortController = null;
   }
 
-  // Map video codec to Remotion format
-  private mapVideoCodec(codec: VideoCodec): string {
+  // Map video codec to standardized format (for future server communication)
+  public mapVideoCodec(codec: string): 'h264' | 'h265' | 'vp8' | 'vp9' {
     switch (codec) {
       case 'h264':
         return 'h264';
@@ -424,13 +338,15 @@ export class ExportManager {
     }
   }
 
-  // Map audio codec to Remotion format  
-  private mapAudioCodec(codec: AudioCodec): string {
+  // Map audio codec to standardized format (for future server communication)
+  public mapAudioCodec(codec: string): 'aac' | 'mp3' | 'pcm-16' {
     switch (codec) {
       case 'aac':
         return 'aac';
       case 'mp3':
         return 'mp3';
+      case 'pcm':
+        return 'pcm-16';
       default:
         return 'aac';
     }
@@ -438,7 +354,7 @@ export class ExportManager {
 }
 
 // Create a singleton export manager instance
-export const exportManager = new ExportManager();
+export const exportManager = new ClientExportManager();
 
 // Utility functions
 export const formatFileSize = (bytes: number): string => {
@@ -465,21 +381,30 @@ export const formatDuration = (seconds: number): string => {
   return `${minutes}:${secs.toString().padStart(2, '0')}`;
 };
 
-export const estimateFileSize = (settings: ExportSettings, durationSeconds: number): number => {
+export const estimateFileSize = (
+  settings: ExportSettings,
+  durationSeconds: number
+): number => {
   // Rough estimation based on bitrate and duration
-  const videoBitrate = settings.bitrate || getQualitySettings(settings.quality).bitrate;
+  const videoBitrate =
+    settings.bitrate || getQualitySettings(settings.quality).bitrate;
   const audioBitrate = settings.audioBitrate || 128;
-  
+
   const totalBitrate = videoBitrate + audioBitrate; // kbps
   const estimatedBytes = (totalBitrate * 1000 * durationSeconds) / 8; // Convert to bytes
-  
+
   return Math.round(estimatedBytes);
 };
 
 // Download exported file (for web usage)
-export const downloadExportedFile = (filePath: string, filename?: string): void => {
+export const downloadExportedFile = (
+  filePath: string,
+  filename?: string
+): void => {
   if (typeof window === 'undefined') {
-    console.warn('downloadExportedFile is only available in browser environments');
+    console.warn(
+      'downloadExportedFile is only available in browser environments'
+    );
     return;
   }
 
@@ -487,7 +412,7 @@ export const downloadExportedFile = (filePath: string, filename?: string): void 
   const link = document.createElement('a');
   link.href = filePath;
   link.download = filename || filePath.split('/').pop() || 'export.mp4';
-  
+
   // Trigger download
   document.body.appendChild(link);
   link.click();

@@ -1,6 +1,6 @@
 import type { TimelineItem, MediaAsset, ProjectSettings } from '../lib/types';
 
-export interface MainCompositionProps {
+export interface MainCompositionProps extends Record<string, unknown> {
   timeline: TimelineItem[];
   mediaAssets: MediaAsset[];
   settings: ProjectSettings;

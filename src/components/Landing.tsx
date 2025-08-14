@@ -1,12 +1,18 @@
+import React from 'react';
+import { motion } from 'framer-motion';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Card } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+} from './ui/Select';
+import { Card } from './ui/Card';
+import { Separator } from './ui/Separator';
+import { Button } from './ui/Button';
+import { Label } from './ui/Label';
+import { Input } from './ui/Input';
+import { Textarea } from './ui/Textarea';
 import {
   Play,
   Video,
@@ -21,10 +27,6 @@ import {
   Phone,
 } from 'lucide-react';
 
-interface NavLink {
-  text: string;
-  href: string;
-}
 
 interface HeroSectionProps {
   title?: string;
@@ -51,9 +53,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   primaryCtaText = 'Start Creating',
   secondaryCtaText = 'View Recent Projects',
 }) => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       const rect = (e.currentTarget as HTMLElement)?.getBoundingClientRect();
       if (rect) {
@@ -525,16 +527,15 @@ const Footer: React.FC = () => {
           <p className="mt-2 md:mt-0">
             Building the future of authentic content creation.
           </p>
-tion-colors">Privacy</a></li>
-            </ul>
-          </div>
         </div>
 
         <Separator className="my-8 bg-gray-800" />
 
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
-          <p>&copy; 2024 Synapse Studio. Made with ❤️ by creators, for creators.</p>
-          <p className="mt-2 md:mt-0">Building the future of authentic content creation.</p>
+          <p>2024 Synapse Studio. Made with ❤️ by creators, for creators.</p>
+          <p className="mt-2 md:mt-0">
+            Building the future of authentic content creation.
+          </p>
         </div>
       </div>
     </footer>

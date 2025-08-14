@@ -26,7 +26,7 @@ function StudioViewContent() {
     };
 
     window.addEventListener('openExportDialog', handleOpenExportDialog);
-    
+
     return () => {
       window.removeEventListener('openExportDialog', handleOpenExportDialog);
     };
@@ -44,9 +44,12 @@ function StudioViewContent() {
           <div className="w-16 h-16 bg-purple-600 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg">
             <Sparkles className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">No Project Loaded</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            No Project Loaded
+          </h2>
           <p className="text-gray-600 mb-6 leading-relaxed">
-            Please create or load a project to start your creative journey with Synapse Studio
+            Please create or load a project to start your creative journey with
+            Synapse Studio
           </p>
           <button
             onClick={() => setCurrentView('dashboard')}
@@ -83,9 +86,12 @@ function StudioViewContent() {
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">{project.name}</h1>
+                <h1 className="text-xl font-bold text-gray-900">
+                  {project.name}
+                </h1>
                 <p className="text-sm text-gray-600">
-                  {project.timeline.length} clips • {project.mediaAssets.length} assets
+                  {project.timeline.length} clips • {project.mediaAssets.length}{' '}
+                  assets
                 </p>
               </div>
             </div>
@@ -185,14 +191,18 @@ function StudioViewContent() {
           >
             {/* Media Bin */}
             {ui.mediaBinVisible && (
-              <div className={`${ui.inspectorVisible ? 'flex-1' : 'h-full'} border-b border-purple-200/50 bg-gradient-to-b from-white to-purple-50/30`}>
+              <div
+                className={`${ui.inspectorVisible ? 'flex-1' : 'h-full'} border-b border-purple-200/50 bg-gradient-to-b from-white to-purple-50/30`}
+              >
                 <MediaBin />
               </div>
             )}
 
             {/* Inspector Panel */}
             {ui.inspectorVisible && (
-              <div className={`${ui.mediaBinVisible ? 'flex-1' : 'h-full'} bg-gradient-to-b from-purple-50/30 to-white`}>
+              <div
+                className={`${ui.mediaBinVisible ? 'flex-1' : 'h-full'} bg-gradient-to-b from-purple-50/30 to-white`}
+              >
                 <Inspector />
               </div>
             )}

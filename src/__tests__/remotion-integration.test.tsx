@@ -1,4 +1,3 @@
-import React from 'react';
 import { render } from '@testing-library/react';
 import { vi, describe, it, expect } from 'vitest';
 import { MainComposition } from '../remotion/MainComposition';
@@ -22,7 +21,7 @@ vi.mock('remotion', () => ({
     </div>
   ),
   Video: ({ src }: any) => <video src={src} />,
-  Img: ({ src }: unknown) => <img src={src} alt="" />,
+  Img: ({ src }: any) => <img src={src as string} alt="" />,
 }));
 
 describe('Remotion Integration', () => {
@@ -58,6 +57,7 @@ describe('Remotion Integration', () => {
         type: 'video',
         properties: { volume: 0.8 },
         animations: [],
+        keyframes: [],
       },
       {
         id: 'clip-2',
@@ -68,6 +68,7 @@ describe('Remotion Integration', () => {
         type: 'video', // Images are treated as video clips
         properties: { scale: 1.2, opacity: 0.9 },
         animations: [],
+        keyframes: [],
       },
     ];
 
@@ -143,6 +144,7 @@ describe('Remotion Integration', () => {
         type: 'video',
         properties: {},
         animations: [],
+        keyframes: [],
       },
     ];
 

@@ -9,6 +9,7 @@ The export feature allows users to render their video projects to various format
 ## Key Components
 
 ### 1. Export Manager (`src/lib/exportManager.ts`)
+
 - **Core functionality**: Handles video rendering using Remotion's `@remotion/bundler` and `@remotion/renderer`
 - **Export presets**: Pre-configured settings for popular platforms (YouTube, Twitter, Instagram, Archive)
 - **Progress tracking**: Real-time feedback during the rendering process
@@ -16,6 +17,7 @@ The export feature allows users to render their video projects to various format
 - **File management**: Generates organized output filenames and manages export directory
 
 **Key Features:**
+
 - Support for multiple video codecs (H.264, H.265, VP8, VP9)
 - Audio codec options (AAC, MP3, Opus)
 - Quality presets (Low, Medium, High, Ultra)
@@ -24,17 +26,20 @@ The export feature allows users to render their video projects to various format
 - Progress callbacks with frame-level detail
 
 ### 2. Export Context (`src/state/exportContext.tsx`)
+
 - **State management**: React Context for managing export state across components
 - **Actions**: Functions for starting, cancelling, and tracking exports
 - **Settings management**: Persistent export settings and preset application
 - **History tracking**: Maintains a history of export jobs
 
 **Hooks provided:**
+
 - `useExport()`: Complete export context access
 - `useExportSettings()`: Export settings management
 - `useExportStatus()`: Export progress and status tracking
 
 ### 3. Export Dialog (`src/components/ExportDialog.tsx`)
+
 - **User interface**: Comprehensive dialog for export configuration
 - **Preset selection**: Easy-to-use preset buttons for common formats
 - **Custom settings**: Advanced settings for video/audio configuration
@@ -42,6 +47,7 @@ The export feature allows users to render their video projects to various format
 - **Error feedback**: User-friendly error messages and retry options
 
 **UI Features:**
+
 - Tabbed interface (Presets vs Custom Settings)
 - Estimated file size display
 - Progress bar with percentage and frame count
@@ -49,6 +55,7 @@ The export feature allows users to render their video projects to various format
 - Auto-close on successful completion
 
 ### 4. Integration with Preview Component
+
 - **Export button**: Added export button to preview controls
 - **Event-based communication**: Custom events to trigger export dialog
 - **Seamless workflow**: Direct export from preview interface
@@ -56,23 +63,25 @@ The export feature allows users to render their video projects to various format
 ## Type Definitions
 
 ### Export Settings
+
 ```typescript
 interface ExportSettings {
-  format: VideoFormat;           // mp4, webm, mov, avi
-  codec: VideoCodec;             // h264, h265, vp8, vp9, av1
-  quality: ExportQuality;        // low, medium, high, ultra
-  audioCodec: AudioCodec;        // aac, mp3, opus, vorbis
+  format: VideoFormat; // mp4, webm, mov, avi
+  codec: VideoCodec; // h264, h265, vp8, vp9, av1
+  quality: ExportQuality; // low, medium, high, ultra
+  audioCodec: AudioCodec; // aac, mp3, opus, vorbis
   // ... additional settings for resolution, bitrates, etc.
 }
 ```
 
 ### Export Progress
+
 ```typescript
 interface ExportProgress {
-  status: ExportStatus;          // idle, preparing, rendering, finalizing, completed, failed, cancelled
-  progress: number;              // 0-100 percentage
-  currentFrame?: number;         // Current frame being rendered
-  totalFrames?: number;          // Total frames to render
+  status: ExportStatus; // idle, preparing, rendering, finalizing, completed, failed, cancelled
+  progress: number; // 0-100 percentage
+  currentFrame?: number; // Current frame being rendered
+  totalFrames?: number; // Total frames to render
   estimatedTimeRemaining?: number; // Seconds remaining
   // ... additional progress details
 }
@@ -88,6 +97,7 @@ interface ExportProgress {
 ## Usage Examples
 
 ### Basic Export
+
 ```typescript
 const { startExport } = useExport();
 const { project } = useProject();
@@ -97,6 +107,7 @@ await startExport(project);
 ```
 
 ### Custom Export Settings
+
 ```typescript
 const { startExport, updateExportSettings } = useExport();
 
@@ -113,6 +124,7 @@ await startExport(project);
 ```
 
 ### Progress Tracking
+
 ```typescript
 const { progress } = useExportStatus();
 
@@ -142,6 +154,7 @@ Comprehensive test coverage includes:
 - Progress tracking validation
 
 Run tests with:
+
 ```bash
 npm test -- export
 ```
@@ -149,7 +162,7 @@ npm test -- export
 ## Performance Considerations
 
 - **Bundling optimization**: Efficient webpack configuration for Remotion
-- **Memory management**: Automatic cleanup of rendering resources  
+- **Memory management**: Automatic cleanup of rendering resources
 - **Concurrent rendering**: Configurable concurrency for faster exports
 - **Hardware acceleration**: Optional GPU acceleration support
 - **Progress throttling**: Optimized progress callbacks to prevent UI blocking
@@ -157,6 +170,7 @@ npm test -- export
 ## Future Enhancements
 
 Potential improvements for future versions:
+
 - **Cloud rendering**: Integration with cloud rendering services
 - **Batch exports**: Multiple export jobs in queue
 - **Custom presets**: User-defined preset creation and sharing
@@ -170,7 +184,7 @@ src/
 ├── lib/
 │   └── exportManager.ts        # Core export functionality
 ├── state/
-│   └── exportContext.tsx       # Export state management  
+│   └── exportContext.tsx       # Export state management
 ├── components/
 │   ├── ExportDialog.tsx        # Export UI dialog
 │   └── Preview.tsx             # Updated with export button

@@ -8,21 +8,8 @@ import {
 } from 'remotion';
 import type { CodeSequenceProps } from './types';
 
-// Dynamically import Prism to avoid SSR issues
-let Prism: any = null;
-try {
-  Prism = require('prismjs');
-  require('prismjs/components/prism-javascript');
-  require('prismjs/components/prism-typescript');
-  require('prismjs/components/prism-python');
-  require('prismjs/components/prism-java');
-  require('prismjs/components/prism-cpp');
-  require('prismjs/components/prism-css');
-  require('prismjs/components/prism-json');
-  require('prismjs/components/prism-markup');
-} catch (error) {
-  console.warn('Failed to load Prism.js:', error);
-}
+// Import Prism.js - languages are loaded via vite-plugin-prismjs
+import Prism from 'prismjs';
 
 const THEMES = {
   dark: {

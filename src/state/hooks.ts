@@ -73,8 +73,8 @@ export function useProject() {
     [dispatch]
   );
 
-  const exportProject = useCallback(() => {
-    dispatch({ type: 'EXPORT_PROJECT' });
+  const exportProject = useCallback((projectId: string) => {
+    dispatch({ type: 'EXPORT_PROJECT', payload: projectId });
   }, [dispatch]);
 
   return {

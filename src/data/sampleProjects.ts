@@ -1,10 +1,10 @@
-import { Project, MediaAsset, TimelineItem } from '../lib/types';
-import { StoredProject } from '../lib/projectManager';
+import type { Project } from '../lib/types';
+import type { StoredProject } from '../lib/projectManager';
 
-// Simple sample project for development testing
+// Starter project for development - always loaded in dev mode
 const sampleProject: Project = {
   id: 'remotion-tutorial-sample',
-  name: 'How Remotion Works - Tutorial',
+  name: '🎬 Synapse Studio - Starter Project',
   createdAt: new Date('2024-01-15T10:00:00Z'),
   updatedAt: new Date('2024-01-15T15:30:00Z'),
   version: '1.0.0',
@@ -17,7 +17,7 @@ const sampleProject: Project = {
     audioSampleRate: 48000,
   },
   timeline: [
-    // Opening title 
+    // Opening title
     {
       id: 'timeline-intro-title',
       assetId: 'asset-title-intro',
@@ -41,19 +41,19 @@ const sampleProject: Project = {
           id: 'kf-intro-start',
           time: 0,
           properties: { opacity: 0, scale: 0.9, y: 590 },
-          easing: 'easeOutBack',
+          easing: 'easeOut',
         },
         {
           id: 'kf-intro-visible',
           time: 0.8,
           properties: { opacity: 1, scale: 1, y: 540 },
-          easing: 'easeOutBack',
+          easing: 'easeOut',
         },
         {
           id: 'kf-intro-end',
           time: 3,
           properties: { opacity: 0, scale: 1.05, y: 520 },
-          easing: 'easeInQuart',
+          easing: 'easeIn',
         },
       ],
     },
@@ -81,13 +81,13 @@ const sampleProject: Project = {
           id: 'kf-subtitle-start',
           time: 0,
           properties: { opacity: 0, y: 640 },
-          easing: 'easeOutQuad',
+          easing: 'easeOut',
         },
         {
           id: 'kf-subtitle-visible',
           time: 0.4,
           properties: { opacity: 1, y: 620 },
-          easing: 'easeOutQuad',
+          easing: 'easeOut',
         },
       ],
     },
@@ -114,13 +114,13 @@ const sampleProject: Project = {
           id: 'kf-code-basic-start',
           time: 0,
           properties: { opacity: 0, x: 930 },
-          easing: 'easeOutQuart',
+          easing: 'easeOut',
         },
         {
           id: 'kf-code-basic-visible',
           time: 0.6,
           properties: { opacity: 1, x: 960 },
-          easing: 'easeOutQuart',
+          easing: 'easeOut',
         },
       ],
     },
@@ -148,13 +148,13 @@ const sampleProject: Project = {
           id: 'kf-exp-1-start',
           time: 0,
           properties: { opacity: 0, x: 100 },
-          easing: 'easeOutBack',
+          easing: 'easeOut',
         },
         {
           id: 'kf-exp-1-visible',
           time: 0.5,
           properties: { opacity: 1, x: 200 },
-          easing: 'easeOutBack',
+          easing: 'easeOut',
         },
       ],
     },
@@ -261,7 +261,7 @@ export const Root = () => {
     },
     {
       id: 'region-tutorial-content',
-      name: 'Tutorial Content', 
+      name: 'Tutorial Content',
       startTime: 3.5,
       endTime: 12,
       color: '#a5adcb',
@@ -274,10 +274,12 @@ export const Root = () => {
 export const sampleProjects: Project[] = [sampleProject];
 
 // Export sample stored projects for development
-export const sampleStoredProjects: StoredProject[] = sampleProjects.map(project => ({
-  project,
-  lastOpened: new Date('2024-01-15T15:30:00Z'),
-}));
+export const sampleStoredProjects: StoredProject[] = sampleProjects.map(
+  (project) => ({
+    project,
+    lastOpened: new Date('2024-01-15T15:30:00Z'),
+  })
+);
 
 export const getDefaultProject = (): Project => sampleProjects[0];
 
@@ -302,7 +304,7 @@ export const createEmptyProject = (name: string): Project => ({
 // Function to load sample data in development mode
 export const loadSampleDataForDev = () => {
   if (import.meta.env.DEV) {
-    console.log('🎬 Loading sample Remotion tutorial project for development');
+    console.log('🎬 Dev Mode: Loading starter project with sample content');
     return sampleStoredProjects;
   }
   return [];

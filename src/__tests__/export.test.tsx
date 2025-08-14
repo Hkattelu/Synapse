@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ExportDialog } from '../components/ExportDialog';
 import { ExportProvider } from '../state/exportContext';
 import { AppProvider } from '../state/context';
-import { 
-  exportManager, 
-  DEFAULT_EXPORT_PRESETS, 
+import {
+  exportManager,
+  DEFAULT_EXPORT_PRESETS,
   getDefaultExportSettings,
   formatFileSize,
   formatDuration,
-  estimateFileSize 
+  estimateFileSize,
 } from '../lib/exportManager';
 import type { Project } from '../lib/types';
 
@@ -20,15 +20,17 @@ vi.mock('@remotion/bundler', () => ({
 
 vi.mock('@remotion/renderer', () => ({
   renderMedia: vi.fn(() => Promise.resolve()),
-  getCompositions: vi.fn(() => Promise.resolve([
-    {
-      id: 'MainComposition',
-      width: 1920,
-      height: 1080,
-      fps: 30,
-      durationInFrames: 900,
-    }
-  ])),
+  getCompositions: vi.fn(() =>
+    Promise.resolve([
+      {
+        id: 'MainComposition',
+        width: 1920,
+        height: 1080,
+        fps: 30,
+        durationInFrames: 900,
+      },
+    ])
+  ),
 }));
 
 // Mock fs module
@@ -56,7 +58,7 @@ const mockProject: Project = {
       properties: { text: 'Hello World' },
       animations: [],
       keyframes: [],
-    }
+    },
   ],
   mediaAssets: [
     {
@@ -66,7 +68,7 @@ const mockProject: Project = {
       url: '',
       metadata: { fileSize: 1024, mimeType: 'text/plain' },
       createdAt: new Date('2024-01-01'),
-    }
+    },
   ],
   settings: {
     width: 1920,
@@ -81,9 +83,7 @@ const mockProject: Project = {
 // Test wrapper component
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AppProvider>
-    <ExportProvider>
-      {children}
-    </ExportProvider>
+    <ExportProvider>{children}</ExportProvider>
   </AppProvider>
 );
 
@@ -99,7 +99,7 @@ describe('Export System', () => {
   describe('Export Manager', () => {
     it('should create default export settings', () => {
       const settings = getDefaultExportSettings(mockProject);
-      
+
       expect(settings).toMatchObject({
         format: 'mp4',
         codec: 'h264',
@@ -135,7 +135,7 @@ describe('Export System', () => {
     it('should estimate file size', () => {
       const settings = getDefaultExportSettings(mockProject);
       const estimatedSize = estimateFileSize(settings, 30);
-      
+
       expect(estimatedSize).toBeGreaterThan(0);
       expect(typeof estimatedSize).toBe('number');
     });
@@ -150,7 +150,9 @@ describe('Export System', () => {
       );
 
       expect(screen.getByText('Export Video')).toBeInTheDocument();
-      expect(screen.getByText('Export "Test Project" as video file')).toBeInTheDocument();
+      expect(
+        screen.getByText('Export "Test Project" as video file')
+      ).toBeInTheDocument();
     });
 
     it('should not render when closed', () => {
@@ -219,10 +221,10 @@ describe('Export System', () => {
       const { renderMedia } = await import('@remotion/renderer');
 
       const settings = getDefaultExportSettings(mockProject);
-      
+
       // Mock successful export
       vi.mocked(bundle).mockResolvedValue('/mock/bundle');
-      vi.mocked(renderMedia).mockResolvedValue(undefined);
+      vi.mocked(renderMedia).mockResolvedValue({} as any);
 
       const exportPromise = exportManager.startExport(mockProject, settings);
 
@@ -236,7 +238,7 @@ describe('Export System', () => {
 
     it('should handle export errors', async () => {
       const { bundle } = await import('@remotion/bundler');
-      
+
       vi.mocked(bundle).mockRejectedValue(new Error('Bundle failed'));
 
       const settings = getDefaultExportSettings(mockProject);
@@ -254,7 +256,7 @@ describe('Export System', () => {
       const { renderMedia } = await import('@remotion/renderer');
 
       vi.mocked(bundle).mockResolvedValue('/mock/bundle');
-      vi.mocked(renderMedia).mockImplementation(async (options: any) => {
+      vi.mocked(renderMedia).mockImplementation(async (options: any): Promise<any> => {
         // Simulate progress callback
         if (options.onProgress) {
           options.onProgress({ renderedFrames: 450, encodedFrames: 450 });

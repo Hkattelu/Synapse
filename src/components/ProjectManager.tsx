@@ -1,21 +1,25 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProject } from '../state/hooks';
-import { ProjectManager as PM, uploadProjectFile, downloadProjectFile } from '../lib/projectManager';
-import { 
-  MoreVertical, 
-  Download, 
-  Upload, 
-  Copy, 
-  Trash2, 
-  Edit3, 
-  FileText, 
-  Calendar, 
+import {
+  ProjectManager as PM,
+  uploadProjectFile,
+  downloadProjectFile,
+} from '../lib/projectManager';
+import {
+  MoreVertical,
+  Download,
+  Upload,
+  Copy,
+  Trash2,
+  Edit3,
+  FileText,
+  Calendar,
   Video,
   AlertTriangle,
   Check,
   X,
-  ExternalLink
+  ExternalLink,
 } from 'lucide-react';
 
 interface ProjectCardProps {
@@ -27,7 +31,14 @@ interface ProjectCardProps {
   onDelete: (projectId: string) => void;
 }
 
-function ProjectCard({ project, onOpen, onRename, onDuplicate, onExport, onDelete }: ProjectCardProps) {
+function ProjectCard({
+  project,
+  onOpen,
+  onRename,
+  onDuplicate,
+  onExport,
+  onDelete,
+}: ProjectCardProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showRename, setShowRename] = useState(false);
@@ -103,7 +114,7 @@ function ProjectCard({ project, onOpen, onRename, onDuplicate, onExport, onDelet
             )}
           </div>
         </div>
-        
+
         {/* Menu Button */}
         <div className="relative">
           <button
@@ -133,7 +144,7 @@ function ProjectCard({ project, onOpen, onRename, onDuplicate, onExport, onDelet
                   <ExternalLink className="w-4 h-4" />
                   <span>Open Project</span>
                 </button>
-                
+
                 <button
                   onClick={() => {
                     setShowRename(true);
@@ -144,7 +155,7 @@ function ProjectCard({ project, onOpen, onRename, onDuplicate, onExport, onDelet
                   <Edit3 className="w-4 h-4" />
                   <span>Rename</span>
                 </button>
-                
+
                 <button
                   onClick={() => {
                     onDuplicate(project.project.id);
@@ -155,7 +166,7 @@ function ProjectCard({ project, onOpen, onRename, onDuplicate, onExport, onDelet
                   <Copy className="w-4 h-4" />
                   <span>Duplicate</span>
                 </button>
-                
+
                 <button
                   onClick={() => {
                     onExport(project.project.id);
@@ -166,9 +177,9 @@ function ProjectCard({ project, onOpen, onRename, onDuplicate, onExport, onDelet
                   <Download className="w-4 h-4" />
                   <span>Export</span>
                 </button>
-                
+
                 <hr className="my-2" />
-                
+
                 <button
                   onClick={() => {
                     setShowDeleteConfirm(true);
@@ -206,7 +217,9 @@ function ProjectCard({ project, onOpen, onRename, onDuplicate, onExport, onDelet
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
             className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${Math.min((projectStats.totalDuration / 60) * 100, 100)}%` }}
+            style={{
+              width: `${Math.min((projectStats.totalDuration / 60) * 100, 100)}%`,
+            }}
           />
         </div>
       </div>
@@ -241,16 +254,20 @@ function ProjectCard({ project, onOpen, onRename, onDuplicate, onExport, onDelet
                   <AlertTriangle className="w-6 h-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Delete Project</h3>
-                  <p className="text-sm text-gray-500">This action cannot be undone</p>
+                  <h3 className="font-semibold text-gray-900">
+                    Delete Project
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    This action cannot be undone
+                  </p>
                 </div>
               </div>
-              
+
               <p className="text-gray-700 mb-6">
-                Are you sure you want to delete "{project.project.name}"? 
-                This will permanently remove the project and all its data.
+                Are you sure you want to delete "{project.project.name}"? This
+                will permanently remove the project and all its data.
               </p>
-              
+
               <div className="flex space-x-3">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
@@ -277,14 +294,14 @@ function ProjectCard({ project, onOpen, onRename, onDuplicate, onExport, onDelet
 }
 
 export function ProjectManager() {
-  const { 
-    projects, 
-    switchProject, 
-    deleteProject, 
-    duplicateProject, 
-    renameProject, 
-    exportProject, 
-    importProject 
+  const {
+    projects,
+    switchProject,
+    deleteProject,
+    duplicateProject,
+    renameProject,
+    exportProject,
+    importProject,
   } = useProject();
 
   const [isImporting, setIsImporting] = useState(false);
@@ -305,7 +322,7 @@ export function ProjectManager() {
 
   const handleExportProject = async (projectId: string) => {
     try {
-      const project = projects.find(p => p.project.id === projectId)?.project;
+      const project = projects.find((p) => p.project.id === projectId)?.project;
       if (project) {
         downloadProjectFile(project);
         console.log('✅ Project exported successfully');
@@ -330,8 +347,12 @@ export function ProjectManager() {
     return (
       <div className="text-center py-12">
         <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No projects yet</h3>
-        <p className="text-gray-500 mb-6">Create your first project to get started</p>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          No projects yet
+        </h3>
+        <p className="text-gray-500 mb-6">
+          Create your first project to get started
+        </p>
         <button
           onClick={handleImportProject}
           disabled={isImporting}
@@ -360,10 +381,7 @@ export function ProjectManager() {
       </div>
 
       {/* Projects Grid */}
-      <motion.div 
-        layout
-        className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-      >
+      <motion.div layout className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence mode="popLayout">
           {projects.map((project) => (
             <ProjectCard
@@ -382,7 +400,9 @@ export function ProjectManager() {
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-gray-200">
         <div className="text-center">
-          <div className="text-2xl font-bold text-purple-600">{projects.length}</div>
+          <div className="text-2xl font-bold text-purple-600">
+            {projects.length}
+          </div>
           <div className="text-sm text-gray-500">Total Projects</div>
         </div>
         <div className="text-center">

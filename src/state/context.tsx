@@ -29,33 +29,52 @@ export function AppProvider({ children }: AppProviderProps) {
         // Load all projects
         let projects = await ProjectManager.getAllProjects();
 
-        // In development mode, load sample data if no projects exist
-        if (projects.length === 0 && import.meta.env.DEV) {
+        // In development mode, always ensure sample data exists and load starter project
+        if (import.meta.env.DEV) {
           const sampleProjects = loadSampleDataForDev();
           
-          // Save sample projects to storage
-          for (const sampleProject of sampleProjects) {
-            await ProjectManager.saveProject(sampleProject.project);
-          }
+          // Check if sample projects exist in storage
+          const hasStarterProject = projects.some(p => p.project.id === 'remotion-tutorial-sample');
           
-          // Reload projects after saving samples
-          projects = await ProjectManager.getAllProjects();
-          
-          // Load the first sample project as current
-          if (sampleProjects.length > 0) {
-            dispatch({ type: 'LOAD_PROJECT', payload: sampleProjects[0].project });
+          if (!hasStarterProject && sampleProjects.length > 0) {
+            // Save sample projects to storage if they don't exist
+            for (const sampleProject of sampleProjects) {
+              await ProjectManager.saveProject(sampleProject.project);
+            }
+            // Reload projects after saving samples
+            projects = await ProjectManager.getAllProjects();
           }
-        }
-        
-        dispatch({ type: 'LOAD_PROJECTS_LIST', payload: projects });
 
-        // Load current project if exists and no sample was loaded
-        if (projects.length > 0 && !state.project) {
-          const currentProject = ProjectManager.getCurrentProject();
-          if (currentProject) {
-            dispatch({ type: 'LOAD_PROJECT', payload: currentProject.project });
+          // Always load the starter project in development
+          const starterProject = projects.find(p => p.project.id === 'remotion-tutorial-sample');
+          if (starterProject) {
+            console.log('🎬 Loading starter project for development');
+            dispatch({
+              type: 'LOAD_PROJECT',
+              payload: starterProject.project,
+            });
           }
         }
+        // In production mode, load the last opened project
+        else {
+          // Load current project if exists
+          if (projects.length > 0) {
+            const currentProject = ProjectManager.getCurrentProject();
+            if (currentProject) {
+              dispatch({ type: 'LOAD_PROJECT', payload: currentProject.project });
+            } else {
+              // If no current project, load the most recently updated one
+              const sortedProjects = [...projects].sort(
+                (a, b) => new Date(b.project.updatedAt).getTime() - new Date(a.project.updatedAt).getTime()
+              );
+              if (sortedProjects.length > 0) {
+                dispatch({ type: 'LOAD_PROJECT', payload: sortedProjects[0].project });
+              }
+            }
+          }
+        }
+
+        dispatch({ type: 'LOAD_PROJECTS_LIST', payload: projects });
       } catch (error) {
         console.error('Failed to load initial data:', error);
       }

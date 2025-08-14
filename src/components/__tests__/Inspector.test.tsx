@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Inspector } from '../Inspector';
 import { AppProvider } from '../../state/context';
@@ -24,10 +23,10 @@ vi.mock('../../state/hooks', () => ({
 // Test data
 const mockVideoItem: TimelineItem = {
   id: 'test-item-1',
-  assetId: 'test-asset-1',
+  assetId: 'test-asset',
   startTime: 10,
   duration: 5.5,
-  track: 0,
+  track: 1,
   type: 'video',
   properties: {
     x: 0,
@@ -39,14 +38,15 @@ const mockVideoItem: TimelineItem = {
     playbackRate: 1,
   },
   animations: [],
+  keyframes: [],
 };
 
 const mockCodeItem: TimelineItem = {
   id: 'test-item-2',
-  assetId: 'test-asset-2',
+  assetId: 'code-asset',
   startTime: 0,
   duration: 3,
-  track: 1,
+  track: 0,
   type: 'code',
   properties: {
     language: 'javascript',
@@ -58,16 +58,17 @@ const mockCodeItem: TimelineItem = {
       id: 'fade-in',
       name: 'Fade In',
       type: 'entrance',
-      parameters: { opacity: { from: 0, to: 1 } },
+      parameters: { direction: 'up' },
       duration: 0.5,
     },
   ],
+  keyframes: [],
 };
 
 const mockTitleItem: TimelineItem = {
   id: 'test-item-3',
-  assetId: 'test-asset-3',
-  startTime: 15,
+  assetId: 'title-asset',
+  startTime: 5,
   duration: 2,
   track: 2,
   type: 'title',
@@ -78,6 +79,7 @@ const mockTitleItem: TimelineItem = {
     backgroundColor: 'transparent',
   },
   animations: [],
+  keyframes: [],
 };
 
 const mockVideoAsset: MediaAsset = {

@@ -1,8 +1,6 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useTimeline, useMediaAssets, useUI } from '../state/hooks';
-import type { TimelineItem, MediaAsset, Keyframe } from '../lib/types';
-import { KeyframeManager } from '../lib/keyframes';
-import { generateId } from '../lib/utils';
+import type { TimelineItem, MediaAsset } from '../lib/types';
 
 interface TimelineProps {
   className?: string;

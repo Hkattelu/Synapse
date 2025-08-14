@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useTimeline, useProject } from '../state/hooks';
-import type { TrackGroup, TimelineItem } from '../lib/types';
+import type { TrackGroup } from '../lib/types';
 import { generateId } from '../lib/utils';
 
 interface TrackManagerProps {

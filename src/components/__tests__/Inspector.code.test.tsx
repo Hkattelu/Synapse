@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Inspector } from '../Inspector';
@@ -37,6 +36,7 @@ const mockCodeItem: TimelineItem = {
     fontSize: 16,
   },
   animations: [],
+  keyframes: [],
 };
 
 const mockCodeAsset = {
@@ -177,7 +177,7 @@ describe('Inspector - Code Properties', () => {
     render(<Inspector />);
 
     const codeTextarea = screen.getByLabelText('Code Content');
-    const computedStyle = window.getComputedStyle(codeTextarea);
+    // const computedStyle = window.getComputedStyle(codeTextarea);
 
     // Check if monospace font family is applied
     expect(codeTextarea.style.fontFamily).toContain('Monaco');

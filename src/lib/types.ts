@@ -182,7 +182,14 @@ export type VideoCodec = 'h264' | 'h265' | 'vp8' | 'vp9' | 'av1';
 export type VideoFormat = 'mp4' | 'webm' | 'mov' | 'avi';
 export type AudioCodec = 'aac' | 'mp3' | 'opus' | 'vorbis';
 export type ExportQuality = 'low' | 'medium' | 'high' | 'ultra';
-export type ExportStatus = 'idle' | 'preparing' | 'rendering' | 'finalizing' | 'completed' | 'failed' | 'cancelled';
+export type ExportStatus =
+  | 'idle'
+  | 'preparing'
+  | 'rendering'
+  | 'finalizing'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
 
 export interface ExportSettings {
   // Video settings
@@ -194,16 +201,16 @@ export interface ExportSettings {
   width?: number; // Override project width
   height?: number; // Override project height
   fps?: number; // Override project fps
-  
+
   // Audio settings
   audioCodec: AudioCodec;
   audioBitrate?: number; // Audio bitrate in kbps
   audioSampleRate?: number; // Audio sample rate in Hz
-  
+
   // Range settings
   startTime?: number; // Export start time in seconds
   endTime?: number; // Export end time in seconds
-  
+
   // Advanced settings
   enableHardwareAcceleration?: boolean;
   enableMultithreading?: boolean;

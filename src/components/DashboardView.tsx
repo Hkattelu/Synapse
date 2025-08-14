@@ -1,8 +1,16 @@
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useProject, useUI } from '../state/hooks';
 import { ProjectManager } from './ProjectManager';
-import { Play, Video, Sparkles, Users, Heart, Plus, ArrowRight, Calendar, Folder, MoreVertical, Download, Upload, Copy, Trash2, Edit3, FileText } from 'lucide-react';
+import {
+  Play,
+  Video,
+  Sparkles,
+  Users,
+  Heart,
+  Plus,
+  ArrowRight
+} from 'lucide-react';
 
 export function DashboardView() {
   const { project, projects, createProject } = useProject();
@@ -39,7 +47,7 @@ export function DashboardView() {
         >
           <g clipPath="url(#clip0_hero)">
             {[...Array(35)].map((_, i) => (
-              <React.Fragment key={`row-${i}`}>
+              <Fragment key={`row-${i}`}>
                 {[...Array(23)].map((_, j) => (
                   <rect
                     key={`${i}-${j}`}
@@ -54,7 +62,7 @@ export function DashboardView() {
                     className="transition-all duration-300 hover:stroke-opacity-30"
                   />
                 ))}
-              </React.Fragment>
+              </Fragment>
             ))}
 
             <circle
@@ -101,8 +109,8 @@ export function DashboardView() {
             Made with ❤️ for creators, by creators
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            The human-friendly video creation tool for educational content and game devlogs. 
-            No AI fluff, just pure creative power in your hands.
+            The human-friendly video creation tool for educational content and
+            game devlogs. No AI fluff, just pure creative power in your hands.
           </p>
         </motion.div>
 
@@ -116,7 +124,9 @@ export function DashboardView() {
           {showCreateForm ? (
             <div className="bg-white/80 backdrop-blur-sm border border-purple-200 rounded-2xl p-8 shadow-xl">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">Create New Project</h3>
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Create New Project
+                </h3>
                 <button
                   onClick={() => {
                     setShowCreateForm(false);
@@ -124,8 +134,18 @@ export function DashboardView() {
                   }}
                   className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -159,7 +179,9 @@ export function DashboardView() {
                   <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
                     <Plus className="w-5 h-5" />
                   </div>
-                  <span className="font-semibold text-lg">Create New Project</span>
+                  <span className="font-semibold text-lg">
+                    Create New Project
+                  </span>
                 </div>
               </button>
 
@@ -172,7 +194,9 @@ export function DashboardView() {
                     <div className="w-10 h-10 rounded-full bg-purple-100 group-hover:bg-purple-200 flex items-center justify-center transition-colors">
                       <ArrowRight className="w-5 h-5 text-purple-600" />
                     </div>
-                    <span className="font-semibold text-lg">Continue "{project.name}"</span>
+                    <span className="font-semibold text-lg">
+                      Continue "{project.name}"
+                    </span>
                   </div>
                 </button>
               )}
@@ -203,8 +227,8 @@ export function DashboardView() {
             Why Creators Choose Synapse Studio
           </h2>
           <p className="text-lg text-gray-600 text-center mb-12 max-w-2xl mx-auto">
-            Built by a creator who understands the struggle of making authentic, engaging content 
-            in a world full of generic AI-generated videos.
+            Built by a creator who understands the struggle of making authentic,
+            engaging content in a world full of generic AI-generated videos.
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -218,9 +242,12 @@ export function DashboardView() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
                 <Video className="w-8 h-8 text-purple-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Intuitive Video Editor</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Intuitive Video Editor
+              </h3>
               <p className="text-gray-600 leading-relaxed">
-                Drag-and-drop simplicity meets professional power. Create stunning educational content without the learning curve.
+                Drag-and-drop simplicity meets professional power. Create
+                stunning educational content without the learning curve.
               </p>
             </motion.div>
 
@@ -234,9 +261,12 @@ export function DashboardView() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
                 <Users className="w-8 h-8 text-purple-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Built for Creators</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Built for Creators
+              </h3>
               <p className="text-gray-600 leading-relaxed">
-                Designed specifically for YouTubers, educators, and game developers who want to tell their story authentically.
+                Designed specifically for YouTubers, educators, and game
+                developers who want to tell their story authentically.
               </p>
             </motion.div>
 
@@ -250,9 +280,12 @@ export function DashboardView() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
                 <Heart className="w-8 h-8 text-purple-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Human-Centered</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Human-Centered
+              </h3>
               <p className="text-gray-600 leading-relaxed">
-                No AI shortcuts or automated content. Just pure creative tools that amplify your unique voice and vision.
+                No AI shortcuts or automated content. Just pure creative tools
+                that amplify your unique voice and vision.
               </p>
             </motion.div>
 
@@ -266,9 +299,12 @@ export function DashboardView() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
                 <Sparkles className="w-8 h-8 text-purple-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Devlog Ready</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Devlog Ready
+              </h3>
               <p className="text-gray-600 leading-relaxed">
-                Perfect templates and tools for game developers to showcase their progress and connect with their community.
+                Perfect templates and tools for game developers to showcase
+                their progress and connect with their community.
               </p>
             </motion.div>
           </div>
@@ -291,15 +327,21 @@ export function DashboardView() {
             </div>
             <div className="grid grid-cols-3 gap-6 text-center">
               <div>
-                <div className="text-3xl font-bold mb-1">{project.timeline.length}</div>
+                <div className="text-3xl font-bold mb-1">
+                  {project.timeline.length}
+                </div>
                 <div className="text-purple-200 text-sm">Timeline Clips</div>
               </div>
               <div>
-                <div className="text-3xl font-bold mb-1">{project.mediaAssets.length}</div>
+                <div className="text-3xl font-bold mb-1">
+                  {project.mediaAssets.length}
+                </div>
                 <div className="text-purple-200 text-sm">Media Assets</div>
               </div>
               <div>
-                <div className="text-3xl font-bold mb-1">{project.createdAt.toLocaleDateString()}</div>
+                <div className="text-3xl font-bold mb-1">
+                  {project.createdAt.toLocaleDateString()}
+                </div>
                 <div className="text-purple-200 text-sm">Created</div>
               </div>
             </div>

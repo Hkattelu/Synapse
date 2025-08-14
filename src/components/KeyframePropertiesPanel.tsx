@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useTimeline } from '../state/hooks';
 import type { TimelineItem, Keyframe } from '../lib/types';
 import { KeyframeManager } from '../lib/keyframes';
