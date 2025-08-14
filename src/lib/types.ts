@@ -176,3 +176,84 @@ export interface UIState {
   playback: PlaybackState;
   timeline: TimelineViewState;
 }
+
+// Export system types
+export type VideoCodec = 'h264' | 'h265' | 'vp8' | 'vp9' | 'av1';
+export type VideoFormat = 'mp4' | 'webm' | 'mov' | 'avi';
+export type AudioCodec = 'aac' | 'mp3' | 'opus' | 'vorbis';
+export type ExportQuality = 'low' | 'medium' | 'high' | 'ultra';
+export type ExportStatus = 'idle' | 'preparing' | 'rendering' | 'finalizing' | 'completed' | 'failed' | 'cancelled';
+
+export interface ExportSettings {
+  // Video settings
+  format: VideoFormat;
+  codec: VideoCodec;
+  quality: ExportQuality;
+  crf?: number; // Constant Rate Factor (0-51)
+  bitrate?: number; // Target bitrate in kbps
+  width?: number; // Override project width
+  height?: number; // Override project height
+  fps?: number; // Override project fps
+  
+  // Audio settings
+  audioCodec: AudioCodec;
+  audioBitrate?: number; // Audio bitrate in kbps
+  audioSampleRate?: number; // Audio sample rate in Hz
+  
+  // Range settings
+  startTime?: number; // Export start time in seconds
+  endTime?: number; // Export end time in seconds
+  
+  // Advanced settings
+  enableHardwareAcceleration?: boolean;
+  enableMultithreading?: boolean;
+  concurrency?: number; // Number of concurrent render jobs
+  imageSequence?: boolean; // Export as image sequence instead of video
+  frameRange?: [number, number]; // Specific frame range [start, end]
+}
+
+export interface ExportProgress {
+  status: ExportStatus;
+  progress: number; // 0-100
+  currentFrame?: number;
+  totalFrames?: number;
+  renderedFrames?: number;
+  estimatedTimeRemaining?: number; // in seconds
+  averageFrameTime?: number; // milliseconds per frame
+  errorMessage?: string;
+  startTime?: Date;
+  endTime?: Date;
+}
+
+export interface ExportJob {
+  id: string;
+  projectId: string;
+  projectName: string;
+  settings: ExportSettings;
+  progress: ExportProgress;
+  outputPath?: string;
+  outputSize?: number; // File size in bytes
+  createdAt: Date;
+  startedAt?: Date;
+  completedAt?: Date;
+  cancelledAt?: Date;
+  retryCount: number;
+  maxRetries: number;
+}
+
+export interface ExportPreset {
+  id: string;
+  name: string;
+  description: string;
+  settings: Partial<ExportSettings>;
+  isDefault?: boolean;
+  category: 'web' | 'social' | 'broadcast' | 'archive' | 'custom';
+}
+
+export interface ExportState {
+  isExporting: boolean;
+  currentJob?: ExportJob;
+  exportHistory: ExportJob[];
+  availablePresets: ExportPreset[];
+  exportSettings: ExportSettings;
+}

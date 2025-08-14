@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import type { AppState, AppAction, AppContextType } from './types';
 import { appReducer, initialState } from './reducers';
 import { ProjectManager } from '../lib/projectManager';
+import { loadSampleDataForDev } from '../data/sampleProjects';
 
 // Create the context
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -26,13 +27,34 @@ export function AppProvider({ children }: AppProviderProps) {
     async function loadInitialData() {
       try {
         // Load all projects
-        const projects = await ProjectManager.getAllProjects();
+        let projects = await ProjectManager.getAllProjects();
+
+        // In development mode, load sample data if no projects exist
+        if (projects.length === 0 && import.meta.env.DEV) {
+          const sampleProjects = loadSampleDataForDev();
+          
+          // Save sample projects to storage
+          for (const sampleProject of sampleProjects) {
+            await ProjectManager.saveProject(sampleProject.project);
+          }
+          
+          // Reload projects after saving samples
+          projects = await ProjectManager.getAllProjects();
+          
+          // Load the first sample project as current
+          if (sampleProjects.length > 0) {
+            dispatch({ type: 'LOAD_PROJECT', payload: sampleProjects[0].project });
+          }
+        }
+        
         dispatch({ type: 'LOAD_PROJECTS_LIST', payload: projects });
 
-        // Load current project if exists
-        const currentProject = ProjectManager.getCurrentProject();
-        if (currentProject) {
-          dispatch({ type: 'LOAD_PROJECT', payload: currentProject.project });
+        // Load current project if exists and no sample was loaded
+        if (projects.length > 0 && !state.project) {
+          const currentProject = ProjectManager.getCurrentProject();
+          if (currentProject) {
+            dispatch({ type: 'LOAD_PROJECT', payload: currentProject.project });
+          }
         }
       } catch (error) {
         console.error('Failed to load initial data:', error);

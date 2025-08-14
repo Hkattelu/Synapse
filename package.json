@@ -21,6 +21,8 @@
     "@remotion/cli": "^4.0.332",
     "@remotion/player": "^4.0.332",
     "@types/prismjs": "^1.26.5",
+    "lucide-react": "^0.539.0",
+    "motion": "^12.23.12",
     "prismjs": "^1.30.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"

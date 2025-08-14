@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useProject, useUI } from '../state/hooks';
-import { Play, Video, Sparkles, Users, Heart, Plus, ArrowRight, Calendar, Folder } from 'lucide-react';
+import { ProjectManager } from './ProjectManager';
+import { Play, Video, Sparkles, Users, Heart, Plus, ArrowRight, Calendar, Folder, MoreVertical, Download, Upload, Copy, Trash2, Edit3, FileText } from 'lucide-react';
 
 export function DashboardView() {
   const { project, projects, createProject } = useProject();
@@ -179,50 +180,17 @@ export function DashboardView() {
           )}
         </motion.div>
 
-        {/* Recent Projects */}
-        {projects && projects.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="max-w-4xl mx-auto mb-16"
-          >
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Recent Projects</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {projects.slice(0, 6).map((p, index) => (
-                <motion.button
-                  key={p.project.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                  onClick={() => setCurrentView('studio')}
-                  className="bg-white/80 backdrop-blur-sm hover:bg-white border border-purple-200 hover:border-purple-300 rounded-xl p-6 transition-all duration-200 hover:scale-105 hover:shadow-lg text-left group"
-                >
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                      <Folder className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate group-hover:text-purple-900 transition-colors">
-                        {p.project.name}
-                      </h3>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Video className="w-4 h-4 mr-2" />
-                      {p.project.timeline.length} clips
-                    </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      {p.lastOpened.toLocaleDateString()}
-                    </div>
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-        )}
+        {/* Project Management */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="max-w-6xl mx-auto mb-16"
+        >
+          <div className="bg-white/60 backdrop-blur-sm border border-purple-200 rounded-3xl p-8 shadow-xl">
+            <ProjectManager />
+          </div>
+        </motion.div>
 
         {/* Features Section */}
         <motion.div
