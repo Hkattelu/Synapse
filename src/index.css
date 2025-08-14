@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* =================================================
    SYNAPSE STUDIO - CATPPUCCIN MACCHIATO THEME
@@ -23,7 +21,7 @@
   --synapse-sapphire: #7dc4e4;
   --synapse-blue: #8aadf4;
   --synapse-lavender: #b7bdf8;
-  
+
   /* Neutral Colors */
   --synapse-text: #cad3f5;
   --synapse-subtext1: #b8c0e0;
@@ -37,37 +35,37 @@
   --synapse-base: #24273a;
   --synapse-mantle: #1e2030;
   --synapse-crust: #181926;
-  
+
   /* ===== SEMANTIC COLOR TOKENS ===== */
   /* Brand Colors */
   --synapse-primary: var(--synapse-blue);
   --synapse-primary-hover: var(--synapse-sapphire);
   --synapse-primary-active: var(--synapse-sky);
-  
+
   /* Interface Colors */
   --synapse-background: var(--synapse-base);
   --synapse-background-alt: var(--synapse-mantle);
   --synapse-surface: var(--synapse-surface0);
   --synapse-surface-hover: var(--synapse-surface1);
   --synapse-surface-active: var(--synapse-surface2);
-  
+
   /* Border Colors */
   --synapse-border: var(--synapse-surface2);
   --synapse-border-hover: var(--synapse-overlay0);
   --synapse-border-focus: var(--synapse-primary);
-  
+
   /* Text Colors */
   --synapse-text-primary: var(--synapse-text);
   --synapse-text-secondary: var(--synapse-subtext1);
   --synapse-text-muted: var(--synapse-subtext0);
   --synapse-text-inverse: var(--synapse-crust);
-  
+
   /* Status Colors */
   --synapse-success: var(--synapse-green);
   --synapse-warning: var(--synapse-yellow);
   --synapse-error: var(--synapse-red);
   --synapse-info: var(--synapse-blue);
-  
+
   /* Creative Tool Colors */
   --synapse-timeline-bg: var(--synapse-surface1);
   --synapse-timeline-track: var(--synapse-surface2);
@@ -76,22 +74,28 @@
   --synapse-clip-text: var(--synapse-yellow);
   --synapse-clip-code: var(--synapse-lavender);
   --synapse-playhead: var(--synapse-peach);
-  
+
   /* Shadow Colors */
   --synapse-shadow-sm: 0 1px 2px rgba(24, 25, 38, 0.2);
-  --synapse-shadow-md: 0 4px 6px -1px rgba(24, 25, 38, 0.3), 0 2px 4px -1px rgba(24, 25, 38, 0.1);
-  --synapse-shadow-lg: 0 10px 15px -3px rgba(24, 25, 38, 0.4), 0 4px 6px -2px rgba(24, 25, 38, 0.1);
-  --synapse-shadow-xl: 0 20px 25px -5px rgba(24, 25, 38, 0.5), 0 10px 10px -5px rgba(24, 25, 38, 0.1);
-  
+  --synapse-shadow-md:
+    0 4px 6px -1px rgba(24, 25, 38, 0.3), 0 2px 4px -1px rgba(24, 25, 38, 0.1);
+  --synapse-shadow-lg:
+    0 10px 15px -3px rgba(24, 25, 38, 0.4), 0 4px 6px -2px rgba(24, 25, 38, 0.1);
+  --synapse-shadow-xl:
+    0 20px 25px -5px rgba(24, 25, 38, 0.5),
+    0 10px 10px -5px rgba(24, 25, 38, 0.1);
+
   /* ===== SPACING & SIZING ===== */
   --synapse-border-radius-sm: 0.375rem;
   --synapse-border-radius: 0.5rem;
   --synapse-border-radius-lg: 0.75rem;
   --synapse-border-radius-xl: 1rem;
-  
+
   /* ===== TYPOGRAPHY ===== */
-  --synapse-font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-  
+  --synapse-font-mono:
+    ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', Consolas,
+    'Courier New', monospace;
+
   /* ===== ANIMATIONS ===== */
   --synapse-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --synapse-transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -100,7 +104,7 @@
 
 /* ===== FUTURE LIGHT MODE SUPPORT ===== */
 /* This structure allows easy addition of light mode later */
-[data-theme="light"] {
+[data-theme='light'] {
   /* Light mode variables would go here */
   /* For now, we'll keep the Macchiato theme as default */
 }
@@ -111,7 +115,13 @@
 }
 
 html {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
   line-height: 1.5;
   color: var(--synapse-text-primary);
 }
@@ -131,10 +141,10 @@ body {
   height: 6px;
   border-radius: var(--synapse-border-radius-sm);
   background: linear-gradient(
-    to right, 
-    var(--synapse-primary) 0%, 
-    var(--synapse-primary) var(--value, 0%), 
-    var(--synapse-surface2) var(--value, 0%), 
+    to right,
+    var(--synapse-primary) 0%,
+    var(--synapse-primary) var(--value, 0%),
+    var(--synapse-surface2) var(--value, 0%),
     var(--synapse-surface2) 100%
   );
   outline: none;
@@ -143,10 +153,10 @@ body {
 
 .slider:hover {
   background: linear-gradient(
-    to right, 
-    var(--synapse-primary-hover) 0%, 
-    var(--synapse-primary-hover) var(--value, 0%), 
-    var(--synapse-surface-hover) var(--value, 0%), 
+    to right,
+    var(--synapse-primary-hover) 0%,
+    var(--synapse-primary-hover) var(--value, 0%),
+    var(--synapse-surface-hover) var(--value, 0%),
     var(--synapse-surface-hover) 100%
   );
 }
@@ -205,11 +215,19 @@ body {
 }
 
 .synapse-brand-gradient {
-  background: linear-gradient(135deg, var(--synapse-blue), var(--synapse-mauve));
+  background: linear-gradient(
+    135deg,
+    var(--synapse-blue),
+    var(--synapse-mauve)
+  );
 }
 
 .synapse-text-gradient {
-  background: linear-gradient(135deg, var(--synapse-text), var(--synapse-subtext1));
+  background: linear-gradient(
+    135deg,
+    var(--synapse-text),
+    var(--synapse-subtext1)
+  );
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;

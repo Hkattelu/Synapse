@@ -12,17 +12,19 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
-        defaultProps={{
-          timeline: [],
-          mediaAssets: [],
-          settings: {
-            width: 1920,
-            height: 1080,
-            fps: 30,
-            duration: 60,
-            backgroundColor: '#000000',
-          },
-        } satisfies MainCompositionProps}
+        defaultProps={
+          {
+            timeline: [],
+            mediaAssets: [],
+            settings: {
+              width: 1920,
+              height: 1080,
+              fps: 30,
+              duration: 60,
+              backgroundColor: '#000000',
+            },
+          } satisfies MainCompositionProps
+        }
       />
     </>
   );

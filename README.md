@@ -51,6 +51,7 @@ npm run type-check
 ## Requirements
 
 This project addresses the following key requirements:
+
 - Web-based video project management
 - Timeline-based video editing interface
 - Media asset management with drag-and-drop

@@ -278,15 +278,19 @@ export const ANIMATION_PRESETS: AnimationPreset[] = [
 ];
 
 // Helper functions for animation management
-export function getAnimationsByType(type: 'entrance' | 'exit' | 'emphasis' | 'transition'): AnimationPreset[] {
-  return ANIMATION_PRESETS.filter(preset => preset.type === type);
+export function getAnimationsByType(
+  type: 'entrance' | 'exit' | 'emphasis' | 'transition'
+): AnimationPreset[] {
+  return ANIMATION_PRESETS.filter((preset) => preset.type === type);
 }
 
 export function getAnimationById(id: string): AnimationPreset | undefined {
-  return ANIMATION_PRESETS.find(preset => preset.id === id);
+  return ANIMATION_PRESETS.find((preset) => preset.id === id);
 }
 
-export function getCompatibleAnimations(itemType: 'video' | 'code' | 'title' | 'audio'): AnimationPreset[] {
+export function getCompatibleAnimations(
+  itemType: 'video' | 'code' | 'title' | 'audio'
+): AnimationPreset[] {
   // All animations are compatible with all item types for now
   // In the future, we could add item-type-specific restrictions
   return ANIMATION_PRESETS;
@@ -305,14 +309,17 @@ export interface AnimationParameters {
 }
 
 // Validate animation parameters
-export function validateAnimationParameters(parameters: AnimationParameters): boolean {
+export function validateAnimationParameters(
+  parameters: AnimationParameters
+): boolean {
   for (const [key, value] of Object.entries(parameters)) {
     if (typeof value === 'object' && value !== null) {
       // Check if it has valid properties
       const hasFrom = 'from' in value;
       const hasTo = 'to' in value;
-      const hasOscillate = 'oscillate' in value && Array.isArray(value.oscillate);
-      
+      const hasOscillate =
+        'oscillate' in value && Array.isArray(value.oscillate);
+
       if (!hasFrom && !hasTo && !hasOscillate) {
         return false;
       }

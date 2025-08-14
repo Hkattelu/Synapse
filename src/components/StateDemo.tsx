@@ -1,6 +1,12 @@
 // Demo component to showcase state management functionality
 
-import { useProject, useTimeline, useMediaAssets, useUI, usePlayback } from '../state/hooks';
+import {
+  useProject,
+  useTimeline,
+  useMediaAssets,
+  useUI,
+  usePlayback,
+} from '../state/hooks';
 
 export function StateDemo() {
   const { project, createProject, isDirty } = useProject();
@@ -45,13 +51,15 @@ export function StateDemo() {
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <div className="bg-gray-800 rounded-lg p-4">
         <h3 className="text-lg font-semibold mb-4">State Management Demo</h3>
-        
+
         {/* Project State */}
         <div className="mb-4">
           <h4 className="font-medium mb-2">Project State</h4>
           <div className="text-sm text-gray-300 mb-2">
             Project: {project ? project.name : 'None'}
-            {isDirty && <span className="text-yellow-400 ml-2">(Unsaved changes)</span>}
+            {isDirty && (
+              <span className="text-yellow-400 ml-2">(Unsaved changes)</span>
+            )}
           </div>
           <button
             onClick={handleCreateProject}
@@ -64,7 +72,9 @@ export function StateDemo() {
 
         {/* Media Assets */}
         <div className="mb-4">
-          <h4 className="font-medium mb-2">Media Assets ({mediaAssets.length})</h4>
+          <h4 className="font-medium mb-2">
+            Media Assets ({mediaAssets.length})
+          </h4>
           <button
             onClick={handleAddMediaAsset}
             className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm mr-2"
@@ -72,7 +82,7 @@ export function StateDemo() {
           >
             Add Demo Asset
           </button>
-          {mediaAssets.map(asset => (
+          {mediaAssets.map((asset) => (
             <div key={asset.id} className="text-sm text-gray-300 mt-1">
               • {asset.name} ({asset.type})
             </div>
@@ -91,9 +101,10 @@ export function StateDemo() {
           >
             Add Timeline Item
           </button>
-          {timeline.map(item => (
+          {timeline.map((item) => (
             <div key={item.id} className="text-sm text-gray-300 mt-1">
-              • Track {item.track}: {item.startTime}s - {item.startTime + item.duration}s
+              • Track {item.track}: {item.startTime}s -{' '}
+              {item.startTime + item.duration}s
             </div>
           ))}
         </div>
@@ -102,11 +113,15 @@ export function StateDemo() {
         <div className="mb-4">
           <h4 className="font-medium mb-2">UI State</h4>
           <div className="text-sm text-gray-300 mb-2">
-            Current View: {ui.currentView} | 
-            Sidebar: {ui.sidebarVisible ? 'Visible' : 'Hidden'}
+            Current View: {ui.currentView} | Sidebar:{' '}
+            {ui.sidebarVisible ? 'Visible' : 'Hidden'}
           </div>
           <button
-            onClick={() => setCurrentView(ui.currentView === 'dashboard' ? 'studio' : 'dashboard')}
+            onClick={() =>
+              setCurrentView(
+                ui.currentView === 'dashboard' ? 'studio' : 'dashboard'
+              )
+            }
             className="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-sm mr-2"
           >
             Switch View
@@ -123,9 +138,8 @@ export function StateDemo() {
         <div className="mb-4">
           <h4 className="font-medium mb-2">Playback State</h4>
           <div className="text-sm text-gray-300 mb-2">
-            Playing: {playback.isPlaying ? 'Yes' : 'No'} | 
-            Volume: {Math.round(playback.volume * 100)}% |
-            Time: {playback.currentTime}s
+            Playing: {playback.isPlaying ? 'Yes' : 'No'} | Volume:{' '}
+            {Math.round(playback.volume * 100)}% | Time: {playback.currentTime}s
           </div>
           <button
             onClick={togglePlayback}

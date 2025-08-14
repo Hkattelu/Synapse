@@ -7,7 +7,9 @@ import type { TimelineItem, MediaAsset } from '../lib/types';
 
 // Mock Remotion components
 vi.mock('remotion', () => ({
-  AbsoluteFill: ({ children, style }: any) => <div style={style}>{children}</div>,
+  AbsoluteFill: ({ children, style }: any) => (
+    <div style={style}>{children}</div>
+  ),
   useVideoConfig: () => ({
     fps: 30, // This is always 30 in the mock
     width: 1920,
@@ -99,8 +101,12 @@ describe('Remotion Integration', () => {
     expect(imageSequence).toHaveAttribute('data-duration', '240'); // 8 seconds * 30fps
 
     // Verify media elements are rendered
-    expect(container.querySelector('video[src="blob:video-url"]')).toBeInTheDocument();
-    expect(container.querySelector('img[src="blob:image-url"]')).toBeInTheDocument();
+    expect(
+      container.querySelector('video[src="blob:video-url"]')
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector('img[src="blob:image-url"]')
+    ).toBeInTheDocument();
   });
 
   it('handles empty timeline gracefully', () => {
@@ -169,7 +175,7 @@ describe('Remotion Integration', () => {
     // Should calculate using mock fps of 30: startFrame = Math.round(2.5 * 30) = 75, duration = Math.round(3.75 * 30) = 112
     const allSequences = container.querySelectorAll('[data-from]');
     expect(allSequences).toHaveLength(1);
-    
+
     const sequence = allSequences[0];
     expect(sequence).toHaveAttribute('data-from', '75');
     expect(sequence).toHaveAttribute('data-duration', '113');

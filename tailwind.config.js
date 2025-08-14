@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -24,7 +21,7 @@ export default {
           sapphire: 'var(--synapse-sapphire)',
           blue: 'var(--synapse-blue)',
           lavender: 'var(--synapse-lavender)',
-          
+
           // Neutral colors
           text: 'var(--synapse-text)',
           subtext1: 'var(--synapse-subtext1)',
@@ -38,7 +35,7 @@ export default {
           base: 'var(--synapse-base)',
           mantle: 'var(--synapse-mantle)',
           crust: 'var(--synapse-crust)',
-          
+
           // Semantic colors
           primary: {
             DEFAULT: 'var(--synapse-primary)',
@@ -63,13 +60,13 @@ export default {
           'text-secondary': 'var(--synapse-text-secondary)',
           'text-muted': 'var(--synapse-text-muted)',
           'text-inverse': 'var(--synapse-text-inverse)',
-          
+
           // Status colors
           success: 'var(--synapse-success)',
           warning: 'var(--synapse-warning)',
           error: 'var(--synapse-error)',
           info: 'var(--synapse-info)',
-          
+
           // Creative tool colors
           timeline: {
             bg: 'var(--synapse-timeline-bg)',
@@ -89,7 +86,7 @@ export default {
       },
       borderRadius: {
         'synapse-sm': 'var(--synapse-border-radius-sm)',
-        'synapse': 'var(--synapse-border-radius)',
+        synapse: 'var(--synapse-border-radius)',
         'synapse-lg': 'var(--synapse-border-radius-lg)',
         'synapse-xl': 'var(--synapse-border-radius-xl)',
       },
@@ -107,4 +104,4 @@ export default {
     },
   },
   plugins: [],
-}
+};

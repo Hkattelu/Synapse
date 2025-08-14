@@ -6,8 +6,20 @@ import type { TimelineItem } from '../../lib/types';
 
 // Mock Remotion hooks
 vi.mock('remotion', () => ({
-  AbsoluteFill: ({ children, style }: any) => <div style={style} data-testid="absolute-fill">{children}</div>,
-  Sequence: ({ children, from, durationInFrames }: any) => <div data-testid="sequence" data-from={from} data-duration={durationInFrames}>{children}</div>,
+  AbsoluteFill: ({ children, style }: any) => (
+    <div style={style} data-testid="absolute-fill">
+      {children}
+    </div>
+  ),
+  Sequence: ({ children, from, durationInFrames }: any) => (
+    <div
+      data-testid="sequence"
+      data-from={from}
+      data-duration={durationInFrames}
+    >
+      {children}
+    </div>
+  ),
   interpolate: vi.fn((frame, input, output) => {
     const progress = (frame - input[0]) / (input[1] - input[0]);
     return Math.max(0, Math.min(1, progress));
@@ -62,11 +74,7 @@ describe('CodeSequence', () => {
 
   it('renders code sequence with default properties', () => {
     const { container } = render(
-      <CodeSequence
-        item={mockItem}
-        startFrame={0}
-        durationInFrames={150}
-      />
+      <CodeSequence item={mockItem} startFrame={0} durationInFrames={150} />
     );
 
     expect(container).toBeInTheDocument();
@@ -134,7 +142,9 @@ describe('CodeSequence', () => {
     );
 
     const codeContainer = getByTestId('absolute-fill');
-    expect(codeContainer.style.transform).toBe('translate(100px, 50px) scale(1.5) rotate(45deg)');
+    expect(codeContainer.style.transform).toBe(
+      'translate(100px, 50px) scale(1.5) rotate(45deg)'
+    );
     expect(codeContainer.style.opacity).toBe('0.8');
   });
 
@@ -179,8 +189,8 @@ describe('CodeSequence', () => {
 
   it('applies all available themes correctly', () => {
     const themes = ['dark', 'light', 'monokai', 'github', 'dracula'];
-    
-    themes.forEach(theme => {
+
+    themes.forEach((theme) => {
       const { getByTestId, unmount } = render(
         <CodeSequence
           item={{
@@ -197,7 +207,7 @@ describe('CodeSequence', () => {
 
       const codeContainer = getByTestId('absolute-fill');
       expect(codeContainer.style.backgroundColor).toBeTruthy();
-      
+
       // Clean up to prevent multiple elements in DOM
       unmount();
     });

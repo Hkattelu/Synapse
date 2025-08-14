@@ -32,7 +32,9 @@ export class ProjectManager {
       }
 
       // Sort by last opened date (most recent first)
-      return projects.sort((a, b) => b.lastOpened.getTime() - a.lastOpened.getTime());
+      return projects.sort(
+        (a, b) => b.lastOpened.getTime() - a.lastOpened.getTime()
+      );
     } catch (error) {
       console.error('Failed to load projects list:', error);
       return [];
@@ -84,7 +86,9 @@ export class ProjectManager {
   // Load a project by ID
   static loadProjectById(id: string): StoredProject | null {
     try {
-      const serializedProject = localStorage.getItem(`${this.STORAGE_PREFIX}${id}`);
+      const serializedProject = localStorage.getItem(
+        `${this.STORAGE_PREFIX}${id}`
+      );
       if (!serializedProject) {
         return null;
       }
@@ -128,8 +132,11 @@ export class ProjectManager {
       const projectsList = localStorage.getItem(this.PROJECTS_LIST_KEY);
       if (projectsList) {
         const projectIds: string[] = JSON.parse(projectsList);
-        const updatedIds = projectIds.filter(projectId => projectId !== id);
-        localStorage.setItem(this.PROJECTS_LIST_KEY, JSON.stringify(updatedIds));
+        const updatedIds = projectIds.filter((projectId) => projectId !== id);
+        localStorage.setItem(
+          this.PROJECTS_LIST_KEY,
+          JSON.stringify(updatedIds)
+        );
       }
 
       // Clear current project if it was the deleted one
@@ -187,7 +194,9 @@ export class ProjectManager {
       // Validate imported project
       const validation = validateProject(importedProject);
       if (!validation.isValid) {
-        throw new Error(`Invalid project data: ${validation.errors.map(e => e.message).join(', ')}`);
+        throw new Error(
+          `Invalid project data: ${validation.errors.map((e) => e.message).join(', ')}`
+        );
       }
 
       return importedProject;
@@ -207,9 +216,12 @@ export class ProjectManager {
         createdAt: new Date(),
         updatedAt: new Date(),
         // Deep clone timeline and media assets to avoid references
-        timeline: originalProject.timeline.map(item => ({ ...item, id: this.generateId() })),
-        mediaAssets: originalProject.mediaAssets.map(asset => ({ 
-          ...asset, 
+        timeline: originalProject.timeline.map((item) => ({
+          ...item,
+          id: this.generateId(),
+        })),
+        mediaAssets: originalProject.mediaAssets.map((asset) => ({
+          ...asset,
           id: this.generateId(),
           createdAt: new Date(),
         })),
@@ -229,11 +241,17 @@ export class ProjectManager {
 
   // Get project statistics
   static getProjectStats(project: Project) {
-    const totalDuration = project.timeline.reduce((sum, item) => sum + item.duration, 0);
-    const assetsByType = project.mediaAssets.reduce((acc, asset) => {
-      acc[asset.type] = (acc[asset.type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const totalDuration = project.timeline.reduce(
+      (sum, item) => sum + item.duration,
+      0
+    );
+    const assetsByType = project.mediaAssets.reduce(
+      (acc, asset) => {
+        acc[asset.type] = (acc[asset.type] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     return {
       totalClips: project.timeline.length,
@@ -266,7 +284,7 @@ export class ProjectManager {
       ...project,
       createdAt: project.createdAt.toISOString(),
       updatedAt: project.updatedAt.toISOString(),
-      mediaAssets: project.mediaAssets.map(asset => ({
+      mediaAssets: project.mediaAssets.map((asset) => ({
         ...asset,
         createdAt: asset.createdAt.toISOString(),
       })),
@@ -306,14 +324,14 @@ export function downloadProjectFile(project: Project): void {
     const jsonData = ProjectManager.exportProject(project);
     const blob = new Blob([jsonData], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    
+
     const link = document.createElement('a');
     link.href = url;
     link.download = `${project.name.replace(/[^a-zA-Z0-9]/g, '_')}.synapse`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     URL.revokeObjectURL(url);
   } catch (error) {
     console.error('Failed to download project file:', error);
@@ -326,7 +344,7 @@ export function uploadProjectFile(): Promise<Project> {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.synapse,.json';
-    
+
     input.onchange = async (event) => {
       const file = (event.target as HTMLInputElement).files?.[0];
       if (!file) {
@@ -342,7 +360,7 @@ export function uploadProjectFile(): Promise<Project> {
         reject(error);
       }
     };
-    
+
     input.click();
   });
 }

@@ -1,5 +1,11 @@
 import React, { useMemo } from 'react';
-import { AbsoluteFill, Sequence, interpolate, useCurrentFrame, useVideoConfig } from 'remotion';
+import {
+  AbsoluteFill,
+  Sequence,
+  interpolate,
+  useCurrentFrame,
+  useVideoConfig,
+} from 'remotion';
 import type { CodeSequenceProps } from './types';
 
 // Dynamically import Prism to avoid SSR issues
@@ -110,11 +116,15 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
     if (!Prism) {
       return codeContent;
     }
-    
+
     try {
       // Ensure the language is supported
       const prismLanguage = Prism.languages[language] ? language : 'javascript';
-      return Prism.highlight(codeContent, Prism.languages[prismLanguage], prismLanguage);
+      return Prism.highlight(
+        codeContent,
+        Prism.languages[prismLanguage],
+        prismLanguage
+      );
     } catch (error) {
       console.warn('Failed to highlight code:', error);
       return codeContent;
@@ -145,18 +155,28 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
 
     // For typing animation, we need to truncate the original code and then highlight
     const truncatedCode = codeContent.substring(0, charactersToShow);
-    
+
     if (!Prism) {
       return truncatedCode;
     }
-    
+
     try {
       const prismLanguage = Prism.languages[language] ? language : 'javascript';
-      return Prism.highlight(truncatedCode, Prism.languages[prismLanguage], prismLanguage);
+      return Prism.highlight(
+        truncatedCode,
+        Prism.languages[prismLanguage],
+        prismLanguage
+      );
     } catch (error) {
       return truncatedCode;
     }
-  }, [codeContent, highlightedCode, charactersToShow, totalCharacters, language]);
+  }, [
+    codeContent,
+    highlightedCode,
+    charactersToShow,
+    totalCharacters,
+    language,
+  ]);
 
   // Style for the container
   const containerStyle: React.CSSProperties = {
@@ -239,7 +259,9 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
     <Sequence from={startFrame} durationInFrames={durationInFrames}>
       <AbsoluteFill style={containerStyle}>
         <style>{syntaxStyles}</style>
-        <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+        <pre
+          style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+        >
           <code
             dangerouslySetInnerHTML={{ __html: animatedCode }}
             style={{ fontFamily: 'inherit' }}
@@ -258,7 +280,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
             />
           )}
         </pre>
-        
+
         {/* Blinking cursor animation */}
         <style>
           {`

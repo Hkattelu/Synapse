@@ -1,7 +1,11 @@
 import React, { useState, useCallback } from 'react';
 import { useTimeline, useMediaAssets } from '../state/hooks';
 import { validateItemProperties } from '../lib/validation';
-import type { TimelineItem, ItemProperties, AnimationPreset } from '../lib/types';
+import type {
+  TimelineItem,
+  ItemProperties,
+  AnimationPreset,
+} from '../lib/types';
 
 interface InspectorProps {
   className?: string;
@@ -13,21 +17,40 @@ export function Inspector({ className = '' }: InspectorProps) {
 
   // Get the first selected item (for now, we'll handle single selection)
   const selectedItem = selectedTimelineItems[0];
-  const selectedAsset = selectedItem ? getMediaAssetById(selectedItem.assetId) : undefined;
+  const selectedAsset = selectedItem
+    ? getMediaAssetById(selectedItem.assetId)
+    : undefined;
 
   if (!selectedItem) {
     return (
       <div className={`inspector bg-background-secondary ${className}`}>
         <div className="p-4 border-b border-border-subtle">
-          <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">Inspector</h3>
+          <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
+            Inspector
+          </h3>
         </div>
         <div className="flex-1 p-4">
           <div className="h-full flex items-center justify-center text-text-secondary">
             <div className="text-center">
               <div className="w-12 h-12 bg-background-tertiary rounded-lg mx-auto mb-3 flex items-center justify-center">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
                 </svg>
               </div>
               <p className="font-medium text-text-primary">No Selection</p>
@@ -40,23 +63,28 @@ export function Inspector({ className = '' }: InspectorProps) {
   }
 
   return (
-    <div className={`inspector bg-background-secondary flex flex-col ${className}`}>
+    <div
+      className={`inspector bg-background-secondary flex flex-col ${className}`}
+    >
       <div className="p-4 border-b border-border-subtle">
-        <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">Inspector</h3>
+        <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
+          Inspector
+        </h3>
         <p className="text-xs text-text-tertiary mt-1">
-          {selectedTimelineItems.length} item{selectedTimelineItems.length !== 1 ? 's' : ''} selected
+          {selectedTimelineItems.length} item
+          {selectedTimelineItems.length !== 1 ? 's' : ''} selected
         </p>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto">
         <ClipMetadata item={selectedItem} asset={selectedAsset} />
-        <ClipProperties 
-          item={selectedItem} 
-          onUpdateProperties={(properties) => 
+        <ClipProperties
+          item={selectedItem}
+          onUpdateProperties={(properties) =>
             updateTimelineItem(selectedItem.id, { properties })
           }
         />
-        <AnimationSettings 
+        <AnimationSettings
           item={selectedItem}
           onUpdateAnimations={(animations) =>
             updateTimelineItem(selectedItem.id, { animations })
@@ -83,32 +111,82 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
     switch (type) {
       case 'video':
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+            />
           </svg>
         );
       case 'audio':
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+            />
           </svg>
         );
       case 'code':
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+            />
           </svg>
         );
       case 'title':
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h7"
+            />
           </svg>
         );
       default:
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
           </svg>
         );
     }
@@ -117,26 +195,32 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
   return (
     <div className="p-4 border-b border-border-subtle">
       <h4 className="font-medium text-text-primary mb-3">Clip Information</h4>
-      
+
       <div className="space-y-3">
         <div className="flex items-center space-x-2">
-          <div className="text-text-secondary">
-            {getTypeIcon(item.type)}
-          </div>
+          <div className="text-text-secondary">{getTypeIcon(item.type)}</div>
           <div>
-            <p className="text-sm font-medium text-text-primary">{asset?.name || 'Unknown Asset'}</p>
-            <p className="text-xs text-text-tertiary capitalize">{item.type} clip</p>
+            <p className="text-sm font-medium text-text-primary">
+              {asset?.name || 'Unknown Asset'}
+            </p>
+            <p className="text-xs text-text-tertiary capitalize">
+              {item.type} clip
+            </p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
             <p className="text-text-secondary">Duration</p>
-            <p className="text-text-primary font-mono">{formatDuration(item.duration)}</p>
+            <p className="text-text-primary font-mono">
+              {formatDuration(item.duration)}
+            </p>
           </div>
           <div>
             <p className="text-text-secondary">Start Time</p>
-            <p className="text-text-primary font-mono">{formatDuration(item.startTime)}</p>
+            <p className="text-text-primary font-mono">
+              {formatDuration(item.startTime)}
+            </p>
           </div>
           <div>
             <p className="text-text-secondary">Track</p>
@@ -144,7 +228,9 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
           </div>
           <div>
             <p className="text-text-secondary">End Time</p>
-            <p className="text-text-primary font-mono">{formatDuration(item.startTime + item.duration)}</p>
+            <p className="text-text-primary font-mono">
+              {formatDuration(item.startTime + item.duration)}
+            </p>
           </div>
         </div>
 
@@ -152,10 +238,14 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
           <div className="pt-2 border-t border-border-subtle">
             <p className="text-xs text-text-tertiary mb-2">Source File</p>
             <div className="text-xs text-text-secondary">
-              <p>Size: {(asset.metadata.fileSize / 1024 / 1024).toFixed(1)} MB</p>
+              <p>
+                Size: {(asset.metadata.fileSize / 1024 / 1024).toFixed(1)} MB
+              </p>
               <p>Type: {asset.metadata.mimeType}</p>
               {asset.metadata.width && asset.metadata.height && (
-                <p>Resolution: {asset.metadata.width} × {asset.metadata.height}</p>
+                <p>
+                  Resolution: {asset.metadata.width} × {asset.metadata.height}
+                </p>
               )}
             </div>
           </div>
@@ -171,8 +261,12 @@ interface ClipPropertiesProps {
 }
 
 function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
-  const [localProperties, setLocalProperties] = useState<ItemProperties>(item.properties);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [localProperties, setLocalProperties] = useState<ItemProperties>(
+    item.properties
+  );
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
 
   // Update local state when item changes
   React.useEffect(() => {
@@ -180,36 +274,42 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
     setValidationErrors({});
   }, [item.properties]);
 
-  const validateAndUpdate = useCallback((newProperties: ItemProperties) => {
-    const validation = validateItemProperties(newProperties);
-    
-    if (validation.isValid) {
-      setValidationErrors({});
-      onUpdateProperties(newProperties);
-    } else {
-      const errorMap: Record<string, string> = {};
-      validation.errors.forEach(error => {
-        errorMap[error.field] = error.message;
-      });
-      setValidationErrors(errorMap);
-    }
-  }, [onUpdateProperties]);
+  const validateAndUpdate = useCallback(
+    (newProperties: ItemProperties) => {
+      const validation = validateItemProperties(newProperties);
 
-  const updateProperty = useCallback((key: keyof ItemProperties, value: any) => {
-    const newProperties = { ...localProperties, [key]: value };
-    setLocalProperties(newProperties);
-    
-    // Immediate validation for testing, debounced for production
-    if (process.env.NODE_ENV === 'test') {
-      validateAndUpdate(newProperties);
-    } else {
-      // Debounced validation and update
-      const timeoutId = setTimeout(() => {
+      if (validation.isValid) {
+        setValidationErrors({});
+        onUpdateProperties(newProperties);
+      } else {
+        const errorMap: Record<string, string> = {};
+        validation.errors.forEach((error) => {
+          errorMap[error.field] = error.message;
+        });
+        setValidationErrors(errorMap);
+      }
+    },
+    [onUpdateProperties]
+  );
+
+  const updateProperty = useCallback(
+    (key: keyof ItemProperties, value: any) => {
+      const newProperties = { ...localProperties, [key]: value };
+      setLocalProperties(newProperties);
+
+      // Immediate validation for testing, debounced for production
+      if (process.env.NODE_ENV === 'test') {
         validateAndUpdate(newProperties);
-      }, 300);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [localProperties, validateAndUpdate]);
+      } else {
+        // Debounced validation and update
+        const timeoutId = setTimeout(() => {
+          validateAndUpdate(newProperties);
+        }, 300);
+        return () => clearTimeout(timeoutId);
+      }
+    },
+    [localProperties, validateAndUpdate]
+  );
 
   const renderTransformProperties = () => (
     <div className="space-y-3">
@@ -365,31 +465,39 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
     <div className="border-b border-border-subtle">
       <div className="p-4">
         <h4 className="font-medium text-text-primary mb-3">Properties</h4>
-        
+
         {/* Transform Properties - Always shown */}
         <div className="mb-4">
-          <h5 className="text-sm font-medium text-text-secondary mb-2">Transform</h5>
+          <h5 className="text-sm font-medium text-text-secondary mb-2">
+            Transform
+          </h5>
           {renderTransformProperties()}
         </div>
 
         {/* Type-specific Properties */}
         {(item.type === 'video' || item.type === 'audio') && (
           <div className="mb-4">
-            <h5 className="text-sm font-medium text-text-secondary mb-2">Media</h5>
+            <h5 className="text-sm font-medium text-text-secondary mb-2">
+              Media
+            </h5>
             {renderVideoProperties()}
           </div>
         )}
 
         {item.type === 'code' && (
           <div className="mb-4">
-            <h5 className="text-sm font-medium text-text-secondary mb-2">Code</h5>
+            <h5 className="text-sm font-medium text-text-secondary mb-2">
+              Code
+            </h5>
             {renderCodeProperties()}
           </div>
         )}
 
         {item.type === 'title' && (
           <div className="mb-4">
-            <h5 className="text-sm font-medium text-text-secondary mb-2">Text</h5>
+            <h5 className="text-sm font-medium text-text-secondary mb-2">
+              Text
+            </h5>
             {renderTitleProperties()}
           </div>
         )}
@@ -403,16 +511,22 @@ interface AnimationSettingsProps {
   onUpdateAnimations: (animations: AnimationPreset[]) => void;
 }
 
-function AnimationSettings({ item, onUpdateAnimations }: AnimationSettingsProps) {
+function AnimationSettings({
+  item,
+  onUpdateAnimations,
+}: AnimationSettingsProps) {
   const [selectedPreset, setSelectedPreset] = useState<string>('');
-  const [selectedType, setSelectedType] = useState<'entrance' | 'exit' | 'emphasis' | 'transition'>('entrance');
+  const [selectedType, setSelectedType] = useState<
+    'entrance' | 'exit' | 'emphasis' | 'transition'
+  >('entrance');
 
   // Import animation presets from the comprehensive system
-  const { ANIMATION_PRESETS, getAnimationsByType, getCompatibleAnimations } = React.useMemo(() => {
-    // Dynamic import to avoid circular dependencies
-    const presets = require('../lib/animationPresets');
-    return presets;
-  }, []);
+  const { ANIMATION_PRESETS, getAnimationsByType, getCompatibleAnimations } =
+    React.useMemo(() => {
+      // Dynamic import to avoid circular dependencies
+      const presets = require('../lib/animationPresets');
+      return presets;
+    }, []);
 
   // Get available presets filtered by type
   const availablePresets = React.useMemo(() => {
@@ -421,8 +535,8 @@ function AnimationSettings({ item, onUpdateAnimations }: AnimationSettingsProps)
 
   const addAnimation = useCallback(() => {
     if (!selectedPreset) return;
-    
-    const preset = availablePresets.find(p => p.id === selectedPreset);
+
+    const preset = availablePresets.find((p) => p.id === selectedPreset);
     if (!preset) return;
 
     const newAnimations = [...item.animations, preset];
@@ -430,33 +544,55 @@ function AnimationSettings({ item, onUpdateAnimations }: AnimationSettingsProps)
     setSelectedPreset('');
   }, [selectedPreset, item.animations, onUpdateAnimations, availablePresets]);
 
-  const removeAnimation = useCallback((index: number) => {
-    const newAnimations = item.animations.filter((_, i) => i !== index);
-    onUpdateAnimations(newAnimations);
-  }, [item.animations, onUpdateAnimations]);
+  const removeAnimation = useCallback(
+    (index: number) => {
+      const newAnimations = item.animations.filter((_, i) => i !== index);
+      onUpdateAnimations(newAnimations);
+    },
+    [item.animations, onUpdateAnimations]
+  );
 
   return (
     <div className="p-4">
       <h4 className="font-medium text-text-primary mb-3">Animations</h4>
-      
+
       {/* Current Animations */}
       {item.animations.length > 0 && (
         <div className="mb-4">
-          <h5 className="text-sm font-medium text-text-secondary mb-2">Applied Animations</h5>
+          <h5 className="text-sm font-medium text-text-secondary mb-2">
+            Applied Animations
+          </h5>
           <div className="space-y-2">
             {item.animations.map((animation, index) => (
-              <div key={index} className="flex items-center justify-between bg-background-tertiary rounded p-2 border border-border-subtle">
+              <div
+                key={index}
+                className="flex items-center justify-between bg-background-tertiary rounded p-2 border border-border-subtle"
+              >
                 <div>
-                  <p className="text-sm font-medium text-text-primary">{animation.name}</p>
-                  <p className="text-xs text-text-tertiary capitalize">{animation.type} • {animation.duration}s</p>
+                  <p className="text-sm font-medium text-text-primary">
+                    {animation.name}
+                  </p>
+                  <p className="text-xs text-text-tertiary capitalize">
+                    {animation.type} • {animation.duration}s
+                  </p>
                 </div>
                 <button
                   onClick={() => removeAnimation(index)}
                   className="text-status-error hover:text-status-error/80 transition-colors"
                   title="Remove Animation"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -467,30 +603,34 @@ function AnimationSettings({ item, onUpdateAnimations }: AnimationSettingsProps)
 
       {/* Add Animation */}
       <div>
-        <h5 className="text-sm font-medium text-text-secondary mb-2">Add Animation</h5>
-        
+        <h5 className="text-sm font-medium text-text-secondary mb-2">
+          Add Animation
+        </h5>
+
         {/* Animation Type Selector */}
         <div className="mb-3">
           <div className="flex space-x-1 bg-background-tertiary rounded p-1">
-            {(['entrance', 'exit', 'emphasis', 'transition'] as const).map((type) => (
-              <button
-                key={type}
-                onClick={() => {
-                  setSelectedType(type);
-                  setSelectedPreset(''); // Reset selection when changing type
-                }}
-                className={`flex-1 px-2 py-1 text-xs font-medium rounded capitalize transition-colors ${
-                  selectedType === type
-                    ? 'bg-primary-600 text-white shadow-glow'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-neutral-700'
-                }`}
-              >
-                {type}
-              </button>
-            ))}
+            {(['entrance', 'exit', 'emphasis', 'transition'] as const).map(
+              (type) => (
+                <button
+                  key={type}
+                  onClick={() => {
+                    setSelectedType(type);
+                    setSelectedPreset(''); // Reset selection when changing type
+                  }}
+                  className={`flex-1 px-2 py-1 text-xs font-medium rounded capitalize transition-colors ${
+                    selectedType === type
+                      ? 'bg-primary-600 text-white shadow-glow'
+                      : 'text-text-secondary hover:text-text-primary hover:bg-neutral-700'
+                  }`}
+                >
+                  {type}
+                </button>
+              )
+            )}
           </div>
         </div>
-        
+
         {/* Animation Selector and Add Button */}
         <div className="flex space-x-2">
           <select
@@ -531,7 +671,16 @@ interface NumberInputProps {
   suffix?: string;
 }
 
-function NumberInput({ label, value, onChange, error, min, max, step = 1, suffix }: NumberInputProps) {
+function NumberInput({
+  label,
+  value,
+  onChange,
+  error,
+  min,
+  max,
+  step = 1,
+  suffix,
+}: NumberInputProps) {
   const [localValue, setLocalValue] = useState(value.toString());
   const inputId = React.useId();
 
@@ -561,7 +710,10 @@ function NumberInput({ label, value, onChange, error, min, max, step = 1, suffix
 
   return (
     <div>
-      <label htmlFor={inputId} className="block text-sm font-medium text-text-secondary mb-1">
+      <label
+        htmlFor={inputId}
+        className="block text-sm font-medium text-text-secondary mb-1"
+      >
         {label}
       </label>
       <div className="relative">
@@ -587,7 +739,11 @@ function NumberInput({ label, value, onChange, error, min, max, step = 1, suffix
         )}
       </div>
       {error && (
-        <p id={`${inputId}-error`} className="text-status-error text-xs mt-1" role="alert">
+        <p
+          id={`${inputId}-error`}
+          className="text-status-error text-xs mt-1"
+          role="alert"
+        >
           {error}
         </p>
       )}
@@ -603,10 +759,18 @@ interface TextInputProps {
   multiline?: boolean;
 }
 
-function TextInput({ label, value, onChange, error, multiline = false }: TextInputProps) {
+function TextInput({
+  label,
+  value,
+  onChange,
+  error,
+  multiline = false,
+}: TextInputProps) {
   const inputId = React.useId();
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     onChange(e.target.value);
   };
 
@@ -616,7 +780,10 @@ function TextInput({ label, value, onChange, error, multiline = false }: TextInp
 
   return (
     <div>
-      <label htmlFor={inputId} className="block text-sm font-medium text-text-secondary mb-1">
+      <label
+        htmlFor={inputId}
+        className="block text-sm font-medium text-text-secondary mb-1"
+      >
         {label}
       </label>
       {multiline ? (
@@ -628,7 +795,11 @@ function TextInput({ label, value, onChange, error, multiline = false }: TextInp
           className={inputClasses}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}
-          style={label === 'Code Content' ? { fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace' } : undefined}
+          style={
+            label === 'Code Content'
+              ? { fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace' }
+              : undefined
+          }
         />
       ) : (
         <input
@@ -642,7 +813,11 @@ function TextInput({ label, value, onChange, error, multiline = false }: TextInp
         />
       )}
       {error && (
-        <p id={`${inputId}-error`} className="text-status-error text-xs mt-1" role="alert">
+        <p
+          id={`${inputId}-error`}
+          className="text-status-error text-xs mt-1"
+          role="alert"
+        >
           {error}
         </p>
       )}
@@ -658,12 +833,21 @@ interface SelectInputProps {
   error?: string;
 }
 
-function SelectInput({ label, value, onChange, options, error }: SelectInputProps) {
+function SelectInput({
+  label,
+  value,
+  onChange,
+  options,
+  error,
+}: SelectInputProps) {
   const inputId = React.useId();
-  
+
   return (
     <div>
-      <label htmlFor={inputId} className="block text-sm font-medium text-text-secondary mb-1">
+      <label
+        htmlFor={inputId}
+        className="block text-sm font-medium text-text-secondary mb-1"
+      >
         {label}
       </label>
       <select
@@ -683,7 +867,11 @@ function SelectInput({ label, value, onChange, options, error }: SelectInputProp
         ))}
       </select>
       {error && (
-        <p id={`${inputId}-error`} className="text-status-error text-xs mt-1" role="alert">
+        <p
+          id={`${inputId}-error`}
+          className="text-status-error text-xs mt-1"
+          role="alert"
+        >
           {error}
         </p>
       )}
@@ -716,9 +904,12 @@ function ColorInput({ label, value, onChange, error }: ColorInputProps) {
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setLocalValue(newValue);
-    
+
     // Validate color format (hex, rgb, rgba, named colors, etc.)
-    const isValidColor = /^(#[0-9A-Fa-f]{3,8}|rgb\(|rgba\(|hsl\(|hsla\(|[a-zA-Z]+|transparent)/.test(newValue);
+    const isValidColor =
+      /^(#[0-9A-Fa-f]{3,8}|rgb\(|rgba\(|hsl\(|hsla\(|[a-zA-Z]+|transparent)/.test(
+        newValue
+      );
     if (isValidColor || newValue === '') {
       onChange(newValue);
     }
@@ -726,7 +917,10 @@ function ColorInput({ label, value, onChange, error }: ColorInputProps) {
 
   return (
     <div>
-      <label htmlFor={inputId} className="block text-sm font-medium text-text-secondary mb-1">
+      <label
+        htmlFor={inputId}
+        className="block text-sm font-medium text-text-secondary mb-1"
+      >
         {label}
       </label>
       <div className="flex space-x-2">
@@ -752,7 +946,11 @@ function ColorInput({ label, value, onChange, error }: ColorInputProps) {
         />
       </div>
       {error && (
-        <p id={`${inputId}-error`} className="text-status-error text-xs mt-1" role="alert">
+        <p
+          id={`${inputId}-error`}
+          className="text-status-error text-xs mt-1"
+          role="alert"
+        >
           {error}
         </p>
       )}

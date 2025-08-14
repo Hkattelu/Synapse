@@ -71,17 +71,19 @@ describe('Inspector Component - Basic Functionality', () => {
 
   it('should display no selection message when no items are selected', () => {
     renderInspector();
-    
+
     expect(screen.getByText('No Selection')).toBeInTheDocument();
-    expect(screen.getByText('Select a clip to edit properties')).toBeInTheDocument();
+    expect(
+      screen.getByText('Select a clip to edit properties')
+    ).toBeInTheDocument();
   });
 
   it('should display video clip metadata correctly', () => {
     mockSelectedTimelineItems.push(mockVideoItem);
     mockGetMediaAssetById.mockReturnValue(mockVideoAsset);
-    
+
     renderInspector();
-    
+
     expect(screen.getByText('test-video.mp4')).toBeInTheDocument();
     expect(screen.getByText(/video.*clip/i)).toBeInTheDocument();
     expect(screen.getByText('0:05.5')).toBeInTheDocument(); // Duration
@@ -93,9 +95,9 @@ describe('Inspector Component - Basic Functionality', () => {
   it('should display transform properties with correct values', () => {
     mockSelectedTimelineItems.push(mockVideoItem);
     mockGetMediaAssetById.mockReturnValue(mockVideoAsset);
-    
+
     renderInspector();
-    
+
     // Check that form inputs exist with correct labels
     expect(screen.getByLabelText('X Position')).toBeInTheDocument();
     expect(screen.getByLabelText('Y Position')).toBeInTheDocument();
@@ -107,9 +109,9 @@ describe('Inspector Component - Basic Functionality', () => {
   it('should display video-specific properties', () => {
     mockSelectedTimelineItems.push(mockVideoItem);
     mockGetMediaAssetById.mockReturnValue(mockVideoAsset);
-    
+
     renderInspector();
-    
+
     expect(screen.getByLabelText('Volume')).toBeInTheDocument();
     expect(screen.getByLabelText('Playback Rate')).toBeInTheDocument();
   });
@@ -117,9 +119,9 @@ describe('Inspector Component - Basic Functionality', () => {
   it('should display animation section', () => {
     mockSelectedTimelineItems.push(mockVideoItem);
     mockGetMediaAssetById.mockReturnValue(mockVideoAsset);
-    
+
     renderInspector();
-    
+
     expect(screen.getByText('Animations')).toBeInTheDocument();
     expect(screen.getByText('Add Animation')).toBeInTheDocument();
     expect(screen.getByText('Add')).toBeInTheDocument();
@@ -143,18 +145,18 @@ describe('Inspector Component - Basic Functionality', () => {
 
     mockSelectedTimelineItems.push(mockVideoItem, mockCodeItem);
     mockGetMediaAssetById.mockReturnValue(mockVideoAsset);
-    
+
     renderInspector();
-    
+
     expect(screen.getByText('2 items selected')).toBeInTheDocument();
   });
 
   it('should render without crashing when asset is not found', () => {
     mockSelectedTimelineItems.push(mockVideoItem);
     mockGetMediaAssetById.mockReturnValue(undefined);
-    
+
     renderInspector();
-    
+
     expect(screen.getByText('Unknown Asset')).toBeInTheDocument();
   });
 });

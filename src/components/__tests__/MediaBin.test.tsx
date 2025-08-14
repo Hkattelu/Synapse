@@ -58,7 +58,7 @@ beforeEach(() => {
     if (tagName === 'canvas') return mockCanvasElement as any;
     return originalCreateElement.call(document, tagName);
   });
-  
+
   mockCreateObjectURL.mockReturnValue('blob:mock-url');
 });
 
@@ -69,11 +69,7 @@ afterEach(() => {
 
 // Test wrapper component
 function TestWrapper({ children }: { children: React.ReactNode }) {
-  return (
-    <AppProvider>
-      {children}
-    </AppProvider>
-  );
+  return <AppProvider>{children}</AppProvider>;
 }
 
 // Helper to create mock files
@@ -92,8 +88,14 @@ describe('MediaBin', () => {
     );
 
     expect(screen.getByText('No Media Assets')).toBeInTheDocument();
-    expect(screen.getByText('Drag and drop files here or click "Add Media" to upload')).toBeInTheDocument();
-    expect(screen.getByText('Supports video, image, and audio files up to 100MB')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Drag and drop files here or click "Add Media" to upload'
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Supports video, image, and audio files up to 100MB')
+    ).toBeInTheDocument();
   });
 
   it('renders add media button', () => {
@@ -115,7 +117,9 @@ describe('MediaBin', () => {
       </TestWrapper>
     );
 
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
     const clickSpy = vi.spyOn(fileInput, 'click');
 
     const addButton = screen.getByRole('button', { name: /add media/i });
@@ -131,7 +135,9 @@ describe('MediaBin', () => {
       </TestWrapper>
     );
 
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
     expect(fileInput.accept).toContain('video/mp4');
     expect(fileInput.accept).toContain('image/jpeg');
     expect(fileInput.accept).toContain('audio/mp3');
@@ -146,8 +152,10 @@ describe('MediaBin', () => {
     );
 
     // Find the actual drop zone element with border classes
-    const dropZone = document.querySelector('[class*="border-2 border-dashed"]');
-    
+    const dropZone = document.querySelector(
+      '[class*="border-2 border-dashed"]'
+    );
+
     fireEvent.dragOver(dropZone!, {
       dataTransfer: { files: [] },
     });
@@ -164,13 +172,15 @@ describe('MediaBin', () => {
     );
 
     // Find the actual drop zone element with border classes
-    const dropZone = document.querySelector('[class*="border-2 border-dashed"]');
-    
+    const dropZone = document.querySelector(
+      '[class*="border-2 border-dashed"]'
+    );
+
     // First drag over
     fireEvent.dragOver(dropZone!, {
       dataTransfer: { files: [] },
     });
-    
+
     // Then drag leave
     fireEvent.dragLeave(dropZone!, {
       dataTransfer: { files: [] },
@@ -187,15 +197,23 @@ describe('MediaBin', () => {
       </TestWrapper>
     );
 
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-    const largeFile = createMockFile('large-video.mp4', 'video/mp4', 200 * 1024 * 1024); // 200MB
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const largeFile = createMockFile(
+      'large-video.mp4',
+      'video/mp4',
+      200 * 1024 * 1024
+    ); // 200MB
 
     fireEvent.change(fileInput, {
       target: { files: [largeFile] },
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/File size exceeds 100MB limit/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/File size exceeds 100MB limit/)
+      ).toBeInTheDocument();
     });
   });
 
@@ -206,7 +224,9 @@ describe('MediaBin', () => {
       </TestWrapper>
     );
 
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
     const unsupportedFile = createMockFile('document.pdf', 'application/pdf');
 
     fireEvent.change(fileInput, {
@@ -214,7 +234,9 @@ describe('MediaBin', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/Unsupported file type: application\/pdf/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Unsupported file type: application\/pdf/)
+      ).toBeInTheDocument();
     });
   });
 
@@ -225,7 +247,9 @@ describe('MediaBin', () => {
       </TestWrapper>
     );
 
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
     const videoFile = createMockFile('test-video.mp4', 'video/mp4');
 
     fireEvent.change(fileInput, {
@@ -258,7 +282,9 @@ describe('MediaBin', () => {
       </TestWrapper>
     );
 
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
     const imageFile = createMockFile('test-image.jpg', 'image/jpeg');
 
     // Mock FileReader
@@ -268,7 +294,7 @@ describe('MediaBin', () => {
       onerror: null as any,
       result: 'data:image/jpeg;base64,mock-image-data',
     };
-    
+
     global.FileReader = vi.fn(() => mockFileReader) as any;
 
     fireEvent.change(fileInput, {
@@ -292,7 +318,9 @@ describe('MediaBin', () => {
       </TestWrapper>
     );
 
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
     const audioFile = createMockFile('test-audio.mp3', 'audio/mp3');
 
     fireEvent.change(fileInput, {
@@ -318,7 +346,9 @@ describe('MediaBin', () => {
       </TestWrapper>
     );
 
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
     const files = [
       createMockFile('video.mp4', 'video/mp4'),
       createMockFile('image.jpg', 'image/jpeg'),
@@ -341,7 +371,9 @@ describe('MediaBin', () => {
       </TestWrapper>
     );
 
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
     const videoFile = createMockFile('error-video.mp4', 'video/mp4');
 
     // Mock error during processing
@@ -354,7 +386,9 @@ describe('MediaBin', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/Failed to create object URL/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Failed to create object URL/)
+      ).toBeInTheDocument();
     });
   });
 
@@ -365,7 +399,9 @@ describe('MediaBin', () => {
       </TestWrapper>
     );
 
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
     const videoFile = createMockFile('test-video.mp4', 'video/mp4');
 
     fireEvent.change(fileInput, {
@@ -384,7 +420,9 @@ describe('MediaBin', () => {
       </TestWrapper>
     );
 
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
     const videoFile = createMockFile('test-video.mp4', 'video/mp4');
 
     fireEvent.change(fileInput, {
@@ -404,7 +442,9 @@ describe('MediaBin', () => {
     );
 
     // Find the actual drop zone element with border classes
-    const dropZone = document.querySelector('[class*="border-2 border-dashed"]');
+    const dropZone = document.querySelector(
+      '[class*="border-2 border-dashed"]'
+    );
     const videoFile = createMockFile('dropped-video.mp4', 'video/mp4');
 
     fireEvent.drop(dropZone!, {
@@ -451,7 +491,7 @@ describe('MediaBin File Validation', () => {
       'video/mov',
     ];
 
-    supportedVideoTypes.forEach(type => {
+    supportedVideoTypes.forEach((type) => {
       const file = createMockFile(`test.${type.split('/')[1]}`, type);
       // Test would validate that these types are accepted
       expect(file.type).toBe(type);
@@ -468,7 +508,7 @@ describe('MediaBin File Validation', () => {
       'image/svg+xml',
     ];
 
-    supportedImageTypes.forEach(type => {
+    supportedImageTypes.forEach((type) => {
       const file = createMockFile(`test.${type.split('/')[1]}`, type);
       expect(file.type).toBe(type);
     });
@@ -483,7 +523,7 @@ describe('MediaBin File Validation', () => {
       'audio/flac',
     ];
 
-    supportedAudioTypes.forEach(type => {
+    supportedAudioTypes.forEach((type) => {
       const file = createMockFile(`test.${type.split('/')[1]}`, type);
       expect(file.type).toBe(type);
     });

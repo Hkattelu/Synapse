@@ -14,19 +14,42 @@ vi.mock('../../state/hooks', () => ({
   useTimeline: () => ({
     timeline: mockState.project?.timeline || [],
     selectedItems: mockState.ui.timeline.selectedItems,
-    addTimelineItem: vi.fn((item) => mockDispatch({ type: 'ADD_TIMELINE_ITEM', payload: { ...item, id: 'new-id' } })),
-    moveTimelineItem: vi.fn((id, startTime, track) => mockDispatch({ type: 'MOVE_TIMELINE_ITEM', payload: { id, startTime, track } })),
-    resizeTimelineItem: vi.fn((id, duration) => mockDispatch({ type: 'RESIZE_TIMELINE_ITEM', payload: { id, duration } })),
-    selectTimelineItems: vi.fn((ids) => mockDispatch({ type: 'SELECT_TIMELINE_ITEMS', payload: ids })),
-    clearTimelineSelection: vi.fn(() => mockDispatch({ type: 'CLEAR_TIMELINE_SELECTION' })),
-    timelineDuration: mockState.project?.timeline.reduce((max, item) => Math.max(max, item.startTime + item.duration), 0) || 0,
+    addTimelineItem: vi.fn((item) =>
+      mockDispatch({
+        type: 'ADD_TIMELINE_ITEM',
+        payload: { ...item, id: 'new-id' },
+      })
+    ),
+    moveTimelineItem: vi.fn((id, startTime, track) =>
+      mockDispatch({
+        type: 'MOVE_TIMELINE_ITEM',
+        payload: { id, startTime, track },
+      })
+    ),
+    resizeTimelineItem: vi.fn((id, duration) =>
+      mockDispatch({ type: 'RESIZE_TIMELINE_ITEM', payload: { id, duration } })
+    ),
+    selectTimelineItems: vi.fn((ids) =>
+      mockDispatch({ type: 'SELECT_TIMELINE_ITEMS', payload: ids })
+    ),
+    clearTimelineSelection: vi.fn(() =>
+      mockDispatch({ type: 'CLEAR_TIMELINE_SELECTION' })
+    ),
+    timelineDuration:
+      mockState.project?.timeline.reduce(
+        (max, item) => Math.max(max, item.startTime + item.duration),
+        0
+      ) || 0,
   }),
   useMediaAssets: () => ({
-    getMediaAssetById: (id: string) => mockState.project?.mediaAssets.find(asset => asset.id === id),
+    getMediaAssetById: (id: string) =>
+      mockState.project?.mediaAssets.find((asset) => asset.id === id),
   }),
   useUI: () => ({
     ui: mockState.ui,
-    updateTimelineView: vi.fn((updates) => mockDispatch({ type: 'UPDATE_TIMELINE_VIEW', payload: updates })),
+    updateTimelineView: vi.fn((updates) =>
+      mockDispatch({ type: 'UPDATE_TIMELINE_VIEW', payload: updates })
+    ),
   }),
 }));
 
@@ -105,7 +128,9 @@ const renderTimeline = (state: Partial<AppState> = {}) => {
   mockState = {
     ...defaultState,
     ...state,
-    project: state.project ? { ...defaultState.project!, ...state.project } : defaultState.project,
+    project: state.project
+      ? { ...defaultState.project!, ...state.project }
+      : defaultState.project,
     ui: state.ui ? { ...defaultState.ui, ...state.ui } : defaultState.ui,
   };
 
@@ -120,7 +145,7 @@ describe('Timeline Component', () => {
 
   it('renders timeline with header and controls', () => {
     renderTimeline();
-    
+
     expect(screen.getByText('Timeline')).toBeInTheDocument();
     expect(screen.getByTitle('Zoom Out')).toBeInTheDocument();
     expect(screen.getByTitle('Zoom In')).toBeInTheDocument();
@@ -135,7 +160,7 @@ describe('Timeline Component', () => {
         timeline: { ...defaultState.ui.timeline, zoom: 1.5 },
       },
     });
-    
+
     expect(screen.getByText('150%')).toBeInTheDocument();
   });
 
@@ -147,17 +172,17 @@ describe('Timeline Component', () => {
         mediaAssets: [mockMediaAsset],
       },
     });
-    
+
     expect(screen.getByText('test-video.mp4')).toBeInTheDocument();
     expect(screen.getByText('10s')).toBeInTheDocument();
   });
 
   it('handles zoom in', async () => {
     renderTimeline();
-    
+
     const zoomInButton = screen.getByTitle('Zoom In');
     fireEvent.click(zoomInButton);
-    
+
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'UPDATE_TIMELINE_VIEW',
@@ -173,10 +198,10 @@ describe('Timeline Component', () => {
         timeline: { ...defaultState.ui.timeline, zoom: 1.5 },
       },
     });
-    
+
     const zoomOutButton = screen.getByTitle('Zoom Out');
     fireEvent.click(zoomOutButton);
-    
+
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'UPDATE_TIMELINE_VIEW',
@@ -187,10 +212,10 @@ describe('Timeline Component', () => {
 
   it('toggles snap to grid', async () => {
     renderTimeline();
-    
+
     const snapButton = screen.getByText('Snap');
     fireEvent.click(snapButton);
-    
+
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'UPDATE_TIMELINE_VIEW',
@@ -206,10 +231,10 @@ describe('Timeline Component', () => {
         mediaAssets: [mockMediaAsset],
       },
     });
-    
+
     const timeline = container.querySelector('.timeline-canvas');
     expect(timeline).toBeInTheDocument();
-    
+
     // Simulate drop - just verify the function is called with the asset ID
     fireEvent.drop(timeline!, {
       dataTransfer: {
@@ -218,7 +243,7 @@ describe('Timeline Component', () => {
       clientX: 100,
       clientY: 50,
     });
-    
+
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'ADD_TIMELINE_ITEM',
@@ -238,10 +263,10 @@ describe('Timeline Component', () => {
         mediaAssets: [mockMediaAsset],
       },
     });
-    
+
     const timelineClip = screen.getByText('test-video.mp4').closest('div');
     expect(timelineClip).toBeInTheDocument();
-    
+
     // Mock getBoundingClientRect for timeline
     const timeline = container.querySelector('.timeline-canvas');
     vi.spyOn(timeline!, 'getBoundingClientRect').mockReturnValue({
@@ -250,12 +275,12 @@ describe('Timeline Component', () => {
       width: 1000,
       height: 200,
     } as DOMRect);
-    
+
     fireEvent.mouseDown(timelineClip!, {
       clientX: 100,
       clientY: 50,
     });
-    
+
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SELECT_TIMELINE_ITEMS',
@@ -273,20 +298,23 @@ describe('Timeline Component', () => {
       },
       ui: {
         ...defaultState.ui,
-        timeline: { ...defaultState.ui.timeline, selectedItems: [mockTimelineItem.id] },
+        timeline: {
+          ...defaultState.ui.timeline,
+          selectedItems: [mockTimelineItem.id],
+        },
       },
     });
-    
+
     const timeline = container.querySelector('.timeline-canvas');
-    
+
     // Create a mock event where target equals currentTarget (clicking empty space)
     const mockEvent = {
       target: timeline,
       currentTarget: timeline,
     };
-    
+
     fireEvent.click(timeline!, mockEvent);
-    
+
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'CLEAR_TIMELINE_SELECTION',
@@ -296,7 +324,7 @@ describe('Timeline Component', () => {
 
   it('displays track labels', () => {
     renderTimeline();
-    
+
     expect(screen.getByText('Track 1')).toBeInTheDocument();
     expect(screen.getByText('Track 2')).toBeInTheDocument();
     expect(screen.getByText('Track 3')).toBeInTheDocument();
@@ -310,25 +338,27 @@ describe('Timeline Component', () => {
         timeline: { ...defaultState.ui.timeline, snapToGrid: true },
       },
     });
-    
-    const gridLines = container.querySelectorAll('.border-l.border-gray-700.opacity-30');
+
+    const gridLines = container.querySelectorAll(
+      '.border-l.border-gray-700.opacity-30'
+    );
     expect(gridLines.length).toBeGreaterThan(0);
   });
 
   it('handles scroll events', async () => {
     const { container } = renderTimeline();
-    
+
     const timelineContent = container.querySelector('.timeline-content');
     expect(timelineContent).toBeInTheDocument();
-    
+
     // Mock the scrollLeft property
     Object.defineProperty(timelineContent, 'scrollLeft', {
       value: 100,
       writable: true,
     });
-    
+
     fireEvent.scroll(timelineContent!);
-    
+
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'UPDATE_TIMELINE_VIEW',
@@ -348,7 +378,7 @@ describe('Timeline Component', () => {
         mediaAssets: [mockMediaAsset],
       },
     });
-    
+
     // Duration should be the end time of the last clip (10 + 8 = 18)
     expect(screen.getByText('Duration: 18s')).toBeInTheDocument();
   });
@@ -362,10 +392,13 @@ describe('Timeline Component', () => {
       },
       ui: {
         ...defaultState.ui,
-        timeline: { ...defaultState.ui.timeline, selectedItems: [mockTimelineItem.id] },
+        timeline: {
+          ...defaultState.ui.timeline,
+          selectedItems: [mockTimelineItem.id],
+        },
       },
     });
-    
+
     // Find the timeline clip container (not just the text)
     const timelineClip = container.querySelector('.border-yellow-400');
     expect(timelineClip).toBeInTheDocument();
@@ -379,14 +412,14 @@ describe('Timeline Component', () => {
       name: 'test-audio.mp3',
       type: 'audio',
     };
-    
+
     const audioItem: TimelineItem = {
       ...mockTimelineItem,
       id: 'audio-item',
       assetId: 'audio-asset',
       type: 'audio',
     };
-    
+
     const { container } = renderTimeline({
       project: {
         ...defaultState.project!,
@@ -394,11 +427,11 @@ describe('Timeline Component', () => {
         mediaAssets: [mockMediaAsset, audioAsset],
       },
     });
-    
+
     // Check that both color classes exist in the DOM
     const videoClip = container.querySelector('.bg-blue-600');
     const audioClip = container.querySelector('.bg-green-600');
-    
+
     expect(videoClip).toBeInTheDocument();
     expect(audioClip).toBeInTheDocument();
   });
@@ -410,10 +443,10 @@ describe('Timeline Component', () => {
         timeline: { ...defaultState.ui.timeline, zoom: 0.1 },
       },
     });
-    
+
     const zoomOutButton = screen.getByTitle('Zoom Out');
     fireEvent.click(zoomOutButton);
-    
+
     // Should not go below 0.1
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith({
@@ -430,10 +463,10 @@ describe('Timeline Component', () => {
         timeline: { ...defaultState.ui.timeline, zoom: 5 },
       },
     });
-    
+
     const zoomInButton = screen.getByTitle('Zoom In');
     fireEvent.click(zoomInButton);
-    
+
     // Should not go above 5
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith({

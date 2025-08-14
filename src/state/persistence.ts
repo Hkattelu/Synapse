@@ -8,18 +8,20 @@ export function saveToLocalStorage(key: string, state: AppState): void {
     const serializedState = JSON.stringify({
       ...state,
       // Convert dates to ISO strings for serialization
-      project: state.project ? {
-        ...state.project,
-        createdAt: state.project.createdAt.toISOString(),
-        updatedAt: state.project.updatedAt.toISOString(),
-        mediaAssets: state.project.mediaAssets.map(asset => ({
-          ...asset,
-          createdAt: asset.createdAt.toISOString(),
-        })),
-      } : null,
+      project: state.project
+        ? {
+            ...state.project,
+            createdAt: state.project.createdAt.toISOString(),
+            updatedAt: state.project.updatedAt.toISOString(),
+            mediaAssets: state.project.mediaAssets.map((asset) => ({
+              ...asset,
+              createdAt: asset.createdAt.toISOString(),
+            })),
+          }
+        : null,
       lastSaved: state.lastSaved?.toISOString() || null,
     });
-    
+
     localStorage.setItem(key, serializedState);
   } catch (error) {
     console.error('Failed to save state to localStorage:', error);
@@ -35,19 +37,21 @@ export function loadFromLocalStorage(key: string): AppState | null {
     }
 
     const parsedState = JSON.parse(serializedState);
-    
+
     // Convert ISO strings back to Date objects
     return {
       ...parsedState,
-      project: parsedState.project ? {
-        ...parsedState.project,
-        createdAt: new Date(parsedState.project.createdAt),
-        updatedAt: new Date(parsedState.project.updatedAt),
-        mediaAssets: parsedState.project.mediaAssets.map((asset: any) => ({
-          ...asset,
-          createdAt: new Date(asset.createdAt),
-        })),
-      } : null,
+      project: parsedState.project
+        ? {
+            ...parsedState.project,
+            createdAt: new Date(parsedState.project.createdAt),
+            updatedAt: new Date(parsedState.project.updatedAt),
+            mediaAssets: parsedState.project.mediaAssets.map((asset: any) => ({
+              ...asset,
+              createdAt: new Date(asset.createdAt),
+            })),
+          }
+        : null,
       lastSaved: parsedState.lastSaved ? new Date(parsedState.lastSaved) : null,
     };
   } catch (error) {

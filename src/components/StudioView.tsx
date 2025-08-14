@@ -1,65 +1,89 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useProject, useUI } from '../state/hooks';
 import { MediaBin } from './MediaBin';
 import { Timeline } from './Timeline';
 import { EnhancedTimelineView } from './EnhancedTimelineView';
 import { Preview } from './Preview';
 import { Inspector } from './Inspector';
+import { ArrowLeft, Sparkles, Settings, Archive, Eye } from 'lucide-react';
 
 export function StudioView() {
   const { project } = useProject();
-  const { ui, setCurrentView, toggleSidebar, toggleInspector, toggleMediaBin } = useUI();
-  const [timelineMode, setTimelineMode] = useState<'standard' | 'enhanced'>('enhanced');
+  const { ui, setCurrentView, toggleSidebar, toggleInspector, toggleMediaBin } =
+    useUI();
+  const [timelineMode, setTimelineMode] = useState<'standard' | 'enhanced'>(
+    'enhanced'
+  );
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-synapse-background text-synapse-text-primary flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">No Project Loaded</h2>
-          <p className="text-synapse-text-secondary mb-6">Please create or load a project to start editing</p>
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-purple-50 to-indigo-50 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center bg-white/80 backdrop-blur-sm border border-purple-200 rounded-2xl p-12 shadow-xl max-w-md"
+        >
+          <div className="w-16 h-16 bg-purple-600 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">No Project Loaded</h2>
+          <p className="text-gray-600 mb-6 leading-relaxed">
+            Please create or load a project to start your creative journey with Synapse Studio
+          </p>
           <button
             onClick={() => setCurrentView('dashboard')}
-            className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse font-medium py-2 px-4 rounded-synapse transition-colors duration-synapse-fast"
+            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-lg flex items-center space-x-2 mx-auto"
           >
-            Go to Dashboard
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Dashboard</span>
           </button>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
-      {/* Simplified Header */}
-      <header className="bg-gray-800 border-b border-gray-700 px-4 py-3">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-purple-50 flex flex-col">
+      {/* Elegant Header */}
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="bg-white/90 backdrop-blur-sm border-b border-purple-200 px-6 py-4 shadow-sm"
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setCurrentView('dashboard')}
-              className="text-gray-400 hover:text-gray-200 p-2 rounded-md hover:bg-gray-700 transition-colors"
+              className="text-gray-500 hover:text-purple-600 p-2 rounded-full hover:bg-purple-100 transition-all duration-200 hover:scale-105"
               title="Back to Dashboard"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
+              <ArrowLeft className="w-5 h-5" />
             </button>
-            <div>
-              <h1 className="text-lg font-semibold">{project.name}</h1>
-              <p className="text-sm text-gray-400">
-                {project.timeline.length} clips • {project.mediaAssets.length} assets
-              </p>
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">{project.name}</h1>
+                <p className="text-sm text-gray-600">
+                  {project.timeline.length} clips • {project.mediaAssets.length} assets
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4">
             {/* Timeline Mode Toggle */}
-            <div className="flex bg-gray-700 rounded-lg p-1">
+            <div className="flex bg-purple-100 rounded-xl p-1">
               <button
                 onClick={() => setTimelineMode('standard')}
-                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                  timelineMode === 'standard' 
-                    ? 'bg-blue-600 text-white shadow-sm' 
-                    : 'text-gray-300 hover:text-white hover:bg-gray-600'
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  timelineMode === 'standard'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'text-purple-700 hover:text-purple-900 hover:bg-purple-200'
                 }`}
                 title="Standard Timeline"
               >
@@ -67,10 +91,10 @@ export function StudioView() {
               </button>
               <button
                 onClick={() => setTimelineMode('enhanced')}
-                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                  timelineMode === 'enhanced' 
-                    ? 'bg-blue-600 text-white shadow-sm' 
-                    : 'text-gray-300 hover:text-white hover:bg-gray-600'
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  timelineMode === 'enhanced'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'text-purple-700 hover:text-purple-900 hover:bg-purple-200'
                 }`}
                 title="Enhanced Timeline with Keyframes"
               >
@@ -79,54 +103,55 @@ export function StudioView() {
             </div>
 
             {/* Panel Controls */}
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-2">
               <button
                 onClick={toggleMediaBin}
-                className={`p-2 rounded-md transition-colors ${
-                  ui.mediaBinVisible 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
+                  ui.mediaBinVisible
+                    ? 'bg-purple-600 text-white shadow-lg'
+                    : 'bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300'
                 }`}
                 title="Toggle Media Bin"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
+                <Archive className="w-4 h-4" />
               </button>
               <button
                 onClick={toggleInspector}
-                className={`p-2 rounded-md transition-colors ${
-                  ui.inspectorVisible 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
+                  ui.inspectorVisible
+                    ? 'bg-purple-600 text-white shadow-lg'
+                    : 'bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300'
                 }`}
                 title="Toggle Properties Panel"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100-4m0 4v2m0-6V4" />
-                </svg>
+                <Settings className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="flex-1 flex overflow-hidden bg-white/50 backdrop-blur-sm m-4 rounded-2xl border border-purple-200/50 shadow-xl"
+      >
         {/* Main Editor Area */}
-        <main className="flex-1 flex flex-col bg-gray-850">
+        <main className="flex-1 flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-l-2xl overflow-hidden">
           <div className="flex-1 flex">
             {/* Preview Area */}
-            <div className="flex-1 bg-black border-r border-gray-700">
+            <div className="flex-1 bg-black border-r border-gray-700/50 rounded-tl-2xl overflow-hidden">
               <Preview className="h-full" />
             </div>
-            
+
             {/* Timeline Area - Always visible */}
-            <div className="w-96 border-r border-gray-700">
+            <div className="w-96 border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900">
               {timelineMode === 'enhanced' ? (
-                <EnhancedTimelineView className="h-full bg-gray-800" />
+                <EnhancedTimelineView className="h-full" />
               ) : (
-                <div className="h-full bg-gray-800">
+                <div className="h-full">
                   <Timeline className="h-full" />
                 </div>
               )}
@@ -136,23 +161,28 @@ export function StudioView() {
 
         {/* Right Panels */}
         {(ui.mediaBinVisible || ui.inspectorVisible) && (
-          <div className="w-80 flex flex-col border-l border-gray-700">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+            className="w-80 flex flex-col bg-white/95 backdrop-blur-sm border-l border-purple-200 rounded-r-2xl overflow-hidden shadow-inner"
+          >
             {/* Media Bin */}
             {ui.mediaBinVisible && (
-              <div className="flex-1 bg-gray-800 border-b border-gray-700">
+              <div className={`${ui.inspectorVisible ? 'flex-1' : 'h-full'} border-b border-purple-200/50 bg-gradient-to-b from-white to-purple-50/30`}>
                 <MediaBin />
               </div>
             )}
 
             {/* Inspector Panel */}
             {ui.inspectorVisible && (
-              <div className="flex-1 bg-gray-800">
+              <div className={`${ui.mediaBinVisible ? 'flex-1' : 'h-full'} bg-gradient-to-b from-purple-50/30 to-white`}>
                 <Inspector />
               </div>
             )}
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

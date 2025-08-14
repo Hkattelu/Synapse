@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useProject, useUI } from '../state/hooks';
+import { Play, Video, Sparkles, Users, Heart, Plus, ArrowRight, Calendar, Folder } from 'lucide-react';
 
 export function DashboardView() {
-  const { project, createProject } = useProject();
+  const { project, projects, createProject } = useProject();
   const { setCurrentView } = useUI();
   const [projectName, setProjectName] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -20,162 +22,322 @@ export function DashboardView() {
     setCurrentView('studio');
   };
 
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
-      {/* Simple Header */}
-      <header className="border-b border-gray-700 px-6 py-4">
-        <div className="flex items-center justify-between max-w-6xl mx-auto">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">S</span>
-            </div>
-            <div>
-              <h1 className="text-xl font-semibold">Synapse Studio</h1>
-              <p className="text-sm text-gray-400">Video creation made simple</p>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-purple-50 to-indigo-50 overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 z-0">
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 1220 810"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          preserveAspectRatio="xMidYMid slice"
+        >
+          <g clipPath="url(#clip0_hero)">
+            {[...Array(35)].map((_, i) => (
+              <React.Fragment key={`row-${i}`}>
+                {[...Array(23)].map((_, j) => (
+                  <rect
+                    key={`${i}-${j}`}
+                    x={-20.0891 + i * 36}
+                    y={9.2 + j * 36}
+                    width="35.6"
+                    height="35.6"
+                    stroke="rgb(147 51 234)"
+                    strokeOpacity="0.1"
+                    strokeWidth="0.4"
+                    strokeDasharray="2 2"
+                    className="transition-all duration-300 hover:stroke-opacity-30"
+                  />
+                ))}
+              </React.Fragment>
+            ))}
+
+            <circle
+              cx={mousePosition.x}
+              cy={mousePosition.y}
+              r="120"
+              fill="url(#mouseGradient)"
+              opacity="0.05"
+              className="pointer-events-none transition-opacity duration-300"
+            />
+          </g>
+
+          <defs>
+            <radialGradient id="mouseGradient" cx="0" cy="0" r="1">
+              <stop offset="0%" stopColor="rgb(147 51 234)" />
+              <stop offset="100%" stopColor="transparent" />
+            </radialGradient>
+            <clipPath id="clip0_hero">
+              <rect width="1220" height="810" rx="16" fill="white" />
+            </clipPath>
+          </defs>
+        </svg>
+      </div>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 py-12">
-        {/* Welcome Section */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4">Get started with your project</h2>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Create professional videos with timeline editing and animated code snippets
+      <div className="relative z-10 container mx-auto px-4 py-20">
+        {/* Header Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <div className="flex items-center justify-center space-x-3 mb-6">
+            <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
+              Welcome to Synapse Studio
+            </h1>
+          </div>
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-100 border border-purple-200 text-sm font-medium text-purple-700 mb-4">
+            <Heart className="w-4 h-4 mr-2" />
+            Made with ❤️ for creators, by creators
+          </div>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            The human-friendly video creation tool for educational content and game devlogs. 
+            No AI fluff, just pure creative power in your hands.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Main Actions */}
-        <div className="max-w-2xl mx-auto">
-          {/* Create Project Form */}
+        {/* Project Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="max-w-4xl mx-auto mb-16"
+        >
           {showCreateForm ? (
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
-              <h3 className="text-lg font-semibold mb-4">Create New Project</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Project Name
-                  </label>
-                  <input
-                    type="text"
-                    value={projectName}
-                    onChange={(e) => setProjectName(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleCreateProject()}
-                    placeholder="My Awesome Project"
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    autoFocus
-                  />
-                </div>
-                <div className="flex space-x-3">
-                  <button
-                    onClick={handleCreateProject}
-                    disabled={!projectName.trim()}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                  >
-                    Create Project
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowCreateForm(false);
-                      setProjectName('');
-                    }}
-                    className="px-4 py-2 text-gray-400 hover:text-gray-200 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
+            <div className="bg-white/80 backdrop-blur-sm border border-purple-200 rounded-2xl p-8 shadow-xl">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">Create New Project</h3>
+                <button
+                  onClick={() => {
+                    setShowCreateForm(false);
+                    setProjectName('');
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <input
+                  type="text"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleCreateProject()}
+                  placeholder="Enter your project name..."
+                  className="flex-1 px-6 py-4 bg-white border border-purple-200 rounded-full text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-lg"
+                  autoFocus
+                />
+                <button
+                  onClick={handleCreateProject}
+                  disabled={!projectName.trim()}
+                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:text-gray-500 text-white font-semibold px-8 py-4 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center space-x-2 text-lg"
+                >
+                  <Play className="w-5 h-5" />
+                  <span>Create Project</span>
+                </button>
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              {/* Create New Project Button */}
+            <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
               <button
                 onClick={() => setShowCreateForm(true)}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                className="group bg-purple-600 hover:bg-purple-700 text-white p-6 rounded-2xl transition-all duration-200 hover:scale-105 hover:shadow-xl shadow-lg"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                <span>Create New Project</span>
+                <div className="flex items-center justify-center space-x-3">
+                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                    <Plus className="w-5 h-5" />
+                  </div>
+                  <span className="font-semibold text-lg">Create New Project</span>
+                </div>
               </button>
 
-              {/* Open Existing Project */}
               {project && (
                 <button
                   onClick={handleOpenProject}
-                  className="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium py-4 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                  className="group bg-white/80 backdrop-blur-sm hover:bg-white border border-purple-200 hover:border-purple-300 text-gray-900 p-6 rounded-2xl transition-all duration-200 hover:scale-105 hover:shadow-xl shadow-lg"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>Continue with "{project.name}"</span>
+                  <div className="flex items-center justify-center space-x-3">
+                    <div className="w-10 h-10 rounded-full bg-purple-100 group-hover:bg-purple-200 flex items-center justify-center transition-colors">
+                      <ArrowRight className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <span className="font-semibold text-lg">Continue "{project.name}"</span>
+                  </div>
                 </button>
               )}
             </div>
           )}
-        </div>
+        </motion.div>
 
-        {/* Current Project Info */}
-        {project && (
-          <div className="max-w-2xl mx-auto mt-8">
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-              <h3 className="text-lg font-semibold mb-4">Current Project</h3>
-              <div className="grid grid-cols-3 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-400 block">Name</span>
-                  <span className="font-medium">{project.name}</span>
-                </div>
-                <div>
-                  <span className="text-gray-400 block">Created</span>
-                  <span className="font-medium">{project.createdAt.toLocaleDateString()}</span>
-                </div>
-                <div>
-                  <span className="text-gray-400 block">Items</span>
-                  <span className="font-medium">{project.timeline.length} clips</span>
-                </div>
-              </div>
+        {/* Recent Projects */}
+        {projects && projects.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="max-w-4xl mx-auto mb-16"
+          >
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Recent Projects</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {projects.slice(0, 6).map((p, index) => (
+                <motion.button
+                  key={p.project.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  onClick={() => setCurrentView('studio')}
+                  className="bg-white/80 backdrop-blur-sm hover:bg-white border border-purple-200 hover:border-purple-300 rounded-xl p-6 transition-all duration-200 hover:scale-105 hover:shadow-lg text-left group"
+                >
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                      <Folder className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 truncate group-hover:text-purple-900 transition-colors">
+                        {p.project.name}
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Video className="w-4 h-4 mr-2" />
+                      {p.project.timeline.length} clips
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      {p.lastOpened.toLocaleDateString()}
+                    </div>
+                  </div>
+                </motion.button>
+              ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
-        {/* Quick Features */}
-        <div className="mt-16 max-w-4xl mx-auto">
-          <h3 className="text-xl font-semibold mb-8 text-center">What you can create</h3>
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="w-12 h-12 bg-purple-600 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
+        {/* Features Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="max-w-6xl mx-auto"
+        >
+          <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center">
+            Why Creators Choose Synapse Studio
+          </h2>
+          <p className="text-lg text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+            Built by a creator who understands the struggle of making authentic, engaging content 
+            in a world full of generic AI-generated videos.
+          </p>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="bg-white/80 backdrop-blur-sm border border-purple-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow"
+            >
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
+                <Video className="w-8 h-8 text-purple-600" />
               </div>
-              <h4 className="font-semibold mb-2">Timeline Editor</h4>
-              <p className="text-gray-400 text-sm">Drag and drop clips with precision</p>
-            </div>
-            
-            <div>
-              <div className="w-12 h-12 bg-green-600 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                </svg>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Intuitive Video Editor</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Drag-and-drop simplicity meets professional power. Create stunning educational content without the learning curve.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="bg-white/80 backdrop-blur-sm border border-purple-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow"
+            >
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
+                <Users className="w-8 h-8 text-purple-600" />
               </div>
-              <h4 className="font-semibold mb-2">Animated Code</h4>
-              <p className="text-gray-400 text-sm">Smooth typing animations for tutorials</p>
-            </div>
-            
-            <div>
-              <div className="w-12 h-12 bg-orange-600 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Built for Creators</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Designed specifically for YouTubers, educators, and game developers who want to tell their story authentically.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="bg-white/80 backdrop-blur-sm border border-purple-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow"
+            >
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
+                <Heart className="w-8 h-8 text-purple-600" />
               </div>
-              <h4 className="font-semibold mb-2">Quick Effects</h4>
-              <p className="text-gray-400 text-sm">Professional transitions with one click</p>
-            </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Human-Centered</h3>
+              <p className="text-gray-600 leading-relaxed">
+                No AI shortcuts or automated content. Just pure creative tools that amplify your unique voice and vision.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              viewport={{ once: true }}
+              className="bg-white/80 backdrop-blur-sm border border-purple-200 rounded-xl p-6 text-center hover:shadow-lg transition-shadow"
+            >
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
+                <Sparkles className="w-8 h-8 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Devlog Ready</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Perfect templates and tools for game developers to showcase their progress and connect with their community.
+              </p>
+            </motion.div>
           </div>
-        </div>
-      </main>
+        </motion.div>
+
+        {/* Current Project Status (if exists) */}
+        {project && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+            className="max-w-4xl mx-auto mt-16 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl p-8 shadow-xl"
+          >
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center space-x-2 mb-4">
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <h3 className="text-xl font-bold">Active Project</h3>
+              </div>
+              <h4 className="text-2xl font-bold mb-2">{project.name}</h4>
+            </div>
+            <div className="grid grid-cols-3 gap-6 text-center">
+              <div>
+                <div className="text-3xl font-bold mb-1">{project.timeline.length}</div>
+                <div className="text-purple-200 text-sm">Timeline Clips</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold mb-1">{project.mediaAssets.length}</div>
+                <div className="text-purple-200 text-sm">Media Assets</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold mb-1">{project.createdAt.toLocaleDateString()}</div>
+                <div className="text-purple-200 text-sm">Created</div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 }

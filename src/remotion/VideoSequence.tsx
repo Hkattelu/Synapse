@@ -40,7 +40,7 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
             }}
           />
         )}
-        
+
         {asset.type === 'image' && (
           <Img
             src={asset.url}
@@ -51,7 +51,7 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
             }}
           />
         )}
-        
+
         {asset.type === 'audio' && (
           <AbsoluteFill
             style={{
@@ -66,7 +66,7 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
             🎵 {asset.name}
           </AbsoluteFill>
         )}
-        
+
         {asset.type === 'code' && (
           <AbsoluteFill
             style={{

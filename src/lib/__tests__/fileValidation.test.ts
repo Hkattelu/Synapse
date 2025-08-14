@@ -1,10 +1,19 @@
 import { describe, it, expect } from 'vitest';
 import { validateMediaAsset } from '../validation';
-import { formatFileSize, formatDuration, getFileExtension, isVideoFile, isImageFile, isAudioFile } from '../utils';
+import {
+  formatFileSize,
+  formatDuration,
+  getFileExtension,
+  isVideoFile,
+  isImageFile,
+  isAudioFile,
+} from '../utils';
 import type { MediaAsset } from '../types';
 
 describe('File Upload Validation', () => {
-  const createMockMediaAsset = (overrides: Partial<MediaAsset> = {}): MediaAsset => ({
+  const createMockMediaAsset = (
+    overrides: Partial<MediaAsset> = {}
+  ): MediaAsset => ({
     id: 'test-id',
     name: 'test-file.mp4',
     type: 'video',
@@ -23,7 +32,7 @@ describe('File Upload Validation', () => {
     it('validates a complete valid media asset', () => {
       const asset = createMockMediaAsset();
       const result = validateMediaAsset(asset);
-      
+
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
@@ -31,50 +40,50 @@ describe('File Upload Validation', () => {
     it('rejects asset with invalid ID', () => {
       const asset = createMockMediaAsset({ id: '' });
       const result = validateMediaAsset(asset);
-      
+
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.field === 'id')).toBe(true);
+      expect(result.errors.some((e) => e.field === 'id')).toBe(true);
     });
 
     it('rejects asset with empty name', () => {
       const asset = createMockMediaAsset({ name: '' });
       const result = validateMediaAsset(asset);
-      
+
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.field === 'name')).toBe(true);
+      expect(result.errors.some((e) => e.field === 'name')).toBe(true);
     });
 
     it('rejects asset with invalid type', () => {
       const asset = createMockMediaAsset({ type: 'invalid' as any });
       const result = validateMediaAsset(asset);
-      
+
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.field === 'type')).toBe(true);
+      expect(result.errors.some((e) => e.field === 'type')).toBe(true);
     });
 
     it('rejects asset with invalid URL', () => {
       const asset = createMockMediaAsset({ url: 'not-a-url' });
       const result = validateMediaAsset(asset);
-      
+
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.field === 'url')).toBe(true);
+      expect(result.errors.some((e) => e.field === 'url')).toBe(true);
     });
 
     it('rejects asset with negative duration', () => {
       const asset = createMockMediaAsset({ duration: -5 });
       const result = validateMediaAsset(asset);
-      
+
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.field === 'duration')).toBe(true);
+      expect(result.errors.some((e) => e.field === 'duration')).toBe(true);
     });
 
     it('accepts asset without duration (for images)', () => {
-      const asset = createMockMediaAsset({ 
+      const asset = createMockMediaAsset({
         type: 'image',
         duration: undefined,
       });
       const result = validateMediaAsset(asset);
-      
+
       expect(result.isValid).toBe(true);
     });
 
@@ -86,18 +95,22 @@ describe('File Upload Validation', () => {
         },
       });
       const result = validateMediaAsset(asset);
-      
+
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.field === 'metadata.fileSize')).toBe(true);
-      expect(result.errors.some(e => e.field === 'metadata.mimeType')).toBe(true);
+      expect(result.errors.some((e) => e.field === 'metadata.fileSize')).toBe(
+        true
+      );
+      expect(result.errors.some((e) => e.field === 'metadata.mimeType')).toBe(
+        true
+      );
     });
 
     it('rejects asset with invalid creation date', () => {
       const asset = createMockMediaAsset({ createdAt: 'invalid-date' as any });
       const result = validateMediaAsset(asset);
-      
+
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.field === 'createdAt')).toBe(true);
+      expect(result.errors.some((e) => e.field === 'createdAt')).toBe(true);
     });
   });
 
@@ -220,7 +233,9 @@ describe('File Upload Edge Cases', () => {
 
     const result = validateMediaAsset(asset);
     expect(result.isValid).toBe(false);
-    expect(result.errors.some(e => e.field === 'metadata.fileSize')).toBe(true);
+    expect(result.errors.some((e) => e.field === 'metadata.fileSize')).toBe(
+      true
+    );
   });
 
   it('handles files with unusual MIME types', () => {

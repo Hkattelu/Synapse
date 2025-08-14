@@ -48,8 +48,9 @@ The application uses a hybrid approach starting with React Context API for simpl
 ### Core Components
 
 #### StudioView.jsx
+
 - **Purpose**: Main controller for the video editor interface
-- **Responsibilities**: 
+- **Responsibilities**:
   - Orchestrates child components
   - Manages layout and responsive behavior
   - Handles keyboard shortcuts and global interactions
@@ -57,6 +58,7 @@ The application uses a hybrid approach starting with React Context API for simpl
 - **State**: Local UI state (panel sizes, view modes)
 
 #### Timeline.jsx
+
 - **Purpose**: Visual timeline interface for clip arrangement
 - **Responsibilities**:
   - Renders timeline tracks and clips
@@ -70,6 +72,7 @@ The application uses a hybrid approach starting with React Context API for simpl
   - Visual feedback for overlapping clips
 
 #### Preview.jsx
+
 - **Purpose**: Video preview and playback control
 - **Responsibilities**:
   - Hosts Remotion Player component
@@ -78,6 +81,7 @@ The application uses a hybrid approach starting with React Context API for simpl
 - **Integration**: Direct connection to Remotion engine via inputProps
 
 #### Inspector.jsx
+
 - **Purpose**: Property panel for selected timeline items
 - **Responsibilities**:
   - Displays item properties and metadata
@@ -86,6 +90,7 @@ The application uses a hybrid approach starting with React Context API for simpl
   - Validates user input
 
 #### MediaBin.jsx
+
 - **Purpose**: Asset management and organization
 - **Responsibilities**:
   - Displays imported media assets
@@ -96,6 +101,7 @@ The application uses a hybrid approach starting with React Context API for simpl
 ### Remotion Components
 
 #### MainComposition.jsx
+
 - **Purpose**: Primary Remotion composition that renders the final video
 - **Responsibilities**:
   - Receives timeline and asset data via inputProps
@@ -104,6 +110,7 @@ The application uses a hybrid approach starting with React Context API for simpl
 - **Dynamic Rendering**: Conditionally renders different sequence types based on asset types
 
 #### VideoSequence.jsx
+
 - **Purpose**: Renders video clips within the composition
 - **Features**:
   - Video playback with timing control
@@ -111,6 +118,7 @@ The application uses a hybrid approach starting with React Context API for simpl
   - Fade in/out transitions
 
 #### CodeSequence.jsx
+
 - **Purpose**: Animated code snippet rendering
 - **Features**:
   - Syntax highlighting with Prism.js integration
@@ -119,6 +127,7 @@ The application uses a hybrid approach starting with React Context API for simpl
   - Support for multiple programming languages
 
 #### TitleSequence.jsx
+
 - **Purpose**: Text and title animations
 - **Features**:
   - Typography animations
@@ -128,6 +137,7 @@ The application uses a hybrid approach starting with React Context API for simpl
 ## Data Models
 
 ### Project Model
+
 ```typescript
 interface Project {
   id: string;
@@ -141,6 +151,7 @@ interface Project {
 ```
 
 ### Timeline Model
+
 ```typescript
 interface TimelineItem {
   id: string;
@@ -155,6 +166,7 @@ interface TimelineItem {
 ```
 
 ### Media Asset Model
+
 ```typescript
 interface MediaAsset {
   id: string;
@@ -168,6 +180,7 @@ interface MediaAsset {
 ```
 
 ### Animation Preset Model
+
 ```typescript
 interface AnimationPreset {
   id: string;
@@ -202,22 +215,26 @@ interface AnimationPreset {
 ## Testing Strategy
 
 ### Unit Testing
+
 - **Components**: Test individual React components with React Testing Library
 - **State Management**: Test state actions and reducers in isolation
 - **Utilities**: Test helper functions and data transformations
 - **Remotion Sequences**: Test sequence components with mock data
 
 ### Integration Testing
+
 - **State-Component Integration**: Test component behavior with real state updates
 - **Remotion Integration**: Test data flow between React UI and Remotion player
 - **File Upload Flow**: Test complete media import and processing pipeline
 
 ### End-to-End Testing
+
 - **User Workflows**: Test complete user journeys (create project → add media → edit → export)
 - **Cross-browser Compatibility**: Ensure functionality across modern browsers
 - **Performance Testing**: Validate rendering performance and memory usage
 
 ### Testing Tools
+
 - **Jest**: Unit and integration testing framework
 - **React Testing Library**: Component testing utilities
 - **Playwright**: End-to-end testing automation
@@ -226,16 +243,19 @@ interface AnimationPreset {
 ## Performance Considerations
 
 ### Rendering Optimization
+
 - **Remotion Performance**: Optimize composition complexity and asset loading
 - **React Optimization**: Use React.memo, useMemo, and useCallback strategically
 - **Virtual Scrolling**: Implement for large timeline and media bin datasets
 
 ### Asset Management
+
 - **Lazy Loading**: Load media assets on-demand
 - **Thumbnail Generation**: Create lightweight previews for quick browsing
 - **Caching Strategy**: Implement browser and memory caching for frequently used assets
 
 ### Bundle Optimization
+
 - **Code Splitting**: Split application into logical chunks
 - **Tree Shaking**: Remove unused code from final bundle
 - **Asset Optimization**: Compress and optimize static assets
@@ -243,11 +263,13 @@ interface AnimationPreset {
 ## Security Considerations
 
 ### File Upload Security
+
 - **File Type Validation**: Strict validation of uploaded file types
 - **File Size Limits**: Prevent oversized uploads that could impact performance
 - **Content Scanning**: Basic validation of file contents
 
 ### Client-Side Security
+
 - **Input Sanitization**: Sanitize user inputs to prevent XSS attacks
 - **Content Security Policy**: Implement CSP headers for additional protection
 - **Secure Asset Handling**: Ensure safe handling of user-uploaded content

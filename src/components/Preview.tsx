@@ -40,7 +40,9 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
 
   // Calculate total duration in frames
   const durationInFrames = useMemo(() => {
-    return Math.round(compositionProps.settings.duration * compositionProps.settings.fps);
+    return Math.round(
+      compositionProps.settings.duration * compositionProps.settings.fps
+    );
   }, [compositionProps.settings.duration, compositionProps.settings.fps]);
 
   // Sync playback state with player
@@ -57,18 +59,23 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   // Sync current time with player
   useEffect(() => {
     if (!playerRef.current) return;
-    
-    const currentFrame = Math.round(playback.currentTime * compositionProps.settings.fps);
+
+    const currentFrame = Math.round(
+      playback.currentTime * compositionProps.settings.fps
+    );
     playerRef.current.seekTo(currentFrame);
   }, [playback.currentTime, compositionProps.settings.fps]);
 
   // Handle player time updates
-  const handleTimeUpdate = useCallback((frame: number) => {
-    if (!isDragging) {
-      const timeInSeconds = frame / compositionProps.settings.fps;
-      seek(timeInSeconds);
-    }
-  }, [seek, compositionProps.settings.fps, isDragging]);
+  const handleTimeUpdate = useCallback(
+    (frame: number) => {
+      if (!isDragging) {
+        const timeInSeconds = frame / compositionProps.settings.fps;
+        seek(timeInSeconds);
+      }
+    },
+    [seek, compositionProps.settings.fps, isDragging]
+  );
 
   // Handle player play/pause
   const handlePlayPause = useCallback(() => {
@@ -80,54 +87,74 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   }, [playback.isPlaying, play, pause]);
 
   // Handle seeking to specific time
-  const handleSeek = useCallback((time: number) => {
-    const clampedTime = Math.max(0, Math.min(time, compositionProps.settings.duration));
-    seek(clampedTime);
-    
-    if (playerRef.current) {
-      const frame = Math.round(clampedTime * compositionProps.settings.fps);
-      playerRef.current.seekTo(frame);
-    }
-  }, [seek, compositionProps.settings.duration, compositionProps.settings.fps]);
+  const handleSeek = useCallback(
+    (time: number) => {
+      const clampedTime = Math.max(
+        0,
+        Math.min(time, compositionProps.settings.duration)
+      );
+      seek(clampedTime);
+
+      if (playerRef.current) {
+        const frame = Math.round(clampedTime * compositionProps.settings.fps);
+        playerRef.current.seekTo(frame);
+      }
+    },
+    [seek, compositionProps.settings.duration, compositionProps.settings.fps]
+  );
 
   // Handle timeline scrubbing
-  const handleTimelineScrub = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const percentage = x / rect.width;
-    const time = percentage * compositionProps.settings.duration;
-    handleSeek(time);
-  }, [handleSeek, compositionProps.settings.duration]);
-
-  // Handle timeline drag start
-  const handleTimelineDragStart = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    setIsDragging(true);
-    setDragStartTime(playback.currentTime);
-    handleTimelineScrub(event);
-    
-    const handleMouseMove = (e: MouseEvent) => {
+  const handleTimelineScrub = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
       const rect = event.currentTarget.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const percentage = Math.max(0, Math.min(1, x / rect.width));
+      const x = event.clientX - rect.left;
+      const percentage = x / rect.width;
       const time = percentage * compositionProps.settings.duration;
       handleSeek(time);
-    };
+    },
+    [handleSeek, compositionProps.settings.duration]
+  );
 
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
+  // Handle timeline drag start
+  const handleTimelineDragStart = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      setIsDragging(true);
+      setDragStartTime(playback.currentTime);
+      handleTimelineScrub(event);
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  }, [handleSeek, handleTimelineScrub, playback.currentTime, compositionProps.settings.duration]);
+      const handleMouseMove = (e: MouseEvent) => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percentage = Math.max(0, Math.min(1, x / rect.width));
+        const time = percentage * compositionProps.settings.duration;
+        handleSeek(time);
+      };
+
+      const handleMouseUp = () => {
+        setIsDragging(false);
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    },
+    [
+      handleSeek,
+      handleTimelineScrub,
+      playback.currentTime,
+      compositionProps.settings.duration,
+    ]
+  );
 
   // Handle volume change
-  const handleVolumeChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const volume = parseFloat(event.target.value);
-    setVolume(volume);
-  }, [setVolume]);
+  const handleVolumeChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const volume = parseFloat(event.target.value);
+      setVolume(volume);
+    },
+    [setVolume]
+  );
 
   // Handle skip forward/backward
   const handleSkipBackward = useCallback(() => {
@@ -136,7 +163,10 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   }, [playback.currentTime, handleSeek]);
 
   const handleSkipForward = useCallback(() => {
-    const newTime = Math.min(compositionProps.settings.duration, playback.currentTime + 10);
+    const newTime = Math.min(
+      compositionProps.settings.duration,
+      playback.currentTime + 10
+    );
     handleSeek(newTime);
   }, [playback.currentTime, compositionProps.settings.duration, handleSeek]);
 
@@ -149,25 +179,42 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
 
   const handleFrameForward = useCallback(() => {
     const frameTime = 1 / compositionProps.settings.fps;
-    const newTime = Math.min(compositionProps.settings.duration, playback.currentTime + frameTime);
+    const newTime = Math.min(
+      compositionProps.settings.duration,
+      playback.currentTime + frameTime
+    );
     handleSeek(newTime);
-  }, [playback.currentTime, compositionProps.settings.fps, compositionProps.settings.duration, handleSeek]);
+  }, [
+    playback.currentTime,
+    compositionProps.settings.fps,
+    compositionProps.settings.duration,
+    handleSeek,
+  ]);
 
   if (!project) {
     return (
-      <div className={`bg-background-primary flex items-center justify-center ${className}`}>
+      <div
+        className={`bg-background-primary flex items-center justify-center ${className}`}
+      >
         <div className="text-center text-text-secondary">
           <div className="w-16 h-16 bg-background-secondary rounded-lg mx-auto mb-4 flex items-center justify-center">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+            <svg
+              className="w-8 h-8"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
           </div>
-          <p className="text-lg font-medium text-text-primary">No Project Loaded</p>
+          <p className="text-lg font-medium text-text-primary">
+            No Project Loaded
+          </p>
           <p className="text-sm">Create or load a project to see the preview</p>
         </div>
       </div>
@@ -217,7 +264,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-primary-600 rounded-full border-2 border-background-primary shadow-lg" />
             </div>
           </div>
-          
+
           {/* Timeline markers */}
           <div className="flex justify-between text-xs text-text-secondary mt-1">
             <span>0:00</span>
@@ -237,8 +284,18 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
               title="Previous Frame"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"
+                />
               </svg>
             </button>
 
@@ -248,9 +305,24 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
               title="Skip Backward 10s"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"
+                />
               </svg>
             </button>
           </div>
@@ -263,20 +335,50 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               title={playback.isPlaying ? 'Pause' : 'Play'}
             >
               {playback.isPlaying ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 9v6m4-6v6"
+                  />
                 </svg>
               ) : (
-                <svg className="w-6 h-6 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <svg
+                  className="w-6 h-6 ml-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                  />
                 </svg>
               )}
             </button>
 
             <div className="flex items-center space-x-2 text-sm text-text-secondary">
-              <span>{formatTime(playback.currentTime, compositionProps.settings.fps)}</span>
+              <span>
+                {formatTime(
+                  playback.currentTime,
+                  compositionProps.settings.fps
+                )}
+              </span>
               <span>/</span>
-              <span>{formatTime(compositionProps.settings.duration, compositionProps.settings.fps)}</span>
+              <span>
+                {formatTime(
+                  compositionProps.settings.duration,
+                  compositionProps.settings.fps
+                )}
+              </span>
             </div>
           </div>
 
@@ -288,8 +390,18 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
               title="Skip Forward 10s"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 4v16l6-8-6-8zM11 4v16l6-8-6-8z" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 4v16l6-8-6-8zM11 4v16l6-8-6-8z"
+                />
               </svg>
             </button>
 
@@ -299,8 +411,18 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
               title="Next Frame"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 4v16l6-8-6-8zM11 4v16l6-8-6-8z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 4v16l6-8-6-8zM11 4v16l6-8-6-8z"
+                />
               </svg>
             </button>
 
@@ -312,17 +434,42 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
                 title={playback.muted ? 'Unmute' : 'Mute'}
               >
                 {playback.muted || playback.volume === 0 ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"
+                    />
                   </svg>
                 ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                    />
                   </svg>
                 )}
               </button>
-              
+
               <input
                 type="range"
                 min="0"
@@ -331,9 +478,11 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
                 value={playback.muted ? 0 : playback.volume}
                 onChange={handleVolumeChange}
                 className="w-16 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-                style={{
-                  '--value': `${(playback.muted ? 0 : playback.volume) * 100}%`,
-                } as React.CSSProperties}
+                style={
+                  {
+                    '--value': `${(playback.muted ? 0 : playback.volume) * 100}%`,
+                  } as React.CSSProperties
+                }
                 title="Volume"
               />
             </div>

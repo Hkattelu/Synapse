@@ -25,23 +25,21 @@ const mockPlayerRef = {
 };
 
 vi.mock('@remotion/player', () => ({
-  Player: React.forwardRef(
-    ({ onTimeUpdate, inputProps }: any, ref: any) => {
-      if (ref) {
-        ref.current = mockPlayerRef.current;
-      }
-
-      return (
-        <div
-          data-testid="remotion-player"
-          data-input-props={JSON.stringify(inputProps)}
-          onClick={() => onTimeUpdate && onTimeUpdate(150)}
-        >
-          Remotion Player Mock
-        </div>
-      );
+  Player: React.forwardRef(({ onTimeUpdate, inputProps }: any, ref: any) => {
+    if (ref) {
+      ref.current = mockPlayerRef.current;
     }
-  ),
+
+    return (
+      <div
+        data-testid="remotion-player"
+        data-input-props={JSON.stringify(inputProps)}
+        onClick={() => onTimeUpdate && onTimeUpdate(150)}
+      >
+        Remotion Player Mock
+      </div>
+    );
+  }),
 }));
 
 // Mock the hooks directly

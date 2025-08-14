@@ -73,7 +73,9 @@ describe('Inspector - Code Properties', () => {
   it('displays current code content in textarea', () => {
     render(<Inspector />);
 
-    const codeTextarea = screen.getByLabelText('Code Content') as HTMLTextAreaElement;
+    const codeTextarea = screen.getByLabelText(
+      'Code Content'
+    ) as HTMLTextAreaElement;
     expect(codeTextarea.value).toBe('console.log("Hello, World!");');
     expect(codeTextarea.rows).toBe(8); // Should have more rows for code
   });
@@ -87,14 +89,11 @@ describe('Inspector - Code Properties', () => {
     fireEvent.change(codeTextarea, { target: { value: newCode } });
 
     await waitFor(() => {
-      expect(mockUpdateTimelineItem).toHaveBeenCalledWith(
-        'test-code-item',
-        {
-          properties: expect.objectContaining({
-            text: newCode,
-          }),
-        }
-      );
+      expect(mockUpdateTimelineItem).toHaveBeenCalledWith('test-code-item', {
+        properties: expect.objectContaining({
+          text: newCode,
+        }),
+      });
     });
   });
 
@@ -105,14 +104,11 @@ describe('Inspector - Code Properties', () => {
     fireEvent.change(languageSelect, { target: { value: 'python' } });
 
     await waitFor(() => {
-      expect(mockUpdateTimelineItem).toHaveBeenCalledWith(
-        'test-code-item',
-        {
-          properties: expect.objectContaining({
-            language: 'python',
-          }),
-        }
-      );
+      expect(mockUpdateTimelineItem).toHaveBeenCalledWith('test-code-item', {
+        properties: expect.objectContaining({
+          language: 'python',
+        }),
+      });
     });
   });
 
@@ -123,14 +119,11 @@ describe('Inspector - Code Properties', () => {
     fireEvent.change(themeSelect, { target: { value: 'monokai' } });
 
     await waitFor(() => {
-      expect(mockUpdateTimelineItem).toHaveBeenCalledWith(
-        'test-code-item',
-        {
-          properties: expect.objectContaining({
-            theme: 'monokai',
-          }),
-        }
-      );
+      expect(mockUpdateTimelineItem).toHaveBeenCalledWith('test-code-item', {
+        properties: expect.objectContaining({
+          theme: 'monokai',
+        }),
+      });
     });
   });
 
@@ -141,14 +134,11 @@ describe('Inspector - Code Properties', () => {
     fireEvent.change(fontSizeInput, { target: { value: '20' } });
 
     await waitFor(() => {
-      expect(mockUpdateTimelineItem).toHaveBeenCalledWith(
-        'test-code-item',
-        {
-          properties: expect.objectContaining({
-            fontSize: 20,
-          }),
-        }
-      );
+      expect(mockUpdateTimelineItem).toHaveBeenCalledWith('test-code-item', {
+        properties: expect.objectContaining({
+          fontSize: 20,
+        }),
+      });
     });
   });
 
@@ -157,7 +147,7 @@ describe('Inspector - Code Properties', () => {
 
     const languageSelect = screen.getByLabelText('Language');
     const options = Array.from(languageSelect.querySelectorAll('option'));
-    const optionValues = options.map(option => option.getAttribute('value'));
+    const optionValues = options.map((option) => option.getAttribute('value'));
 
     expect(optionValues).toContain('javascript');
     expect(optionValues).toContain('typescript');
@@ -174,7 +164,7 @@ describe('Inspector - Code Properties', () => {
 
     const themeSelect = screen.getByLabelText('Theme');
     const options = Array.from(themeSelect.querySelectorAll('option'));
-    const optionValues = options.map(option => option.getAttribute('value'));
+    const optionValues = options.map((option) => option.getAttribute('value'));
 
     expect(optionValues).toContain('dark');
     expect(optionValues).toContain('light');
@@ -188,7 +178,7 @@ describe('Inspector - Code Properties', () => {
 
     const codeTextarea = screen.getByLabelText('Code Content');
     const computedStyle = window.getComputedStyle(codeTextarea);
-    
+
     // Check if monospace font family is applied
     expect(codeTextarea.style.fontFamily).toContain('Monaco');
   });
@@ -196,8 +186,10 @@ describe('Inspector - Code Properties', () => {
   it('validates font size input range', async () => {
     render(<Inspector />);
 
-    const fontSizeInput = screen.getByLabelText('Font Size') as HTMLInputElement;
-    
+    const fontSizeInput = screen.getByLabelText(
+      'Font Size'
+    ) as HTMLInputElement;
+
     // Test minimum value
     expect(fontSizeInput.min).toBe('8');
     // Test maximum value

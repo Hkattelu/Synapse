@@ -7,7 +7,9 @@ import type { TimelineItem, MediaAsset } from '../../lib/types';
 
 // Mock Remotion components
 vi.mock('remotion', () => ({
-  AbsoluteFill: ({ children, style }: any) => <div style={style}>{children}</div>,
+  AbsoluteFill: ({ children, style }: any) => (
+    <div style={style}>{children}</div>
+  ),
   Sequence: ({ children, from, durationInFrames }: any) => (
     <div data-from={from} data-duration={durationInFrames}>
       {children}
@@ -73,11 +75,11 @@ describe('VideoSequence', () => {
 
   it('renders video asset correctly', () => {
     const { container } = render(<VideoSequence {...defaultProps} />);
-    
+
     const sequence = container.querySelector('[data-from="150"]');
     expect(sequence).toBeInTheDocument();
     expect(sequence).toHaveAttribute('data-duration', '300');
-    
+
     const video = container.querySelector('video');
     expect(video).toBeInTheDocument();
     expect(video).toHaveAttribute('src', 'blob:test-url');
@@ -105,7 +107,7 @@ describe('VideoSequence', () => {
     };
 
     const { container } = render(<VideoSequence {...props} />);
-    
+
     const img = container.querySelector('img');
     expect(img).toBeInTheDocument();
     expect(img).toHaveAttribute('src', 'blob:test-url');
@@ -130,7 +132,7 @@ describe('VideoSequence', () => {
     };
 
     const { container } = render(<VideoSequence {...props} />);
-    
+
     expect(container).toHaveTextContent('🎵 test-audio.mp3');
     // Just verify the content is rendered, not specific styles
     expect(container.querySelector('div')).toBeInTheDocument();
@@ -159,7 +161,7 @@ describe('VideoSequence', () => {
     };
 
     const { container } = render(<VideoSequence {...props} />);
-    
+
     expect(container).toHaveTextContent('console.log("Hello World");');
     // Just verify the content is rendered, not specific styles
     expect(container.querySelector('pre')).toBeInTheDocument();
@@ -167,7 +169,7 @@ describe('VideoSequence', () => {
 
   it('applies transform properties correctly', () => {
     const { container } = render(<VideoSequence {...defaultProps} />);
-    
+
     const transformDiv = container.querySelector('div[style*="transform"]');
     expect(transformDiv).toHaveStyle({
       transform: 'translate(100px, 50px) scale(1.5) rotate(45deg)',
@@ -191,7 +193,7 @@ describe('VideoSequence', () => {
     };
 
     const { container } = render(<VideoSequence {...props} />);
-    
+
     // Track 2 should be positioned at y = 2 * (1080/4) = 540px
     const transformDiv = container.querySelector('div[style*="transform"]');
     expect(transformDiv).toHaveStyle({
@@ -211,7 +213,7 @@ describe('VideoSequence', () => {
     };
 
     const { container } = render(<VideoSequence {...props} />);
-    
+
     const transformDiv = container.querySelector('div[style*="transform"]');
     expect(transformDiv).toHaveStyle({
       transform: 'translate(0px, 0px) scale(1) rotate(0deg)',

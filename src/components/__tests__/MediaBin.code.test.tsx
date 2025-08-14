@@ -97,7 +97,7 @@ describe('MediaBin - Code Clips', () => {
   it('creates sequential code clip names', async () => {
     // Mock existing code assets
     mockMediaAssets = [mockCodeAsset];
-    
+
     render(<MediaBin />);
 
     const addCodeButton = screen.getByText('Add Code');
@@ -114,7 +114,7 @@ describe('MediaBin - Code Clips', () => {
 
   it('displays code clips with proper icon and language badge', () => {
     mockMediaAssets = [mockCodeAsset];
-    
+
     render(<MediaBin />);
 
     expect(screen.getByText('Code Clip 1')).toBeInTheDocument();
@@ -124,7 +124,7 @@ describe('MediaBin - Code Clips', () => {
 
   it('adds code clip to timeline on double-click', async () => {
     mockMediaAssets = [mockCodeAsset];
-    
+
     render(<MediaBin />);
 
     const codeClipElement = screen.getByText('Code Clip 1').closest('.group');
@@ -152,7 +152,7 @@ describe('MediaBin - Code Clips', () => {
 
   it('handles code clips differently from media assets on double-click', async () => {
     mockMediaAssets = [mockCodeAsset, mockVideoAsset];
-    
+
     render(<MediaBin />);
 
     // Double-click code clip
@@ -160,7 +160,9 @@ describe('MediaBin - Code Clips', () => {
     fireEvent.doubleClick(codeClipElement!);
 
     // Double-click video asset
-    const videoAssetElement = screen.getByText('test-video.mp4').closest('.group');
+    const videoAssetElement = screen
+      .getByText('test-video.mp4')
+      .closest('.group');
     fireEvent.doubleClick(videoAssetElement!);
 
     await waitFor(() => {
@@ -197,7 +199,7 @@ describe('MediaBin - Code Clips', () => {
     };
 
     mockMediaAssets = [mockCodeAsset, pythonCodeAsset];
-    
+
     render(<MediaBin />);
 
     expect(screen.getByText('js')).toBeInTheDocument();
@@ -206,7 +208,7 @@ describe('MediaBin - Code Clips', () => {
 
   it('removes code clips when delete button is clicked', async () => {
     mockMediaAssets = [mockCodeAsset];
-    
+
     render(<MediaBin />);
 
     const codeClipElement = screen.getByText('Code Clip 1').closest('.group');
@@ -214,7 +216,7 @@ describe('MediaBin - Code Clips', () => {
 
     // Hover to show delete button
     fireEvent.mouseEnter(codeClipElement!);
-    
+
     const deleteButton = screen.getByTitle('Remove asset');
     fireEvent.click(deleteButton);
 
@@ -225,7 +227,7 @@ describe('MediaBin - Code Clips', () => {
 
   it('shows 0 Bytes for code clips file size', () => {
     mockMediaAssets = [mockCodeAsset];
-    
+
     render(<MediaBin />);
 
     expect(screen.getByText('0 Bytes')).toBeInTheDocument();
@@ -233,7 +235,7 @@ describe('MediaBin - Code Clips', () => {
 
   it('shows duration for code clips', () => {
     mockMediaAssets = [mockCodeAsset];
-    
+
     render(<MediaBin />);
 
     expect(screen.getByText('0:10')).toBeInTheDocument(); // 10 seconds formatted

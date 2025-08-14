@@ -1,5 +1,11 @@
 import React, { useMemo } from 'react';
-import { AbsoluteFill, Sequence, interpolate, useCurrentFrame, useVideoConfig } from 'remotion';
+import {
+  AbsoluteFill,
+  Sequence,
+  interpolate,
+  useCurrentFrame,
+  useVideoConfig,
+} from 'remotion';
 import type { TitleSequenceProps } from './types';
 
 // Animation easing functions
@@ -7,10 +13,15 @@ const EASING_FUNCTIONS = {
   linear: (t: number) => t,
   easeIn: (t: number) => t * t,
   easeOut: (t: number) => 1 - Math.pow(1 - t, 2),
-  easeInOut: (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
+  easeInOut: (t: number) =>
+    t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
   elastic: (t: number) => {
     const c4 = (2 * Math.PI) / 3;
-    return t === 0 ? 0 : t === 1 ? 1 : -Math.pow(2, 10 * t - 10) * Math.sin((t * 10 - 10.75) * c4);
+    return t === 0
+      ? 0
+      : t === 1
+        ? 1
+        : -Math.pow(2, 10 * t - 10) * Math.sin((t * 10 - 10.75) * c4);
   },
   bounce: (t: number) => {
     const n1 = 7.5625;
@@ -51,7 +62,7 @@ const TEXT_ANIMATIONS = {
   }),
   scale: (progress: number) => ({
     opacity: progress,
-    transform: `scale(${0.5 + (progress * 0.5)})`,
+    transform: `scale(${0.5 + progress * 0.5})`,
   }),
   typewriter: (progress: number, text: string) => ({
     opacity: 1,
@@ -83,16 +94,16 @@ export const TitleSequence: React.FC<TitleSequenceProps> = ({
 
   // Animation handling
   const animations = item.animations || [];
-  const hasEntranceAnimation = animations.some(a => a.type === 'entrance');
-  const hasExitAnimation = animations.some(a => a.type === 'exit');
+  const hasEntranceAnimation = animations.some((a) => a.type === 'entrance');
+  const hasExitAnimation = animations.some((a) => a.type === 'exit');
 
   // Calculate animation progress
   const relativeFrame = frame - startFrame;
-  
+
   // Entrance animation
   let entranceProgress = 1;
   if (hasEntranceAnimation) {
-    const entranceAnimation = animations.find(a => a.type === 'entrance');
+    const entranceAnimation = animations.find((a) => a.type === 'entrance');
     if (entranceAnimation) {
       const entranceDuration = entranceAnimation.duration * fps;
       entranceProgress = interpolate(
@@ -110,7 +121,7 @@ export const TitleSequence: React.FC<TitleSequenceProps> = ({
   // Exit animation
   let exitProgress = 1;
   if (hasExitAnimation) {
-    const exitAnimation = animations.find(a => a.type === 'exit');
+    const exitAnimation = animations.find((a) => a.type === 'exit');
     if (exitAnimation) {
       const exitDuration = exitAnimation.duration * fps;
       const exitStart = durationInFrames - exitDuration;
@@ -135,9 +146,9 @@ export const TitleSequence: React.FC<TitleSequenceProps> = ({
       return {};
     }
 
-    const entranceAnimation = animations.find(a => a.type === 'entrance');
+    const entranceAnimation = animations.find((a) => a.type === 'entrance');
     let animationType = 'fadeIn';
-    
+
     if (entranceAnimation) {
       // Map animation preset IDs to animation types
       switch (entranceAnimation.id) {
@@ -164,17 +175,24 @@ export const TitleSequence: React.FC<TitleSequenceProps> = ({
       }
     }
 
-    const animationFn = TEXT_ANIMATIONS[animationType as keyof typeof TEXT_ANIMATIONS];
+    const animationFn =
+      TEXT_ANIMATIONS[animationType as keyof typeof TEXT_ANIMATIONS];
     if (typeof animationFn === 'function') {
       return animationFn(combinedProgress, text);
     }
 
     return TEXT_ANIMATIONS.fadeIn(combinedProgress);
-  }, [combinedProgress, animations, hasEntranceAnimation, hasExitAnimation, text]);
+  }, [
+    combinedProgress,
+    animations,
+    hasEntranceAnimation,
+    hasExitAnimation,
+    text,
+  ]);
 
   // Typewriter effect for specific animations
   const displayText = useMemo(() => {
-    const typewriterAnimation = animations.find(a => a.id === 'typewriter');
+    const typewriterAnimation = animations.find((a) => a.id === 'typewriter');
     if (typewriterAnimation && hasEntranceAnimation) {
       const charactersToShow = Math.floor(text.length * entranceProgress);
       return text.substring(0, charactersToShow);
@@ -186,7 +204,8 @@ export const TitleSequence: React.FC<TitleSequenceProps> = ({
   const containerStyle: React.CSSProperties = {
     transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
     opacity: opacity * combinedProgress,
-    backgroundColor: backgroundColor === 'transparent' ? 'transparent' : backgroundColor,
+    backgroundColor:
+      backgroundColor === 'transparent' ? 'transparent' : backgroundColor,
     width: '100%',
     height: '100%',
     display: 'flex',
@@ -215,19 +234,20 @@ export const TitleSequence: React.FC<TitleSequenceProps> = ({
         <div style={textStyle}>
           {displayText}
           {/* Typewriter cursor */}
-          {animations.some(a => a.id === 'typewriter') && entranceProgress < 1 && (
-            <span
-              style={{
-                color,
-                animation: 'blink 1s infinite',
-                marginLeft: '2px',
-              }}
-            >
-              |
-            </span>
-          )}
+          {animations.some((a) => a.id === 'typewriter') &&
+            entranceProgress < 1 && (
+              <span
+                style={{
+                  color,
+                  animation: 'blink 1s infinite',
+                  marginLeft: '2px',
+                }}
+              >
+                |
+              </span>
+            )}
         </div>
-        
+
         {/* Blinking cursor animation for typewriter */}
         <style>
           {`

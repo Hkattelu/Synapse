@@ -11,8 +11,9 @@ Synapse Studio uses a comprehensive theme system based on the beautiful [Catppuc
 Our theme is built on the Catppuccin Macchiato flavor, which provides a medium contrast dark theme with gentle, soothing colors perfect for long coding and video editing sessions.
 
 #### Accent Colors
+
 - **Rosewater** `#f4dbd6` - Warm highlights
-- **Flamingo** `#f0c6c6` - Soft emphasis  
+- **Flamingo** `#f0c6c6` - Soft emphasis
 - **Pink** `#f5bde6` - Creative accents
 - **Mauve** `#c6a0f6` - Video clip color
 - **Red** `#ed8796` - Error states
@@ -27,6 +28,7 @@ Our theme is built on the Catppuccin Macchiato flavor, which provides a medium c
 - **Lavender** `#b7bdf8` - Code clip color
 
 #### Neutral Colors
+
 - **Text** `#cad3f5` - Primary text
 - **Subtext1** `#b8c0e0` - Secondary text
 - **Subtext0** `#a5adcb` - Muted text
@@ -45,6 +47,7 @@ Our theme is built on the Catppuccin Macchiato flavor, which provides a medium c
 The theme system uses CSS variables for easy customization and future theme switching:
 
 ### Semantic Color Tokens
+
 ```css
 /* Brand Colors */
 --synapse-primary: var(--synapse-blue);
@@ -85,6 +88,7 @@ All colors are integrated into Tailwind CSS with the `synapse-` prefix:
 ## Utility Classes
 
 ### Glass Effect
+
 ```css
 .synapse-glass {
   background: rgba(54, 58, 79, 0.8);
@@ -94,22 +98,33 @@ All colors are integrated into Tailwind CSS with the `synapse-` prefix:
 ```
 
 ### Brand Gradient
+
 ```css
 .synapse-brand-gradient {
-  background: linear-gradient(135deg, var(--synapse-blue), var(--synapse-mauve));
+  background: linear-gradient(
+    135deg,
+    var(--synapse-blue),
+    var(--synapse-mauve)
+  );
 }
 ```
 
 ### Text Gradient
+
 ```css
 .synapse-text-gradient {
-  background: linear-gradient(135deg, var(--synapse-text), var(--synapse-subtext1));
+  background: linear-gradient(
+    135deg,
+    var(--synapse-text),
+    var(--synapse-subtext1)
+  );
   background-clip: text;
   color: transparent;
 }
 ```
 
 ### Glow Effect
+
 ```css
 .synapse-glow {
   box-shadow: 0 0 20px rgba(138, 173, 244, 0.3);
@@ -119,13 +134,16 @@ All colors are integrated into Tailwind CSS with the `synapse-` prefix:
 ## Design Philosophy
 
 ### 🎬 Video Creator Focus
+
 The color system is specifically designed for video creators with:
+
 - **High contrast** for text readability during long editing sessions
 - **Distinct clip colors** for easy timeline organization
 - **Gentle on the eyes** to reduce strain during extended use
 - **Professional appearance** suitable for content creation workflows
 
 ### 🎮 Game Developer Friendly
+
 - **Code syntax highlighting** optimized colors
 - **Dark theme** preferred by developers
 - **Consistent visual hierarchy** for complex interfaces
@@ -136,7 +154,7 @@ The color system is specifically designed for video creators with:
 The theme system is structured to support light mode themes in the future:
 
 ```css
-[data-theme="light"] {
+[data-theme='light'] {
   /* Light mode variables would override dark mode here */
   --synapse-background: #eff1f5; /* Catppuccin Latte Base */
   --synapse-text-primary: #4c4f69; /* Catppuccin Latte Text */
@@ -157,14 +175,16 @@ Consistent animation timing for smooth interactions:
 ## Brand Identity
 
 ### Logo & Typography
+
 - **Brand symbol:** ✦ (representing creative synthesis)
 - **Typography:** Clean, modern sans-serif
 - **Voice:** Professional yet approachable
 
 ### Color Psychology
+
 - **Blue (Primary):** Trust, reliability, creativity
 - **Mauve (Video):** Creativity, imagination
-- **Green (Audio):** Growth, harmony, balance  
+- **Green (Audio):** Growth, harmony, balance
 - **Yellow (Text):** Clarity, communication
 - **Peach (Playhead):** Energy, enthusiasm
 

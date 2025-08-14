@@ -1,6 +1,13 @@
 // State reducers for Synapse Studio
 
-import type { AppState, AppAction, ProjectAction, TimelineAction, MediaAction, UIAction } from './types';
+import type {
+  AppState,
+  AppAction,
+  ProjectAction,
+  TimelineAction,
+  MediaAction,
+  UIAction,
+} from './types';
 import type { Project, ProjectSettings, UIState } from '../lib/types';
 import type { StoredProject } from '../lib/projectManager';
 import { ProjectManager, downloadProjectFile } from '../lib/projectManager';
@@ -110,9 +117,11 @@ function projectReducer(state: AppState, action: ProjectAction): AppState {
       };
 
     case 'SWITCH_PROJECT': {
-      const storedProject = state.projects.find(p => p.project.id === action.payload);
+      const storedProject = state.projects.find(
+        (p) => p.project.id === action.payload
+      );
       if (!storedProject) return state;
-      
+
       return {
         ...state,
         project: storedProject.project,
@@ -123,23 +132,29 @@ function projectReducer(state: AppState, action: ProjectAction): AppState {
     }
 
     case 'DELETE_PROJECT': {
-      const updatedProjects = state.projects.filter(p => p.project.id !== action.payload);
+      const updatedProjects = state.projects.filter(
+        (p) => p.project.id !== action.payload
+      );
       const currentProjectDeleted = state.project?.id === action.payload;
-      
+
       return {
         ...state,
         projects: updatedProjects,
         project: currentProjectDeleted ? null : state.project,
         isDirty: currentProjectDeleted ? false : state.isDirty,
         lastSaved: currentProjectDeleted ? null : state.lastSaved,
-        ui: currentProjectDeleted ? { ...state.ui, currentView: 'dashboard' } : state.ui,
+        ui: currentProjectDeleted
+          ? { ...state.ui, currentView: 'dashboard' }
+          : state.ui,
       };
     }
 
     case 'DUPLICATE_PROJECT': {
-      const originalProject = state.projects.find(p => p.project.id === action.payload)?.project;
+      const originalProject = state.projects.find(
+        (p) => p.project.id === action.payload
+      )?.project;
       if (!originalProject) return state;
-      
+
       // Create duplicated project with new ID
       const duplicatedProject: Project = {
         ...originalProject,
@@ -147,19 +162,22 @@ function projectReducer(state: AppState, action: ProjectAction): AppState {
         name: `${originalProject.name} (Copy)`,
         createdAt: new Date(),
         updatedAt: new Date(),
-        timeline: originalProject.timeline.map(item => ({ ...item, id: generateId() })),
-        mediaAssets: originalProject.mediaAssets.map(asset => ({
+        timeline: originalProject.timeline.map((item) => ({
+          ...item,
+          id: generateId(),
+        })),
+        mediaAssets: originalProject.mediaAssets.map((asset) => ({
           ...asset,
           id: generateId(),
           createdAt: new Date(),
         })),
       };
-      
+
       const newStoredProject: StoredProject = {
         project: duplicatedProject,
         lastOpened: new Date(),
       };
-      
+
       return {
         ...state,
         projects: [newStoredProject, ...state.projects],
@@ -170,7 +188,7 @@ function projectReducer(state: AppState, action: ProjectAction): AppState {
     }
 
     case 'RENAME_PROJECT': {
-      const updatedProjects = state.projects.map(p => 
+      const updatedProjects = state.projects.map((p) =>
         p.project.id === action.payload.id
           ? {
               ...p,
@@ -183,11 +201,16 @@ function projectReducer(state: AppState, action: ProjectAction): AppState {
             }
           : p
       );
-      
-      const updatedCurrentProject = state.project?.id === action.payload.id
-        ? { ...state.project, name: action.payload.name, updatedAt: new Date() }
-        : state.project;
-      
+
+      const updatedCurrentProject =
+        state.project?.id === action.payload.id
+          ? {
+              ...state.project,
+              name: action.payload.name,
+              updatedAt: new Date(),
+            }
+          : state.project;
+
       return {
         ...state,
         projects: updatedProjects,
@@ -201,7 +224,7 @@ function projectReducer(state: AppState, action: ProjectAction): AppState {
         project: action.payload,
         lastOpened: new Date(),
       };
-      
+
       return {
         ...state,
         projects: [newStoredProject, ...state.projects],
@@ -213,14 +236,14 @@ function projectReducer(state: AppState, action: ProjectAction): AppState {
 
     case 'EXPORT_PROJECT': {
       if (!state.project) return state;
-      
+
       // Trigger file download (side effect handled outside reducer)
       try {
         downloadProjectFile(state.project);
       } catch (error) {
         console.error('Failed to export project:', error);
       }
-      
+
       return state;
     }
 
@@ -259,14 +282,18 @@ function timelineReducer(state: AppState, action: TimelineAction): AppState {
         ...state,
         project: {
           ...state.project,
-          timeline: state.project.timeline.filter(item => item.id !== action.payload),
+          timeline: state.project.timeline.filter(
+            (item) => item.id !== action.payload
+          ),
           updatedAt: new Date(),
         },
         ui: {
           ...state.ui,
           timeline: {
             ...state.ui.timeline,
-            selectedItems: state.ui.timeline.selectedItems.filter(id => id !== action.payload),
+            selectedItems: state.ui.timeline.selectedItems.filter(
+              (id) => id !== action.payload
+            ),
           },
         },
         isDirty: true,
@@ -277,7 +304,7 @@ function timelineReducer(state: AppState, action: TimelineAction): AppState {
         ...state,
         project: {
           ...state.project,
-          timeline: state.project.timeline.map(item =>
+          timeline: state.project.timeline.map((item) =>
             item.id === action.payload.id
               ? { ...item, ...action.payload.updates }
               : item
@@ -292,9 +319,13 @@ function timelineReducer(state: AppState, action: TimelineAction): AppState {
         ...state,
         project: {
           ...state.project,
-          timeline: state.project.timeline.map(item =>
+          timeline: state.project.timeline.map((item) =>
             item.id === action.payload.id
-              ? { ...item, startTime: action.payload.startTime, track: action.payload.track }
+              ? {
+                  ...item,
+                  startTime: action.payload.startTime,
+                  track: action.payload.track,
+                }
               : item
           ),
           updatedAt: new Date(),
@@ -307,7 +338,7 @@ function timelineReducer(state: AppState, action: TimelineAction): AppState {
         ...state,
         project: {
           ...state.project,
-          timeline: state.project.timeline.map(item =>
+          timeline: state.project.timeline.map((item) =>
             item.id === action.payload.id
               ? { ...item, duration: Math.max(0.1, action.payload.duration) }
               : item
@@ -342,7 +373,9 @@ function timelineReducer(state: AppState, action: TimelineAction): AppState {
       };
 
     case 'DUPLICATE_TIMELINE_ITEM': {
-      const itemToDuplicate = state.project.timeline.find(item => item.id === action.payload);
+      const itemToDuplicate = state.project.timeline.find(
+        (item) => item.id === action.payload
+      );
       if (!itemToDuplicate) return state;
 
       const duplicatedItem = {
@@ -386,14 +419,16 @@ function mediaReducer(state: AppState, action: MediaAction): AppState {
     case 'REMOVE_MEDIA_ASSET': {
       // Also remove any timeline items that reference this asset
       const filteredTimeline = state.project.timeline.filter(
-        item => item.assetId !== action.payload
+        (item) => item.assetId !== action.payload
       );
-      
+
       return {
         ...state,
         project: {
           ...state.project,
-          mediaAssets: state.project.mediaAssets.filter(asset => asset.id !== action.payload),
+          mediaAssets: state.project.mediaAssets.filter(
+            (asset) => asset.id !== action.payload
+          ),
           timeline: filteredTimeline,
           updatedAt: new Date(),
         },
@@ -406,7 +441,7 @@ function mediaReducer(state: AppState, action: MediaAction): AppState {
         ...state,
         project: {
           ...state.project,
-          mediaAssets: state.project.mediaAssets.map(asset =>
+          mediaAssets: state.project.mediaAssets.map((asset) =>
             asset.id === action.payload.id
               ? { ...asset, ...action.payload.updates }
               : asset

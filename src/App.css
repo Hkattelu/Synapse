@@ -7,7 +7,13 @@
   min-height: 100vh;
   background-color: var(--synapse-background);
   color: var(--synapse-text-primary);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
 }
 
 /* Synapse brand logo styling */
@@ -36,7 +42,8 @@
 
 /* Synapse brand animations */
 @keyframes synapse-glow {
-  0%, 100% {
+  0%,
+  100% {
     filter: drop-shadow(0 0 0.5rem var(--synapse-primary));
   }
   50% {
@@ -45,7 +52,8 @@
 }
 
 @keyframes synapse-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -58,11 +66,11 @@
   .synapse-logo-symbol {
     animation: synapse-pulse 3s ease-in-out infinite;
   }
-  
+
   .synapse-feature-icon {
     transition: transform var(--synapse-transition-normal);
   }
-  
+
   .synapse-feature-icon:hover {
     animation: synapse-glow 1s ease-in-out;
   }

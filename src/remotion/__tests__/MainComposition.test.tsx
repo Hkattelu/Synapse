@@ -7,7 +7,9 @@ import type { TimelineItem, MediaAsset } from '../../lib/types';
 
 // Mock Remotion hooks and components
 vi.mock('remotion', () => ({
-  AbsoluteFill: ({ children, style }: any) => <div style={style}>{children}</div>,
+  AbsoluteFill: ({ children, style }: any) => (
+    <div style={style}>{children}</div>
+  ),
   useVideoConfig: () => ({
     fps: 30,
     width: 1920,
@@ -68,7 +70,7 @@ describe('MainComposition', () => {
 
   it('renders with empty timeline', () => {
     const { container } = render(<MainComposition {...defaultProps} />);
-    
+
     expect(container.firstChild).toHaveStyle({
       backgroundColor: '#000000',
     });
@@ -82,9 +84,11 @@ describe('MainComposition', () => {
     };
 
     const { getByTestId } = render(<MainComposition {...props} />);
-    
+
     expect(getByTestId('video-sequence-item-1')).toBeInTheDocument();
-    expect(getByTestId('video-sequence-item-1')).toHaveTextContent('test-video.mp4 - video');
+    expect(getByTestId('video-sequence-item-1')).toHaveTextContent(
+      'test-video.mp4 - video'
+    );
   });
 
   it('filters out timeline items without matching assets', () => {
@@ -95,7 +99,7 @@ describe('MainComposition', () => {
     };
 
     const { queryByTestId } = render(<MainComposition {...props} />);
-    
+
     expect(queryByTestId('video-sequence-item-1')).not.toBeInTheDocument();
   });
 
@@ -121,7 +125,7 @@ describe('MainComposition', () => {
     };
 
     const { getByTestId } = render(<MainComposition {...props} />);
-    
+
     expect(getByTestId('video-sequence-item-1')).toBeInTheDocument();
     expect(getByTestId('video-sequence-item-2')).toBeInTheDocument();
   });
@@ -136,7 +140,7 @@ describe('MainComposition', () => {
     };
 
     const { container } = render(<MainComposition {...props} />);
-    
+
     expect(container.firstChild).toHaveStyle({
       backgroundColor: '#ff0000',
     });

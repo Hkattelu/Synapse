@@ -30,7 +30,7 @@ export function useProjectManager() {
 
   const saveCurrentProject = async (): Promise<boolean> => {
     if (!state.project) return false;
-    
+
     try {
       const success = await ProjectManager.saveProject(state.project);
       if (success) {
@@ -59,14 +59,19 @@ export function useProjectManager() {
     }
   };
 
-  const duplicateProject = async (projectId: string): Promise<Project | null> => {
+  const duplicateProject = async (
+    projectId: string
+  ): Promise<Project | null> => {
     try {
-      const originalProject = state.projects.find(p => p.project.id === projectId)?.project;
+      const originalProject = state.projects.find(
+        (p) => p.project.id === projectId
+      )?.project;
       if (!originalProject) return null;
 
-      const duplicatedProject = await ProjectManager.duplicateProject(originalProject);
+      const duplicatedProject =
+        await ProjectManager.duplicateProject(originalProject);
       dispatch({ type: 'DUPLICATE_PROJECT', payload: projectId });
-      
+
       return duplicatedProject;
     } catch (error) {
       console.error('Failed to duplicate project:', error);
@@ -74,7 +79,10 @@ export function useProjectManager() {
     }
   };
 
-  const renameProject = async (projectId: string, newName: string): Promise<boolean> => {
+  const renameProject = async (
+    projectId: string,
+    newName: string
+  ): Promise<boolean> => {
     try {
       // Update in ProjectManager
       const storedProject = ProjectManager.loadProjectById(projectId);
@@ -88,12 +96,15 @@ export function useProjectManager() {
 
       const success = await ProjectManager.saveProject(updatedProject);
       if (success) {
-        dispatch({ type: 'RENAME_PROJECT', payload: { id: projectId, name: newName } });
+        dispatch({
+          type: 'RENAME_PROJECT',
+          payload: { id: projectId, name: newName },
+        });
         // Refresh projects list
         const projects = await ProjectManager.getAllProjects();
         dispatch({ type: 'LOAD_PROJECTS_LIST', payload: projects });
       }
-      
+
       return success;
     } catch (error) {
       console.error('Failed to rename project:', error);
@@ -102,10 +113,10 @@ export function useProjectManager() {
   };
 
   const exportProject = (projectId?: string): void => {
-    const projectToExport = projectId 
-      ? state.projects.find(p => p.project.id === projectId)?.project
+    const projectToExport = projectId
+      ? state.projects.find((p) => p.project.id === projectId)?.project
       : state.project;
-    
+
     if (projectToExport) {
       dispatch({ type: 'EXPORT_PROJECT', payload: projectToExport.id });
     }
@@ -114,7 +125,7 @@ export function useProjectManager() {
   const importProject = async (): Promise<Project | null> => {
     try {
       const importedProject = await uploadProjectFile();
-      
+
       // Save the imported project
       const success = await ProjectManager.saveProject(importedProject);
       if (success) {
@@ -124,7 +135,7 @@ export function useProjectManager() {
         dispatch({ type: 'LOAD_PROJECTS_LIST', payload: projects });
         return importedProject;
       }
-      
+
       return null;
     } catch (error) {
       console.error('Failed to import project:', error);
@@ -137,19 +148,19 @@ export function useProjectManager() {
     if (state.isDirty && state.project) {
       await saveCurrentProject();
     }
-    
+
     dispatch({ type: 'SWITCH_PROJECT', payload: projectId });
   };
 
   const getProjectStats = (projectId?: string) => {
-    const project = projectId 
-      ? state.projects.find(p => p.project.id === projectId)?.project
+    const project = projectId
+      ? state.projects.find((p) => p.project.id === projectId)?.project
       : state.project;
-    
+
     if (project) {
       return ProjectManager.getProjectStats(project);
     }
-    
+
     return null;
   };
 
@@ -169,7 +180,7 @@ export function useProjectManager() {
     isDirty: state.isDirty,
     isLoading: state.isLoading,
     lastSaved: state.lastSaved,
-    
+
     // Operations
     createProject,
     loadProject,
@@ -195,7 +206,7 @@ export function useProjectStats(projectId?: string) {
 export function useProjectSaveStatus() {
   const state = useAppState();
   const { saveCurrentProject } = useProjectManager();
-  
+
   return {
     isDirty: state.isDirty,
     lastSaved: state.lastSaved,
