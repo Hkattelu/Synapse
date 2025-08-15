@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Inspector } from '../Inspector';
+import { TestProviders } from '../../test/TestProviders';
 import type { TimelineItem } from '../../lib/types';
 
 // Mock the hooks
@@ -20,6 +21,13 @@ vi.mock('../../state/hooks', () => ({
 // Mock validation
 vi.mock('../../lib/validation', () => ({
   validateItemProperties: vi.fn(() => ({ isValid: true, errors: [] })),
+  validateProject: vi.fn(() => ({ isValid: true, errors: [] })),
+}));
+
+vi.mock('../../lib/animationPresets', () =e ({
+  ANIMATION_PRESETS: [],
+  getAnimationsByType: () =e [],
+  getCompatibleAnimations: () =e [],
 }));
 
 const mockCodeItem: TimelineItem = {
@@ -61,7 +69,11 @@ describe('Inspector - Code Properties', () => {
   });
 
   it('renders code properties section for code items', () => {
-    render(<Inspector />);
+    render(
+      <TestProviders>
+        <Inspector />
+      </TestProviders>
+    );
 
     expect(screen.getByText('Code')).toBeInTheDocument();
     expect(screen.getByLabelText('Code Content')).toBeInTheDocument();
@@ -71,7 +83,11 @@ describe('Inspector - Code Properties', () => {
   });
 
   it('displays current code content in textarea', () => {
-    render(<Inspector />);
+    render(
+      <TestProviders>
+        <Inspector />
+      </TestProviders>
+    );
 
     const codeTextarea = screen.getByLabelText(
       'Code Content'
@@ -81,7 +97,11 @@ describe('Inspector - Code Properties', () => {
   });
 
   it('updates code content when textarea changes', async () => {
-    render(<Inspector />);
+    render(
+      <TestProviders>
+        <Inspector />
+      </TestProviders>
+    );
 
     const codeTextarea = screen.getByLabelText('Code Content');
     const newCode = 'function hello() {\n  return "Hello, World!";\n}';
@@ -98,7 +118,11 @@ describe('Inspector - Code Properties', () => {
   });
 
   it('updates language selection', async () => {
-    render(<Inspector />);
+    render(
+      <TestProviders>
+        <Inspector />
+      </TestProviders>
+    );
 
     const languageSelect = screen.getByLabelText('Language');
     fireEvent.change(languageSelect, { target: { value: 'python' } });
@@ -113,7 +137,11 @@ describe('Inspector - Code Properties', () => {
   });
 
   it('updates theme selection', async () => {
-    render(<Inspector />);
+    render(
+      <TestProviders>
+        <Inspector />
+      </TestProviders>
+    );
 
     const themeSelect = screen.getByLabelText('Theme');
     fireEvent.change(themeSelect, { target: { value: 'monokai' } });
@@ -128,7 +156,11 @@ describe('Inspector - Code Properties', () => {
   });
 
   it('updates font size', async () => {
-    render(<Inspector />);
+    render(
+      <TestProviders>
+        <Inspector />
+      </TestProviders>
+    );
 
     const fontSizeInput = screen.getByLabelText('Font Size');
     fireEvent.change(fontSizeInput, { target: { value: '20' } });
@@ -143,7 +175,11 @@ describe('Inspector - Code Properties', () => {
   });
 
   it('shows all supported languages in dropdown', () => {
-    render(<Inspector />);
+    render(
+      <TestProviders>
+        <Inspector />
+      </TestProviders>
+    );
 
     const languageSelect = screen.getByLabelText('Language');
     const options = Array.from(languageSelect.querySelectorAll('option'));

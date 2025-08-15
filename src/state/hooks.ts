@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useAppContext } from './context';
+import { useHistory, createAddItemCommand, createRemoveItemCommand, createUpdateItemCommand, createMoveItemCommand, createResizeItemCommand } from './history';
 import type { TimelineItem, MediaAsset, Project } from '../lib/types';
 import { generateId } from '../lib/utils';
 
@@ -102,6 +103,8 @@ export function useTimeline() {
   const { state, dispatch } = useAppContext();
   const [currentTime, setCurrentTime] = useState(0);
 
+  const { execute } = useHistory();
+
   const addTimelineItem = useCallback(
     (item: Omit<TimelineItem, 'id'>) => {
       const newItem: TimelineItem = {
@@ -109,41 +112,71 @@ export function useTimeline() {
         id: generateId(),
         keyframes: item.keyframes || [],
       };
-      dispatch({ type: 'ADD_TIMELINE_ITEM', payload: newItem });
+      execute(createAddItemCommand(newItem, dispatch));
       return newItem.id;
     },
-    [dispatch]
+    [dispatch, execute]
   );
 
   const removeTimelineItem = useCallback(
     (id: string) => {
-      dispatch({ type: 'REMOVE_TIMELINE_ITEM', payload: id });
+      const item = state.project?.timeline.find((i) => i.id === id);
+      if (!item) return;
+      execute(createRemoveItemCommand(item, dispatch));
     },
-    [dispatch]
+    [dispatch, state.project?.timeline, execute]
   );
 
   const updateTimelineItem = useCallback(
     (id: string, updates: Partial<TimelineItem>) => {
-      dispatch({ type: 'UPDATE_TIMELINE_ITEM', payload: { id, updates } });
+      const before = state.project?.timeline.find((i) => i.id === id);
+      if (!before) return;
+      execute(
+        createUpdateItemCommand(
+          id,
+          { ...updatesKeysToBefore(updates, before) },
+          updates,
+          dispatch
+        )
+      );
     },
-    [dispatch]
+    [dispatch, state.project?.timeline, execute]
   );
+
+  function updatesKeysToBefore(
+    updates: Partial<TimelineItem>,
+    before: TimelineItem
+  ): Partial<TimelineItem> {
+    const prev: Partial<TimelineItem> = {};
+    for (const k of Object.keys(updates) as (keyof TimelineItem)[]) {
+      (prev as any)[k] = (before as any)[k];
+    }
+    return prev;
+  }
 
   const moveTimelineItem = useCallback(
     (id: string, startTime: number, track: number) => {
-      dispatch({
-        type: 'MOVE_TIMELINE_ITEM',
-        payload: { id, startTime, track },
-      });
+      const item = state.project?.timeline.find((i) => i.id === id);
+      if (!item) return;
+      execute(
+        createMoveItemCommand(
+          id,
+          { startTime: item.startTime, track: item.track },
+          { startTime, track },
+          dispatch
+        )
+      );
     },
-    [dispatch]
+    [dispatch, state.project?.timeline, execute]
   );
 
   const resizeTimelineItem = useCallback(
     (id: string, duration: number) => {
-      dispatch({ type: 'RESIZE_TIMELINE_ITEM', payload: { id, duration } });
+      const item = state.project?.timeline.find((i) => i.id === id);
+      if (!item) return;
+      execute(createResizeItemCommand(id, item.duration, duration, dispatch));
     },
-    [dispatch]
+    [dispatch, state.project?.timeline, execute]
   );
 
   const selectTimelineItems = useCallback(

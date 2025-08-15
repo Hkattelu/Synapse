@@ -93,8 +93,26 @@ export interface ItemProperties {
 
   // Code-specific properties
   language?: string;
-  theme?: string;
+  theme?: string; // 'monokai' | 'solarized-dark' | 'solarized-light' | 'vscode-dark-plus' | 'dark' | 'light'
   fontSize?: number;
+  fontFamily?: string;
+  showLineNumbers?: boolean;
+  codeText?: string; // raw pasted code
+  codeTextB?: string; // optional second code block for diff mode
+  animationMode?: 'typing' | 'line-by-line' | 'diff' | 'none';
+  typingSpeedCps?: number; // characters per second for typing
+  lineRevealIntervalMs?: number; // interval per line for line-by-line
+
+  // Side-by-side companion media with code
+  sideBySideAssetId?: string; // media asset (image/video) to render alongside code
+  sideBySideLayout?: 'left-right' | 'right-left' | 'top-bottom' | 'bottom-top';
+  sideBySideGap?: number; // px gap between panes
+
+  // Focus / Ken Burns
+  autoFocus?: boolean; // enable auto pan/zoom
+  focusPointX?: number; // 0..1 normalized center X
+  focusPointY?: number; // 0..1 normalized center Y
+  focusScale?: number; // zoom level target (e.g., 1.0..2.0)
 
   // Title-specific properties
   text?: string;

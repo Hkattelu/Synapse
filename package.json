@@ -14,7 +14,8 @@
     "type-check": "tsc --noEmit",
     "test": "vitest --run",
     "test:watch": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "generate:launch-og": "node ./scripts/generate-og.mjs public/launch/og-image.svg public/launch/og-image.png"
   },
   "dependencies": {
     "@remotion/bundler": "^4.0.332",
@@ -22,6 +23,7 @@
     "@remotion/player": "^4.0.332",
     "@remotion/renderer": "^4.0.332",
     "@types/prismjs": "^1.26.5",
+    "diff": "^5.2.0",
     "lucide-react": "^0.539.0",
     "motion": "^12.23.12",
     "prismjs": "^1.30.0",
@@ -55,6 +57,7 @@
     "typescript-eslint": "^8.39.1",
     "vite": "^7.1.2",
     "vite-plugin-prismjs": "^0.0.11",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@resvg/resvg-js": "^2.6.2"
   }
 }

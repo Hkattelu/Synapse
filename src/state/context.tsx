@@ -26,6 +26,8 @@ export function AppProvider({ children }: AppProviderProps) {
   useEffect(() => {
     async function loadInitialData() {
       try {
+        // Show loading message
+        dispatch({ type: 'SET_LOADING', payload: { isLoading: true, message: 'Loading projects…' } });
         // Load all projects
         let projects = await ProjectManager.getAllProjects();
 
@@ -75,8 +77,10 @@ export function AppProvider({ children }: AppProviderProps) {
         }
 
         dispatch({ type: 'LOAD_PROJECTS_LIST', payload: projects });
+        dispatch({ type: 'SET_LOADING', payload: { isLoading: false } });
       } catch (error) {
         console.error('Failed to load initial data:', error);
+        dispatch({ type: 'SET_LOADING', payload: { isLoading: false } });
       }
     }
 

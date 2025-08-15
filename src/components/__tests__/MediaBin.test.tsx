@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { MediaBin } from '../MediaBin';
-import { AppProvider } from '../../state/context';
+import { TestProviders } from '../../test/TestProviders';
 
 // Mock URL.createObjectURL and URL.revokeObjectURL
 const mockCreateObjectURL = vi.fn();
@@ -69,7 +69,7 @@ afterEach(() => {
 
 // Test wrapper component
 function TestWrapper({ children }: { children: React.ReactNode }) {
-  return <AppProvider>{children}</AppProvider>;
+  return <TestProviders>{children}</TestProviders>;
 }
 
 // Helper to create mock files
@@ -160,8 +160,8 @@ describe('MediaBin', () => {
       dataTransfer: { files: [] },
     });
 
-    // Should show drag over state
-    expect(dropZone).toHaveClass('border-blue-500', 'bg-blue-500/10');
+    // Should show drag over state (design tokens)
+    expect(dropZone).toHaveClass('border-primary-500', 'bg-primary-500/10');
   });
 
   it('handles drag leave events', () => {
@@ -187,7 +187,7 @@ describe('MediaBin', () => {
     });
 
     // Should remove drag over state
-    expect(dropZone).toHaveClass('border-gray-600');
+    expect(dropZone).toHaveClass('border-border-subtle');
   });
 
   it('validates file size limits', async () => {

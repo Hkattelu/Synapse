@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { AppProvider } from '../context';
+import { TestProviders } from '../../test/TestProviders';
 import {
   useProject,
   useTimeline,
@@ -15,7 +15,7 @@ import type { Project } from '../../lib/types';
 
 // Test wrapper component that provides shared context
 function TestWrapper({ children }: { children: ReactNode }) {
-  return <AppProvider>{children}</AppProvider>;
+  return <TestProviders>{children}</TestProviders>;
 }
 
 describe('State Management Hooks', () => {

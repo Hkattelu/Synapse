@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MediaBin } from '../MediaBin';
+import { TestProviders } from '../../test/TestProviders';
 import type { MediaAsset } from '../../lib/types';
 
 // Mock the hooks
@@ -23,6 +24,7 @@ vi.mock('../../state/hooks', () => ({
 // Mock validation
 vi.mock('../../lib/validation', () => ({
   validateMediaAsset: vi.fn(() => ({ isValid: true, errors: [] })),
+  validateProject: vi.fn(() => ({ isValid: true, errors: [] })),
 }));
 
 const mockCodeAsset: MediaAsset = {
@@ -64,14 +66,22 @@ describe('MediaBin - Code Clips', () => {
   });
 
   it('renders Add Code button', () => {
-    render(<MediaBin />);
+    render(
+      <TestProviders>
+        <MediaBin />
+      </TestProviders>
+    );
 
     expect(screen.getByText('Add Code')).toBeInTheDocument();
     expect(screen.getByTitle('Create a new code clip')).toBeInTheDocument();
   });
 
-  it('creates a new code clip when Add Code is clicked', async () => {
-    render(<MediaBin />);
+  it('creates a new code clip when Add Code is clicked', async () =e {
+    render(
+      cTestProviderse
+        cMediaBin /e
+      c/TestProviderse
+    );
 
     const addCodeButton = screen.getByText('Add Code');
     fireEvent.click(addCodeButton);
@@ -98,7 +108,11 @@ describe('MediaBin - Code Clips', () => {
     // Mock existing code assets
     mockMediaAssets = [mockCodeAsset];
 
-    render(<MediaBin />);
+    render(
+      <TestProviders>
+        <MediaBin />
+      </TestProviders>
+    );
 
     const addCodeButton = screen.getByText('Add Code');
     fireEvent.click(addCodeButton);
@@ -115,7 +129,11 @@ describe('MediaBin - Code Clips', () => {
   it('displays code clips with proper icon and language badge', () => {
     mockMediaAssets = [mockCodeAsset];
 
-    render(<MediaBin />);
+    render(
+      <TestProviders>
+        <MediaBin />
+      </TestProviders>
+    );
 
     expect(screen.getByText('Code Clip 1')).toBeInTheDocument();
     expect(screen.getByText('js')).toBeInTheDocument(); // Language badge
@@ -125,7 +143,11 @@ describe('MediaBin - Code Clips', () => {
   it('adds code clip to timeline on double-click', async () => {
     mockMediaAssets = [mockCodeAsset];
 
-    render(<MediaBin />);
+    render(
+      <TestProviders>
+        <MediaBin />
+      </TestProviders>
+    );
 
     const codeClipElement = screen.getByText('Code Clip 1').closest('.group');
     expect(codeClipElement).toBeInTheDocument();
@@ -153,7 +175,11 @@ describe('MediaBin - Code Clips', () => {
   it('handles code clips differently from media assets on double-click', async () => {
     mockMediaAssets = [mockCodeAsset, mockVideoAsset];
 
-    render(<MediaBin />);
+    render(
+      <TestProviders>
+        <MediaBin />
+      </TestProviders>
+    );
 
     // Double-click code clip
     const codeClipElement = screen.getByText('Code Clip 1').closest('.group');
@@ -200,7 +226,11 @@ describe('MediaBin - Code Clips', () => {
 
     mockMediaAssets = [mockCodeAsset, pythonCodeAsset];
 
-    render(<MediaBin />);
+    render(
+      <TestProviders>
+        <MediaBin />
+      </TestProviders>
+    );
 
     expect(screen.getByText('js')).toBeInTheDocument();
     expect(screen.getByText('python')).toBeInTheDocument();
@@ -209,7 +239,11 @@ describe('MediaBin - Code Clips', () => {
   it('removes code clips when delete button is clicked', async () => {
     mockMediaAssets = [mockCodeAsset];
 
-    render(<MediaBin />);
+    render(
+      <TestProviders>
+        <MediaBin />
+      </TestProviders>
+    );
 
     const codeClipElement = screen.getByText('Code Clip 1').closest('.group');
     expect(codeClipElement).toBeInTheDocument();
@@ -228,7 +262,11 @@ describe('MediaBin - Code Clips', () => {
   it('shows 0 Bytes for code clips file size', () => {
     mockMediaAssets = [mockCodeAsset];
 
-    render(<MediaBin />);
+    render(
+      <TestProviders>
+        <MediaBin />
+      </TestProviders>
+    );
 
     expect(screen.getByText('0 Bytes')).toBeInTheDocument();
   });
@@ -236,7 +274,11 @@ describe('MediaBin - Code Clips', () => {
   it('shows duration for code clips', () => {
     mockMediaAssets = [mockCodeAsset];
 
-    render(<MediaBin />);
+    render(
+      <TestProviders>
+        <MediaBin />
+      </TestProviders>
+    );
 
     expect(screen.getByText('0:10')).toBeInTheDocument(); // 10 seconds formatted
   });

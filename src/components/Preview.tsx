@@ -192,6 +192,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   ]);
 
   if (!project) {
+    // Graceful empty state for preview
     return (
       <div
         className={`bg-background-primary flex items-center justify-center ${className}`}
@@ -243,7 +244,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             loop={false}
             showVolumeControls={false}
             clickToPlay={false}
-            // onTimeUpdate={handleTimeUpdate}
+            onTimeUpdate={handleTimeUpdate}
           />
         </div>
       </div>

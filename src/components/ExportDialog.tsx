@@ -138,7 +138,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
 
               {/* Progress Details */}
               {progress && (
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   {progress.currentFrame && progress.totalFrames && (
                     <div>
                       <span className="text-text-secondary">Frame:</span>
@@ -295,7 +295,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                       <h3 className="text-sm font-medium text-text-primary mb-3">
                         Video Settings
                       </h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-medium text-text-secondary mb-1">
                             Format
@@ -395,7 +395,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                       <h3 className="text-sm font-medium text-text-primary mb-3">
                         Audio Settings
                       </h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-medium text-text-secondary mb-1">
                             Audio Codec

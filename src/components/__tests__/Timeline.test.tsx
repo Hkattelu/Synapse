@@ -340,7 +340,7 @@ describe('Timeline Component', () => {
     });
 
     const gridLines = container.querySelectorAll(
-      '.border-l.border-gray-700.opacity-30'
+      '.border-l.border-border-subtle.opacity-30'
     );
     expect(gridLines.length).toBeGreaterThan(0);
   });
@@ -400,9 +400,9 @@ describe('Timeline Component', () => {
     });
 
     // Find the timeline clip container (not just the text)
-    const timelineClip = container.querySelector('.border-yellow-400');
+    const timelineClip = container.querySelector('.border-accent-yellow');
     expect(timelineClip).toBeInTheDocument();
-    expect(timelineClip).toHaveClass('bg-blue-600'); // Should also have the video color
+    expect(timelineClip).toHaveClass('bg-accent-blue'); // Should also have the video color
   });
 
   it('applies correct color based on clip type', () => {
@@ -429,8 +429,8 @@ describe('Timeline Component', () => {
     });
 
     // Check that both color classes exist in the DOM
-    const videoClip = container.querySelector('.bg-blue-600');
-    const audioClip = container.querySelector('.bg-green-600');
+    const videoClip = container.querySelector('.bg-accent-blue');
+    const audioClip = container.querySelector('.bg-accent-green');
 
     expect(videoClip).toBeInTheDocument();
     expect(audioClip).toBeInTheDocument();

@@ -7,6 +7,8 @@ import {
   useVideoConfig,
 } from 'remotion';
 import type { CodeSequenceProps } from './types';
+import { diffLines } from 'diff';
+import { formatCode } from '../lib/format';
 
 // Import Prism.js - languages are loaded via vite-plugin-prismjs
 import Prism from 'prismjs';
@@ -72,6 +74,42 @@ const THEMES = {
     function: '#50fa7b',
     variable: '#8be9fd',
   },
+  'solarized-dark': {
+    background: '#002b36',
+    color: '#93a1a1',
+    comment: '#586e75',
+    keyword: '#859900',
+    string: '#2aa198',
+    number: '#b58900',
+    operator: '#93a1a1',
+    punctuation: '#93a1a1',
+    function: '#268bd2',
+    variable: '#cb4b16',
+  },
+  'solarized-light': {
+    background: '#fdf6e3',
+    color: '#657b83',
+    comment: '#93a1a1',
+    keyword: '#859900',
+    string: '#2aa198',
+    number: '#b58900',
+    operator: '#657b83',
+    punctuation: '#657b83',
+    function: '#268bd2',
+    variable: '#cb4b16',
+  },
+  'vscode-dark-plus': {
+    background: '#1e1e1e',
+    color: '#d4d4d4',
+    comment: '#6a9955',
+    keyword: '#c586c0',
+    string: '#ce9178',
+    number: '#b5cea8',
+    operator: '#d4d4d4',
+    punctuation: '#d4d4d4',
+    function: '#dcdcaa',
+    variable: '#9cdcfe',
+  },
 };
 
 export const CodeSequence: React.FC<CodeSequenceProps> = ({
@@ -83,10 +121,20 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
   const { fps } = useVideoConfig();
 
   // Get code content from item properties
-  const codeContent = item.properties.text || '// No code content';
+  const codeContentRaw = item.properties.codeText || item.properties.text || '// No code content';
   const language = item.properties.language || 'javascript';
   const theme = item.properties.theme || 'dark';
   const fontSize = item.properties.fontSize || 16;
+  const fontFamily = item.properties.fontFamily || 'Monaco, Menlo, "Ubuntu Mono", monospace';
+  const showLineNumbers = item.properties.showLineNumbers ?? false;
+  const animationMode = item.properties.animationMode || 'typing';
+  const typingSpeedCps = item.properties.typingSpeedCps || 30;
+  const lineRevealIntervalMs = item.properties.lineRevealIntervalMs || 350;
+
+  // Format code when pasted (placeholder: synchronous passthrough to avoid async in render)
+  const codeContent = useMemo(() => {
+    return codeContentRaw;
+  }, [codeContentRaw, language]);
 
   // Get theme colors
   const themeColors = THEMES[theme as keyof typeof THEMES] || THEMES.dark;
@@ -120,50 +168,59 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
 
   // Calculate typing animation progress
   const relativeFrame = frame - startFrame;
-  const animationProgress = interpolate(
-    relativeFrame,
-    [0, durationInFrames * 0.8], // Animation completes at 80% of duration
-    [0, 1],
-    {
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-    }
-  );
-
-  // Calculate how many characters to show based on animation progress
+  // Typing speed based on characters per second
   const totalCharacters = codeContent.length;
-  const charactersToShow = Math.floor(totalCharacters * animationProgress);
+  const charsPerFrame = typingSpeedCps / fps;
+  const charactersToShow = Math.floor(Math.max(0, relativeFrame) * charsPerFrame);
+
+  // Line-by-line reveal calculations
+  const lines = useMemo(() => codeContent.split(/\r?\n/), [codeContent]);
+  const revealIntervalFrames = Math.max(1, Math.round((lineRevealIntervalMs / 1000) * fps));
+  const linesToShow = Math.floor(Math.max(0, relativeFrame) / revealIntervalFrames);
 
   // Create animated code content
   const animatedCode = useMemo(() => {
-    if (charactersToShow >= totalCharacters) {
-      return highlightedCode;
+    const prismLanguage = Prism.languages[language] ? language : 'javascript';
+
+    if (animationMode === 'line-by-line') {
+      const visible = lines.slice(0, Math.min(linesToShow, lines.length)).join('\n');
+      try {
+        return Prism.highlight(visible, Prism.languages[prismLanguage], prismLanguage);
+      } catch {
+        return visible;
+      }
     }
 
-    // For typing animation, we need to truncate the original code and then highlight
-    const truncatedCode = codeContent.substring(0, charactersToShow);
-
-    if (!Prism) {
-      return truncatedCode;
+    if (animationMode === 'diff') {
+      const a = (item.properties.codeText || '').replace(/\r?\n$/, '');
+      const b = (item.properties.codeTextB || '').replace(/\r?\n$/, '');
+      const parts = diffLines(a + '\n', b + '\n');
+      return parts
+        .map((p) => {
+          const cls = p.added ? 'added' : p.removed ? 'removed' : 'unchanged';
+          try {
+            const inner = Prism.highlight(p.value, Prism.languages[prismLanguage], prismLanguage);
+            return `<span class="diff-${cls}">${inner}</span>`;
+          } catch {
+            return `<span class="diff-${cls}">${p.value}</span>`;
+          }
+        })
+        .join('');
     }
 
-    try {
-      const prismLanguage = Prism.languages[language] ? language : 'javascript';
-      return Prism.highlight(
-        truncatedCode,
-        Prism.languages[prismLanguage],
-        prismLanguage
-      );
-    } catch (error) {
-      return truncatedCode;
+    // typing or none
+    if (animationMode === 'typing') {
+      if (charactersToShow >= totalCharacters) return highlightedCode;
+      const truncated = codeContent.substring(0, Math.max(0, charactersToShow));
+      try {
+        return Prism.highlight(truncated, Prism.languages[prismLanguage], prismLanguage);
+      } catch {
+        return truncated;
+      }
     }
-  }, [
-    codeContent,
-    highlightedCode,
-    charactersToShow,
-    totalCharacters,
-    language,
-  ]);
+
+    return highlightedCode;
+  }, [animationMode, charactersToShow, codeContent, highlightedCode, language, lines, linesToShow, item.properties.codeText, item.properties.codeTextB]);
 
   // Style for the container
   const containerStyle: React.CSSProperties = {
@@ -171,7 +228,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
     opacity,
     backgroundColor: themeColors.background,
     color: themeColors.color,
-    fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
+    fontFamily,
     fontSize: `${fontSize}px`,
     lineHeight: 1.5,
     padding: '20px',
@@ -254,7 +311,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
             style={{ fontFamily: 'inherit' }}
           />
           {/* Typing cursor */}
-          {charactersToShow < totalCharacters && (
+          {animationMode === 'typing' && charactersToShow < totalCharacters && (
             <span
               style={{
                 backgroundColor: themeColors.color,
@@ -275,6 +332,14 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
               0%, 50% { opacity: 1; }
               51%, 100% { opacity: 0; }
             }
+            .diff-added { background-color: rgba(16, 185, 129, 0.15); display: block; }
+            .diff-removed { background-color: rgba(239, 68, 68, 0.15); display: block; text-decoration: line-through; opacity: 0.85; }
+            .diff-unchanged { display: block; }
+            ${showLineNumbers ? `pre { counter-reset: line; }
+            code span { counter-increment: line; }
+            code span::before { content: counter(line);
+              display: inline-block; width: 2.5em; margin-right: 1em; text-align: right; color: ${themeColors.comment}; }
+            ` : ''}
           `}
         </style>
       </AbsoluteFill>

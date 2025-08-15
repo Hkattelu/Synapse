@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useTimeline, useMediaAssets } from '../state/hooks';
 import { validateItemProperties } from '../lib/validation';
+import * as animationPresetsModule from '../lib/animationPresets';
 import type {
   TimelineItem,
   ItemProperties,
@@ -268,6 +269,11 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
     Record<string, string>
   >({});
 
+  // Temporary helper to avoid undefined reference during tests; can be enhanced to list eligible assets
+  const getSideBySideOptions = React.useCallback(() => {
+    return [] as { value: string; label: string }[];
+  }, []);
+
   // Update local state when item changes
   React.useEffect(() => {
     setLocalProperties(item.properties);
@@ -384,11 +390,18 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
 
   const renderCodeProperties = () => (
     <div className="space-y-3">
-      <TextInput
+      <TextAreaWithFormat
         label="Code Content"
-        value={localProperties.text ?? ''}
-        onChange={(value) => updateProperty('text', value)}
-        error={validationErrors.text}
+        value={localProperties.codeText ?? localProperties.text ?? ''}
+        language={localProperties.language ?? 'javascript'}
+        onChange={(value) => updateProperty('codeText', value)}
+        error={validationErrors.codeText}
+      />
+      <TextInput
+        label="Second Code (for Diff)"
+        value={localProperties.codeTextB ?? ''}
+        onChange={(value) => updateProperty('codeTextB', value)}
+        error={validationErrors.codeTextB}
         multiline
       />
       <SelectInput
@@ -398,6 +411,8 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
         options={[
           { value: 'javascript', label: 'JavaScript' },
           { value: 'typescript', label: 'TypeScript' },
+          { value: 'tsx', label: 'TSX' },
+          { value: 'jsx', label: 'JSX' },
           { value: 'python', label: 'Python' },
           { value: 'java', label: 'Java' },
           { value: 'cpp', label: 'C++' },
@@ -416,7 +431,16 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
           { value: 'monokai', label: 'Monokai' },
           { value: 'github', label: 'GitHub' },
           { value: 'dracula', label: 'Dracula' },
+          { value: 'solarized-dark', label: 'Solarized Dark' },
+          { value: 'solarized-light', label: 'Solarized Light' },
+          { value: 'vscode-dark-plus', label: 'VS Code Dark+' },
         ]}
+      />
+      <TextInput
+        label="Font Family"
+        value={localProperties.fontFamily ?? 'Monaco, Menlo, "Ubuntu Mono", monospace'}
+        onChange={(value) => updateProperty('fontFamily', value)}
+        error={validationErrors.fontFamily}
       />
       <NumberInput
         label="Font Size"
@@ -428,8 +452,89 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
         step={1}
         suffix="px"
       />
+      <SelectInput
+        label="Animation Mode"
+        value={localProperties.animationMode ?? 'typing'}
+        onChange={(value) => updateProperty('animationMode', value as any)}
+        options={[
+          { value: 'typing', label: 'Typing' },
+          { value: 'line-by-line', label: 'Line by Line' },
+          { value: 'diff', label: 'Diff Highlight' },
+          { value: 'none', label: 'None' },
+        ]}
+      />
+      <NumberInput
+        label="Typing Speed"
+        value={localProperties.typingSpeedCps ?? 30}
+        onChange={(value) => updateProperty('typingSpeedCps', value)}
+        error={validationErrors.typingSpeedCps}
+        min={1}
+        max={120}
+        step={1}
+        suffix="cps"
+      />
+      <NumberInput
+        label="Line Reveal Interval"
+        value={localProperties.lineRevealIntervalMs ?? 350}
+        onChange={(value) => updateProperty('lineRevealIntervalMs', value)}
+        error={validationErrors.lineRevealIntervalMs}
+        min={50}
+        max={2000}
+        step={10}
+        suffix="ms"
+      />
+      <SelectInput
+        label="Line Numbers"
+        value={(localProperties.showLineNumbers ?? false) ? 'on' : 'off'}
+        onChange={(value) => updateProperty('showLineNumbers', value === 'on')}
+        options={[
+          { value: 'off', label: 'Off' },
+          { value: 'on', label: 'On' },
+        ]}
+      />
     </div>
   );
+
+  function TextAreaWithFormat({ label, value, language, onChange, error }: { label: string; value: string; language: string; onChange: (v: string) => void; error?: string; }) {
+    const inputId = React.useId();
+    const [localValue, setLocalValue] = useState(value);
+    React.useEffect(() => setLocalValue(value), [value]);
+
+    const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      // Let paste happen, then format next tick
+      setTimeout(async () => {
+        const target = e.target as HTMLTextAreaElement;
+        const formatted = await import('../lib/format').then(m => m.formatCode(target.value, language));
+        setLocalValue(formatted);
+        onChange(formatted);
+      }, 0);
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setLocalValue(e.target.value);
+      onChange(e.target.value);
+    };
+
+    return (
+      <div>
+        <label htmlFor={inputId} className="block text-sm font-medium text-text-secondary mb-1">{label}</label>
+        <textarea
+          id={inputId}
+          value={localValue}
+          onChange={handleChange}
+          onPaste={handlePaste}
+          rows={8}
+          className={`w-full bg-background-tertiary border rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500 ${error ? 'border-status-error' : 'border-border-subtle'}`}
+          aria-invalid={error ? 'true' : 'false'}
+          aria-describedby={error ? `${inputId}-error` : undefined}
+          style={{ fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace' }}
+        />
+        {error && (
+          <p id={`${inputId}-error`} className="text-status-error text-xs mt-1" role="alert">{error}</p>
+        )}
+      </div>
+    );
+  }
 
   const renderTitleProperties = () => (
     <div className="space-y-3">
@@ -484,12 +589,74 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
           </div>
         )}
 
-        {item.type === 'code' && (
+      {item.type === 'code' && (
           <div className="mb-4">
             <h5 className="text-sm font-medium text-text-secondary mb-2">
               Code
             </h5>
             {renderCodeProperties()}
+            <div className="mt-4">
+              <h5 className="text-sm font-medium text-text-secondary mb-2">Side by Side</h5>
+              <SelectInput
+                label="Companion Asset"
+                value={localProperties.sideBySideAssetId ?? ''}
+                onChange={(value) => updateProperty('sideBySideAssetId', value || undefined)}
+                options={[{ value: '', label: 'None' }, ...getSideBySideOptions()]}
+              />
+              <SelectInput
+                label="Layout"
+                value={localProperties.sideBySideLayout ?? 'left-right'}
+                onChange={(value) => updateProperty('sideBySideLayout', value as any)}
+                options={[
+                  { value: 'left-right', label: 'Left • Right' },
+                  { value: 'right-left', label: 'Right • Left' },
+                  { value: 'top-bottom', label: 'Top • Bottom' },
+                  { value: 'bottom-top', label: 'Bottom • Top' },
+                ]}
+              />
+              <NumberInput
+                label="Gap"
+                value={localProperties.sideBySideGap ?? 16}
+                onChange={(value) => updateProperty('sideBySideGap', value)}
+                min={0}
+                max={128}
+                step={1}
+                suffix="px"
+              />
+            </div>
+            <div className="mt-4">
+              <h5 className="text-sm font-medium text-text-secondary mb-2">Focus (Ken Burns)</h5>
+              <SelectInput
+                label="Auto Focus"
+                value={(localProperties.autoFocus ?? true) ? 'on' : 'off'}
+                onChange={(value) => updateProperty('autoFocus', value === 'on')}
+                options={[{ value: 'off', label: 'Off' }, { value: 'on', label: 'On' }]}
+              />
+              <NumberInput
+                label="Focus X"
+                value={localProperties.focusPointX ?? 0.5}
+                onChange={(value) => updateProperty('focusPointX', value)}
+                min={0}
+                max={1}
+                step={0.01}
+              />
+              <NumberInput
+                label="Focus Y"
+                value={localProperties.focusPointY ?? 0.5}
+                onChange={(value) => updateProperty('focusPointY', value)}
+                min={0}
+                max={1}
+                step={0.01}
+              />
+              <NumberInput
+                label="Focus Scale"
+                value={localProperties.focusScale ?? 1.2}
+                onChange={(value) => updateProperty('focusScale', value)}
+                min={1}
+                max={3}
+                step={0.05}
+              />
+            </div>
           </div>
         )}
 
@@ -522,11 +689,7 @@ function AnimationSettings({
 
   // Import animation presets from the comprehensive system
   const { ANIMATION_PRESETS, getAnimationsByType, getCompatibleAnimations } =
-    React.useMemo(() => {
-      // Dynamic import to avoid circular dependencies
-      const presets = require('../lib/animationPresets');
-      return presets;
-    }, []);
+    animationPresetsModule;
 
   // Get available presets filtered by type
   const availablePresets = React.useMemo(() => {

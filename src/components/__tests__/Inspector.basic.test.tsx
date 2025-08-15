@@ -25,7 +25,7 @@ const mockVideoItem: TimelineItem = {
   assetId: 'test-asset',
   startTime: 10,
   duration: 5.5,
-  track: 1,
+  track: 0,
   type: 'video',
   properties: {
     x: 0,

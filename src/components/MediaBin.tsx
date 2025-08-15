@@ -1,6 +1,8 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { useMediaAssets, useTimeline } from '../state/hooks';
+import { useNotifications } from '../state/notifications';
 import { validateMediaAsset } from '../lib/validation';
+import { RecorderDialog } from './RecorderDialog';
 import type { MediaAsset, MediaAssetType } from '../lib/types';
 
 interface MediaBinProps {
@@ -29,11 +31,13 @@ const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 export function MediaBin({ className = '' }: MediaBinProps) {
   const { mediaAssets, addMediaAsset, removeMediaAsset } = useMediaAssets();
+  const [recorderOpen, setRecorderOpen] = useState(false);
   const { addTimelineItem } = useTimeline();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadErrors, setUploadErrors] = useState<FileUploadError[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const { notify } = useNotifications();
 
   // Determine media type from MIME type
   const getMediaType = (mimeType: string): MediaAssetType | null => {
@@ -165,6 +169,14 @@ export function MediaBin({ className = '' }: MediaBinProps) {
           getMediaDuration(file, mediaType),
         ]);
 
+        // Warn if metadata could not be extracted
+        if ((mediaType === 'video' || mediaType === 'audio') && duration === undefined) {
+          notify({ type: 'warning', title: 'Metadata', message: `Could not read duration for ${file.name}. Using defaults.` });
+        }
+        if (mediaType === 'video' && !thumbnail) {
+          notify({ type: 'warning', title: 'Thumbnail', message: `Could not generate thumbnail for ${file.name}.` });
+        }
+
         // Create media asset
         const mediaAsset: Omit<MediaAsset, 'id' | 'createdAt'> = {
           name: file.name,
@@ -196,6 +208,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
 
         // Add to media assets
         addMediaAsset(mediaAsset);
+        notify({ type: 'success', title: 'Imported', message: `${file.name} added to Media Bin` });
       } catch (error) {
         errors.push({
           file: file.name,
@@ -206,6 +219,9 @@ export function MediaBin({ className = '' }: MediaBinProps) {
     }
 
     setUploadErrors(errors);
+    if (errors.length) {
+      notify({ type: 'error', title: 'Import Issues', message: `${errors.length} file(s) had problems during import.` });
+    }
     setIsUploading(false);
   };
 
@@ -356,6 +372,13 @@ export function MediaBin({ className = '' }: MediaBinProps) {
             Media Bin
           </h3>
           <div className="flex space-x-2">
+            <button
+              onClick={() => setRecorderOpen(true)}
+              className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium py-1 px-3 rounded transition-colors shadow-glow"
+              title="Record audio narration or camera"
+            >
+              Record
+            </button>
             <button
               onClick={openFileDialog}
               className="bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium py-1 px-3 rounded transition-colors shadow-glow disabled:opacity-50 disabled:cursor-not-allowed"
@@ -607,5 +630,8 @@ export function MediaBin({ className = '' }: MediaBinProps) {
         )}
       </div>
     </div>
+    {recorderOpen && (
+      <RecorderDialog isOpen={recorderOpen} onClose={() => setRecorderOpen(false)} />
+    )}
   );
 }

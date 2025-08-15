@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0b1020"/>
+      <stop offset="1" stop-color="#11162a"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="40" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <clipPath id="r">
+      <rect x="0" y="0" width="1200" height="630" rx="24"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Grid -->
+  <g opacity="0.18" clip-path="url(#r)">
+    <g stroke="#7c3aed" stroke-opacity="0.25" stroke-width="0.5" stroke-dasharray="2 6">
+      <!-- generate a subtle grid -->
+      <!-- vertical -->
+      <g>
+        <line x1="60" y1="0" x2="60" y2="630"/>
+        <line x1="160" y1="0" x2="160" y2="630"/>
+        <line x1="260" y1="0" x2="260" y2="630"/>
+        <line x1="360" y1="0" x2="360" y2="630"/>
+        <line x1="460" y1="0" x2="460" y2="630"/>
+        <line x1="560" y1="0" x2="560" y2="630"/>
+        <line x1="660" y1="0" x2="660" y2="630"/>
+        <line x1="760" y1="0" x2="760" y2="630"/>
+        <line x1="860" y1="0" x2="860" y2="630"/>
+        <line x1="960" y1="0" x2="960" y2="630"/>
+        <line x1="1060" y1="0" x2="1060" y2="630"/>
+      </g>
+      <!-- horizontal -->
+      <g>
+        <line x1="0" y1="60" x2="1200" y2="60"/>
+        <line x1="0" y1="140" x2="1200" y2="140"/>
+        <line x1="0" y1="220" x2="1200" y2="220"/>
+        <line x1="0" y1="300" x2="1200" y2="300"/>
+        <line x1="0" y1="380" x2="1200" y2="380"/>
+        <line x1="0" y1="460" x2="1200" y2="460"/>
+        <line x1="0" y1="540" x2="1200" y2="540"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Accent blob -->
+  <g filter="url(#glow)">
+    <circle cx="980" cy="120" r="140" fill="#06b6d4" opacity="0.25"/>
+    <circle cx="980" cy="120" r="240" fill="#7c3aed" opacity="0.15"/>
+  </g>
+
+  <!-- Content -->
+  <g font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+    <rect x="48" y="48" width="84" height="84" rx="16" fill="url(#accent)"/>
+    <text x="150" y="86" font-size="28" fill="#c4b5fd" opacity="0.9" font-weight="700">Synapse Studio</text>
+    <text x="150" y="118" font-size="16" fill="#94a3b8">Code-first video studio</text>
+
+    <text x="48" y="260" font-size="64" font-weight="800" fill="white">Launching on Product Hunt</text>
+    <text x="48" y="320" font-size="28" fill="#cbd5e1" opacity="0.95">Orchestrate video compositions from code with a real timeline.</text>
+
+    <g>
+      <rect x="48" y="360" rx="14" width="260" height="54" fill="url(#accent)"/>
+      <text x="72" y="395" font-size="18" font-weight="700" fill="white">Try the app → synapse.studio</text>
+    </g>
+
+    <g opacity="0.9">
+      <rect x="48" y="440" width="520" height="120" rx="16" fill="rgba(255,255,255,0.04)" stroke="#111827"/>
+      <text x="72" y="480" font-size="18" fill="#e5e7eb">What makes Synapse different</text>
+      <text x="72" y="510" font-size="16" fill="#94a3b8">• Studio-grade timeline • Remotion-powered • Team-ready</text>
+    </g>
+  </g>
+</svg>
+

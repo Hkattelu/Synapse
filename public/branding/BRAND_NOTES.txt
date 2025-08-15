@@ -1,0 +1,21 @@
+Brand color palette (placeholder)
+
+- Primary: #7C3AED (violet-600)
+- Accent: #06B6D4 (cyan-500)
+- Surface: #0B1020 (near-black)
+- Text: #E5E7EB (gray-200)
+- Muted: #94A3B8 (slate-400)
+
+Typography (placeholder)
+- Display: Sora or Inter Tight, 700/800
+- Body: Inter, 400/500
+
+Voice and tone
+- Confident, practical, maker-focused
+- Emphasize speed, clarity, and creative control
+
+Usage notes
+- High-contrast UI
+- Gradients sparingly
+- Prefer dark backgrounds
+

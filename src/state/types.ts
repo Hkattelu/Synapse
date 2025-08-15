@@ -51,7 +51,9 @@ export type UIAction =
   | { type: 'UPDATE_TIMELINE_VIEW'; payload: Partial<UIState['timeline']> }
   | { type: 'RESET_UI_STATE' };
 
-export type AppAction = ProjectAction | TimelineAction | MediaAction | UIAction;
+export type SetLoadingAction = { type: 'SET_LOADING'; payload: { isLoading: boolean; message?: string } };
+
+export type AppAction = ProjectAction | TimelineAction | MediaAction | UIAction | SetLoadingAction;
 
 // Combined application state
 export interface AppState {
