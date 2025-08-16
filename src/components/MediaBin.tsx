@@ -3,6 +3,7 @@ import { useMediaAssets, useTimeline } from '../state/hooks';
 import { useNotifications } from '../state/notifications';
 import { validateMediaAsset } from '../lib/validation';
 import { RecorderDialog } from './RecorderDialog';
+import { AudioWaveform } from './Waveform';
 import type { MediaAsset, MediaAssetType } from '../lib/types';
 
 interface MediaBinProps {
@@ -534,19 +535,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                           </svg>
                         )}
                         {asset.type === 'audio' && (
-                          <svg
-                            className="w-8 h-8"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                            />
-                          </svg>
+                          <AudioWaveform src={asset.url} />
                         )}
                         {asset.type === 'code' && (
                           <div className="text-center">
@@ -629,9 +618,9 @@ export function MediaBin({ className = '' }: MediaBinProps) {
           </div>
         )}
       </div>
+      {recorderOpen && (
+        <RecorderDialog isOpen={recorderOpen} onClose={() => setRecorderOpen(false)} />
+      )}
     </div>
-    {recorderOpen && (
-      <RecorderDialog isOpen={recorderOpen} onClose={() => setRecorderOpen(false)} />
-    )}
   );
 }

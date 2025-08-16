@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
+import Prism from 'prismjs';
 
 // Silence AppProvider project loading and saving side-effects in tests
 vi.mock('../lib/projectManager', async (importOriginal) => {
@@ -36,3 +37,12 @@ if (!(globalThis as any).IntersectionObserver) {
     thresholds: ReadonlyArray<number> = [];
   } as any;
 }
+
+// Prism markdown patch: ensure nested structures exist before markdown component loads
+try {
+  // Some Prism plugins expect nested objects; ensure structure exists
+  (Prism as any).languages = (Prism as any).languages || {};
+  (Prism as any).languages.markdown = (Prism as any).languages.markdown || {
+    inside: { content: { inside: {} } },
+  };
+} catch {}

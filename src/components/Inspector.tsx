@@ -394,7 +394,10 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
         label="Code Content"
         value={localProperties.codeText ?? localProperties.text ?? ''}
         language={localProperties.language ?? 'javascript'}
-        onChange={(value) => updateProperty('codeText', value)}
+        onChange={(value) => {
+          updateProperty('text', value);
+          updateProperty('codeText', value);
+        }}
         error={validationErrors.codeText}
       />
       <TextInput

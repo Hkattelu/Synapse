@@ -24,10 +24,10 @@ vi.mock('../../lib/validation', () => ({
   validateProject: vi.fn(() => ({ isValid: true, errors: [] })),
 }));
 
-vi.mock('../../lib/animationPresets', () =e ({
+vi.mock('../../lib/animationPresets', () => ({
   ANIMATION_PRESETS: [],
-  getAnimationsByType: () =e [],
-  getCompatibleAnimations: () =e [],
+  getAnimationsByType: () => [],
+  getCompatibleAnimations: () => [],
 }));
 
 const mockCodeItem: TimelineItem = {

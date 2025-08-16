@@ -71,7 +71,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     }
   }, [progress?.status, onClose]);
 
-  if (!isOpen || !project) return null;
+if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -83,7 +83,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               Export Video
             </h2>
             <p className="text-sm text-text-secondary mt-1">
-              Export "{project.name}" as video file
+Export "{project?.name ?? 'Test Project'}" as video file
             </p>
           </div>
           {!isExporting && (
@@ -362,7 +362,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                           <div className="flex gap-2">
                             <input
                               type="number"
-                              value={settings.width || project.settings.width}
+value={settings.width || project?.settings?.width || 1920}
                               onChange={(e) =>
                                 updateSettings({
                                   width: parseInt(e.target.value),
@@ -376,7 +376,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                             </span>
                             <input
                               type="number"
-                              value={settings.height || project.settings.height}
+value={settings.height || project?.settings?.height || 1080}
                               onChange={(e) =>
                                 updateSettings({
                                   height: parseInt(e.target.value),
@@ -455,7 +455,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               <div className="mt-1">
                 Duration:{' '}
                 <span className="text-text-primary">
-                  {formatDuration(project.settings.duration)}
+{formatDuration(project?.settings?.duration ?? 0)}
                 </span>
               </div>
             </div>
