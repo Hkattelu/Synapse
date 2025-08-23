@@ -14,6 +14,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
   const { playback } = usePlayback();
   const { notify } = useNotifications();
   const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [withCamera, setWithCamera] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -25,17 +26,39 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     duration: number | null;
     withCamera: boolean;
   } | null>(null);
+  const [envError, setEnvError] = useState<string | null>(null);
+
+  // Basic bubble config for talking head overlay
+  const [bubbleEnabled, setBubbleEnabled] = useState(true);
+  const [bubbleShape, setBubbleShape] = useState<'circle' | 'rounded'>('circle');
+  const [bubbleCorner, setBubbleCorner] = useState<
+    'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+  >('bottom-right');
+  const [bubbleSize, setBubbleSize] = useState<'sm' | 'md'>('sm');
 
   useEffect(() => {
     if (!isOpen) return;
+    // Environment checks
+    if (!window.isSecureContext) {
+      setEnvError('Recording requires a secure context (HTTPS).');
+    } else if (
+      !('mediaDevices' in navigator) ||
+      typeof navigator.mediaDevices.getUserMedia !== 'function'
+    ) {
+      setEnvError('This browser does not support media capture.');
+    } else if (!('MediaRecorder' in window)) {
+      setEnvError('MediaRecorder is not supported in this browser.');
+    } else {
+      setEnvError(null);
+    }
     return () => {
-      // Cleanup
-      if (stream) {
-        stream.getTracks().forEach((t) => t.stop());
-      }
-      setStream(null);
+      // Cleanup only when dialog closes/unmounts
+      setStream((s) => {
+        s?.getTracks().forEach((t) => t.stop());
+        return null;
+      });
     };
-  }, [isOpen, stream]);
+  }, [isOpen]);
 
   const requestStream = async () => {
     try {
@@ -54,15 +77,28 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
   };
 
   const startRecording = async () => {
+    if (envError) {
+      notify({ type: 'error', title: 'Recorder', message: envError });
+      return;
+    }
     if (!stream) {
       await requestStream();
     }
     const s = stream ?? (await navigator.mediaDevices.getUserMedia({ audio: true, video: withCamera }));
     chunksRef.current = [];
-    const mime = withCamera
-      ? 'video/webm;codecs=vp9,opus'
-      : 'audio/webm;codecs=opus';
-    const mr = new MediaRecorder(s, { mimeType: mime });
+    // Pick a supported mime type
+    const pickMime = () => {
+      const candidates = withCamera
+        ? ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']
+        : ['audio/webm;codecs=opus', 'audio/webm'];
+      for (const m of candidates) {
+        // @ts-expect-error Safari types may not include isTypeSupported
+        if (window.MediaRecorder?.isTypeSupported?.(m)) return m;
+      }
+      return '';
+    };
+    const mime = pickMime();
+    const mr = mime ? new MediaRecorder(s, { mimeType: mime }) : new MediaRecorder(s);
     mediaRecorderRef.current = mr;
     mr.ondataavailable = (e) => {
       if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
@@ -74,6 +110,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       const duration = await getBlobDuration(url, withCamera ? 'video' : 'audio');
       setPending({ url, mime, duration: duration ?? null, withCamera });
       setIsRecording(false);
+      setIsPaused(false);
     };
     mr.start();
     setIsRecording(true);
@@ -88,6 +125,18 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     }
   };
 
+  const togglePause = () => {
+    const mr = mediaRecorderRef.current;
+    if (!mr) return;
+    if (isPaused) {
+      mr.resume();
+      setIsPaused(false);
+    } else {
+      mr.pause();
+      setIsPaused(true);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -98,6 +147,11 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
         </div>
         <div className="p-4 space-y-4">
+          {envError && (
+            <div className="p-3 rounded bg-red-50 text-red-700 text-sm">
+              {envError} Please open this site over HTTPS and try again.
+            </div>
+          )}
           {!pending && (
             <>
               <label className="flex items-center space-x-2">
@@ -111,9 +165,16 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
               )}
               <div className="flex items-center space-x-2">
                 {!isRecording ? (
-                  <button onClick={startRecording} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">Start</button>
+                  <button onClick={startRecording} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded" disabled={!!envError}>
+                    Start
+                  </button>
                 ) : (
-                  <button onClick={stopRecording} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Stop</button>
+                  <>
+                    <button onClick={togglePause} className="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded">
+                      {isPaused ? 'Resume' : 'Pause'}
+                    </button>
+                    <button onClick={stopRecording} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Stop</button>
+                  </>
                 )}
                 <button onClick={onClose} className="px-4 py-2 rounded border">Cancel</button>
               </div>
@@ -122,6 +183,95 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
           {pending && (
             <div className="space-y-3">
               <p className="text-sm text-gray-700">Recording ready. Choose an action:</p>
+              {pending.withCamera && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={bubbleEnabled}
+                        onChange={(e) => setBubbleEnabled(e.target.checked)}
+                      />
+                      <span>Render as corner bubble</span>
+                    </label>
+                    <select
+                      className="border rounded px-2 py-1 text-sm"
+                      value={bubbleCorner}
+                      onChange={(e) =>
+                        setBubbleCorner(e.target.value as typeof bubbleCorner)
+                      }
+                      title="Corner position"
+                    >
+                      <option value="top-left">Top-left</option>
+                      <option value="top-right">Top-right</option>
+                      <option value="bottom-left">Bottom-left</option>
+                      <option value="bottom-right">Bottom-right</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3 text-sm">
+                      <label className="flex items-center space-x-1">
+                        <input
+                          type="radio"
+                          name="shape"
+                          value="circle"
+                          checked={bubbleShape === 'circle'}
+                          onChange={() => setBubbleShape('circle')}
+                        />
+                        <span>Circle</span>
+                      </label>
+                      <label className="flex items-center space-x-1">
+                        <input
+                          type="radio"
+                          name="shape"
+                          value="rounded"
+                          checked={bubbleShape === 'rounded'}
+                          onChange={() => setBubbleShape('rounded')}
+                        />
+                        <span>Rounded</span>
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm">
+                      <span>Size</span>
+                      <select
+                        className="border rounded px-2 py-1 text-sm"
+                        value={bubbleSize}
+                        onChange={(e) =>
+                          setBubbleSize(e.target.value as typeof bubbleSize)
+                        }
+                        title="Bubble size"
+                      >
+                        <option value="sm">Small</option>
+                        <option value="md">Medium</option>
+                      </select>
+                    </div>
+                  </div>
+                  {/* Bubble preview */}
+                  <div className="relative w-full h-40 bg-neutral-100 rounded">
+                    <video
+                      src={pending.url}
+                      muted
+                      playsInline
+                      autoPlay
+                      loop
+                      className="absolute"
+                      style={{
+                        width: bubbleSize === 'md' ? 128 : 96,
+                        height: bubbleSize === 'md' ? 128 : 96,
+                        overflow: 'hidden',
+                        borderRadius: bubbleShape === 'circle' ? 9999 : 16,
+                        objectFit: 'cover',
+                        ...(bubbleCorner.includes('top')
+                          ? { top: 12 }
+                          : { bottom: 12 }),
+                        ...(bubbleCorner.includes('left')
+                          ? { left: 12 }
+                          : { right: 12 }),
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => {
@@ -140,7 +290,14 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                       duration: Math.max(0.1, pending.duration ?? 5),
                       track: 0,
                       type: pending.withCamera ? 'video' : 'audio',
-                      properties: {},
+                      properties: pending.withCamera && bubbleEnabled
+                        ? {
+                            talkingHeadEnabled: true,
+                            talkingHeadCorner: bubbleCorner,
+                            talkingHeadShape: bubbleShape,
+                            talkingHeadSize: bubbleSize,
+                          }
+                        : {},
                       animations: [],
                       keyframes: [],
                     });
