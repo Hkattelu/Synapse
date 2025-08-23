@@ -16,9 +16,16 @@ const DEV_URL =
 const DIST_DIR =
   process.env.SYNAPSE_ELECTRON_DIST_DIR || join(process.cwd(), 'dist');
 
+// Sensible default dialog filters; renderer can override by passing `options.filters`
+const defaultFilters = [
+  { name: 'Video', extensions: ['mp4'] },
+  { name: 'Audio', extensions: ['mp3'] },
+  { name: 'Code', extensions: ['ts'] },
+];
+
 /**
- * Create the main application window
- */
+* Create the main application window
+*/
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 1280,
@@ -44,7 +51,7 @@ const createWindow = () => {
     win.loadURL(indexHtml.toString());
   }
 
-  // Optional: Open external links in default browser
+  // Open external links in default browser
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('http:') || url.startsWith('https:')) {
       shell.openExternal(url);
@@ -78,17 +85,12 @@ app.on('window-all-closed', () => {
 // IPC: Filesystem surface
 // Channel names documented in docs/electron/outline.md
 
-const defaultFilters = [
-  { name: 'Video', extensions: ['mp4'] },
-  { name: 'Audio', extensions: ['mp3'] },
-  { name: 'Code', extensions: ['ts'] },
-];
-
 ipcMain.handle('ipc:fs:open-file', async (evt, options = {}) => {
   const parent = BrowserWindow.fromWebContents(evt.sender) ?? undefined;
-  const opts = options && Object.prototype.hasOwnProperty.call(options, 'filters')
-    ? options
-    : { ...options, filters: defaultFilters };
+  const opts =
+    options && Object.prototype.hasOwnProperty.call(options, 'filters')
+      ? options
+      : { ...options, filters: defaultFilters };
   const res = await dialog.showOpenDialog(parent, {
     properties: ['openFile'],
     ...opts,
@@ -99,9 +101,10 @@ ipcMain.handle('ipc:fs:open-file', async (evt, options = {}) => {
 
 ipcMain.handle('ipc:fs:open-files', async (evt, options = {}) => {
   const parent = BrowserWindow.fromWebContents(evt.sender) ?? undefined;
-  const opts = options && Object.prototype.hasOwnProperty.call(options, 'filters')
-    ? options
-    : { ...options, filters: defaultFilters };
+  const opts =
+    options && Object.prototype.hasOwnProperty.call(options, 'filters')
+      ? options
+      : { ...options, filters: defaultFilters };
   const res = await dialog.showOpenDialog(parent, {
     properties: ['openFile', 'multiSelections'],
     ...opts,
@@ -134,9 +137,10 @@ ipcMain.handle('ipc:fs:write-file', async (_evt, path, data, options = {}) => {
 
 ipcMain.handle('ipc:fs:show-save-dialog', async (evt, options = {}) => {
   const parent = BrowserWindow.fromWebContents(evt.sender) ?? undefined;
-  const opts = options && Object.prototype.hasOwnProperty.call(options, 'filters')
-    ? options
-    : { ...options, filters: defaultFilters };
+  const opts =
+    options && Object.prototype.hasOwnProperty.call(options, 'filters')
+      ? options
+      : { ...options, filters: defaultFilters };
   const res = await dialog.showSaveDialog(parent, {
     ...opts,
   });
