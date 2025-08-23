@@ -60,9 +60,12 @@ const createWindow = () => {
     return { action: 'deny' };
   });
 
-  // Block in-window navigations to external content
+  // Block in-window navigations to external content; open in system browser instead
+  const devOrigin = isDev && DEV_URL ? new URL(DEV_URL).origin : null;
   win.webContents.on('will-navigate', (e, url) => {
     if (url.startsWith('http:') || url.startsWith('https:')) {
+      // Allow same-origin navigations for the dev server; block everything else
+      if (devOrigin && new URL(url).origin === devOrigin) return;
       e.preventDefault();
       shell.openExternal(url);
     }

@@ -25,16 +25,17 @@ High-level architecture
 - Renderer
   - The existing Vite/React app. No Node integration; it can only access native capabilities via `window.SynapseFS`.
 
-Security model (initial)
+Security model
 
-- `contextIsolation: true` (enabled)
-- `nodeIntegration: false` (disabled)
-- `sandbox: true` (enabled) — renderer runs in a sandboxed environment; only the preload bridge is privileged.
-- Preload is the only bridge; keep it minimal and namespaced: `window.SynapseFS` (the object is frozen at runtime and typed as readonly).
+- `contextIsolation: true` and `nodeIntegration: false`.
+- `sandbox: true` for renderer processes.
+- Preload is the only bridge; keep it minimal and namespaced: `window.SynapseFS`.
 - IPC channel allow-list: restrict to the channels enumerated below.
 - Do not use the deprecated `remote` module.
-- External links open in the system browser; in-window navigations to `http(s)` are blocked via `will-navigate` to protect the preload surface.
-- Content Security Policy (CSP): keep current web CSP; tighten in packaging pass if needed.
+- External content handling:
+  - `setWindowOpenHandler` denies new windows and opens `http/https` links in the system browser.
+  - `will-navigate` blocks in-window navigations to `http/https` and opens them externally. This prevents untrusted pages from gaining access to the preload API within the current window.
+- Content Security Policy (CSP): keep current web CSP; tighten in a packaging pass if needed.
 
 Renderer-facing API surface (preload)
 
@@ -67,11 +68,14 @@ IPC channel names (main <-> preload <-> renderer)
 - `ipc:fs:show-save-dialog`
 - `ipc:app:get-path`
 
-Allowed operations and constraints (initial)
+Allowed operations and constraints
 
-- No hard file-type filters or size limits are enforced in code yet.
+- File dialogs apply initial default filters when none are provided by the renderer:
+  - Video: `.mp4`
+  - Audio: `.mp3`
+  - Code: `.ts`
+    These defaults apply to `openFile`, `openFiles`, and `showSaveDialog`. The renderer's `options.filters` takes precedence if supplied. `openDirectory` is unaffected. More types can be added later.
 - The renderer may pass standard Electron dialog options (filters, default paths) as the `options` argument.
-- Maintainer decisions are requested on initial file type restrictions and size thresholds (see Open Questions).
 
 Build workflows
 
@@ -91,8 +95,8 @@ Production / local packaging (first pass)
 
 Asset loading rules
 
-- Dev: `BrowserWindow` loads `SYNAPSE_ELECTRON_DEV_URL` or `VITE_DEV_SERVER_URL` only when `!app.isPackaged`.
-- Prod: loads `file://${PROJECT_ROOT}/dist/index.html` by default (constructed via `pathToFileURL` for cross‑platform safety). Override with `SYNAPSE_ELECTRON_DIST_DIR` if needed.
+- Development: When the app is not packaged (`!app.isPackaged`) and a dev URL is defined (`SYNAPSE_ELECTRON_DEV_URL` or `VITE_DEV_SERVER_URL`), the window loads that remote URL.
+- Packaged builds: The app always loads local assets from `DIST_DIR` (defaults to `dist/`) using a safe file URL constructed via Node's `pathToFileURL`. Remote content is not allowed when packaged.
 
 Target platforms (proposal)
 
@@ -143,8 +147,8 @@ Environment variables (desktop-only; optional)
 
 Open Questions (maintainer decisions)
 
-1) Packager: prefer `electron-builder` or `electron-forge` (or other)?
-2) Targets for the initial release (OS/arch matrix).
-3) Confirm the web build output directory (`dist/` is assumed from Vite defaults) and dev server URL.
-4) Keep Electron files in `.js` or move to `.ts` with a new `tsconfig.electron.json`?
-5) Initial file type filters and any size limits for `openFile(s)` and `readFile`.
+1. Packager: prefer `electron-builder` or `electron-forge` (or other)?
+2. Targets for the initial release (OS/arch matrix).
+3. Confirm the web build output directory (`dist/` is assumed from Vite defaults) and dev server URL.
+4. Keep Electron files in `.js` or move to `.ts` with a new `tsconfig.electron.json`?
+5. Initial file type filters and any size limits for `openFile(s)` and `readFile`.
