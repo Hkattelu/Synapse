@@ -48,6 +48,16 @@ npm run format
 npm run type-check
 ```
 
+## Desktop (Electron)
+
+Initial Electron scaffolding is included to run Synapse as a desktop app with native filesystem access via a secure preload bridge. See the full outline/spec here: [docs/electron/outline.md](docs/electron/outline.md).
+
+Available scripts:
+
+- `desktop:dev` — Launches Electron pointing at the Vite dev server (expects it to be running at `http://localhost:5173`).
+- `desktop:start` — Launches Electron loading the built web bundle from `dist/`.
+- `desktop:build` — Placeholder; exits with guidance until a packager (electron-builder/forge) is selected.
+
 ## Requirements
 
 This project addresses the following key requirements:

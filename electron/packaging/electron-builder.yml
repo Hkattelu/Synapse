@@ -1,0 +1,33 @@
+# Placeholder configuration for electron-builder.
+# This file is illustrative only until a packager is chosen.
+# If you choose electron-builder, adjust the fields below and install:
+#   npm i -D electron-builder electron
+
+appId: ai.synapse.desktop
+productName: Synapse
+
+directories:
+  output: release
+
+files:
+  - electron/**
+  - dist/**
+  - package.json
+
+extraResources: []
+
+mac:
+  target:
+    - dmg
+    - zip
+win:
+  target:
+    - nsis
+linux:
+  target:
+    - AppImage
+
+# TODO:
+# - Confirm icons per platform
+# - Harden file inclusions/exclusions
+# - Wire env for devServer vs file loading if needed
