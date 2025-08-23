@@ -1,6 +1,6 @@
 Synapse Desktop (Electron) — Outline & Specification
 
-Last updated: 2025-08-23
+Last updated: 2025-08-23 (post‑review hardening)
 
 Goals and scope
 
@@ -14,28 +14,29 @@ Goals and scope
 
 High-level architecture
 
-- Main process (electron/main.ts)
+- Main process (electron/main.js)
   - Owns the app lifecycle and `BrowserWindow`.
   - Loads the renderer from either the Vite dev server (dev) or the built web assets (prod).
   - Implements IPC handlers for the filesystem surface (see below).
-- Preload (electron/preload.ts)
+- Preload (electron/preload.js)
   - Runs in an isolated, privileged context.
-  - Uses `contextBridge.exposeInMainWorld` to publish a small, namespaced API: `window.SynapseFS` (the API object is frozen at runtime).
+  - Uses `contextBridge.exposeInMainWorld` to publish a small, namespaced API: `window.SynapseFS`.
   - Calls `ipcRenderer.invoke` to reach main-process handlers; no Node globals are exposed to the page.
 - Renderer
   - The existing Vite/React app. No Node integration; it can only access native capabilities via `window.SynapseFS`.
 
-Security model
+Security model (hardened)
 
 - `contextIsolation: true` (enabled)
 - `nodeIntegration: false` (disabled)
-- `sandbox: true` (enabled for renderer process isolation)
-- Preload is the only bridge; it exposes a frozen, namespaced API: `window.SynapseFS`.
-- IPC channel allow-list: restricted to the channels enumerated below.
-- External content hardening:
-  - `setWindowOpenHandler` denies new windows and opens external `http(s)` links in the system browser.
-  - `will-navigate` blocks in-window navigations to `http(s)` URLs and opens them externally instead.
-- Dev/prod gating: the remote dev URL is used only when the app is not packaged (`!app.isPackaged`), otherwise the app always loads the local built `dist/index.html` via a file URL.
+- `sandbox: true` (enabled) for renderer process isolation.
+- Preload is the only bridge; keep it minimal and namespaced: `window.SynapseFS`.
+  - The exposed API object is frozen in preload (`Object.freeze`) to prevent runtime monkey‑patching.
+- IPC channel allow-list: restrict to the channels enumerated below.
+- Do not use the deprecated `remote` module.
+- External content handling:
+  - `window.open` to http/https is denied and opened in the system browser.
+  - In‑window navigations (`will-navigate`) to http/https are blocked and opened externally.
 - Content Security Policy (CSP): keep current web CSP; tighten in packaging pass if needed.
 
 Renderer-facing API surface (preload)
@@ -71,9 +72,11 @@ IPC channel names (main <-> preload <-> renderer)
 
 Allowed operations and constraints
 
-- Default file-type filters are applied when the renderer does not supply filters:
-  - Video (`.mp4`), Audio (`.mp3`), Code (`.ts`).
-- Renderer-supplied filters take precedence over defaults.
+- File dialogs apply initial default filters when none are provided by the renderer:
+  - Video: `.mp4`
+  - Audio: `.mp3`
+  - Code: `.ts`
+    These defaults apply to `openFile`, `openFiles`, and `showSaveDialog`. The renderer's `options.filters` takes precedence if supplied. `openDirectory` is unaffected. More types can be added later.
 - The renderer may pass standard Electron dialog options (filters, default paths) as the `options` argument.
 
 Build workflows
@@ -86,38 +89,42 @@ Development
 - Env knobs:
   - `SYNAPSE_ELECTRON_DEV_URL` — explicitly set the dev URL (overrides the default and Vite’s value).
 
-Production / packaging
+Production / local packaging (first pass)
 
-- Build the web assets: `npm run build` (outputs to `dist/`).
-- Validate locally: `npm run desktop:start`.
-- Packager: `electron-builder` (per maintainer decision).
-  - Script: `npm run desktop:build` (runs web build, compiles Electron TS, and invokes electron-builder with `electron/packaging/electron-builder.yml`).
+- Build the web assets: `npm run build` (outputs to `dist/` by default; see `vite.config.ts`).
+- Start Electron against the built bundle for manual validation: `npm run desktop:start`.
+- Packaging is intentionally not finalized in this PR. A placeholder config file is included under `electron/packaging/` and the `desktop:build` script currently exits with an instructional message. See Open Questions to select a packager.
 
 Asset loading rules
 
-- Dev: `BrowserWindow` loads `SYNAPSE_ELECTRON_DEV_URL` or `VITE_DEV_SERVER_URL` when `!app.isPackaged`.
-- Prod: always loads `file://${PROJECT_ROOT}/dist/index.html` (constructed with `pathToFileURL(...)`). Override base directory with `SYNAPSE_ELECTRON_DIST_DIR` if needed.
+- Dev: only when the app is not packaged (`!app.isPackaged`), `BrowserWindow` loads the development URL from `SYNAPSE_ELECTRON_DEV_URL` (or `VITE_DEV_SERVER_URL`).
+- Prod (packaged): always loads a local file URL generated from the filesystem path to `dist/index.html` (via `pathToFileURL`). You can override the directory with `SYNAPSE_ELECTRON_DIST_DIR`.
 
-Target platforms (maintainer decisions)
+Target platforms (confirmed)
 
-- macOS (arm64 and x64), Windows (x64), Linux (x64). We start with Windows while keeping macOS and Linux configured.
+- First packaged target: Windows x64.
+- Next: macOS arm64 and x64, and Linux x64.
 
-Packaging strategy
+Packaging strategy (chosen)
 
-- Tooling: `electron-builder` with `electron/packaging/electron-builder.yml`.
-- Targets configured for macOS (arm64/x64), Windows (x64), Linux (x64). Start with Windows builds.
+- Packager: electron-builder.
+- Config: `electron/packaging/electron-builder.yml` (functional initial config with Windows/macOS/Linux targets and frozen publish).
+- Script: `npm run desktop:build` invokes electron-builder with this config and builds for the current OS.
 
 Repository layout and typing
 
 - Desktop sources live under `electron/`:
-  - `electron/main.ts` — main process entry (compiled to `electron/dist/main.js`)
-  - `electron/preload.ts` — preload script exposing `window.SynapseFS` (compiled to `electron/dist/preload.js`)
-  - `electron/packaging/*` — electron-builder config and resources
-- Dedicated TS config: `tsconfig.electron.json` (includes Node/Electron types). Electron sources are not referenced by the app’s tsconfigs, so the web typecheck remains unchanged.
-- Renderer globals: `src/types/preload.d.ts` declares `readonly window.SynapseFS` with a `Readonly<...>` API surface matching the frozen runtime object.
+  - `electron/main.js` — main process entry
+  - `electron/preload.js` — preload script exposing `window.SynapseFS`
+  - `electron/packaging/*` — placeholder config(s)
+- Renderer type declarations: `src/types/preload.d.ts` defines the global `window.SynapseFS` surface for TypeScript consumers.
+- We’re using plain `.js` for Electron initially to keep the web typecheck untouched. If we switch to TypeScript for Electron in the future:
+  - Add `tsconfig.electron.json` (Node/Electron libs; `moduleResolution: node` or `bundler`, `types: ['electron']`).
+  - Exclude `electron/*` from the app’s `tsconfig.app.json` so the web typecheck remains fast.
 
 Security hardening TODOs for later passes
 
+- Add explicit dialog filters for supported file types, if desired.
 - Consider a stricter CSP for the packaged app.
 - Consider permission prompts and sandboxing strategy for future native integrations.
 
@@ -140,10 +147,14 @@ Environment variables (desktop-only; optional)
 - `SYNAPSE_ELECTRON_DEV_URL` — dev server URL (overrides `VITE_DEV_SERVER_URL`)
 - `SYNAPSE_ELECTRON_DIST_DIR` — absolute or relative path to the built web assets directory (defaults to `dist/`)
 
-Open Questions (maintainer decisions)
+Decisions (from review + owner answers)
 
-1. Packager: prefer `electron-builder` or `electron-forge` (or other)?
-2. Targets for the initial release (OS/arch matrix).
-3. Confirm the web build output directory (`dist/` is assumed from Vite defaults) and dev server URL.
-4. Keep Electron files in `.js` or move to `.ts` with a new `tsconfig.electron.json`?
-5. Initial file type filters and any size limits for `openFile(s)` and `readFile`.
+- Packager: electron-builder.
+- Targets: Windows x64 first; macOS (arm64, x64) and Linux (x64) next.
+- Build output dir: `dist/`.
+- Dev URL: `http://localhost:5173`.
+- Default dialog filters (when none provided by renderer): Video (`.mp4`), Audio (`.mp3`), Code (`.ts`). Additional types can be added later.
+
+Open follow-ups
+
+- Consider migrating Electron sources to TypeScript with a dedicated `tsconfig.electron.json`.

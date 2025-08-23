@@ -3,38 +3,44 @@ productName: Synapse
 
 directories:
   output: release
-  buildResources: electron/packaging/resources
-
-files:
-  - from: .
-    filter:
-      - dist/**                 # built web assets (Vite)
-      - electron/dist/**        # compiled Electron main+preload
-      - package.json
 
 asar: true
+publish: 'never'
+
+files:
+  # Include built web assets and Electron sources
+  - dist/**
+  - electron/**
+  - '!electron/packaging/**'
+  - package.json
+
+extraMetadata:
+  # Ensure the packaged app points to our Electron entry
+  main: electron/main.js
 
 mac:
   category: public.app-category.productivity
   target:
     - target: dmg
-      arch: [arm64, x64]
+      arch:
+        - x64
+        - arm64
     - target: zip
-      arch: [arm64, x64]
+      arch:
+        - x64
+        - arm64
 
 win:
   target:
     - target: nsis
-      arch: [x64]
+      arch:
+        - x64
 
 linux:
+  category: Utility
   target:
     - target: AppImage
-      arch: [x64]
-  category: Utility
+      arch:
+        - x64
 
-publish: null
-
-# Notes
-# - We start with Windows as the initial packaging focus while keeping macOS and Linux configured.
-# - Ensure `npm run build` and `npm run electron:build` are run before packaging so dist assets exist.
+artifactName: '${productName}-${version}-${os}-${arch}.${ext}'

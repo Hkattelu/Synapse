@@ -50,13 +50,20 @@ npm run type-check
 
 ## Desktop (Electron)
 
-Initial Electron scaffolding is included to run Synapse as a desktop app with native filesystem access via a secure preload bridge. See the full outline/spec here: [docs/electron/outline.md](docs/electron/outline.md).
+Electron support lets you run Synapse as a desktop app with native filesystem access via a minimal, secure preload bridge. See the full outline/spec: [docs/electron/outline.md](docs/electron/outline.md).
 
-Available scripts:
+Scripts:
 
-- `desktop:dev` — Launches Electron pointing at the Vite dev server (expects it to be running at `http://localhost:5173`).
+- `desktop:dev` — Launches Electron pointing at the Vite dev server. Cross‑platform via `cross-env` with default `http://localhost:5173`.
 - `desktop:start` — Launches Electron loading the built web bundle from `dist/`.
-- `desktop:build` — Placeholder; exits with guidance until a packager (electron-builder/forge) is selected.
+- `desktop:build` — Packages the app using electron-builder with the config at `electron/packaging/electron-builder.yml` (builds for your current OS).
+
+Security posture:
+
+- `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`.
+- Only a frozen, namespaced API is exposed to the renderer: `window.SynapseFS`.
+- External links open in the system browser, and in‑window navigations to http/https are blocked.
+- Remote dev URLs are used only in development (`!app.isPackaged`); packaged apps load local files.
 
 ## Requirements
 
