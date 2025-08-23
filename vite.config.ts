@@ -34,6 +34,15 @@ export default defineConfig({
       css: true,
     })
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8787',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
   optimizeDeps: {
     exclude: [
       '@remotion/bundler',

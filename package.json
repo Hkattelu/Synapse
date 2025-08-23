@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "server": "node server/index.mjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -23,7 +24,11 @@
     "@remotion/player": "^4.0.332",
     "@remotion/renderer": "^4.0.332",
     "@types/prismjs": "^1.26.5",
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
     "diff": "^5.2.0",
+    "express": "^5.1.0",
     "lucide-react": "^0.539.0",
     "motion": "^12.23.12",
     "prismjs": "^1.30.0",
@@ -32,6 +37,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/postcss": "^4.1.11",
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
@@ -57,7 +63,6 @@
     "typescript-eslint": "^8.39.1",
     "vite": "^7.1.2",
     "vite-plugin-prismjs": "^0.0.11",
-    "vitest": "^3.2.4",
-    "@resvg/resvg-js": "^2.6.2"
+    "vitest": "^3.2.4"
   }
 }

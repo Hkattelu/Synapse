@@ -13,6 +13,7 @@ import type {
   AudioCodec,
 } from '../lib/types';
 import { formatFileSize, formatDuration } from '../lib/exportManagerClient';
+import { useAuth } from '../state/authContext';
 
 interface ExportDialogProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const { settings, presets, updateSettings, applyPreset } =
     useExportSettings();
   const { isExporting, progress, canStartExport } = useExportStatus();
+  const { authenticated, membership, donateDemo, loading: authLoading, error: authError } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'presets' | 'custom'>('presets');
   const [selectedPresetId, setSelectedPresetId] =
@@ -216,6 +218,34 @@ Export "{project?.name ?? 'Test Project'}" as video file
           ) : (
             // Export Settings View
             <div className="overflow-y-auto max-h-96">
+              {/* Auth/Membership gating */}
+              {!authenticated && (
+                <div className="p-6 border-b border-border-subtle">
+                  <div className="mb-2">
+                    <h3 className="text-lg font-semibold text-text-primary">Sign in required</h3>
+                    <p className="text-sm text-text-secondary">Create an account or sign in to export videos.</p>
+                  </div>
+                  <AuthInlineForm />
+                  {authError && (
+                    <p className="text-xs text-red-500 mt-2">{String(authError)}</p>
+                  )}
+                </div>
+              )}
+              {authenticated && !membership?.active && (
+                <div className="p-6 border-b border-border-subtle">
+                  <div className="mb-3">
+                    <h3 className="text-lg font-semibold text-text-primary">Unlock exports</h3>
+                    <p className="text-sm text-text-secondary">A one-time donation activates your membership for 30 days.</p>
+                  </div>
+                  <button
+                    onClick={() => void donateDemo(500)}
+                    disabled={authLoading}
+                    className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded disabled:opacity-60"
+                  >
+                    {authLoading ? 'Processing…' : 'Donate $5 (demo)'}
+                  </button>
+                </div>
+              )}
               {/* Tabs */}
               <div className="flex border-b border-border-subtle">
                 <button
@@ -469,15 +499,76 @@ value={settings.height || project?.settings?.height || 1080}
               </button>
               <button
                 onClick={handleStartExport}
-                disabled={!canStartExport}
+                disabled={!canStartExport || !authenticated || !membership?.active}
                 className="px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-600 disabled:cursor-not-allowed text-white rounded transition-colors"
               >
-                Start Export
+                {!authenticated ? 'Sign in to export' : !membership?.active ? 'Unlock to export' : 'Start Export'}
               </button>
             </div>
           </div>
         )}
       </div>
     </div>
+  );
+};
+
+// Inline auth form used in export dialog
+const AuthInlineForm: React.FC = () => {
+  const { login, signup, loading, error } = useAuth();
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (mode === 'login') await login({ email, password });
+    else await signup({ email, password, name });
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-2">
+      {mode === 'signup' && (
+        <input
+          className="w-full p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      )}
+      <input
+        className="w-full p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
+        placeholder="Email"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+      <input
+        className="w-full p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
+        placeholder="Password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
+      {error && <div className="text-xs text-red-500">{String(error)}</div>}
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={loading}
+          className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded disabled:opacity-60"
+        >
+          {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Sign up'}
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
+          className="text-sm text-primary-400 hover:text-primary-300"
+        >
+          {mode === 'login' ? 'Create an account' : 'Have an account? Sign in'}
+        </button>
+      </div>
+    </form>
   );
 };

@@ -8,6 +8,8 @@ import { Preview } from './Preview';
 import { Inspector } from './Inspector';
 import { ExportDialog } from './ExportDialog';
 import { ExportProvider } from '../state/exportContext';
+import { AuthProvider } from '../state/authContext';
+import { AccountStatus } from './AccountStatus';
 import { ArrowLeft, Sparkles, Settings, Archive, Eye } from 'lucide-react';
 import { useHistory } from '../state/history';
 
@@ -127,6 +129,7 @@ function StudioViewContent() {
             >
               Launch
             </a>
+            <AccountStatus />
             {/* Timeline Mode Toggle */}
             <div className="flex bg-purple-100 rounded-xl p-1">
               <button
@@ -282,8 +285,10 @@ function StudioViewContent() {
 // Wrapper component with ExportProvider
 export function StudioView() {
   return (
-    <ExportProvider>
-      <StudioViewContent />
-    </ExportProvider>
+    <AuthProvider>
+      <ExportProvider>
+        <StudioViewContent />
+      </ExportProvider>
+    </AuthProvider>
   );
 }
