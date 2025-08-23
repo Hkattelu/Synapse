@@ -3,7 +3,7 @@
 // and wires IPC handlers for filesystem operations.
 
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
 import fs from 'node:fs/promises';
 
@@ -11,12 +11,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Env knobs (documented in docs/electron/outline.md)
-const DEV_URL = process.env.SYNAPSE_ELECTRON_DEV_URL || process.env.VITE_DEV_SERVER_URL;
-const DIST_DIR = process.env.SYNAPSE_ELECTRON_DIST_DIR || join(process.cwd(), 'dist');
+const DEV_URL =
+  process.env.SYNAPSE_ELECTRON_DEV_URL || process.env.VITE_DEV_SERVER_URL;
+const DIST_DIR =
+  process.env.SYNAPSE_ELECTRON_DIST_DIR || join(process.cwd(), 'dist');
 
 /**
-* Create the main application window
-*/
+ * Create the main application window
+ */
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 1280,
@@ -37,7 +39,7 @@ const createWindow = () => {
   if (DEV_URL) {
     win.loadURL(DEV_URL);
   } else {
-    const indexHtml = new URL('file://' + join(DIST_DIR, 'index.html'));
+    const indexHtml = pathToFileURL(join(DIST_DIR, 'index.html'));
     win.loadURL(indexHtml.toString());
   }
 
