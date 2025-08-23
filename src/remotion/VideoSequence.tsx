@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, Sequence, Video, Img, staticFile } from 'remotion';
+import { AbsoluteFill, Sequence, Video, Img, staticFile, useVideoConfig } from 'remotion';
 import type { VideoSequenceProps } from './types';
 
 export const VideoSequence: React.FC<VideoSequenceProps> = ({
@@ -15,8 +15,9 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
   const rotation = item.properties.rotation || 0;
   const opacity = item.properties.opacity || 1;
 
-  // Calculate track-based positioning
-  const trackHeight = 1080 / 4; // Assuming 4 tracks max for now
+  // Calculate track-based positioning based on composition height
+  const { height } = useVideoConfig();
+  const trackHeight = height / 4; // Assuming 4 tracks max for now
   const trackY = item.track * trackHeight;
 
   const style: React.CSSProperties = {

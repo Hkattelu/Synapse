@@ -47,7 +47,9 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     if (!project) return;
 
     try {
-      await startExport(project);
+      // Pass the currently selected settings explicitly so tests and
+      // downstream pipelines use the exact values (width/height, etc.).
+      await startExport(project, { ...settings });
       // Keep dialog open to show progress
     } catch (error) {
       console.error('Export failed:', error);
@@ -315,6 +317,42 @@ Export "{project?.name ?? 'Test Project'}" as video file
                           </select>
                         </div>
 
+                        {/* Orientation toggle (Landscape vs Vertical/Portrait) */}
+                        <div>
+                          <label className="block text-xs font-medium text-text-secondary mb-1">
+                            Orientation
+                          </label>
+                          {(() => {
+                            const currentWidth =
+                              settings.width || project?.settings?.width || 1920;
+                            const currentHeight =
+                              settings.height || project?.settings?.height || 1080;
+                            const isVertical = currentHeight > currentWidth;
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (isVertical) {
+                                    // Switch to landscape 16:9 default
+                                    updateSettings({ width: 1920, height: 1080 });
+                                  } else {
+                                    // Switch to portrait 9:16 default
+                                    updateSettings({ width: 1080, height: 1920 });
+                                  }
+                                }}
+                                className={`w-full p-2 border rounded text-sm transition-colors ${
+                                  isVertical
+                                    ? 'border-primary-400 bg-primary-900/20 text-text-primary'
+                                    : 'border-border-subtle bg-background-secondary text-text-primary'
+                                }`}
+                                title="Toggle between landscape (16:9) and vertical (9:16)"
+                              >
+                                {isVertical ? 'Vertical (9:16)' : 'Landscape (16:9)'}
+                              </button>
+                            );
+                          })()}
+                        </div>
+
                         <div>
                           <label className="block text-xs font-medium text-text-secondary mb-1">
                             Codec
@@ -355,6 +393,42 @@ Export "{project?.name ?? 'Test Project'}" as video file
                           </select>
                         </div>
 
+                        {/* Vertical resolution presets (shown when in Vertical mode) */}
+                        {(() => {
+                          const currentWidth =
+                            settings.width || project?.settings?.width || 1920;
+                          const currentHeight =
+                            settings.height || project?.settings?.height || 1080;
+                          const isVertical = currentHeight > currentWidth;
+                          if (!isVertical) return null;
+                          return (
+                            <div>
+                              <label className="block text-xs font-medium text-text-secondary mb-1">
+                                Vertical resolution presets
+                              </label>
+                              <select
+                                value={`${currentWidth}x${currentHeight}`}
+                                onChange={(e) => {
+                                  const [w, h] = e.target.value
+                                    .split('x')
+                                    .map((n) => parseInt(n, 10));
+                                  if (!isNaN(w) && !isNaN(h)) {
+                                    updateSettings({ width: w, height: h });
+                                  }
+                                }}
+                                className="w-full p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
+                              >
+                                <option value="720x1280">720×1280 (HD)</option>
+                                <option value="1080x1920">1080×1920 (Full HD)</option>
+                                <option value="2160x3840">2160×3840 (4K)</option>
+                              </select>
+                              <p className="text-xs text-text-secondary mt-1">
+                                Choose a portrait preset or set a custom size below.
+                              </p>
+                            </div>
+                          );
+                        })()}
+
                         <div>
                           <label className="block text-xs font-medium text-text-secondary mb-1">
                             Resolution
@@ -386,6 +460,9 @@ value={settings.height || project?.settings?.height || 1080}
                               placeholder="Height"
                             />
                           </div>
+                          <p className="text-xs text-text-secondary mt-1">
+                            Enter any custom width × height. For Shorts/TikTok/Reels, use portrait sizes like 1080×1920.
+                          </p>
                         </div>
                       </div>
                     </div>
