@@ -29,10 +29,11 @@ Security model (initial)
 
 - `contextIsolation: true` (enabled)
 - `nodeIntegration: false` (disabled)
-- Preload is the only bridge; keep it minimal and namespaced: `window.SynapseFS`.
+- `sandbox: true` (enabled) — renderer runs in a sandboxed environment; only the preload bridge is privileged.
+- Preload is the only bridge; keep it minimal and namespaced: `window.SynapseFS` (the object is frozen at runtime and typed as readonly).
 - IPC channel allow-list: restrict to the channels enumerated below.
 - Do not use the deprecated `remote` module.
-- External links open in the system browser (basic hardening to avoid new windows executing arbitrary content).
+- External links open in the system browser; in-window navigations to `http(s)` are blocked via `will-navigate` to protect the preload surface.
 - Content Security Policy (CSP): keep current web CSP; tighten in packaging pass if needed.
 
 Renderer-facing API surface (preload)
@@ -90,8 +91,8 @@ Production / local packaging (first pass)
 
 Asset loading rules
 
-- Dev: `BrowserWindow` loads `SYNAPSE_ELECTRON_DEV_URL` or `VITE_DEV_SERVER_URL`.
-- Prod: loads `file://${PROJECT_ROOT}/dist/index.html` by default. Override with `SYNAPSE_ELECTRON_DIST_DIR` if needed.
+- Dev: `BrowserWindow` loads `SYNAPSE_ELECTRON_DEV_URL` or `VITE_DEV_SERVER_URL` only when `!app.isPackaged`.
+- Prod: loads `file://${PROJECT_ROOT}/dist/index.html` by default (constructed via `pathToFileURL` for cross‑platform safety). Override with `SYNAPSE_ELECTRON_DIST_DIR` if needed.
 
 Target platforms (proposal)
 

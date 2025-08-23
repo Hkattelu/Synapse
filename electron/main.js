@@ -36,7 +36,8 @@ const createWindow = () => {
   win.on('ready-to-show', () => win.show());
 
   // In dev, point to Vite dev server; in prod, load built index.html
-  if (DEV_URL) {
+  const isDev = !app.isPackaged;
+  if (isDev && DEV_URL) {
     win.loadURL(DEV_URL);
   } else {
     const indexHtml = pathToFileURL(join(DIST_DIR, 'index.html'));
@@ -50,6 +51,14 @@ const createWindow = () => {
       return { action: 'deny' };
     }
     return { action: 'deny' };
+  });
+
+  // Block in-window navigations to external content
+  win.webContents.on('will-navigate', (e, url) => {
+    if (url.startsWith('http:') || url.startsWith('https:')) {
+      e.preventDefault();
+      shell.openExternal(url);
+    }
   });
 };
 
@@ -69,26 +78,41 @@ app.on('window-all-closed', () => {
 // IPC: Filesystem surface
 // Channel names documented in docs/electron/outline.md
 
-ipcMain.handle('ipc:fs:open-file', async (_evt, options = {}) => {
-  const res = await dialog.showOpenDialog({
+const defaultFilters = [
+  { name: 'Video', extensions: ['mp4'] },
+  { name: 'Audio', extensions: ['mp3'] },
+  { name: 'Code', extensions: ['ts'] },
+];
+
+ipcMain.handle('ipc:fs:open-file', async (evt, options = {}) => {
+  const parent = BrowserWindow.fromWebContents(evt.sender) ?? undefined;
+  const opts = options && Object.prototype.hasOwnProperty.call(options, 'filters')
+    ? options
+    : { ...options, filters: defaultFilters };
+  const res = await dialog.showOpenDialog(parent, {
     properties: ['openFile'],
-    ...options,
+    ...opts,
   });
   if (res.canceled || res.filePaths.length === 0) return null;
   return res.filePaths[0];
 });
 
-ipcMain.handle('ipc:fs:open-files', async (_evt, options = {}) => {
-  const res = await dialog.showOpenDialog({
+ipcMain.handle('ipc:fs:open-files', async (evt, options = {}) => {
+  const parent = BrowserWindow.fromWebContents(evt.sender) ?? undefined;
+  const opts = options && Object.prototype.hasOwnProperty.call(options, 'filters')
+    ? options
+    : { ...options, filters: defaultFilters };
+  const res = await dialog.showOpenDialog(parent, {
     properties: ['openFile', 'multiSelections'],
-    ...options,
+    ...opts,
   });
   if (res.canceled || res.filePaths.length === 0) return [];
   return res.filePaths;
 });
 
-ipcMain.handle('ipc:fs:open-directory', async (_evt, options = {}) => {
-  const res = await dialog.showOpenDialog({
+ipcMain.handle('ipc:fs:open-directory', async (evt, options = {}) => {
+  const parent = BrowserWindow.fromWebContents(evt.sender) ?? undefined;
+  const res = await dialog.showOpenDialog(parent, {
     properties: ['openDirectory'],
     ...options,
   });
@@ -108,9 +132,13 @@ ipcMain.handle('ipc:fs:write-file', async (_evt, path, data, options = {}) => {
   return true;
 });
 
-ipcMain.handle('ipc:fs:show-save-dialog', async (_evt, options = {}) => {
-  const res = await dialog.showSaveDialog({
-    ...options,
+ipcMain.handle('ipc:fs:show-save-dialog', async (evt, options = {}) => {
+  const parent = BrowserWindow.fromWebContents(evt.sender) ?? undefined;
+  const opts = options && Object.prototype.hasOwnProperty.call(options, 'filters')
+    ? options
+    : { ...options, filters: defaultFilters };
+  const res = await dialog.showSaveDialog(parent, {
+    ...opts,
   });
   if (res.canceled || !res.filePath) return null;
   return res.filePath;

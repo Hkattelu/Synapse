@@ -24,7 +24,11 @@ dist-ssr
 *.sw?
 
 # Env files
-.env*
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.sample
 
 # Electron/packaging outputs
 release/

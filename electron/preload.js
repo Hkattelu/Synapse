@@ -3,7 +3,7 @@
 
 import { contextBridge, ipcRenderer } from 'electron';
 
-const SynapseFS = {
+const SynapseFS = Object.freeze({
   openFile: (options) => ipcRenderer.invoke('ipc:fs:open-file', options),
   openFiles: (options) => ipcRenderer.invoke('ipc:fs:open-files', options),
   openDirectory: (options) => ipcRenderer.invoke('ipc:fs:open-directory', options),
@@ -11,6 +11,6 @@ const SynapseFS = {
   writeFile: (path, data, options) => ipcRenderer.invoke('ipc:fs:write-file', path, data, options),
   showSaveDialog: (options) => ipcRenderer.invoke('ipc:fs:show-save-dialog', options),
   getAppPath: () => ipcRenderer.invoke('ipc:app:get-path'),
-};
+});
 
 contextBridge.exposeInMainWorld('SynapseFS', SynapseFS);

@@ -4,7 +4,7 @@
 
 declare global {
   interface Window {
-    SynapseFS: {
+    readonly SynapseFS: Readonly<{
       openFile: (options?: OpenDialogOptions) => Promise<string | null>;
       openFiles: (options?: OpenDialogOptions) => Promise<string[]>;
       openDirectory: (options?: OpenDialogOptions) => Promise<string | null>;
@@ -19,7 +19,7 @@ declare global {
       ) => Promise<boolean>;
       showSaveDialog: (options?: SaveDialogOptions) => Promise<string | null>;
       getAppPath: () => Promise<string>;
-    };
+    }>;
   }
 }
 
