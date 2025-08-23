@@ -22,3 +22,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Env files
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.sample
+
+# Electron/packaging outputs
+release/
+out/
+make/
+dist-electron/
+*.asar
+
