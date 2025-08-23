@@ -8,15 +8,16 @@ asar: true
 publish: 'never'
 
 files:
-  # Include built web assets and Electron sources
+  # Include built web assets and compiled Electron JS (TS builds to electron/dist)
   - dist/**
-  - electron/**
+  - electron/dist/**
+  - node_modules/**
   - '!electron/packaging/**'
   - package.json
 
 extraMetadata:
-  # Ensure the packaged app points to our Electron entry
-  main: electron/main.js
+  # Ensure the packaged app points to the compiled Electron entry
+  main: electron/dist/main.js
 
 mac:
   category: public.app-category.productivity

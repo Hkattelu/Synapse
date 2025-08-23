@@ -1,6 +1,6 @@
 Synapse Desktop (Electron) — Outline & Specification
 
-Last updated: 2025-08-23 (post‑review hardening)
+Last updated: 2025-08-23 (packaging finalized; TS sources)
 
 Goals and scope
 
@@ -14,11 +14,11 @@ Goals and scope
 
 High-level architecture
 
-- Main process (electron/main.js)
+- Main process (electron/main.ts)
   - Owns the app lifecycle and `BrowserWindow`.
   - Loads the renderer from either the Vite dev server (dev) or the built web assets (prod).
   - Implements IPC handlers for the filesystem surface (see below).
-- Preload (electron/preload.js)
+- Preload (electron/preload.ts)
   - Runs in an isolated, privileged context.
   - Uses `contextBridge.exposeInMainWorld` to publish a small, namespaced API: `window.SynapseFS`.
   - Calls `ipcRenderer.invoke` to reach main-process handlers; no Node globals are exposed to the page.
@@ -89,11 +89,14 @@ Development
 - Env knobs:
   - `SYNAPSE_ELECTRON_DEV_URL` — explicitly set the dev URL (overrides the default and Vite’s value).
 
-Production / local packaging (first pass)
+Production / packaging
 
 - Build the web assets: `npm run build` (outputs to `dist/` by default; see `vite.config.ts`).
-- Start Electron against the built bundle for manual validation: `npm run desktop:start`.
-- Packaging is intentionally not finalized in this PR. A placeholder config file is included under `electron/packaging/` and the `desktop:build` script currently exits with an instructional message. See Open Questions to select a packager.
+- Validate locally without packaging: `npm run desktop:start`.
+- Package for the current OS: `npm run desktop:build`.
+  - Packager: electron-builder
+  - Config: `electron/packaging/electron-builder.yml`
+  - Outputs: `release/` (ignored by git)
 
 Asset loading rules
 
@@ -108,30 +111,27 @@ Target platforms (confirmed)
 Packaging strategy (chosen)
 
 - Packager: electron-builder.
-- Config: `electron/packaging/electron-builder.yml` (functional initial config with Windows/macOS/Linux targets and frozen publish).
+- Config: `electron/packaging/electron-builder.yml` (Windows x64 prioritized; plus macOS arm64/x64 and Linux x64).
 - Script: `npm run desktop:build` invokes electron-builder with this config and builds for the current OS.
 
 Repository layout and typing
 
-- Desktop sources live under `electron/`:
-  - `electron/main.js` — main process entry
-  - `electron/preload.js` — preload script exposing `window.SynapseFS`
-  - `electron/packaging/*` — placeholder config(s)
+- Desktop sources live under `electron/` (TypeScript):
+  - `electron/main.ts` — main process entry (compiled to `electron/dist/main.js`)
+  - `electron/preload.ts` — preload script exposing `window.SynapseFS` (compiled to `electron/dist/preload.js`)
+  - `electron/packaging/*` — electron-builder configuration
+- Dedicated TS project for Electron: `tsconfig.electron.json` (outputs to `electron/dist/`; includes Node/Electron types). Web app typecheck remains independent.
 - Renderer type declarations: `src/types/preload.d.ts` defines the global `window.SynapseFS` surface for TypeScript consumers.
-- We’re using plain `.js` for Electron initially to keep the web typecheck untouched. If we switch to TypeScript for Electron in the future:
-  - Add `tsconfig.electron.json` (Node/Electron libs; `moduleResolution: node` or `bundler`, `types: ['electron']`).
-  - Exclude `electron/*` from the app’s `tsconfig.app.json` so the web typecheck remains fast.
 
 Security hardening TODOs for later passes
 
-- Add explicit dialog filters for supported file types, if desired.
 - Consider a stricter CSP for the packaged app.
 - Consider permission prompts and sandboxing strategy for future native integrations.
 
 Update strategy (what is committed vs generated)
 
 - Committed:
-  - `electron/*` sources and placeholder packaging config
+  - `electron/*` sources and electron-builder configuration
   - `docs/electron/*`
   - `src/types/preload.d.ts`
 - Generated (not committed):
@@ -157,4 +157,4 @@ Decisions (from review + owner answers)
 
 Open follow-ups
 
-- Consider migrating Electron sources to TypeScript with a dedicated `tsconfig.electron.json`.
+- Confirm that Electron sources should remain in TypeScript with `tsconfig.electron.json`. If preferred, we can revert to plain JS; current branch is already migrated to TS.

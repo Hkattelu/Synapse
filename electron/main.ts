@@ -132,6 +132,7 @@ ipcMain.handle(
     const parent = BrowserWindow.fromWebContents(evt.sender) ?? null;
     const merged: OpenDialogOptions = {
       properties: ['openDirectory'],
+      filters: defaultFilters,
       ...options,
     };
     const res = parent
