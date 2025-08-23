@@ -14,28 +14,29 @@ Goals and scope
 
 High-level architecture
 
-- Main process (electron/main.js)
+- Main process (electron/main.ts)
   - Owns the app lifecycle and `BrowserWindow`.
   - Loads the renderer from either the Vite dev server (dev) or the built web assets (prod).
   - Implements IPC handlers for the filesystem surface (see below).
-- Preload (electron/preload.js)
+- Preload (electron/preload.ts)
   - Runs in an isolated, privileged context.
-  - Uses `contextBridge.exposeInMainWorld` to publish a small, namespaced API: `window.SynapseFS`.
+  - Uses `contextBridge.exposeInMainWorld` to publish a small, namespaced API: `window.SynapseFS` (the API object is frozen at runtime).
   - Calls `ipcRenderer.invoke` to reach main-process handlers; no Node globals are exposed to the page.
 - Renderer
   - The existing Vite/React app. No Node integration; it can only access native capabilities via `window.SynapseFS`.
 
 Security model
 
-- `contextIsolation: true` and `nodeIntegration: false`.
-- `sandbox: true` for renderer processes.
-- Preload is the only bridge; keep it minimal and namespaced: `window.SynapseFS`.
-- IPC channel allow-list: restrict to the channels enumerated below.
-- Do not use the deprecated `remote` module.
-- External content handling:
-  - `setWindowOpenHandler` denies new windows and opens `http/https` links in the system browser.
-  - `will-navigate` blocks in-window navigations to `http/https` and opens them externally. This prevents untrusted pages from gaining access to the preload API within the current window.
-- Content Security Policy (CSP): keep current web CSP; tighten in a packaging pass if needed.
+- `contextIsolation: true` (enabled)
+- `nodeIntegration: false` (disabled)
+- `sandbox: true` (enabled for renderer process isolation)
+- Preload is the only bridge; it exposes a frozen, namespaced API: `window.SynapseFS`.
+- IPC channel allow-list: restricted to the channels enumerated below.
+- External content hardening:
+  - `setWindowOpenHandler` denies new windows and opens external `http(s)` links in the system browser.
+  - `will-navigate` blocks in-window navigations to `http(s)` URLs and opens them externally instead.
+- Dev/prod gating: the remote dev URL is used only when the app is not packaged (`!app.isPackaged`), otherwise the app always loads the local built `dist/index.html` via a file URL.
+- Content Security Policy (CSP): keep current web CSP; tighten in packaging pass if needed.
 
 Renderer-facing API surface (preload)
 
@@ -70,11 +71,9 @@ IPC channel names (main <-> preload <-> renderer)
 
 Allowed operations and constraints
 
-- File dialogs apply initial default filters when none are provided by the renderer:
-  - Video: `.mp4`
-  - Audio: `.mp3`
-  - Code: `.ts`
-    These defaults apply to `openFile`, `openFiles`, and `showSaveDialog`. The renderer's `options.filters` takes precedence if supplied. `openDirectory` is unaffected. More types can be added later.
+- Default file-type filters are applied when the renderer does not supply filters:
+  - Video (`.mp4`), Audio (`.mp3`), Code (`.ts`).
+- Renderer-supplied filters take precedence over defaults.
 - The renderer may pass standard Electron dialog options (filters, default paths) as the `options` argument.
 
 Build workflows
@@ -87,42 +86,38 @@ Development
 - Env knobs:
   - `SYNAPSE_ELECTRON_DEV_URL` — explicitly set the dev URL (overrides the default and Vite’s value).
 
-Production / local packaging (first pass)
+Production / packaging
 
-- Build the web assets: `npm run build` (outputs to `dist/` by default; see `vite.config.ts`).
-- Start Electron against the built bundle for manual validation: `npm run desktop:start`.
-- Packaging is intentionally not finalized in this PR. A placeholder config file is included under `electron/packaging/` and the `desktop:build` script currently exits with an instructional message. See Open Questions to select a packager.
+- Build the web assets: `npm run build` (outputs to `dist/`).
+- Validate locally: `npm run desktop:start`.
+- Packager: `electron-builder` (per maintainer decision).
+  - Script: `npm run desktop:build` (runs web build, compiles Electron TS, and invokes electron-builder with `electron/packaging/electron-builder.yml`).
 
 Asset loading rules
 
-- Development: When the app is not packaged (`!app.isPackaged`) and a dev URL is defined (`SYNAPSE_ELECTRON_DEV_URL` or `VITE_DEV_SERVER_URL`), the window loads that remote URL.
-- Packaged builds: The app always loads local assets from `DIST_DIR` (defaults to `dist/`) using a safe file URL constructed via Node's `pathToFileURL`. Remote content is not allowed when packaged.
+- Dev: `BrowserWindow` loads `SYNAPSE_ELECTRON_DEV_URL` or `VITE_DEV_SERVER_URL` when `!app.isPackaged`.
+- Prod: always loads `file://${PROJECT_ROOT}/dist/index.html` (constructed with `pathToFileURL(...)`). Override base directory with `SYNAPSE_ELECTRON_DIST_DIR` if needed.
 
-Target platforms (proposal)
+Target platforms (maintainer decisions)
 
-- Initial focus: macOS (arm64, x64), Windows (x64), Linux (x64). Finalize in Open Questions.
+- macOS (arm64 and x64), Windows (x64), Linux (x64). We start with Windows while keeping macOS and Linux configured.
 
-Packaging strategy (pending maintainer choice)
+Packaging strategy
 
-- Options considered:
-  - electron-builder (simple one-command packaging, rich target matrix).
-  - electron-forge (batteries-included dev + make flows, good for long-term scaffolding).
-- Placeholder file provided: `electron/packaging/electron-builder.yml` to show expected fields (appId, productName, files, directories, targets). Remove or replace once a tool is chosen.
+- Tooling: `electron-builder` with `electron/packaging/electron-builder.yml`.
+- Targets configured for macOS (arm64/x64), Windows (x64), Linux (x64). Start with Windows builds.
 
 Repository layout and typing
 
 - Desktop sources live under `electron/`:
-  - `electron/main.js` — main process entry
-  - `electron/preload.js` — preload script exposing `window.SynapseFS`
-  - `electron/packaging/*` — placeholder config(s)
-- Renderer type declarations: `src/types/preload.d.ts` defines the global `window.SynapseFS` surface for TypeScript consumers.
-- We’re using plain `.js` for Electron initially to keep the web typecheck untouched. If we switch to TypeScript for Electron in the future:
-  - Add `tsconfig.electron.json` (Node/Electron libs; `moduleResolution: node` or `bundler`, `types: ['electron']`).
-  - Exclude `electron/*` from the app’s `tsconfig.app.json` so the web typecheck remains fast.
+  - `electron/main.ts` — main process entry (compiled to `electron/dist/main.js`)
+  - `electron/preload.ts` — preload script exposing `window.SynapseFS` (compiled to `electron/dist/preload.js`)
+  - `electron/packaging/*` — electron-builder config and resources
+- Dedicated TS config: `tsconfig.electron.json` (includes Node/Electron types). Electron sources are not referenced by the app’s tsconfigs, so the web typecheck remains unchanged.
+- Renderer globals: `src/types/preload.d.ts` declares `readonly window.SynapseFS` with a `Readonly<...>` API surface matching the frozen runtime object.
 
 Security hardening TODOs for later passes
 
-- Add explicit dialog filters for supported file types, if desired.
 - Consider a stricter CSP for the packaged app.
 - Consider permission prompts and sandboxing strategy for future native integrations.
 

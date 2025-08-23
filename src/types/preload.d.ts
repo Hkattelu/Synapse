@@ -2,24 +2,26 @@
 // These types are intentionally minimal and do not import Electron types
 // so that the web build remains independent of Electron.
 
+export type SynapseFSApi = {
+  openFile: (options?: OpenDialogOptions) => Promise<string | null>;
+  openFiles: (options?: OpenDialogOptions) => Promise<string[]>;
+  openDirectory: (options?: OpenDialogOptions) => Promise<string | null>;
+  readFile: (
+    path: string,
+    encoding?: string | null
+  ) => Promise<string | Uint8Array>;
+  writeFile: (
+    path: string,
+    data: string | Uint8Array,
+    options?: { encoding?: string | null }
+  ) => Promise<boolean>;
+  showSaveDialog: (options?: SaveDialogOptions) => Promise<string | null>;
+  getAppPath: () => Promise<string>;
+};
+
 declare global {
   interface Window {
-    readonly SynapseFS: Readonly<{
-      openFile: (options?: OpenDialogOptions) => Promise<string | null>;
-      openFiles: (options?: OpenDialogOptions) => Promise<string[]>;
-      openDirectory: (options?: OpenDialogOptions) => Promise<string | null>;
-      readFile: (
-        path: string,
-        encoding?: string | null
-      ) => Promise<string | Uint8Array>;
-      writeFile: (
-        path: string,
-        data: string | Uint8Array,
-        options?: { encoding?: string | null }
-      ) => Promise<boolean>;
-      showSaveDialog: (options?: SaveDialogOptions) => Promise<string | null>;
-      getAppPath: () => Promise<string>;
-    }>;
+    readonly SynapseFS: Readonly<SynapseFSApi>;
   }
 }
 

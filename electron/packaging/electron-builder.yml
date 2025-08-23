@@ -1,33 +1,40 @@
-# Placeholder configuration for electron-builder.
-# This file is illustrative only until a packager is chosen.
-# If you choose electron-builder, adjust the fields below and install:
-#   npm i -D electron-builder electron
-
 appId: ai.synapse.desktop
 productName: Synapse
 
 directories:
   output: release
+  buildResources: electron/packaging/resources
 
 files:
-  - electron/**
-  - dist/**
-  - package.json
+  - from: .
+    filter:
+      - dist/**                 # built web assets (Vite)
+      - electron/dist/**        # compiled Electron main+preload
+      - package.json
 
-extraResources: []
+asar: true
 
 mac:
+  category: public.app-category.productivity
   target:
-    - dmg
-    - zip
+    - target: dmg
+      arch: [arm64, x64]
+    - target: zip
+      arch: [arm64, x64]
+
 win:
   target:
-    - nsis
+    - target: nsis
+      arch: [x64]
+
 linux:
   target:
-    - AppImage
+    - target: AppImage
+      arch: [x64]
+  category: Utility
 
-# TODO:
-# - Confirm icons per platform
-# - Harden file inclusions/exclusions
-# - Wire env for devServer vs file loading if needed
+publish: null
+
+# Notes
+# - We start with Windows as the initial packaging focus while keeping macOS and Linux configured.
+# - Ensure `npm run build` and `npm run electron:build` are run before packaging so dist assets exist.
