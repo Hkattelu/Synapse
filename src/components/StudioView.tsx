@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useProject, useUI } from '../state/hooks';
 import { MediaBin } from './MediaBin';
 import { Timeline } from './Timeline';
@@ -16,8 +17,8 @@ import { useHistory } from '../state/history';
 
 function StudioViewContent() {
   const { project } = useProject();
-  const { ui, setCurrentView, toggleSidebar, toggleInspector, toggleMediaBin } =
-    useUI();
+  const { ui, toggleInspector, toggleMediaBin } = useUI();
+  const navigate = useNavigate();
   const [timelineMode, setTimelineMode] = useState<'standard' | 'enhanced'>(
     'enhanced'
   );
@@ -77,11 +78,11 @@ function StudioViewContent() {
             Synapse Studio
           </p>
           <button
-            onClick={() => setCurrentView('dashboard')}
+            onClick={() => navigate('/projects')}
             className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-lg flex items-center space-x-2 mx-auto"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to Dashboard</span>
+            <span>Back to Projects</span>
           </button>
         </motion.div>
       </div>
@@ -100,9 +101,9 @@ function StudioViewContent() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => setCurrentView('dashboard')}
+              onClick={() => navigate('/projects')}
               className="text-gray-500 hover:text-purple-600 p-2 rounded-full hover:bg-purple-100 transition-all duration-200 hover:scale-105"
-              title="Back to Dashboard"
+              title="Back to Projects"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>

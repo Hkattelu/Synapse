@@ -318,13 +318,6 @@ export function useMediaAssets() {
 export function useUI() {
   const { state, dispatch } = useAppContext();
 
-  const setCurrentView = useCallback(
-    (view: 'dashboard' | 'studio') => {
-      dispatch({ type: 'SET_CURRENT_VIEW', payload: view });
-    },
-    [dispatch]
-  );
-
   const toggleSidebar = useCallback(() => {
     dispatch({ type: 'TOGGLE_SIDEBAR' });
   }, [dispatch]);
@@ -357,7 +350,6 @@ export function useUI() {
 
   return {
     ui: state.ui,
-    setCurrentView,
     toggleSidebar,
     toggleInspector,
     toggleMediaBin,

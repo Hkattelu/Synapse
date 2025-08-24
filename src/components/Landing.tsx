@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Select,
   SelectContent,
@@ -24,6 +25,11 @@ import Youtube from 'lucide-react/dist/esm/icons/youtube.js';
 import Mail from 'lucide-react/dist/esm/icons/mail.js';
 import MapPin from 'lucide-react/dist/esm/icons/map-pin.js';
 import Phone from 'lucide-react/dist/esm/icons/phone.js';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.js';
+import Zap from 'lucide-react/dist/esm/icons/zap.js';
+import Shield from 'lucide-react/dist/esm/icons/shield.js';
+import Layers from 'lucide-react/dist/esm/icons/layers.js';
+import Download from 'lucide-react/dist/esm/icons/download.js';
 
 interface HeroSectionProps {
   title?: string;
@@ -40,16 +46,17 @@ interface FeatureProps {
 }
 
 interface ContactFormProps {
-  onSubmit?: (data: any) => void;
+  onSubmit?: (data: Record<string, FormDataEntryValue>) => void;
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({
-  title = 'Create Amazing Videos with Synapse Studio',
+  title = 'Human-Powered Video Creation for Authentic Storytellers',
   subtitle = 'Made with ❤️ for creators, by creators',
-  description = 'The human-friendly video creation tool for educational content and game devlogs. No AI fluff, just pure creative power in your hands.',
+  description = 'Create compelling educational content and game devlogs without the AI fluff. Synapse Studio puts the power back in your hands with intuitive tools designed for authentic storytelling.',
   primaryCtaText = 'Start Creating',
-  secondaryCtaText = 'View Recent Projects',
+  secondaryCtaText = 'View Projects',
 }) => {
+  const navigate = useNavigate();
   const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
 
   React.useEffect(() => {
@@ -74,7 +81,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   return (
     <section
       id="hero-section"
-      className="relative min-h-screen bg-gradient-to-br from-rose-50 via-purple-50 to-indigo-50 overflow-hidden"
+      className="relative min-h-screen bg-gradient-to-br from-rose-50 via-purple-50 to-indigo-50 overflow-hidden flex items-center"
     >
       <div className="absolute inset-0 z-0">
         <svg
@@ -127,7 +134,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         </svg>
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-20">
+      <div className="relative z-10 container mx-auto px-4">
         <div className="text-center max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -165,18 +172,20 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           >
             <Button
               size="lg"
+              onClick={() => navigate('/downloads')}
               className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
             >
               <Play className="w-5 h-5 mr-2" />
-              {primaryCtaText}
+              Download Now
             </Button>
             <Button
               variant="outline"
               size="lg"
+              onClick={() => navigate('/projects')}
               className="border-purple-200 text-purple-700 hover:bg-purple-50 px-8 py-4 rounded-full font-semibold text-lg"
             >
               <Video className="w-5 h-5 mr-2" />
-              {secondaryCtaText}
+              Try Web Version
             </Button>
           </motion.div>
 
@@ -257,19 +266,184 @@ const FeaturesSection: React.FC = () => {
     <section className="py-20 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Why Creators Choose Synapse Studio
-          </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Built by a creator who understands the struggle of making authentic,
-            engaging content in a world full of generic AI-generated videos.
-          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Why Creators Choose Synapse Studio
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Built by a creator who understands the struggle of making
+              authentic, engaging content in a world full of generic
+              AI-generated videos.
+            </p>
+          </motion.div>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
             <Feature key={index} {...feature} />
           ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const PowerSection: React.FC = () => {
+  const navigate = useNavigate();
+
+  return (
+    <section className="py-20 bg-gradient-to-br from-purple-50 to-indigo-50">
+      <div className="container mx-auto px-4">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Powerful Tools for Authentic Storytelling
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Every feature is designed with one goal: helping you create
+              content that truly represents your voice and vision.
+            </p>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <div className="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                <Zap className="w-8 h-8 text-purple-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Lightning Fast
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Real-time preview and rendering powered by Remotion. See your
+                changes instantly without waiting for exports.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-center">
+                  <div className="w-1.5 h-1.5 bg-purple-600 rounded-full mr-3"></div>
+                  Real-time timeline editing
+                </li>
+                <li className="flex items-center">
+                  <div className="w-1.5 h-1.5 bg-purple-600 rounded-full mr-3"></div>
+                  Instant preview updates
+                </li>
+                <li className="flex items-center">
+                  <div className="w-1.5 h-1.5 bg-purple-600 rounded-full mr-3"></div>
+                  Fast export rendering
+                </li>
+              </ul>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+                <Shield className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Privacy First
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Your content stays on your machine. No cloud uploads, no data
+                mining, no privacy concerns.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-center">
+                  <div className="w-1.5 h-1.5 bg-green-600 rounded-full mr-3"></div>
+                  Local-only processing
+                </li>
+                <li className="flex items-center">
+                  <div className="w-1.5 h-1.5 bg-green-600 rounded-full mr-3"></div>
+                  No cloud dependencies
+                </li>
+                <li className="flex items-center">
+                  <div className="w-1.5 h-1.5 bg-green-600 rounded-full mr-3"></div>
+                  Complete data ownership
+                </li>
+              </ul>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                <Layers className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Flexible Workflow
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Adapt to your creative process with customizable templates and
+                unlimited creative freedom.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-center">
+                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-3"></div>
+                  Custom templates
+                </li>
+                <li className="flex items-center">
+                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-3"></div>
+                  Multi-track timeline
+                </li>
+                <li className="flex items-center">
+                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-3"></div>
+                  Unlimited creativity
+                </li>
+              </ul>
+            </motion.div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            viewport={{ once: true }}
+            className="text-center mt-12"
+          >
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button
+                size="lg"
+                onClick={() => navigate('/downloads')}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+              >
+                <Download className="w-5 h-5 mr-2" />
+                Download Desktop App
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => navigate('/projects')}
+                className="border-purple-200 text-purple-700 hover:bg-purple-50 px-8 py-4 rounded-full font-semibold text-lg"
+              >
+                <ArrowRight className="w-5 h-5 mr-2" />
+                Try Web Version
+              </Button>
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -440,19 +614,28 @@ const Footer: React.FC = () => {
             <h4 className="font-semibold mb-4">Product</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <button
+                  onClick={() => navigate('/downloads')}
+                  className="hover:text-white transition-colors text-left"
+                >
+                  Downloads
+                </button>
+              </li>
+              <li>
+                <a
+                  href="#features"
+                  className="hover:text-white transition-colors"
+                >
                   Features
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Templates
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Pricing
-                </a>
+                <button
+                  onClick={() => navigate('/projects')}
+                  className="hover:text-white transition-colors text-left"
+                >
+                  Web App
+                </button>
               </li>
               <li>
                 <a href="#" className="hover:text-white transition-colors">
@@ -539,17 +722,92 @@ const Footer: React.FC = () => {
   );
 };
 
+const Navigation: React.FC = () => {
+  const navigate = useNavigate();
+
+  return (
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-purple-100">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xl font-bold text-gray-900">
+              Synapse Studio
+            </span>
+          </div>
+
+          <div className="hidden md:flex items-center space-x-8">
+            <a
+              href="#features"
+              className="text-gray-600 hover:text-purple-600 transition-colors"
+            >
+              Features
+            </a>
+            <a
+              href="#power"
+              className="text-gray-600 hover:text-purple-600 transition-colors"
+            >
+              Why Choose Us
+            </a>
+            <button
+              onClick={() => navigate('/downloads')}
+              className="text-gray-600 hover:text-purple-600 transition-colors"
+            >
+              Downloads
+            </button>
+            <a
+              href="#contact"
+              className="text-gray-600 hover:text-purple-600 transition-colors"
+            >
+              Contact
+            </a>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/projects')}
+              className="border-purple-200 text-purple-700 hover:bg-purple-50"
+            >
+              Projects
+            </Button>
+            <Button
+              onClick={() => navigate('/projects')}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              Get Started
+            </Button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
 const SynapseStudioLanding: React.FC = () => {
-  const handleContactSubmit = (data: any) => {
+  const handleContactSubmit = (data: Record<string, FormDataEntryValue>) => {
     console.log('Contact form submitted:', data);
+    // TODO: Implement contact form submission
   };
 
   return (
     <div className="min-h-screen">
-      <HeroSection />
-      <FeaturesSection />
-      <ContactSection onSubmit={handleContactSubmit} />
-      <Footer />
+      <Navigation />
+      <div className="pt-16">
+        <HeroSection />
+        <div id="features">
+          <FeaturesSection />
+        </div>
+        <div id="power">
+          <PowerSection />
+        </div>
+        <div id="contact">
+          <ContactSection onSubmit={handleContactSubmit} />
+        </div>
+        <Footer />
+      </div>
     </div>
   );
 };

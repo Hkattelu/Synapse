@@ -509,11 +509,6 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                                 project?.settings?.width ||
                                 1920
                               }
-                              value={
-                                settings.width ||
-                                project?.settings?.width ||
-                                1920
-                              }
                               onChange={(e) =>
                                 updateSettings({
                                   width: parseInt(e.target.value),
@@ -527,11 +522,6 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                             </span>
                             <input
                               type="number"
-                              value={
-                                settings.height ||
-                                project?.settings?.height ||
-                                1080
-                              }
                               value={
                                 settings.height ||
                                 project?.settings?.height ||

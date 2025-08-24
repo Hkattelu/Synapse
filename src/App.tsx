@@ -1,28 +1,15 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './state/context';
 import { AuthProvider } from './state/authContext';
-import { useUI } from './state/hooks';
 import { DashboardView } from './components/DashboardView';
 import { StudioView } from './components/StudioView';
 import { LoadingOverlay } from './components/LoadingOverlay';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NotificationsProvider } from './state/notifications';
 import { HistoryProvider } from './state/history';
+import Landing from './components/Landing';
+import DownloadsPage from './components/DownloadsPage';
 import './App.css';
-
-// Main app component that switches between views
-function AppContent() {
-  const { ui } = useUI();
-
-  // Render the appropriate view based on current state
-  switch (ui.currentView) {
-    case 'dashboard':
-      return <DashboardView />;
-    case 'studio':
-      return <StudioView />;
-    default:
-      return <DashboardView />;
-  }
-}
 
 function App() {
   return (
@@ -31,7 +18,14 @@ function App() {
         <NotificationsProvider>
           <ErrorBoundary>
             <HistoryProvider>
-              <AppContent />
+              <Router>
+                <Routes>
+                  <Route path="/" element={<Landing />} />
+                  <Route path="/projects" element={<DashboardView />} />
+                  <Route path="/studio" element={<StudioView />} />
+                  <Route path="/downloads" element={<DownloadsPage />} />
+                </Routes>
+              </Router>
               <LoadingOverlay />
             </HistoryProvider>
           </ErrorBoundary>
