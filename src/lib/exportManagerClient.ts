@@ -280,9 +280,12 @@ export class ClientExportManager {
   private async pollServerJob(serverJobId: string): Promise<void> {
     if (!this.currentJob) return;
     const startedAt = Date.now();
-    const maxDurationMs = 5 * 60_000; // 5 minutes
+    const maxDurationMs = 5 * 60_000; // 5 minutes absolute cap
+    const inactivityTimeoutMs = 2 * 60_000; // consider stalled if no progress for 2 minutes
     let delay = 600; // initial delay
     const maxDelay = 5000; // cap the backoff
+    let lastProgress = -1;
+    let lastChangeTs = startedAt;
 
     while (true) {
       // Cancellation: request server cancel without using the aborted signal
@@ -297,24 +300,34 @@ export class ClientExportManager {
       }
 
       // Timeout guard
-      if (Date.now() - startedAt > maxDurationMs) {
+      const elapsed = Date.now() - startedAt;
+      if (elapsed > maxDurationMs) {
         throw new Error('Export polling timed out');
       }
 
       const job = await api.getExportJob(serverJobId);
       const status = job.status as ExportProgress['status'];
       const progress = Number(job.progress ?? 0);
+
       this.updateProgress({
         status,
         progress,
         estimatedTimeRemaining: Math.max(
           0,
-          Math.round(
-            (Date.now() - startedAt) *
-              ((100 - progress) / Math.max(1, progress))
-          )
+          Math.round(elapsed * ((100 - progress) / Math.max(1, progress)))
         ),
       });
+
+      // Track progress changes for inactivity timeout
+      if (progress > lastProgress) {
+        lastProgress = progress;
+        lastChangeTs = Date.now();
+      }
+
+      // If no progress has been reported for a while, fail fast
+      if (Date.now() - lastChangeTs > inactivityTimeoutMs) {
+        throw new Error('Export stalled: no progress for 2 minutes');
+      }
 
       if (status === 'completed') {
         this.currentJob!.outputPath =
@@ -327,6 +340,7 @@ export class ClientExportManager {
         });
         return;
       }
+
       if (status === 'failed' || status === 'cancelled') {
         throw new Error(`Export ${status}`);
       }
