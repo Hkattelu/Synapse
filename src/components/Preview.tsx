@@ -18,21 +18,15 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
 
   // Find any talking head items to enable viewer controls
   const talkingHeads = useMemo(
-    () =>
-      timeline.filter(
-        (i) => i.type === 'video' && i.properties.talkingHeadEnabled
-      ),
+    () => timeline.filter((i) => i.type === 'video' && i.properties.talkingHeadEnabled),
     [timeline]
   );
   const bubbleHidden = useMemo(
-    () =>
-      talkingHeads.length > 0 &&
-      talkingHeads.every((i) => i.properties.talkingHeadHidden === true),
+    () => talkingHeads.length > 0 && talkingHeads.every((i) => i.properties.talkingHeadHidden === true),
     [talkingHeads]
   );
   const bubbleMuted = useMemo(
-    () =>
-      talkingHeads.length > 0 && talkingHeads.every((i) => i.muted === true),
+    () => talkingHeads.length > 0 && talkingHeads.every((i) => i.muted === true),
     [talkingHeads]
   );
 
@@ -336,8 +330,13 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   return (
     <div className={`bg-background-primary flex flex-col ${className}`}>
       {/* Preview Area */}
+<<<<<<< HEAD
       <div className="flex-1 flex items-center justify-center p-4 bg-black">
         <div className="relative w-full h-full flex items-center justify-center">
+=======
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="relative w-full h-full max-w-4xl max-h-full">
+>>>>>>> a0b3039 (feat: in-browser A/V recording + talking-head bubble overlay (#6))
           <Player
             acknowledgeRemotionLicense
             ref={playerRef}
