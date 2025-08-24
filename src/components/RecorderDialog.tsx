@@ -31,7 +31,9 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
 
   // Basic bubble config for talking head overlay
   const [bubbleEnabled, setBubbleEnabled] = useState(true);
-  const [bubbleShape, setBubbleShape] = useState<'circle' | 'rounded'>('circle');
+  const [bubbleShape, setBubbleShape] = useState<'circle' | 'rounded'>(
+    'circle'
+  );
   const [bubbleCorner, setBubbleCorner] = useState<
     'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
   >('bottom-right');
@@ -71,14 +73,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     };
   }, [isOpen]);
 
-  // Revoke any previously-created pending preview URL when it is replaced/cleared or on unmount
-  useEffect(() => {
-    return () => {
-      if (pending?.url && pending.url.startsWith('blob:')) {
-        URL.revokeObjectURL(pending.url);
-      }
-    };
-  }, [pending?.url]);
+  // Note: URL revocation is handled explicitly in start/save/discard/cancel paths.
   const requestStream = async (): Promise<MediaStream | null> => {
     try {
       const media = await navigator.mediaDevices.getUserMedia({
@@ -110,13 +105,19 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     }
     // If a previous pending preview exists (user recorded before and didn't save), revoke it
     if (pending?.url) {
-      try { URL.revokeObjectURL(pending.url); } catch {}
+      try {
+        URL.revokeObjectURL(pending.url);
+      } catch {}
       setPending(null);
     }
     const s = stream ?? (await requestStream());
     if (!s) return;
     // Ensure the live preview uses the same stream we are about to record
-    if (withCamera && videoRef.current && (videoRef.current as any).srcObject !== s) {
+    if (
+      withCamera &&
+      videoRef.current &&
+      (videoRef.current as any).srcObject !== s
+    ) {
       try {
         (videoRef.current as any).srcObject = s;
         await videoRef.current.play().catch(() => {});
@@ -126,7 +127,11 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     // Pick a supported mime type
     const pickMime = () => {
       const candidates = withCamera
-        ? ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']
+        ? [
+            'video/webm;codecs=vp9,opus',
+            'video/webm;codecs=vp8,opus',
+            'video/webm',
+          ]
         : ['audio/webm;codecs=opus', 'audio/webm'];
       for (const m of candidates) {
         // @ts-expect-error Safari types may not include isTypeSupported
@@ -135,7 +140,9 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       return '';
     };
     const mime = pickMime();
-    const mr = mime ? new MediaRecorder(s, { mimeType: mime }) : new MediaRecorder(s);
+    const mr = mime
+      ? new MediaRecorder(s, { mimeType: mime })
+      : new MediaRecorder(s);
     mediaRecorderRef.current = mr;
     mr.ondataavailable = (e) => {
       if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
@@ -146,8 +153,17 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       const previewUrl = URL.createObjectURL(blob);
       // Measure duration via a temporary URL that we immediately revoke inside helper
       const tempUrl = URL.createObjectURL(blob);
-      const duration = await getBlobDuration(tempUrl, withCamera ? 'video' : 'audio');
-      setPending({ url: previewUrl, mime, duration: duration ?? null, withCamera, blob });
+      const duration = await getBlobDuration(
+        tempUrl,
+        withCamera ? 'video' : 'audio'
+      );
+      setPending({
+        url: previewUrl,
+        mime,
+        duration: duration ?? null,
+        withCamera,
+        blob,
+      });
       setIsRecording(false);
       setIsPaused(false);
     };
@@ -157,8 +173,13 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
 
   const stopRecording = () => {
     // Stop the recorder first (triggers onstop -> pending creation)
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      try { mediaRecorderRef.current.stop(); } catch {}
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== 'inactive'
+    ) {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {}
     }
     mediaRecorderRef.current = null;
     setIsPaused(false);
@@ -195,12 +216,16 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       if (s) s.getTracks().forEach((t) => t.stop());
       setStream(null);
       if (videoRef.current) {
-        try { (videoRef.current as any).srcObject = null; } catch {}
+        try {
+          (videoRef.current as any).srcObject = null;
+        } catch {}
       }
     }
     // If there is a pending preview, discard it and revoke the URL
     if (pending?.url && pending.url.startsWith('blob:')) {
-      try { URL.revokeObjectURL(pending.url); } catch {}
+      try {
+        URL.revokeObjectURL(pending.url);
+      } catch {}
     }
     setPending(null);
     onClose();
@@ -213,7 +238,12 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       <div className="bg-white rounded-xl w-full max-w-md overflow-hidden">
         <div className="p-4 border-b flex items-center justify-between">
           <h3 className="font-semibold">Record Narration</h3>
-          <button onClick={handleCancel} className="text-gray-500 hover:text-gray-700">✕</button>
+          <button
+            onClick={handleCancel}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            ✕
+          </button>
         </div>
         <div className="p-4 space-y-4">
           {envError && (
@@ -224,34 +254,62 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
           {!pending && (
             <>
               <label className="flex items-center space-x-2">
-                <input type="checkbox" checked={withCamera} onChange={(e) => setWithCamera(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  checked={withCamera}
+                  onChange={(e) => setWithCamera(e.target.checked)}
+                />
                 <span>Include camera video</span>
               </label>
               {withCamera && (
                 <div className="aspect-video bg-black rounded overflow-hidden">
-                  <video ref={videoRef} muted playsInline className="w-full h-full object-cover" />
+                  <video
+                    ref={videoRef}
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               )}
               <div className="flex items-center space-x-2">
                 {!isRecording ? (
-                  <button onClick={startRecording} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded" disabled={!!envError}>
+                  <button
+                    onClick={startRecording}
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
+                    disabled={!!envError}
+                  >
                     Start
                   </button>
                 ) : (
                   <>
-                    <button onClick={togglePause} className="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded">
+                    <button
+                      onClick={togglePause}
+                      className="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded"
+                    >
                       {isPaused ? 'Resume' : 'Pause'}
                     </button>
-                    <button onClick={stopRecording} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Stop</button>
+                    <button
+                      onClick={stopRecording}
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+                    >
+                      Stop
+                    </button>
                   </>
                 )}
-                <button onClick={handleCancel} className="px-4 py-2 rounded border">Cancel</button>
+                <button
+                  onClick={handleCancel}
+                  className="px-4 py-2 rounded border"
+                >
+                  Cancel
+                </button>
               </div>
             </>
           )}
           {pending && (
             <div className="space-y-3">
-              <p className="text-sm text-gray-700">Recording ready. Choose an action:</p>
+              <p className="text-sm text-gray-700">
+                Recording ready. Choose an action:
+              </p>
               {pending.withCamera && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -353,7 +411,10 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                       type: pending.withCamera ? 'video' : 'audio',
                       url: assetUrl,
                       duration: pending.duration ?? undefined,
-                      metadata: { fileSize: pending.blob.size, mimeType: pending.mime },
+                      metadata: {
+                        fileSize: pending.blob.size,
+                        mimeType: pending.mime,
+                      },
                     });
                     // Add to timeline at playhead
                     const start = playback.currentTime || 0;
@@ -375,10 +436,16 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                       animations: [],
                       keyframes: [],
                     });
-                    notify({ type: 'success', title: 'Recorder', message: 'Added to Media Bin and timeline.' });
+                    notify({
+                      type: 'success',
+                      title: 'Recorder',
+                      message: 'Added to Media Bin and timeline.',
+                    });
                     // Revoke the temporary preview URL now that the asset owns its own URL
                     if (pending.url && pending.url.startsWith('blob:')) {
-                      try { URL.revokeObjectURL(pending.url); } catch {}
+                      try {
+                        URL.revokeObjectURL(pending.url);
+                      } catch {}
                     }
                     setPending(null);
                     notify({
@@ -403,11 +470,20 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                       type: pending.withCamera ? 'video' : 'audio',
                       url: assetUrl,
                       duration: pending.duration ?? undefined,
-                      metadata: { fileSize: pending.blob.size, mimeType: pending.mime },
+                      metadata: {
+                        fileSize: pending.blob.size,
+                        mimeType: pending.mime,
+                      },
                     });
-                    notify({ type: 'success', title: 'Recorder', message: 'Saved to Media Bin.' });
+                    notify({
+                      type: 'success',
+                      title: 'Recorder',
+                      message: 'Saved to Media Bin.',
+                    });
                     if (pending.url && pending.url.startsWith('blob:')) {
-                      try { URL.revokeObjectURL(pending.url); } catch {}
+                      try {
+                        URL.revokeObjectURL(pending.url);
+                      } catch {}
                     }
                     setPending(null);
                     notify({
@@ -424,7 +500,9 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                 <button
                   onClick={() => {
                     if (pending.url && pending.url.startsWith('blob:')) {
-                      try { URL.revokeObjectURL(pending.url); } catch {}
+                      try {
+                        URL.revokeObjectURL(pending.url);
+                      } catch {}
                     }
                     setPending(null);
                     onClose();
