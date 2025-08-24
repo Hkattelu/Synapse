@@ -156,6 +156,7 @@ function StudioViewContent() {
 
             {/* Panel Controls */}
 <<<<<<< HEAD
+<<<<<<< HEAD
             <div className="flex items-center space-x-2">
               {/* Undo/Redo Buttons */}
               <button
@@ -164,6 +165,11 @@ function StudioViewContent() {
               {/* Undo/Redo Buttons */}
              <button
 >>>>>>> 9eda38b (Implement some more composition features)
+=======
+            <div className="flex items-center space-x-2">
+              {/* Undo/Redo Buttons */}
+              <button
+>>>>>>> e22fab1 (Fixed video preview)
                 onClick={undo}
                 disabled={!canUndo}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${canUndo
@@ -173,6 +179,9 @@ function StudioViewContent() {
                 title="Undo (Ctrl+Z)"
               >
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> e22fab1 (Fixed video preview)
                 <svg
                   className="w-4 h-4"
                   viewBox="0 0 24 24"
@@ -194,6 +203,7 @@ function StudioViewContent() {
                 </svg>
               </button>
               <button
+<<<<<<< HEAD
 =======
                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l-7-7 7-7"></path>
@@ -202,6 +212,8 @@ function StudioViewContent() {
              </button>
              <button
 >>>>>>> 9eda38b (Implement some more composition features)
+=======
+>>>>>>> e22fab1 (Fixed video preview)
                 onClick={redo}
                 disabled={!canRedo}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${canRedo
@@ -211,6 +223,9 @@ function StudioViewContent() {
                 title="Redo (Ctrl+Y / Shift+Ctrl+Z)"
               >
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> e22fab1 (Fixed video preview)
                 <svg
                   className="w-4 h-4"
                   viewBox="0 0 24 24"
@@ -231,6 +246,7 @@ function StudioViewContent() {
                   ></path>
                 </svg>
               </button>
+<<<<<<< HEAD
 =======
                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5l7 7-7 7"></path>
@@ -238,6 +254,8 @@ function StudioViewContent() {
                </svg>
              </button>
 >>>>>>> 9eda38b (Implement some more composition features)
+=======
+>>>>>>> e22fab1 (Fixed video preview)
               <button
                 onClick={toggleMediaBin}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${ui.mediaBinVisible

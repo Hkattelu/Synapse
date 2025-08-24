@@ -107,7 +107,11 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             }
           } else {
             // Fallback: increment time manually based on real time
+<<<<<<< HEAD
             const newTime = playback.currentTime + 1000 / 30 / 1000; // 30fps increment
+=======
+            const newTime = playback.currentTime + (1000 / 30) / 1000; // 30fps increment
+>>>>>>> e22fab1 (Fixed video preview)
             if (newTime <= compositionProps.settings.duration) {
               console.log('Fallback time update:', newTime);
               seek(newTime);
@@ -119,7 +123,11 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
         } catch (error) {
           console.log('Error getting player time, using fallback:', error);
           // Fallback: increment time manually
+<<<<<<< HEAD
           const newTime = playback.currentTime + 1000 / 30 / 1000;
+=======
+          const newTime = playback.currentTime + (1000 / 30) / 1000;
+>>>>>>> e22fab1 (Fixed video preview)
           if (newTime <= compositionProps.settings.duration) {
             seek(newTime);
           } else {
@@ -130,6 +138,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     }, 1000 / 30); // Update at 30fps
 
     return () => clearInterval(interval);
+<<<<<<< HEAD
   }, [
     playback.isPlaying,
     playback.currentTime,
@@ -139,6 +148,9 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     isDragging,
     pause,
   ]);
+=======
+  }, [playback.isPlaying, playback.currentTime, seek, compositionProps.settings.fps, compositionProps.settings.duration, isDragging, pause]);
+>>>>>>> e22fab1 (Fixed video preview)
 
   // Sync current time with player (only when seeking manually)
   useEffect(() => {
@@ -149,9 +161,13 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     );
 
     // Only seek if there's a significant difference to avoid conflicts
+<<<<<<< HEAD
     const playerCurrentFrame = Math.round(
       playback.currentTime * compositionProps.settings.fps
     );
+=======
+    const playerCurrentFrame = Math.round(playback.currentTime * compositionProps.settings.fps);
+>>>>>>> e22fab1 (Fixed video preview)
     if (Math.abs(currentFrame - playerCurrentFrame) > 1) {
       playerRef.current.seekTo(currentFrame);
     }
@@ -343,6 +359,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             showVolumeControls={false}
             clickToPlay={false}
             onTimeUpdate={handleTimeUpdate}
+
           />
           {talkingHeads.length > 0 && (
             <div className="absolute top-3 right-3 flex items-center space-x-2 bg-neutral-900/70 backdrop-blur px-2 py-1 rounded text-white text-xs">
