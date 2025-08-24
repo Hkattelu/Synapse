@@ -8,7 +8,10 @@ import { Preview } from './Preview';
 import { Inspector } from './Inspector';
 import { ExportDialog } from './ExportDialog';
 import { ExportProvider } from '../state/exportContext';
-import { ArrowLeft, Sparkles, Settings, Archive, Eye } from 'lucide-react';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left.js';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
+import Settings from 'lucide-react/dist/esm/icons/settings.js';
+import Archive from 'lucide-react/dist/esm/icons/archive.js';
 import { useHistory } from '../state/history';
 
 function StudioViewContent() {
@@ -131,22 +134,20 @@ function StudioViewContent() {
             <div className="flex bg-purple-100 rounded-xl p-1">
               <button
                 onClick={() => setTimelineMode('standard')}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                  timelineMode === 'standard'
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${timelineMode === 'standard'
                     ? 'bg-purple-600 text-white shadow-sm'
                     : 'text-purple-700 hover:text-purple-900 hover:bg-purple-200'
-                }`}
+                  }`}
                 title="Standard Timeline"
               >
                 Standard
               </button>
               <button
                 onClick={() => setTimelineMode('enhanced')}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                  timelineMode === 'enhanced'
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${timelineMode === 'enhanced'
                     ? 'bg-purple-600 text-white shadow-sm'
                     : 'text-purple-700 hover:text-purple-900 hover:bg-purple-200'
-                }`}
+                  }`}
                 title="Enhanced Timeline with Keyframes"
               >
                 Enhanced
@@ -159,11 +160,10 @@ function StudioViewContent() {
               <button
                 onClick={undo}
                 disabled={!canUndo}
-                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
-                  canUndo
+                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${canUndo
                     ? 'bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300'
                     : 'bg-white border border-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
+                  }`}
                 title="Undo (Ctrl+Z)"
               >
                 <svg
@@ -189,11 +189,10 @@ function StudioViewContent() {
               <button
                 onClick={redo}
                 disabled={!canRedo}
-                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
-                  canRedo
+                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${canRedo
                     ? 'bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300'
                     : 'bg-white border border-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
+                  }`}
                 title="Redo (Ctrl+Y / Shift+Ctrl+Z)"
               >
                 <svg
@@ -218,22 +217,20 @@ function StudioViewContent() {
               </button>
               <button
                 onClick={toggleMediaBin}
-                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
-                  ui.mediaBinVisible
+                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${ui.mediaBinVisible
                     ? 'bg-purple-600 text-white shadow-lg'
                     : 'bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300'
-                }`}
+                  }`}
                 title="Toggle Media Bin"
               >
                 <Archive className="w-4 h-4" />
               </button>
               <button
                 onClick={toggleInspector}
-                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
-                  ui.inspectorVisible
+                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${ui.inspectorVisible
                     ? 'bg-purple-600 text-white shadow-lg'
                     : 'bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300'
-                }`}
+                  }`}
                 title="Toggle Properties Panel"
               >
                 <Settings className="w-4 h-4" />
@@ -253,12 +250,14 @@ function StudioViewContent() {
         {/* Main Editor Area */}
         <main className="flex-1 flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-l-2xl overflow-hidden">
           <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col">
             {/* Preview Area */}
             <div className="flex-1 bg-black border-r border-gray-700/50 rounded-tl-2xl overflow-hidden">
               <Preview className="h-full" />
             </div>
 
             {/* Timeline Area - Always visible */}
+            <div className="border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900">
             <div className="border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900">
               {timelineMode === 'enhanced' ? (
                 <EnhancedTimelineView className="h-full" />

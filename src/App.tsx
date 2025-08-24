@@ -7,6 +7,10 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { NotificationsProvider } from './state/notifications';
 import { HistoryProvider } from './state/history';
 import './App.css';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { NotificationsProvider } from './state/notifications';
+import { HistoryProvider } from './state/history';
+import './App.css';
 
 // Main app component that switches between views
 function AppContent() {

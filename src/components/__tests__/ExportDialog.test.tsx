@@ -2,6 +2,18 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ExportDialog } from '../ExportDialog';
+vi.mock('../../state/authContext', () => ({
+  useAuth: () => ({
+    authenticated: true,
+    membership: { active: true },
+    login: vi.fn(),
+    signup: vi.fn(),
+    logout: vi.fn(),
+    donateDemo: vi.fn(),
+    loading: false,
+    error: undefined,
+  }),
+}));
 
 vi.mock('../../state/hooks', () => ({
   useProject: () => ({

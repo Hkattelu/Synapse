@@ -13,6 +13,19 @@ import { Button } from './ui/Button';
 import { Label } from './ui/Label';
 import { Input } from './ui/Input';
 import { Textarea } from './ui/Textarea';
+<<<<<<< HEAD
+import Play from 'lucide-react/dist/esm/icons/play.js';
+import Video from 'lucide-react/dist/esm/icons/video.js';
+import Users from 'lucide-react/dist/esm/icons/users.js';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
+import Heart from 'lucide-react/dist/esm/icons/heart.js';
+import Github from 'lucide-react/dist/esm/icons/github.js';
+import Twitter from 'lucide-react/dist/esm/icons/twitter.js';
+import Youtube from 'lucide-react/dist/esm/icons/youtube.js';
+import Mail from 'lucide-react/dist/esm/icons/mail.js';
+import MapPin from 'lucide-react/dist/esm/icons/map-pin.js';
+import Phone from 'lucide-react/dist/esm/icons/phone.js';
+=======
 import {
   Play,
   Video,
