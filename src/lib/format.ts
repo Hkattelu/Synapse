@@ -21,10 +21,10 @@ export async function formatCode(
       language === 'typescript'
         ? 'typescript'
         : language === 'tsx'
-        ? 'typescript'
-        : language === 'html'
-        ? 'html'
-        : 'babel',
+          ? 'typescript'
+          : language === 'html'
+            ? 'html'
+            : 'babel',
   };
 
   try {
@@ -34,4 +34,3 @@ export async function formatCode(
     return code;
   }
 }
-

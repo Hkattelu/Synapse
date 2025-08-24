@@ -2,6 +2,18 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ExportDialog } from '../ExportDialog';
+vi.mock('../../state/authContext', () => ({
+  useAuth: () => ({
+    authenticated: true,
+    membership: { active: true },
+    login: vi.fn(),
+    signup: vi.fn(),
+    logout: vi.fn(),
+    donateDemo: vi.fn(),
+    loading: false,
+    error: undefined,
+  }),
+}));
 
 vi.mock('../../state/hooks', () => ({
   useProject: () => ({
@@ -42,7 +54,12 @@ vi.mock('../../state/exportContext', () => ({
         id: 'web-720p',
         name: 'Web 720p',
         description: 'Smaller size 720p',
-        settings: { format: 'mp4', quality: 'medium', width: 1280, height: 720 },
+        settings: {
+          format: 'mp4',
+          quality: 'medium',
+          width: 1280,
+          height: 720,
+        },
       },
       {
         id: 'vertical-1080x1920',
@@ -54,7 +71,11 @@ vi.mock('../../state/exportContext', () => ({
     updateSettings: mockUpdateSettings,
     applyPreset: mockApplyPreset,
   }),
-  useExportStatus: () => ({ isExporting: false, progress: null, canStartExport: true }),
+  useExportStatus: () => ({
+    isExporting: false,
+    progress: null,
+    canStartExport: true,
+  }),
 }));
 
 describe('ExportDialog', () => {

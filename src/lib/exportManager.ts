@@ -155,12 +155,26 @@ export function formatDuration(totalSeconds: number): string {
   return `${mm}:${ss}`;
 }
 
-export function estimateFileSize(settings: ExportSettings, durationSeconds: number): number {
+export function estimateFileSize(
+  settings: ExportSettings,
+  durationSeconds: number
+): number {
   // Very rough heuristic based on resolution, fps, codec, and quality
   const pixels = settings.width * settings.height;
-  const qualityFactor = settings.quality === 'high' ? 1 : settings.quality === 'medium' ? 0.6 : 0.35;
-  const codecFactor = settings.codec === 'h264' ? 1 : settings.codec === 'prores' ? 3 : 0.8;
-  const bitrateMbps = (pixels / (1920 * 1080)) * (settings.fps / 30) * qualityFactor * codecFactor * 8; // Mbps
+  const qualityFactor =
+    settings.quality === 'high'
+      ? 1
+      : settings.quality === 'medium'
+        ? 0.6
+        : 0.35;
+  const codecFactor =
+    settings.codec === 'h264' ? 1 : settings.codec === 'prores' ? 3 : 0.8;
+  const bitrateMbps =
+    (pixels / (1920 * 1080)) *
+    (settings.fps / 30) *
+    qualityFactor *
+    codecFactor *
+    8; // Mbps
   const bits = bitrateMbps * 1_000_000 * durationSeconds;
   return Math.max(1, Math.round(bits / 8)); // bytes
 }
@@ -168,7 +182,9 @@ export function estimateFileSize(settings: ExportSettings, durationSeconds: numb
 // Internal export state
 let _isExporting = false;
 let _currentJob: any = null;
-let progressCb: ((p: { status: string; progress: number; [k: string]: any }) => void) | null = null;
+let progressCb:
+  | ((p: { status: string; progress: number; [k: string]: any }) => void)
+  | null = null;
 
 export const exportManager = {
   // Exposed properties for tests to poke
@@ -188,13 +204,18 @@ export const exportManager = {
   isCurrentlyExporting(): boolean {
     return _isExporting;
   },
-  setProgressCallback(cb: (p: { status: string; progress: number; [k: string]: any }) => void) {
+  setProgressCallback(
+    cb: (p: { status: string; progress: number; [k: string]: any }) => void
+  ) {
     progressCb = cb;
   },
   getCurrentJob() {
     return _currentJob;
   },
-  async startExport(project: Project, settings: ExportSettings): Promise<string> {
+  async startExport(
+    project: Project,
+    settings: ExportSettings
+  ): Promise<string> {
     try {
       _isExporting = true;
       _currentJob = {
@@ -216,19 +237,39 @@ export const exportManager = {
         composition: 'MainComposition',
         serveUrl: bundleLocation as any,
         codec: settings.codec as any,
-        onProgress: (p: { renderedFrames?: number; encodedFrames?: number; totalFrames?: number }) => {
-          const totalFrames = p.totalFrames ?? project.settings.fps * project.settings.duration;
+        onProgress: (p: {
+          renderedFrames?: number;
+          encodedFrames?: number;
+          totalFrames?: number;
+        }) => {
+          const totalFrames =
+            p.totalFrames ?? project.settings.fps * project.settings.duration;
           const rendered = p.encodedFrames ?? p.renderedFrames ?? 0;
-          const progress = totalFrames > 0 ? Math.min(100, Math.round((rendered / totalFrames) * 100)) : 0;
-          progressCb?.({ status: 'rendering', progress, currentFrame: rendered, totalFrames });
+          const progress =
+            totalFrames > 0
+              ? Math.min(100, Math.round((rendered / totalFrames) * 100))
+              : 0;
+          progressCb?.({
+            status: 'rendering',
+            progress,
+            currentFrame: rendered,
+            totalFrames,
+          });
         },
       } as any);
 
       progressCb?.({ status: 'completed', progress: 100 });
-      _currentJob = { ..._currentJob, progress: { status: 'completed', progress: 100 } };
+      _currentJob = {
+        ..._currentJob,
+        progress: { status: 'completed', progress: 100 },
+      };
       return 'C:/tmp/export.mp4';
     } catch (e: any) {
-      progressCb?.({ status: 'failed', progress: 0, errorMessage: `Export failed: ${e?.message || e}` });
+      progressCb?.({
+        status: 'failed',
+        progress: 0,
+        errorMessage: `Export failed: ${e?.message || e}`,
+      });
       throw new Error(`Export failed: ${e?.message || e}`);
     } finally {
       _isExporting = false;
@@ -240,9 +281,11 @@ export const exportManager = {
       _isExporting = false;
       progressCb?.({ status: 'cancelled', progress: 0 });
       if (_currentJob) {
-        _currentJob = { ..._currentJob, progress: { status: 'cancelled', progress: 0 } };
+        _currentJob = {
+          ..._currentJob,
+          progress: { status: 'cancelled', progress: 0 },
+        };
       }
     }
   },
 };
-

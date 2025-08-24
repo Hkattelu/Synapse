@@ -1,5 +1,12 @@
 import React from 'react';
-import { AbsoluteFill, Sequence, Video, Img, staticFile, useVideoConfig } from 'remotion';
+import {
+  AbsoluteFill,
+  Sequence,
+  Video,
+  Img,
+  staticFile,
+  useVideoConfig,
+} from 'remotion';
 import type { VideoSequenceProps } from './types';
 
 export const VideoSequence: React.FC<VideoSequenceProps> = ({

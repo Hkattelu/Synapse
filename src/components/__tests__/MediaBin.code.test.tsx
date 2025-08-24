@@ -76,7 +76,7 @@ describe('MediaBin - Code Clips', () => {
     expect(screen.getByTitle('Create a new code clip')).toBeInTheDocument();
   });
 
-it('creates a new code clip when Add Code is clicked', async () => {
+  it('creates a new code clip when Add Code is clicked', async () => {
     render(
       <TestProviders>
         <MediaBin />

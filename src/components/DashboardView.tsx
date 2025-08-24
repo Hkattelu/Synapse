@@ -2,6 +2,15 @@ import React, { Fragment, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useProject, useUI } from '../state/hooks';
 import { ProjectManager } from './ProjectManager';
+<<<<<<< HEAD
+import Play from 'lucide-react/dist/esm/icons/play.js';
+import Video from 'lucide-react/dist/esm/icons/video.js';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
+import Users from 'lucide-react/dist/esm/icons/users.js';
+import Heart from 'lucide-react/dist/esm/icons/heart.js';
+import Plus from 'lucide-react/dist/esm/icons/plus.js';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.js';
+=======
 import {
   Play,
   Video,
@@ -9,8 +18,9 @@ import {
   Users,
   Heart,
   Plus,
-  ArrowRight
+  ArrowRight,
 } from 'lucide-react';
+>>>>>>> 9eda38b (Implement some more composition features)
 
 export function DashboardView() {
   const { project, projects, createProject } = useProject();
@@ -115,9 +125,26 @@ export function DashboardView() {
               className="inline-flex items-center px-4 py-2 rounded-full bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors"
               title="See our Product Hunt launch page"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="mr-2">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h-2v10h2a5 5 0 000-10z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h6a5 5 0 010 10H7V7z" />
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                className="mr-2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M13 7h-2v10h2a5 5 0 000-10z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M7 7h6a5 5 0 010 10H7V7z"
+                />
               </svg>
               Launch Page
             </a>

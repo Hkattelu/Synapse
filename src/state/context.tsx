@@ -27,17 +27,22 @@ export function AppProvider({ children }: AppProviderProps) {
     async function loadInitialData() {
       try {
         // Show loading message
-        dispatch({ type: 'SET_LOADING', payload: { isLoading: true, message: 'Loading projects…' } });
+        dispatch({
+          type: 'SET_LOADING',
+          payload: { isLoading: true, message: 'Loading projects…' },
+        });
         // Load all projects
         let projects = await ProjectManager.getAllProjects();
 
         // In development mode, always ensure sample data exists and load starter project
         if (import.meta.env.DEV) {
           const sampleProjects = loadSampleDataForDev();
-          
+
           // Check if sample projects exist in storage
-          const hasStarterProject = projects.some(p => p.project.id === 'remotion-tutorial-sample');
-          
+          const hasStarterProject = projects.some(
+            (p) => p.project.id === 'remotion-tutorial-sample'
+          );
+
           if (!hasStarterProject && sampleProjects.length > 0) {
             // Save sample projects to storage if they don't exist
             for (const sampleProject of sampleProjects) {
@@ -48,7 +53,9 @@ export function AppProvider({ children }: AppProviderProps) {
           }
 
           // Always load the starter project in development
-          const starterProject = projects.find(p => p.project.id === 'remotion-tutorial-sample');
+          const starterProject = projects.find(
+            (p) => p.project.id === 'remotion-tutorial-sample'
+          );
           if (starterProject) {
             console.log('🎬 Loading starter project for development');
             dispatch({
@@ -63,14 +70,22 @@ export function AppProvider({ children }: AppProviderProps) {
           if (projects.length > 0) {
             const currentProject = ProjectManager.getCurrentProject();
             if (currentProject) {
-              dispatch({ type: 'LOAD_PROJECT', payload: currentProject.project });
+              dispatch({
+                type: 'LOAD_PROJECT',
+                payload: currentProject.project,
+              });
             } else {
               // If no current project, load the most recently updated one
               const sortedProjects = [...projects].sort(
-                (a, b) => new Date(b.project.updatedAt).getTime() - new Date(a.project.updatedAt).getTime()
+                (a, b) =>
+                  new Date(b.project.updatedAt).getTime() -
+                  new Date(a.project.updatedAt).getTime()
               );
               if (sortedProjects.length > 0) {
-                dispatch({ type: 'LOAD_PROJECT', payload: sortedProjects[0].project });
+                dispatch({
+                  type: 'LOAD_PROJECT',
+                  payload: sortedProjects[0].project,
+                });
               }
             }
           }

@@ -2,8 +2,11 @@ import { AppProvider } from './state/context';
 import { useUI } from './state/hooks';
 import { DashboardView } from './components/DashboardView';
 import { StudioView } from './components/StudioView';
-import './App.css';
 import { LoadingOverlay } from './components/LoadingOverlay';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { NotificationsProvider } from './state/notifications';
+import { HistoryProvider } from './state/history';
+import './App.css';
 
 // Main app component that switches between views
 function AppContent() {
@@ -20,22 +23,39 @@ function AppContent() {
   }
 }
 
+<<<<<<< HEAD
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NotificationsProvider } from './state/notifications';
 import { HistoryProvider } from './state/history';
+import { AuthProvider } from './state/authContext';
 
 function App() {
   return (
-    cAppProvidere
-      cNotificationsProvidere
-        cErrorBoundarye
-          cHistoryProvidere
-            cAppContent /e
-            cLoadingOverlay /e
-          c/HistoryProvidere
-        c/ErrorBoundarye
-      c/NotificationsProvidere
-    c/AppProvidere
+    <AppProvider>
+      <AuthProvider>
+        <NotificationsProvider>
+          <ErrorBoundary>
+            <HistoryProvider>
+              <AppContent />
+              <LoadingOverlay />
+            </HistoryProvider>
+          </ErrorBoundary>
+        </NotificationsProvider>
+      </AuthProvider>
+=======
+function App() {
+  return (
+    <AppProvider>
+      <NotificationsProvider>
+        <ErrorBoundary>
+          <HistoryProvider>
+            <AppContent />
+            <LoadingOverlay />
+          </HistoryProvider>
+        </ErrorBoundary>
+      </NotificationsProvider>
+>>>>>>> 9eda38b (Implement some more composition features)
+    </AppProvider>
   );
 }
 
