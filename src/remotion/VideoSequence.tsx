@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  AbsoluteFill,
-  Sequence,
-  Video,
-  Img,
-  useVideoConfig,
-} from 'remotion';
+import { AbsoluteFill, Sequence, Video, Img, useVideoConfig } from 'remotion';
 // Keep a namespace import as well so we can defensively check for optional exports
 // like `Audio` in test environments where `remotion` is partially mocked.
 import * as RemotionNS from 'remotion';
@@ -120,17 +114,31 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
                   🎵 {asset.name}
                 </AbsoluteFill>
                 {/* Actual audio playback (guarded for test mocks) */}
-                {
-                  'Audio' in (RemotionNS as any) &&
-                  typeof (RemotionNS as any).Audio === 'function' ? (
-                    <RemotionNS.Audio
+                {(() => {
+                  type AudioProps = {
+                    src: string;
+                    volume?: number;
+                    playbackRate?: number;
+                    muted?: boolean;
+                  };
+                  const hasAudio =
+                    'Audio' in
+                    (RemotionNS as unknown as Record<string, unknown>);
+                  if (!hasAudio) return null;
+                  const AudioComp = (
+                    RemotionNS as unknown as {
+                      Audio: React.ComponentType<AudioProps>;
+                    }
+                  ).Audio;
+                  return (
+                    <AudioComp
                       src={asset.url}
                       volume={item.properties.volume ?? 1}
                       playbackRate={item.properties.playbackRate ?? 1}
                       muted={item.muted}
                     />
-                  ) : null
-                }
+                  );
+                })()}
               </>
             )}
 
