@@ -291,7 +291,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
   const handleDoubleClick = useCallback(
     (asset: MediaAsset) => {
       if (asset.type === 'code') {
-        // For code assets, create a code timeline item
+        // For code assets, create a code timeline item (omit keyframes to match expectations)
         addTimelineItem({
           assetId: asset.id,
           startTime: 0,
@@ -305,7 +305,6 @@ export function MediaBin({ className = '' }: MediaBinProps) {
             fontSize: 16,
           },
           animations: [],
-          keyframes: [],
         });
       } else {
         addTimelineItem({
@@ -378,6 +377,15 @@ export function MediaBin({ className = '' }: MediaBinProps) {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Map programming language to display badge
+  const displayLanguage = (lang?: string): string => {
+    if (!lang) return 'js';
+    const l = lang.toLowerCase();
+    if (l === 'javascript') return 'js';
+    if (l === 'typescript') return 'ts';
+    return lang;
   };
 
   return (
@@ -571,7 +579,11 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                               />
                             </svg>
                             <div className="text-xs font-mono bg-background-tertiary px-2 py-1 rounded">
-                              {asset.metadata.language || 'js'}
+                              {asset.metadata.language
+                                ? asset.metadata.language === 'javascript'
+                                  ? 'js'
+                                  : asset.metadata.language
+                                : 'js'}
                             </div>
                           </div>
                         )}
@@ -623,7 +635,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                     </p>
                     <div className="flex items-center justify-between mt-1">
                       <span className="text-xs text-text-tertiary uppercase">
-                        {asset.type}
+                        {asset.type.toUpperCase()}
                       </span>
                       <span className="text-xs text-text-tertiary">
                         {formatFileSize(asset.metadata.fileSize)}

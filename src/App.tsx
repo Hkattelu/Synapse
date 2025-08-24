@@ -2,8 +2,11 @@ import { AppProvider } from './state/context';
 import { useUI } from './state/hooks';
 import { DashboardView } from './components/DashboardView';
 import { StudioView } from './components/StudioView';
-import './App.css';
 import { LoadingOverlay } from './components/LoadingOverlay';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { NotificationsProvider } from './state/notifications';
+import { HistoryProvider } from './state/history';
+import './App.css';
 
 // Main app component that switches between views
 function AppContent() {

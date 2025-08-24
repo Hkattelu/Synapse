@@ -48,6 +48,16 @@ export const TitleSequence: React.FC<TitleSequenceProps> = ({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  console.log('TitleSequence rendering:', {
+    text: item.properties.text,
+    startFrame,
+    durationInFrames,
+    currentFrame: frame,
+    relativeFrame: frame - startFrame,
+    x: item.properties.x,
+    y: item.properties.y,
+  });
+
   // Get title properties
   const text = item.properties.text || 'Title Text';
   const fontFamily = item.properties.fontFamily || 'Inter, sans-serif';
@@ -170,20 +180,19 @@ export const TitleSequence: React.FC<TitleSequenceProps> = ({
     return text;
   }, [text, entranceProgress, animations, hasEntranceAnimation]);
 
-  // Container style
+  // Container style - use flexbox for centering, then adjust with transform
   const containerStyle: React.CSSProperties = {
-    transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
-    opacity: opacity * combinedProgress,
-    backgroundColor:
-      backgroundColor === 'transparent' ? 'transparent' : backgroundColor,
     width: '100%',
     height: '100%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
-    boxSizing: 'border-box',
-    padding: '20px',
+    backgroundColor:
+      backgroundColor === 'transparent' ? 'transparent' : backgroundColor,
+    // Apply positioning as offset from center
+    transform: `translate(${x - 960}px, ${y - 540}px) scale(${scale}) rotate(${rotation}deg)`,
+    opacity: opacity * combinedProgress,
   };
 
   // Text style
@@ -195,6 +204,10 @@ export const TitleSequence: React.FC<TitleSequenceProps> = ({
     lineHeight: 1.2,
     wordWrap: 'break-word',
     maxWidth: '100%',
+    // Temporary: add background to make text visible
+    backgroundColor: 'rgba(255, 0, 0, 0.3)',
+    padding: '10px',
+    border: '2px solid yellow',
     ...animationStyle,
   };
 
