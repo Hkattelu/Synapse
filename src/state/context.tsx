@@ -92,6 +92,68 @@ export function AppProvider({ children }: AppProviderProps) {
         }
 
         dispatch({ type: 'LOAD_PROJECTS_LIST', payload: projects });
+
+        // Fetch Music Library metadata (public JSON) in parallel to startup
+        // Non-fatal if it fails; UI will simply show empty library
+        try {
+          // Skip in non-window environments (e.g., Node tests) to avoid noisy fetches
+          if (typeof window !== 'undefined') {
+            // Build URL from Vite base so non-root deployments work (e.g., /app/)
+            const rawBase = (import.meta as any)?.env?.BASE_URL ?? '/';
+            const origin = window.location?.origin ?? 'http://localhost';
+            const baseUrl = new URL(rawBase, origin);
+            const url = new URL('music/library.json', baseUrl).toString();
+
+            // Fire-and-forget; do not block startup loading state
+            void fetch(url)
+              .then(async (res) => {
+                if (!res.ok) return;
+                const raw = await res.json();
+                if (!Array.isArray(raw)) return;
+                const normalized = raw
+                  .filter(
+                    (t: unknown) =>
+                      t &&
+                      typeof (t as any).title === 'string' &&
+                      typeof (t as any).url === 'string' &&
+                      Number.isFinite(Number((t as any).duration))
+                  )
+                  .map((t: any) => {
+                    const duration = Number((t as any).duration);
+                    const title = String((t as any).title);
+                    const urlStr = String((t as any).url);
+                    const genre =
+                      typeof (t as any).genre === 'string' &&
+                      (t as any).genre.trim().length > 0
+                        ? (t as any).genre
+                        : 'Misc';
+                    const id = String((t as any).id ?? `${title}::${urlStr}`);
+                    return {
+                      id,
+                      title,
+                      duration,
+                      genre,
+                      url: urlStr,
+                      license:
+                        typeof (t as any).license === 'string'
+                          ? (t as any).license
+                          : undefined,
+                      source:
+                        typeof (t as any).source === 'string'
+                          ? (t as any).source
+                          : undefined,
+                    };
+                  });
+                dispatch({ type: 'LOAD_MUSIC_LIBRARY', payload: normalized });
+              })
+              .catch((err) => {
+                console.warn('Music library fetch failed:', err);
+              });
+          }
+        } catch (err) {
+          console.warn('Music library fetch failed:', err);
+        }
+
         dispatch({ type: 'SET_LOADING', payload: { isLoading: false } });
       } catch (error) {
         console.error('Failed to load initial data:', error);

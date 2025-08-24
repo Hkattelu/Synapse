@@ -48,6 +48,9 @@ const defaultUIState: UIState = {
     timelineMode: 'standard' as const,
     verticalScrollPosition: 0,
   },
+  musicLibrary: {
+    tracks: [],
+  },
 };
 
 // Initial application state
@@ -522,6 +525,17 @@ function uiReducer(state: AppState, action: UIAction): AppState {
           timeline: {
             ...state.ui.timeline,
             ...action.payload,
+          },
+        },
+      };
+
+    case 'LOAD_MUSIC_LIBRARY':
+      return {
+        ...state,
+        ui: {
+          ...state.ui,
+          musicLibrary: {
+            tracks: action.payload,
           },
         },
       };
