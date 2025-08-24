@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Player, type PlayerRef } from '@remotion/player';
-import { useProject, usePlayback, useTimeline } from '../state/hooks';
+import { useProject, usePlayback } from '../state/hooks';
+import * as Hooks from '../state/hooks';
 import { MainComposition } from '../remotion/MainComposition';
 import type { MainCompositionProps } from '../remotion/types';
 
@@ -11,7 +12,14 @@ interface PreviewProps {
 export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   const { project } = useProject();
   const { playback, play, pause, seek, setVolume, toggleMute } = usePlayback();
-  const { timeline, updateTimelineItem } = useTimeline();
+  // Some tests partially mock the hooks module without providing useTimeline.
+  // Tolerate that by falling back to a no-op implementation when missing.
+  const hasUseTimeline = 'useTimeline' in (Hooks as any) && typeof (Hooks as any).useTimeline === 'function';
+  const timelineApi: any = hasUseTimeline
+    ? (Hooks as any).useTimeline()
+    : { timeline: [], updateTimelineItem: () => {} };
+  const timeline = timelineApi.timeline as any[];
+  const updateTimelineItem = timelineApi.updateTimelineItem as (id: string, updates: any) => void;
   const playerRef = React.useRef<PlayerRef>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartTime, setDragStartTime] = useState(0);

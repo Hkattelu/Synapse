@@ -77,6 +77,22 @@ export function AppProvider({ children }: AppProviderProps) {
         }
 
         dispatch({ type: 'LOAD_PROJECTS_LIST', payload: projects });
+
+        // Fetch Music Library metadata (public JSON) in parallel to startup
+        // Non-fatal if it fails; UI will simply show empty library
+        try {
+          const res = await fetch('/music/library.json');
+          if (res.ok) {
+            const tracks = await res.json();
+            // Basic shape guard: ensure it's an array
+            if (Array.isArray(tracks)) {
+              dispatch({ type: 'LOAD_MUSIC_LIBRARY', payload: tracks });
+            }
+          }
+        } catch (err) {
+          console.warn('Music library fetch failed:', err);
+        }
+
         dispatch({ type: 'SET_LOADING', payload: { isLoading: false } });
       } catch (error) {
         console.error('Failed to load initial data:', error);

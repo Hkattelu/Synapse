@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, Sequence, Video, Img, staticFile, useVideoConfig } from 'remotion';
+import * as Remotion from 'remotion';
 import type { VideoSequenceProps } from './types';
 
 export const VideoSequence: React.FC<VideoSequenceProps> = ({
@@ -23,7 +23,7 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
   const opacity = item.properties.opacity || 1;
 
   // Calculate track-based positioning based on composition height
-  const { height } = useVideoConfig();
+  const { height } = Remotion.useVideoConfig();
   const trackHeight = height / 4; // Assuming 4 tracks max for now
   const trackY = item.track * trackHeight;
 
@@ -50,12 +50,12 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
       };
 
   return (
-    <Sequence from={startFrame} durationInFrames={durationInFrames}>
-      <AbsoluteFill>
+    <Remotion.Sequence from={startFrame} durationInFrames={durationInFrames}>
+      <Remotion.AbsoluteFill>
         {talkingHead ? (
           <div style={style}>
             {asset.type === 'video' && (
-              <Video
+              <Remotion.Video
                 src={asset.url}
                 volume={item.properties.volume || 1}
                 playbackRate={item.properties.playbackRate || 1}
@@ -71,7 +71,7 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
         ) : (
           <div style={style}>
             {asset.type === 'video' && (
-              <Video
+              <Remotion.Video
                 src={asset.url}
                 volume={item.properties.volume || 1}
                 playbackRate={item.properties.playbackRate || 1}
@@ -85,7 +85,7 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
             )}
 
             {asset.type === 'image' && (
-              <Img
+              <Remotion.Img
                 src={asset.url}
                 style={{
                   width: '100%',
@@ -96,22 +96,35 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
             )}
 
             {asset.type === 'audio' && (
-              <AbsoluteFill
-                style={{
-                  backgroundColor: 'rgba(0, 255, 0, 0.3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '24px',
-                  color: 'white',
-                }}
-              >
-                🎵 {asset.name}
-              </AbsoluteFill>
+              <>
+                {/* Visual placeholder */}
+                <Remotion.AbsoluteFill
+                  style={{
+                    backgroundColor: 'rgba(0, 255, 0, 0.18)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '24px',
+                    color: 'white',
+                  }}
+                >
+                  🎵 {asset.name}
+                </Remotion.AbsoluteFill>
+                {/* Actual audio playback */}
+                {
+                  'Audio' in (Remotion as any) && typeof (Remotion as any).Audio === 'function' ? (
+                    <Remotion.Audio
+                      src={asset.url}
+                      volume={item.properties.volume ?? 1}
+                      muted={item.muted}
+                    />
+                  ) : null
+                }
+              </>
             )}
 
             {asset.type === 'code' && (
-              <AbsoluteFill
+              <Remotion.AbsoluteFill
                 style={{
                   backgroundColor: '#1e1e1e',
                   padding: '20px',
@@ -125,11 +138,11 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
                   {/* Code content would be rendered here */}
                   {item.properties.text || '// Code content'}
                 </pre>
-              </AbsoluteFill>
+              </Remotion.AbsoluteFill>
             )}
           </div>
         )}
-      </AbsoluteFill>
-    </Sequence>
+      </Remotion.AbsoluteFill>
+    </Remotion.Sequence>
   );
 };

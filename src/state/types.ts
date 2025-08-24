@@ -1,6 +1,6 @@
 // State management types for Synapse Studio
 
-import type { Project, TimelineItem, MediaAsset, UIState } from '../lib/types';
+import type { Project, TimelineItem, MediaAsset, UIState, MusicTrack } from '../lib/types';
 import type { StoredProject } from '../lib/projectManager';
 
 // Action types for state management
@@ -49,6 +49,7 @@ export type UIAction =
   | { type: 'TOGGLE_MEDIA_BIN' }
   | { type: 'UPDATE_PLAYBACK_STATE'; payload: Partial<UIState['playback']> }
   | { type: 'UPDATE_TIMELINE_VIEW'; payload: Partial<UIState['timeline']> }
+  | { type: 'LOAD_MUSIC_LIBRARY'; payload: MusicTrack[] }
   | { type: 'RESET_UI_STATE' };
 
 export type SetLoadingAction = { type: 'SET_LOADING'; payload: { isLoading: boolean; message?: string } };
