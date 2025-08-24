@@ -221,24 +221,20 @@ export class ClientExportManager {
         jobId: this.currentJob.id,
       };
 
-      // Create export job on server. This enforces authentication + membership.
-      const res = await fetch('/api/export/jobs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(exportPayload),
-        signal: this.abortController?.signal,
-      });
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        const message = body?.error || `${res.status} ${res.statusText}`;
-        if (res.status === 401) throw new Error('Authentication required to export');
-        if (res.status === 402) throw new Error('Membership required to export');
-        throw new Error(message);
+      // Create export job on server via centralized API client.
+      // Preserve explicit error messaging for 401/402.
+      let serverJobId: string;
+      try {
+        const { id } = await api.createExportJob(exportPayload);
+        serverJobId = id;
+      } catch (err) {
+        const status = (err as any)?.status;
+        if (status === 401)
+          throw new Error('Authentication required to export');
+        if (status === 402)
+          throw new Error('Membership required to export');
+        throw err;
       }
-
-      const { id: serverJobId } = await res.json();
       this.updateProgress({ status: 'preparing', progress: 10 });
 
       // Poll server job for progress until completion
@@ -287,7 +283,7 @@ export class ClientExportManager {
     while (true) {
       if (this.abortController?.signal.aborted) {
         try {
-          // Issue cancel without an (already-aborted) signal
+          // Do not pass an already-aborted signal; use API client.
           await api.cancelExportJob(serverJobId);
         } catch {}
         throw new Error('Export cancelled');
