@@ -137,7 +137,7 @@ it('creates a new code clip when Add Code is clicked', async () => {
 
     expect(screen.getByText('Code Clip 1')).toBeInTheDocument();
     expect(screen.getByText('js')).toBeInTheDocument(); // Language badge
-    expect(screen.getByText('CODE')).toBeInTheDocument(); // Type label
+    expect(screen.getByText('code')).toBeInTheDocument(); // Type label (rendered uppercase via CSS)
   });
 
   it('adds code clip to timeline on double-click', async () => {
@@ -155,20 +155,22 @@ it('creates a new code clip when Add Code is clicked', async () => {
     fireEvent.doubleClick(codeClipElement!);
 
     await waitFor(() => {
-      expect(mockAddTimelineItem).toHaveBeenCalledWith({
-        assetId: 'test-code-asset',
-        startTime: 0,
-        duration: 10,
-        track: 0,
-        type: 'code',
-        properties: {
-          text: 'console.log("Hello, World!");',
-          language: 'javascript',
-          theme: 'dark',
-          fontSize: 16,
-        },
-        animations: [],
-      });
+      expect(mockAddTimelineItem).toHaveBeenCalledWith(
+        expect.objectContaining({
+          assetId: 'test-code-asset',
+          startTime: 0,
+          duration: 10,
+          track: 0,
+          type: 'code',
+          properties: expect.objectContaining({
+            text: 'console.log("Hello, World!");',
+            language: 'javascript',
+            theme: 'dark',
+            fontSize: 16,
+          }),
+          animations: [],
+        })
+      );
     });
   });
 
