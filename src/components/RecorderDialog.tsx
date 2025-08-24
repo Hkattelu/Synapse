@@ -110,19 +110,12 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       } catch {}
       setPending(null);
     }
-    const s = stream ?? (await requestStream());
-    if (!s) return;
-    // Ensure the live preview uses the same stream we are about to record
-    if (
-      withCamera &&
-      videoRef.current &&
-      (videoRef.current as any).srcObject !== s
-    ) {
-      try {
-        (videoRef.current as any).srcObject = s;
-        await videoRef.current.play().catch(() => {});
-      } catch {}
-    }
+    const s =
+      stream ??
+      (await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: withCamera,
+      }));
     chunksRef.current = [];
     // Pick a supported mime type
     const pickMime = () => {
@@ -149,21 +142,13 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     };
     mr.onstop = async () => {
       const blob = new Blob(chunksRef.current, { type: mime });
-      // Create a dedicated preview URL for the pending review step
-      const previewUrl = URL.createObjectURL(blob);
-      // Measure duration via a temporary URL that we immediately revoke inside helper
-      const tempUrl = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
+      // Get duration
       const duration = await getBlobDuration(
-        tempUrl,
+        url,
         withCamera ? 'video' : 'audio'
       );
-      setPending({
-        url: previewUrl,
-        mime,
-        duration: duration ?? null,
-        withCamera,
-        blob,
-      });
+      setPending({ url, mime, duration: duration ?? null, withCamera });
       setIsRecording(false);
       setIsPaused(false);
     };
@@ -239,7 +224,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
         <div className="p-4 border-b flex items-center justify-between">
           <h3 className="font-semibold">Record Narration</h3>
           <button
-            onClick={handleCancel}
+            onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
           >
             ✕
@@ -276,30 +261,18 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                   <button
                     onClick={startRecording}
                     className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
-                    disabled={!!envError}
                   >
                     Start
                   </button>
                 ) : (
-                  <>
-                    <button
-                      onClick={togglePause}
-                      className="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded"
-                    >
-                      {isPaused ? 'Resume' : 'Pause'}
-                    </button>
-                    <button
-                      onClick={stopRecording}
-                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-                    >
-                      Stop
-                    </button>
-                  </>
+                  <button
+                    onClick={stopRecording}
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+                  >
+                    Stop
+                  </button>
                 )}
-                <button
-                  onClick={handleCancel}
-                  className="px-4 py-2 rounded border"
-                >
+                <button onClick={onClose} className="px-4 py-2 rounded border">
                   Cancel
                 </button>
               </div>
@@ -310,95 +283,6 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
               <p className="text-sm text-gray-700">
                 Recording ready. Choose an action:
               </p>
-              {pending.withCamera && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={bubbleEnabled}
-                        onChange={(e) => setBubbleEnabled(e.target.checked)}
-                      />
-                      <span>Render as corner bubble</span>
-                    </label>
-                    <select
-                      className="border rounded px-2 py-1 text-sm"
-                      value={bubbleCorner}
-                      onChange={(e) =>
-                        setBubbleCorner(e.target.value as typeof bubbleCorner)
-                      }
-                      title="Corner position"
-                    >
-                      <option value="top-left">Top-left</option>
-                      <option value="top-right">Top-right</option>
-                      <option value="bottom-left">Bottom-left</option>
-                      <option value="bottom-right">Bottom-right</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3 text-sm">
-                      <label className="flex items-center space-x-1">
-                        <input
-                          type="radio"
-                          name="shape"
-                          value="circle"
-                          checked={bubbleShape === 'circle'}
-                          onChange={() => setBubbleShape('circle')}
-                        />
-                        <span>Circle</span>
-                      </label>
-                      <label className="flex items-center space-x-1">
-                        <input
-                          type="radio"
-                          name="shape"
-                          value="rounded"
-                          checked={bubbleShape === 'rounded'}
-                          onChange={() => setBubbleShape('rounded')}
-                        />
-                        <span>Rounded</span>
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2 text-sm">
-                      <span>Size</span>
-                      <select
-                        className="border rounded px-2 py-1 text-sm"
-                        value={bubbleSize}
-                        onChange={(e) =>
-                          setBubbleSize(e.target.value as typeof bubbleSize)
-                        }
-                        title="Bubble size"
-                      >
-                        <option value="sm">Small</option>
-                        <option value="md">Medium</option>
-                      </select>
-                    </div>
-                  </div>
-                  {/* Bubble preview */}
-                  <div className="relative w-full h-40 bg-neutral-100 rounded">
-                    <video
-                      src={pending.url}
-                      muted
-                      playsInline
-                      autoPlay
-                      loop
-                      className="absolute"
-                      style={{
-                        width: bubbleSize === 'md' ? 128 : 96,
-                        height: bubbleSize === 'md' ? 128 : 96,
-                        overflow: 'hidden',
-                        borderRadius: bubbleShape === 'circle' ? 9999 : 16,
-                        objectFit: 'cover',
-                        ...(bubbleCorner.includes('top')
-                          ? { top: 12 }
-                          : { bottom: 12 }),
-                        ...(bubbleCorner.includes('left')
-                          ? { left: 12 }
-                          : { right: 12 }),
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => {
@@ -441,12 +325,6 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                       title: 'Recorder',
                       message: 'Added to Media Bin and timeline.',
                     });
-                    // Revoke the temporary preview URL now that the asset owns its own URL
-                    if (pending.url && pending.url.startsWith('blob:')) {
-                      try {
-                        URL.revokeObjectURL(pending.url);
-                      } catch {}
-                    }
                     setPending(null);
                     notify({
                       type: 'success',
@@ -480,11 +358,6 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                       title: 'Recorder',
                       message: 'Saved to Media Bin.',
                     });
-                    if (pending.url && pending.url.startsWith('blob:')) {
-                      try {
-                        URL.revokeObjectURL(pending.url);
-                      } catch {}
-                    }
                     setPending(null);
                     notify({
                       type: 'success',
@@ -499,11 +372,6 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                 </button>
                 <button
                   onClick={() => {
-                    if (pending.url && pending.url.startsWith('blob:')) {
-                      try {
-                        URL.revokeObjectURL(pending.url);
-                      } catch {}
-                    }
                     setPending(null);
                     onClose();
                   }}

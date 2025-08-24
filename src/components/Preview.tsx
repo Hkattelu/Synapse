@@ -38,15 +38,21 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
 
   // Find any talking head items to enable viewer controls
   const talkingHeads = useMemo(
-    () => timeline.filter((i) => i.type === 'video' && i.properties.talkingHeadEnabled),
+    () =>
+      timeline.filter(
+        (i) => i.type === 'video' && i.properties.talkingHeadEnabled
+      ),
     [timeline]
   );
   const bubbleHidden = useMemo(
-    () => talkingHeads.length > 0 && talkingHeads.every((i) => i.properties.talkingHeadHidden === true),
+    () =>
+      talkingHeads.length > 0 &&
+      talkingHeads.every((i) => i.properties.talkingHeadHidden === true),
     [talkingHeads]
   );
   const bubbleMuted = useMemo(
-    () => talkingHeads.length > 0 && talkingHeads.every((i) => i.muted === true),
+    () =>
+      talkingHeads.length > 0 && talkingHeads.every((i) => i.muted === true),
     [talkingHeads]
   );
 
@@ -84,22 +90,90 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   useEffect(() => {
     if (!playerRef.current) return;
 
-    if (playback.isPlaying) {
-      playerRef.current.play();
-    } else {
-      playerRef.current.pause();
-    }
+    // Add a small delay to ensure player is ready
+    const timer = setTimeout(() => {
+      if (!playerRef.current) return;
+
+      try {
+        if (playback.isPlaying) {
+          playerRef.current.play();
+        } else {
+          playerRef.current.pause();
+        }
+      } catch (error) {
+        console.error('Error controlling player:', error);
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [playback.isPlaying]);
 
-  // Sync current time with player
+  // Manual timer for updating playback time when Remotion's onTimeUpdate doesn't work
   useEffect(() => {
-    if (!playerRef.current) return;
+    if (!playback.isPlaying) return;
+
+    const interval = setInterval(() => {
+      if (playerRef.current && !isDragging) {
+        try {
+          // Try to get current frame from player
+          if (typeof playerRef.current.getCurrentFrame === 'function') {
+            const currentFrame = playerRef.current.getCurrentFrame();
+            const timeInSeconds = currentFrame / compositionProps.settings.fps;
+
+            // Only update if time has changed significantly
+            if (Math.abs(timeInSeconds - playback.currentTime) > 0.01) {
+              seek(timeInSeconds);
+            }
+          } else {
+            // Fallback: increment time manually based on real time
+            const newTime = playback.currentTime + 1000 / 30 / 1000; // 30fps increment
+            if (newTime <= compositionProps.settings.duration) {
+              seek(newTime);
+            } else {
+              // End of video, pause
+              pause();
+            }
+          }
+        } catch (error) {
+          // Fallback: increment time manually
+          const newTime = playback.currentTime + 1000 / 30 / 1000;
+          if (newTime <= compositionProps.settings.duration) {
+            seek(newTime);
+          } else {
+            pause();
+          }
+        }
+      }
+    }, 1000 / 30); // Update at 30fps
+
+    return () => clearInterval(interval);
+  }, [
+    playback.isPlaying,
+    playback.currentTime,
+    seek,
+    compositionProps.settings.fps,
+    compositionProps.settings.duration,
+    isDragging,
+    pause,
+  ]);
+
+  // Sync current time with player (only when seeking manually)
+  useEffect(() => {
+    if (!playerRef.current || isDragging) return;
+    if (!playerRef.current || isDragging) return;
 
     const currentFrame = Math.round(
       playback.currentTime * compositionProps.settings.fps
     );
-    playerRef.current.seekTo(currentFrame);
-  }, [playback.currentTime, compositionProps.settings.fps]);
+
+    // Only seek if there's a significant difference to avoid conflicts
+    const playerCurrentFrame = Math.round(
+      playback.currentTime * compositionProps.settings.fps
+    );
+    if (Math.abs(currentFrame - playerCurrentFrame) > 1) {
+      playerRef.current.seekTo(currentFrame);
+    }
+  }, [playback.currentTime, compositionProps.settings.fps, isDragging]);
 
   // Handle player time updates
   const handleTimeUpdate = useCallback(
@@ -260,8 +334,8 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   return (
     <div className={`bg-background-primary flex flex-col ${className}`}>
       {/* Preview Area */}
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="relative w-full h-full max-w-4xl max-h-full">
+      <div className="flex-1 flex items-center justify-center p-4 bg-black">
+        <div className="relative w-full h-full flex items-center justify-center">
           <Player
             acknowledgeRemotionLicense
             ref={playerRef}
@@ -274,6 +348,9 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             style={{
               width: '100%',
               height: '100%',
+              maxWidth: '100%',
+              maxHeight: '100%',
+              objectFit: 'contain',
             }}
             controls={false}
             loop={false}
@@ -321,18 +398,33 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
       <div className="bg-background-secondary border-t border-border-subtle px-4 py-2">
         <div className="relative">
           <div
-            className="h-2 bg-neutral-600 rounded-full cursor-pointer"
+            className="h-2 bg-gray-600 rounded-full cursor-pointer relative"
             onMouseDown={handleTimelineDragStart}
             onClick={handleTimelineScrub}
           >
+            {/* Progress bar (colored left side) */}
+            {/* Progress bar (colored left side) */}
             <div
-              className="h-full bg-primary-600 rounded-full relative"
+              className="h-full bg-purple-600 rounded-full relative transition-all duration-100"
               style={{
-                width: `${(playback.currentTime / compositionProps.settings.duration) * 100}%`,
+                width: `${Math.max(0, Math.min(100, (playback.currentTime / compositionProps.settings.duration) * 100))}%`,
               }}
-            >
-              <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-primary-600 rounded-full border-2 border-background-primary shadow-lg" />
-            </div>
+            />
+            {/* Playhead handle */}
+            <div
+              className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white rounded-full border-2 border-purple-600 shadow-lg cursor-grab active:cursor-grabbing transition-all duration-100"
+              style={{
+                width: `${Math.max(0, Math.min(100, (playback.currentTime / compositionProps.settings.duration) * 100))}%`,
+              }}
+            />
+            {/* Playhead handle */}
+            <div
+              className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white rounded-full border-2 border-purple-600 shadow-lg cursor-grab active:cursor-grabbing transition-all duration-100"
+              style={{
+                left: `${Math.max(0, Math.min(100, (playback.currentTime / compositionProps.settings.duration) * 100))}%`,
+                transform: 'translateX(-50%)',
+              }}
+            />
           </div>
 
           {/* Timeline markers */}
@@ -436,14 +528,14 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             </button>
 
             <div className="flex items-center space-x-2 text-sm text-text-secondary">
-              <span>
+              <span className="font-mono">
                 {formatTime(
                   playback.currentTime,
                   compositionProps.settings.fps
                 )}
               </span>
               <span>/</span>
-              <span>
+              <span className="font-mono">
                 {formatTime(
                   compositionProps.settings.duration,
                   compositionProps.settings.fps

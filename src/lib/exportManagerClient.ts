@@ -6,6 +6,7 @@ import type {
   ExportPreset,
   ExportQuality,
 } from './types';
+import { api, ApiError } from './api';
 
 // Export presets for common use cases
 export const DEFAULT_EXPORT_PRESETS: ExportPreset[] = [
@@ -235,7 +236,7 @@ export class ClientExportManager {
     this.progressCallback?.(this.currentJob.progress);
   }
 
-  // Start export process (browser version - will communicate with server)
+  // Start export process (browser version - communicates with server for authorization and job progress)
   public async startExport(
     project: Project,
     settings: ExportSettings
@@ -258,7 +259,7 @@ export class ClientExportManager {
       // Generate output filename
       const outputFilename = generateOutputFilename(project, settings);
 
-      // Prepare export payload for server
+      // Prepare export payload for server (authorization + job orchestration)
       const exportPayload = {
         project: {
           id: project.id,
@@ -272,29 +273,30 @@ export class ClientExportManager {
         jobId: this.currentJob.id,
       };
 
-      this.updateProgress({ status: 'preparing', progress: 20 });
-
-      // In the future, this will send the job to a server worker
-      // For now, we'll simulate the export process
-      await this.simulateExportProcess(outputFilename);
-
-      // Complete the export
-      this.currentJob.outputPath = `./exports/${outputFilename}`;
-      this.currentJob.completedAt = new Date();
-
-      this.updateProgress({
-        status: 'completed',
-        progress: 100,
-        endTime: new Date(),
+      // Create export job on server (enforces auth + gating)
+      const { id: serverJobId } = await api.createExportJob(exportPayload, {
+        signal: this.abortController?.signal,
       });
+      this.updateProgress({ status: 'preparing', progress: 10 });
+
+      // Poll server job for progress until completion
+      await this.pollServerJob(serverJobId);
 
       console.log(`Export completed: ${outputFilename}`);
-      return this.currentJob.outputPath;
+      return this.currentJob.outputPath as string;
     } catch (error) {
       console.error('Export failed:', error);
 
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error occurred';
+      let errorMessage = 'Unknown error occurred';
+      if (error instanceof ApiError) {
+        if (error.status === 401)
+          errorMessage = 'Authentication required to export';
+        else if (error.status === 402)
+          errorMessage = 'Membership required to export';
+        else errorMessage = error.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
 
       this.updateProgress({
         status: 'failed',
@@ -325,33 +327,64 @@ export class ClientExportManager {
     }
   }
 
-  // Simulate export process (placeholder for actual server communication)
-  private async simulateExportProcess(filename: string): Promise<void> {
-    const totalSteps = 10;
-    
-    for (let step = 1; step <= totalSteps; step++) {
-      // Check if cancelled
+  private async pollServerJob(serverJobId: string): Promise<void> {
+    if (!this.currentJob) return;
+    const start = Date.now();
+    const maxDurationMs = 5 * 60_000; // 5 minutes
+    let delay = 600; // ms
+    const maxDelay = 5_000;
+
+    while (true) {
+      // Abort/cancel handling: do not pass the aborted signal to cancel request
       if (this.abortController?.signal.aborted) {
+        try {
+          await api.cancelExportJob(serverJobId);
+        } catch {
+          // ignore; best-effort cancel
+        }
         throw new Error('Export cancelled');
       }
 
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Timeout guard
+      if (Date.now() - start > maxDurationMs) {
+        throw new Error('Export polling timed out');
+      }
 
-      const progress = 20 + (step / totalSteps) * 70; // 20-90%
-      
-      this.updateProgress({
-        status: step <= 8 ? 'rendering' : 'finalizing',
-        progress,
-        currentFrame: step * 30, // Simulate frame progress
-        renderedFrames: step * 30,
-        totalFrames: totalSteps * 30,
+      const job = await api.getExportJob(serverJobId, {
+        signal: this.abortController?.signal,
       });
-    }
 
-    // Simulate final processing
-    await new Promise(resolve => setTimeout(resolve, 500));
-    this.updateProgress({ status: 'finalizing', progress: 95 });
+      const status = job.status as ExportProgress['status'];
+      const progress = Number(job.progress ?? 0);
+      this.updateProgress({
+        status,
+        progress,
+        estimatedTimeRemaining: Math.max(
+          0,
+          Math.round(
+            (Date.now() - start) * ((100 - progress) / Math.max(1, progress))
+          )
+        ),
+      });
+
+      if (status === 'completed') {
+        this.currentJob!.outputPath =
+          job.outputPath || `./exports/${job.outputFilename}`;
+        this.currentJob!.completedAt = new Date();
+        this.updateProgress({
+          status: 'completed',
+          progress: 100,
+          endTime: new Date(),
+        });
+        return;
+      }
+      if (status === 'failed' || status === 'cancelled') {
+        throw new Error(`Export ${status}`);
+      }
+
+      await new Promise((r) => setTimeout(r, delay));
+      delay = Math.min(Math.floor(delay * 1.5), maxDelay);
+    }
   }
 
   // Cancel current export

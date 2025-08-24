@@ -52,9 +52,17 @@ export type UIAction =
   | { type: 'LOAD_MUSIC_LIBRARY'; payload: MusicTrack[] }
   | { type: 'RESET_UI_STATE' };
 
-export type SetLoadingAction = { type: 'SET_LOADING'; payload: { isLoading: boolean; message?: string } };
+export type SetLoadingAction = {
+  type: 'SET_LOADING';
+  payload: { isLoading: boolean; message?: string };
+};
 
-export type AppAction = ProjectAction | TimelineAction | MediaAction | UIAction | SetLoadingAction;
+export type AppAction =
+  | ProjectAction
+  | TimelineAction
+  | MediaAction
+  | UIAction
+  | SetLoadingAction;
 
 // Combined application state
 export interface AppState {

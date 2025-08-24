@@ -121,11 +121,13 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
   const { fps } = useVideoConfig();
 
   // Get code content from item properties
-  const codeContentRaw = item.properties.codeText || item.properties.text || '// No code content';
+  const codeContentRaw =
+    item.properties.codeText || item.properties.text || '// No code content';
   const language = item.properties.language || 'javascript';
   const theme = item.properties.theme || 'dark';
   const fontSize = item.properties.fontSize || 16;
-  const fontFamily = item.properties.fontFamily || 'Monaco, Menlo, "Ubuntu Mono", monospace';
+  const fontFamily =
+    item.properties.fontFamily || 'Monaco, Menlo, "Ubuntu Mono", monospace';
   const showLineNumbers = item.properties.showLineNumbers ?? false;
   const animationMode = item.properties.animationMode || 'typing';
   const typingSpeedCps = item.properties.typingSpeedCps || 30;
@@ -171,21 +173,34 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
   // Typing speed based on characters per second
   const totalCharacters = codeContent.length;
   const charsPerFrame = typingSpeedCps / fps;
-  const charactersToShow = Math.floor(Math.max(0, relativeFrame) * charsPerFrame);
+  const charactersToShow = Math.floor(
+    Math.max(0, relativeFrame) * charsPerFrame
+  );
 
   // Line-by-line reveal calculations
   const lines = useMemo(() => codeContent.split(/\r?\n/), [codeContent]);
-  const revealIntervalFrames = Math.max(1, Math.round((lineRevealIntervalMs / 1000) * fps));
-  const linesToShow = Math.floor(Math.max(0, relativeFrame) / revealIntervalFrames);
+  const revealIntervalFrames = Math.max(
+    1,
+    Math.round((lineRevealIntervalMs / 1000) * fps)
+  );
+  const linesToShow = Math.floor(
+    Math.max(0, relativeFrame) / revealIntervalFrames
+  );
 
   // Create animated code content
   const animatedCode = useMemo(() => {
     const prismLanguage = Prism.languages[language] ? language : 'javascript';
 
     if (animationMode === 'line-by-line') {
-      const visible = lines.slice(0, Math.min(linesToShow, lines.length)).join('\n');
+      const visible = lines
+        .slice(0, Math.min(linesToShow, lines.length))
+        .join('\n');
       try {
-        return Prism.highlight(visible, Prism.languages[prismLanguage], prismLanguage);
+        return Prism.highlight(
+          visible,
+          Prism.languages[prismLanguage],
+          prismLanguage
+        );
       } catch {
         return visible;
       }
@@ -199,7 +214,11 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
         .map((p) => {
           const cls = p.added ? 'added' : p.removed ? 'removed' : 'unchanged';
           try {
-            const inner = Prism.highlight(p.value, Prism.languages[prismLanguage], prismLanguage);
+            const inner = Prism.highlight(
+              p.value,
+              Prism.languages[prismLanguage],
+              prismLanguage
+            );
             return `<span class="diff-${cls}">${inner}</span>`;
           } catch {
             return `<span class="diff-${cls}">${p.value}</span>`;
@@ -213,14 +232,28 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
       if (charactersToShow >= totalCharacters) return highlightedCode;
       const truncated = codeContent.substring(0, Math.max(0, charactersToShow));
       try {
-        return Prism.highlight(truncated, Prism.languages[prismLanguage], prismLanguage);
+        return Prism.highlight(
+          truncated,
+          Prism.languages[prismLanguage],
+          prismLanguage
+        );
       } catch {
         return truncated;
       }
     }
 
     return highlightedCode;
-  }, [animationMode, charactersToShow, codeContent, highlightedCode, language, lines, linesToShow, item.properties.codeText, item.properties.codeTextB]);
+  }, [
+    animationMode,
+    charactersToShow,
+    codeContent,
+    highlightedCode,
+    language,
+    lines,
+    linesToShow,
+    item.properties.codeText,
+    item.properties.codeTextB,
+  ]);
 
   // Style for the container
   const containerStyle: React.CSSProperties = {
@@ -335,11 +368,15 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
             .diff-added { background-color: rgba(16, 185, 129, 0.15); display: block; }
             .diff-removed { background-color: rgba(239, 68, 68, 0.15); display: block; text-decoration: line-through; opacity: 0.85; }
             .diff-unchanged { display: block; }
-            ${showLineNumbers ? `pre { counter-reset: line; }
+            ${
+              showLineNumbers
+                ? `pre { counter-reset: line; }
             code span { counter-increment: line; }
             code span::before { content: counter(line);
               display: inline-block; width: 2.5em; margin-right: 1em; text-align: right; color: ${themeColors.comment}; }
-            ` : ''}
+            `
+                : ''
+            }
           `}
         </style>
       </AbsoluteFill>

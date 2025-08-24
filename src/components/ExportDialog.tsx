@@ -13,6 +13,7 @@ import type {
   AudioCodec,
 } from '../lib/types';
 import { formatFileSize, formatDuration } from '../lib/exportManagerClient';
+import { useAuth } from '../state/authContext';
 
 interface ExportDialogProps {
   isOpen: boolean;
@@ -28,6 +29,15 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const { settings, presets, updateSettings, applyPreset } =
     useExportSettings();
   const { isExporting, progress, canStartExport } = useExportStatus();
+  const {
+    authenticated,
+    membership,
+    donateDemo,
+    loading: authLoading,
+  } = useAuth();
+  const trialsUsed = Number(membership?.trialUsed ?? 0);
+  const trialsLimit = Number(membership?.trialLimit ?? 0);
+  const trialsRemaining = Math.max(0, trialsLimit - trialsUsed);
 
   const [activeTab, setActiveTab] = useState<'presets' | 'custom'>('presets');
   const [selectedPresetId, setSelectedPresetId] =
@@ -49,7 +59,9 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     try {
       // Pass the currently selected settings explicitly so tests and
       // downstream pipelines use the exact values (width/height, etc.).
-      await startExport(project, { ...settings });
+      // Pass the currently selected settings explicitly so tests and
+      // downstream pipelines use the exact values (width/height, etc.).
+      await startExport(project, { ...settings }, { ...settings });
       // Keep dialog open to show progress
     } catch (error) {
       console.error('Export failed:', error);
@@ -73,7 +85,8 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     }
   }, [progress?.status, onClose]);
 
-if (!isOpen) return null;
+  if (!isOpen) return null;
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -85,7 +98,8 @@ if (!isOpen) return null;
               Export Video
             </h2>
             <p className="text-sm text-text-secondary mt-1">
-Export "{project?.name ?? 'Test Project'}" as video file
+              Export "{project?.name ?? 'Test Project'}" as video file Export "
+              {project?.name ?? 'Test Project'}" as video file
             </p>
           </div>
           {!isExporting && (
@@ -218,6 +232,41 @@ Export "{project?.name ?? 'Test Project'}" as video file
           ) : (
             // Export Settings View
             <div className="overflow-y-auto max-h-96">
+              {/* Auth/Membership gating */}
+              {!authenticated && (
+                <div className="p-6 border-b border-border-subtle">
+                  <div className="mb-2">
+                    <h3 className="text-lg font-semibold text-text-primary">
+                      Sign in required
+                    </h3>
+                    <p className="text-sm text-text-secondary">
+                      Create an account or sign in to export videos.
+                    </p>
+                  </div>
+                  <AuthInlineForm />
+                </div>
+              )}
+              {authenticated && !membership?.active && (
+                <div className="p-6 border-b border-border-subtle">
+                  <div className="mb-3">
+                    <h3 className="text-lg font-semibold text-text-primary">
+                      Unlock exports
+                    </h3>
+                    <p className="text-sm text-text-secondary">
+                      You have {trialsRemaining} of {trialsLimit || 2} trial
+                      exports remaining. Support us on Ko‑fi to unlock unlimited
+                      exports for 30 days.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => void donateDemo(500)}
+                    disabled={authLoading}
+                    className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded disabled:opacity-60"
+                  >
+                    {authLoading ? 'Processing…' : 'Support on Ko‑fi (demo)'}
+                  </button>
+                </div>
+              )}
               {/* Tabs */}
               <div className="flex border-b border-border-subtle">
                 <button
@@ -324,9 +373,13 @@ Export "{project?.name ?? 'Test Project'}" as video file
                           </label>
                           {(() => {
                             const currentWidth =
-                              settings.width || project?.settings?.width || 1920;
+                              settings.width ||
+                              project?.settings?.width ||
+                              1920;
                             const currentHeight =
-                              settings.height || project?.settings?.height || 1080;
+                              settings.height ||
+                              project?.settings?.height ||
+                              1080;
                             const isVertical = currentHeight > currentWidth;
                             return (
                               <button
@@ -334,10 +387,16 @@ Export "{project?.name ?? 'Test Project'}" as video file
                                 onClick={() => {
                                   if (isVertical) {
                                     // Switch to landscape 16:9 default
-                                    updateSettings({ width: 1920, height: 1080 });
+                                    updateSettings({
+                                      width: 1920,
+                                      height: 1080,
+                                    });
                                   } else {
                                     // Switch to portrait 9:16 default
-                                    updateSettings({ width: 1080, height: 1920 });
+                                    updateSettings({
+                                      width: 1080,
+                                      height: 1920,
+                                    });
                                   }
                                 }}
                                 className={`w-full p-2 border rounded text-sm transition-colors ${
@@ -347,7 +406,9 @@ Export "{project?.name ?? 'Test Project'}" as video file
                                 }`}
                                 title="Toggle between landscape (16:9) and vertical (9:16)"
                               >
-                                {isVertical ? 'Vertical (9:16)' : 'Landscape (16:9)'}
+                                {isVertical
+                                  ? 'Vertical (9:16)'
+                                  : 'Landscape (16:9)'}
                               </button>
                             );
                           })()}
@@ -398,7 +459,9 @@ Export "{project?.name ?? 'Test Project'}" as video file
                           const currentWidth =
                             settings.width || project?.settings?.width || 1920;
                           const currentHeight =
-                            settings.height || project?.settings?.height || 1080;
+                            settings.height ||
+                            project?.settings?.height ||
+                            1080;
                           const isVertical = currentHeight > currentWidth;
                           if (!isVertical) return null;
                           return (
@@ -419,11 +482,16 @@ Export "{project?.name ?? 'Test Project'}" as video file
                                 className="w-full p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
                               >
                                 <option value="720x1280">720×1280 (HD)</option>
-                                <option value="1080x1920">1080×1920 (Full HD)</option>
-                                <option value="2160x3840">2160×3840 (4K)</option>
+                                <option value="1080x1920">
+                                  1080×1920 (Full HD)
+                                </option>
+                                <option value="2160x3840">
+                                  2160×3840 (4K)
+                                </option>
                               </select>
                               <p className="text-xs text-text-secondary mt-1">
-                                Choose a portrait preset or set a custom size below.
+                                Choose a portrait preset or set a custom size
+                                below.
                               </p>
                             </div>
                           );
@@ -436,7 +504,16 @@ Export "{project?.name ?? 'Test Project'}" as video file
                           <div className="flex gap-2">
                             <input
                               type="number"
-value={settings.width || project?.settings?.width || 1920}
+                              value={
+                                settings.width ||
+                                project?.settings?.width ||
+                                1920
+                              }
+                              value={
+                                settings.width ||
+                                project?.settings?.width ||
+                                1920
+                              }
                               onChange={(e) =>
                                 updateSettings({
                                   width: parseInt(e.target.value),
@@ -450,7 +527,16 @@ value={settings.width || project?.settings?.width || 1920}
                             </span>
                             <input
                               type="number"
-value={settings.height || project?.settings?.height || 1080}
+                              value={
+                                settings.height ||
+                                project?.settings?.height ||
+                                1080
+                              }
+                              value={
+                                settings.height ||
+                                project?.settings?.height ||
+                                1080
+                              }
                               onChange={(e) =>
                                 updateSettings({
                                   height: parseInt(e.target.value),
@@ -461,7 +547,9 @@ value={settings.height || project?.settings?.height || 1080}
                             />
                           </div>
                           <p className="text-xs text-text-secondary mt-1">
-                            Enter any custom width × height. For Shorts/TikTok/Reels, use portrait sizes like 1080×1920.
+                            Enter any custom width × height. For
+                            Shorts/TikTok/Reels, use portrait sizes like
+                            1080×1920.
                           </p>
                         </div>
                       </div>
@@ -532,7 +620,8 @@ value={settings.height || project?.settings?.height || 1080}
               <div className="mt-1">
                 Duration:{' '}
                 <span className="text-text-primary">
-{formatDuration(project?.settings?.duration ?? 0)}
+                  {formatDuration(project?.settings?.duration ?? 0)}
+                  {formatDuration(project?.settings?.duration ?? 0)}
                 </span>
               </div>
             </div>
@@ -546,15 +635,86 @@ value={settings.height || project?.settings?.height || 1080}
               </button>
               <button
                 onClick={handleStartExport}
-                disabled={!canStartExport}
+                disabled={
+                  !canStartExport ||
+                  !authenticated ||
+                  !(membership?.active || trialsRemaining > 0)
+                }
                 className="px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-600 disabled:cursor-not-allowed text-white rounded transition-colors"
               >
-                Start Export
+                {!authenticated
+                  ? 'Sign in to export'
+                  : membership?.active
+                    ? 'Start Export'
+                    : trialsRemaining > 0
+                      ? `Start Export (trial ${trialsUsed + 1}/${trialsLimit || 2})`
+                      : 'Unlock to export'}
               </button>
             </div>
           </div>
         )}
       </div>
     </div>
+  );
+};
+
+// Inline auth form used in export dialog
+const AuthInlineForm: React.FC = () => {
+  const { login, signup, loading, error } = useAuth();
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (mode === 'login') await login({ email, password });
+    else await signup({ email, password, name });
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-2">
+      {mode === 'signup' && (
+        <input
+          className="w-full p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      )}
+      <input
+        className="w-full p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
+        placeholder="Email"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+      <input
+        className="w-full p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
+        placeholder="Password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
+      {error && <div className="text-xs text-red-500">{String(error)}</div>}
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={loading}
+          className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded disabled:opacity-60"
+        >
+          {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Sign up'}
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
+          className="text-sm text-primary-400 hover:text-primary-300"
+        >
+          {mode === 'login' ? 'Create an account' : 'Have an account? Sign in'}
+        </button>
+      </div>
+    </form>
   );
 };

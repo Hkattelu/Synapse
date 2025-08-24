@@ -1,4 +1,18 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { vi } from 'vitest';
+// Mock auth to avoid real network I/O in tests (must be declared before imports that consume it)
+vi.mock('../state/authContext', () => ({
+  useAuth: () => ({
+    authenticated: true,
+    membership: { active: true },
+    login: vi.fn(),
+    signup: vi.fn(),
+    logout: vi.fn(),
+    donateDemo: vi.fn(),
+    loading: false,
+    error: undefined,
+  }),
+}));
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ExportDialog } from '../components/ExportDialog';
 import { ExportProvider } from '../state/exportContext';
@@ -121,7 +135,9 @@ describe('Export System', () => {
       });
       // Verify a vertical preset exists
       expect(
-        DEFAULT_EXPORT_PRESETS.some((p: { id: string }) => p.id === 'vertical-1080x1920')
+        DEFAULT_EXPORT_PRESETS.some(
+          (p: { id: string }) => p.id === 'vertical-1080x1920'
+        )
       ).toBe(true);
     });
 
@@ -264,7 +280,10 @@ describe('Export System', () => {
       vi.mocked(bundle).mockResolvedValue('/mock/bundle');
       vi.mocked(renderMedia).mockImplementation(
         async (options: {
-          onProgress?: (p: { renderedFrames: number; encodedFrames: number }) => void;
+          onProgress?: (p: {
+            renderedFrames: number;
+            encodedFrames: number;
+          }) => void;
         }): Promise<void> => {
           // Simulate progress callback
           options.onProgress?.({ renderedFrames: 450, encodedFrames: 450 });
@@ -317,11 +336,18 @@ describe('Export System', () => {
         retryCount: number;
         maxRetries: number;
       };
-      (exportManager as unknown as {
-        currentJob: MinimalJob | null;
-        isExporting: boolean;
-      }).currentJob = job as MinimalJob;
-      (exportManager as unknown as { currentJob: MinimalJob | null; isExporting: boolean }).isExporting = true;
+      (
+        exportManager as unknown as {
+          currentJob: MinimalJob | null;
+          isExporting: boolean;
+        }
+      ).currentJob = job as MinimalJob;
+      (
+        exportManager as unknown as {
+          currentJob: MinimalJob | null;
+          isExporting: boolean;
+        }
+      ).isExporting = true;
 
       exportManager.cancelExport();
 
