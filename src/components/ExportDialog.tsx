@@ -29,7 +29,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const { settings, presets, updateSettings, applyPreset } =
     useExportSettings();
   const { isExporting, progress, canStartExport } = useExportStatus();
-  const { authenticated, membership, donateDemo, loading: authLoading, error: authError } = useAuth();
+  const { authenticated, membership, donateDemo, loading: authLoading } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'presets' | 'custom'>('presets');
   const [selectedPresetId, setSelectedPresetId] =
@@ -226,9 +226,6 @@ Export "{project?.name ?? 'Test Project'}" as video file
                     <p className="text-sm text-text-secondary">Create an account or sign in to export videos.</p>
                   </div>
                   <AuthInlineForm />
-                  {authError && (
-                    <p className="text-xs text-red-500 mt-2">{String(authError)}</p>
-                  )}
                 </div>
               )}
               {authenticated && !membership?.active && (
