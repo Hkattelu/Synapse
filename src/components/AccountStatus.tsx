@@ -2,7 +2,16 @@ import React, { useState } from 'react';
 import { useAuth } from '../state/authContext';
 
 export const AccountStatus: React.FC = () => {
-  const { authenticated, user, membership, login, signup, logout, loading, error } = useAuth();
+  const {
+    authenticated,
+    user,
+    membership,
+    login,
+    signup,
+    logout,
+    loading,
+    error,
+  } = useAuth();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
@@ -34,7 +43,11 @@ export const AccountStatus: React.FC = () => {
             <div className="text-xs text-gray-600 mb-3">
               Membership: {membership?.active ? 'Active' : 'Inactive'}
               {membership?.expiresAt && (
-                <span> (expires {new Date(membership.expiresAt).toLocaleDateString()})</span>
+                <span>
+                  {' '}
+                  (expires {new Date(membership.expiresAt).toLocaleDateString()}
+                  )
+                </span>
               )}
             </div>
             <button
@@ -95,13 +108,19 @@ export const AccountStatus: React.FC = () => {
               type="password"
               required
             />
-            {error && <div className="text-xs text-red-600">{String(error)}</div>}
+            {error && (
+              <div className="text-xs text-red-600">{String(error)}</div>
+            )}
             <button
               type="submit"
               disabled={loading}
               className="w-full px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded text-sm disabled:opacity-60"
             >
-              {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Sign up'}
+              {loading
+                ? 'Please wait…'
+                : mode === 'login'
+                  ? 'Sign in'
+                  : 'Sign up'}
             </button>
           </form>
         </div>

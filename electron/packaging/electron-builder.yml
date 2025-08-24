@@ -1,0 +1,47 @@
+appId: ai.synapse.desktop
+productName: Synapse
+
+directories:
+  output: release
+
+asar: true
+publish: 'never'
+
+files:
+  # Include built web assets and compiled Electron JS (TS builds to electron/dist)
+  - dist/**
+  - electron/dist/**
+  - node_modules/**
+  - '!electron/packaging/**'
+  - package.json
+
+extraMetadata:
+  # Ensure the packaged app points to the compiled Electron entry
+  main: electron/dist/main.js
+
+mac:
+  category: public.app-category.productivity
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+    - target: zip
+      arch:
+        - x64
+        - arm64
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+
+linux:
+  category: Utility
+  target:
+    - target: AppImage
+      arch:
+        - x64
+
+artifactName: '${productName}-${version}-${os}-${arch}.${ext}'

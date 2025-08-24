@@ -45,7 +45,14 @@ export const MediaFrame: React.FC<MediaFrameProps> = ({
         <img
           src={asset.url}
           alt={asset.name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', animation: autoFocus ? `kbZoomPan ${durationInFrames / fps}s ease-in-out forwards` : undefined }}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            animation: autoFocus
+              ? `kbZoomPan ${durationInFrames / fps}s ease-in-out forwards`
+              : undefined,
+          }}
         />
       );
     }
@@ -54,7 +61,14 @@ export const MediaFrame: React.FC<MediaFrameProps> = ({
         <video
           src={asset.url}
           muted
-          style={{ width: '100%', height: '100%', objectFit: 'cover', animation: autoFocus ? `kbZoomPan ${durationInFrames / fps}s ease-in-out forwards` : undefined }}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            animation: autoFocus
+              ? `kbZoomPan ${durationInFrames / fps}s ease-in-out forwards`
+              : undefined,
+          }}
         />
       );
     }
@@ -92,13 +106,26 @@ export const SideBySideSequence: React.FC<SideBySideSequenceProps> = ({
 
   return (
     <Sequence from={startFrame} durationInFrames={durationInFrames}>
-      <AbsoluteFill style={{ display: 'flex', flexDirection: isVertical ? 'column' : 'row', gap }}>
+      <AbsoluteFill
+        style={{
+          display: 'flex',
+          flexDirection: isVertical ? 'column' : 'row',
+          gap,
+        }}
+      >
         {!reverse ? (
           <>
             <div style={{ flex: 1, overflow: 'hidden' }}>
               {/* Code side will be rendered by CodeSequence separately; this component is for companion media */}
             </div>
-            <div style={{ flex: 1, overflow: 'hidden', borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div
+              style={{
+                flex: 1,
+                overflow: 'hidden',
+                borderRadius: 12,
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}
+            >
               {companion && (
                 <MediaFrame
                   asset={companion}
@@ -114,7 +141,14 @@ export const SideBySideSequence: React.FC<SideBySideSequenceProps> = ({
           </>
         ) : (
           <>
-            <div style={{ flex: 1, overflow: 'hidden', borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div
+              style={{
+                flex: 1,
+                overflow: 'hidden',
+                borderRadius: 12,
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}
+            >
               {companion && (
                 <MediaFrame
                   asset={companion}
@@ -127,13 +161,10 @@ export const SideBySideSequence: React.FC<SideBySideSequenceProps> = ({
                 />
               )}
             </div>
-            <div style={{ flex: 1, overflow: 'hidden' }}>
-              {/* Code slot */}
-            </div>
+            <div style={{ flex: 1, overflow: 'hidden' }}>{/* Code slot */}</div>
           </>
         )}
       </AbsoluteFill>
     </Sequence>
   );
 };
-

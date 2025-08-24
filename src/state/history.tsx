@@ -1,4 +1,10 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+} from 'react';
 import type { TimelineItem } from '../lib/types';
 import { useAppContext } from './context';
 
@@ -26,7 +32,9 @@ export const useHistory = (): HistoryContextValue => {
   return ctx;
 };
 
-export const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   // Using refs to avoid rerenders on every push/pop; we expose booleans via getters
   const undoStack = useRef<Command[]>([]);
   const redoStack = useRef<Command[]>([]);
@@ -66,22 +74,25 @@ export const HistoryProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const value = useMemo(
-    () => ({
-      undo,
-      redo,
-      clear,
-      execute,
-      get canUndo() {
-        return undoStack.current.length > 0;
-      },
-      get canRedo() {
-        return redoStack.current.length > 0;
-      },
-    }) as HistoryContextValue,
+    () =>
+      ({
+        undo,
+        redo,
+        clear,
+        execute,
+        get canUndo() {
+          return undoStack.current.length > 0;
+        },
+        get canRedo() {
+          return redoStack.current.length > 0;
+        },
+      }) as HistoryContextValue,
     [undo, redo, clear, execute]
   );
 
-  return <HistoryContext.Provider value={value}>{children}</HistoryContext.Provider>;
+  return (
+    <HistoryContext.Provider value={value}>{children}</HistoryContext.Provider>
+  );
 };
 
 // Prebuilt commands for timeline operations
@@ -122,7 +133,10 @@ export const createUpdateItemCommand = (
     dispatch({ type: 'UPDATE_TIMELINE_ITEM', payload: { id, updates: after } });
   },
   undo: () => {
-    dispatch({ type: 'UPDATE_TIMELINE_ITEM', payload: { id, updates: before } });
+    dispatch({
+      type: 'UPDATE_TIMELINE_ITEM',
+      payload: { id, updates: before },
+    });
   },
 });
 
@@ -149,10 +163,15 @@ export const createResizeItemCommand = (
 ): Command => ({
   label: 'Resize Item',
   do: () => {
-    dispatch({ type: 'RESIZE_TIMELINE_ITEM', payload: { id, duration: toDuration } });
+    dispatch({
+      type: 'RESIZE_TIMELINE_ITEM',
+      payload: { id, duration: toDuration },
+    });
   },
   undo: () => {
-    dispatch({ type: 'RESIZE_TIMELINE_ITEM', payload: { id, duration: fromDuration } });
+    dispatch({
+      type: 'RESIZE_TIMELINE_ITEM',
+      payload: { id, duration: fromDuration },
+    });
   },
 });
-

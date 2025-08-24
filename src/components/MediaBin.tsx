@@ -44,8 +44,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
   const getMediaType = (mimeType: string): MediaAssetType | null => {
     if (SUPPORTED_FILE_TYPES.video.includes(mimeType as any)) return 'video';
     if (SUPPORTED_FILE_TYPES.image.includes(mimeType as any)) return 'image';
-    if (SUPPORTED_FILE_TYPES.audio.includes(mimeType as any))
-      return 'audio';
+    if (SUPPORTED_FILE_TYPES.audio.includes(mimeType as any)) return 'audio';
     return null;
   };
 
@@ -171,11 +170,22 @@ export function MediaBin({ className = '' }: MediaBinProps) {
         ]);
 
         // Warn if metadata could not be extracted
-        if ((mediaType === 'video' || mediaType === 'audio') && duration === undefined) {
-          notify({ type: 'warning', title: 'Metadata', message: `Could not read duration for ${file.name}. Using defaults.` });
+        if (
+          (mediaType === 'video' || mediaType === 'audio') &&
+          duration === undefined
+        ) {
+          notify({
+            type: 'warning',
+            title: 'Metadata',
+            message: `Could not read duration for ${file.name}. Using defaults.`,
+          });
         }
         if (mediaType === 'video' && !thumbnail) {
-          notify({ type: 'warning', title: 'Thumbnail', message: `Could not generate thumbnail for ${file.name}.` });
+          notify({
+            type: 'warning',
+            title: 'Thumbnail',
+            message: `Could not generate thumbnail for ${file.name}.`,
+          });
         }
 
         // Create media asset
@@ -209,7 +219,11 @@ export function MediaBin({ className = '' }: MediaBinProps) {
 
         // Add to media assets
         addMediaAsset(mediaAsset);
-        notify({ type: 'success', title: 'Imported', message: `${file.name} added to Media Bin` });
+        notify({
+          type: 'success',
+          title: 'Imported',
+          message: `${file.name} added to Media Bin`,
+        });
       } catch (error) {
         errors.push({
           file: file.name,
@@ -221,7 +235,11 @@ export function MediaBin({ className = '' }: MediaBinProps) {
 
     setUploadErrors(errors);
     if (errors.length) {
-      notify({ type: 'error', title: 'Import Issues', message: `${errors.length} file(s) had problems during import.` });
+      notify({
+        type: 'error',
+        title: 'Import Issues',
+        message: `${errors.length} file(s) had problems during import.`,
+      });
     }
     setIsUploading(false);
   };
@@ -619,7 +637,10 @@ export function MediaBin({ className = '' }: MediaBinProps) {
         )}
       </div>
       {recorderOpen && (
-        <RecorderDialog isOpen={recorderOpen} onClose={() => setRecorderOpen(false)} />
+        <RecorderDialog
+          isOpen={recorderOpen}
+          onClose={() => setRecorderOpen(false)}
+        />
       )}
     </div>
   );

@@ -29,7 +29,12 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const { settings, presets, updateSettings, applyPreset } =
     useExportSettings();
   const { isExporting, progress, canStartExport } = useExportStatus();
-  const { authenticated, membership, donateDemo, loading: authLoading } = useAuth();
+  const {
+    authenticated,
+    membership,
+    donateDemo,
+    loading: authLoading,
+  } = useAuth();
   const trialsUsed = Number(membership?.trialUsed ?? 0);
   const trialsLimit = Number(membership?.trialLimit ?? 0);
   const trialsRemaining = Math.max(0, trialsLimit - trialsUsed);
@@ -238,10 +243,13 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               {authenticated && !membership?.active && (
                 <div className="p-6 border-b border-border-subtle">
                   <div className="mb-3">
-                    <h3 className="text-lg font-semibold text-text-primary">Unlock exports</h3>
+                    <h3 className="text-lg font-semibold text-text-primary">
+                      Unlock exports
+                    </h3>
                     <p className="text-sm text-text-secondary">
-                      You have {trialsRemaining} of {trialsLimit || 2} trial exports remaining.
-                      Support us on Ko‑fi to unlock unlimited exports for 30 days.
+                      You have {trialsRemaining} of {trialsLimit || 2} trial
+                      exports remaining. Support us on Ko‑fi to unlock unlimited
+                      exports for 30 days.
                     </p>
                   </div>
                   <button
@@ -524,10 +532,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                 {!authenticated
                   ? 'Sign in to export'
                   : membership?.active
-                  ? 'Start Export'
-                  : trialsRemaining > 0
-                  ? `Start Export (trial ${trialsUsed + 1}/${trialsLimit || 2})`
-                  : 'Unlock to export'}
+                    ? 'Start Export'
+                    : trialsRemaining > 0
+                      ? `Start Export (trial ${trialsUsed + 1}/${trialsLimit || 2})`
+                      : 'Unlock to export'}
               </button>
             </div>
           </div>

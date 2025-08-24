@@ -33,11 +33,12 @@ Positioning: Fair, maker-friendly pricing with a generous free tier. Early-bird 
     - Team presets and brand kits
 
 ## Launch offer
+
 - Product Hunt week: 40% off Pro annual for the first year (code: PHLAUNCH)
 - Early adopters get access to the web export beta
 
 ## Notes
+
 - Pricing subject to change after beta
 - VAT/sales tax not included
 - Downgrade/upgrade anytime
-

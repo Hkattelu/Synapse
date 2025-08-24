@@ -237,8 +237,10 @@ export class ClientExportManager {
 
       let errorMessage = 'Unknown error occurred';
       if (error instanceof ApiError) {
-        if (error.status === 401) errorMessage = 'Authentication required to export';
-        else if (error.status === 402) errorMessage = 'Membership required to export';
+        if (error.status === 401)
+          errorMessage = 'Authentication required to export';
+        else if (error.status === 402)
+          errorMessage = 'Membership required to export';
         else errorMessage = error.message;
       } else if (error instanceof Error) {
         errorMessage = error.message;
@@ -307,14 +309,21 @@ export class ClientExportManager {
         progress,
         estimatedTimeRemaining: Math.max(
           0,
-          Math.round((Date.now() - start) * ((100 - progress) / Math.max(1, progress)))
+          Math.round(
+            (Date.now() - start) * ((100 - progress) / Math.max(1, progress))
+          )
         ),
       });
 
       if (status === 'completed') {
-        this.currentJob!.outputPath = job.outputPath || `./exports/${job.outputFilename}`;
+        this.currentJob!.outputPath =
+          job.outputPath || `./exports/${job.outputFilename}`;
         this.currentJob!.completedAt = new Date();
-        this.updateProgress({ status: 'completed', progress: 100, endTime: new Date() });
+        this.updateProgress({
+          status: 'completed',
+          progress: 100,
+          endTime: new Date(),
+        });
         return;
       }
       if (status === 'failed' || status === 'cancelled') {

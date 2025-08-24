@@ -23,16 +23,12 @@ export default defineConfig({
         'rust',
         'sql',
         'xml',
-        'yaml'
+        'yaml',
       ],
-      plugins: [
-        'line-numbers',
-        'show-language',
-        'copy-to-clipboard'
-      ],
+      plugins: ['line-numbers', 'show-language', 'copy-to-clipboard'],
       theme: 'tomorrow',
       css: true,
-    })
+    }),
   ],
   server: {
     proxy: {
@@ -44,11 +40,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: [
-      '@remotion/bundler',
-      '@remotion/renderer',
-      '@remotion/cli',
-    ],
+    exclude: ['@remotion/bundler', '@remotion/renderer', '@remotion/cli'],
   },
   build: {
     rollupOptions: {
@@ -77,8 +69,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': '/src'
-    }
+      '@': '/src',
+    },
   },
   assetsInclude: ['**/*.node'],
   test: {
@@ -86,4 +78,4 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
   },
-})
+});

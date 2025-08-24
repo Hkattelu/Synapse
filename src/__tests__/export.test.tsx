@@ -270,13 +270,15 @@ describe('Export System', () => {
       const { renderMedia } = await import('@remotion/renderer');
 
       vi.mocked(bundle).mockResolvedValue('/mock/bundle');
-      vi.mocked(renderMedia).mockImplementation(async (options: any): Promise<any> => {
-        // Simulate progress callback
-        if (options.onProgress) {
-          options.onProgress({ renderedFrames: 450, encodedFrames: 450 });
+      vi.mocked(renderMedia).mockImplementation(
+        async (options: any): Promise<any> => {
+          // Simulate progress callback
+          if (options.onProgress) {
+            options.onProgress({ renderedFrames: 450, encodedFrames: 450 });
+          }
+          return Promise.resolve();
         }
-        return Promise.resolve();
-      });
+      );
 
       const settings = getDefaultExportSettings(mockProject);
       await exportManager.startExport(mockProject, settings);

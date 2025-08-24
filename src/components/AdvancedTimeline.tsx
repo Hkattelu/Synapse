@@ -1,10 +1,6 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useTimeline, useMediaAssets, useUI } from '../state/hooks';
-import type {
-  TimelineItem,
-  MediaAsset,
-  Keyframe,
-} from '../lib/types';
+import type { TimelineItem, MediaAsset, Keyframe } from '../lib/types';
 import { KeyframeManager, createKeyframe } from '../lib/keyframes';
 
 interface AdvancedTimelineProps {
@@ -25,7 +21,6 @@ interface DragState {
 
 const TRACK_HEIGHT = 80; // Increased for keyframe editing
 const PIXELS_PER_SECOND = 100;
-
 
 export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
   const {

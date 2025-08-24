@@ -37,7 +37,9 @@ async function writeDb(db) {
 
 export async function createUser({ email, passwordHash, name }) {
   const db = await readDb();
-  const existing = db.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+  const existing = db.users.find(
+    (u) => u.email.toLowerCase() === email.toLowerCase()
+  );
   if (existing) throw new Error('Email already in use');
   const user = {
     id: crypto.randomUUID(),
@@ -53,7 +55,9 @@ export async function createUser({ email, passwordHash, name }) {
 
 export async function findUserByEmail(email) {
   const db = await readDb();
-  return db.users.find((u) => u.email.toLowerCase() === email.toLowerCase()) || null;
+  return (
+    db.users.find((u) => u.email.toLowerCase() === email.toLowerCase()) || null
+  );
 }
 
 export async function getUserById(id) {
@@ -94,11 +98,20 @@ export async function getMembership(userId) {
   return { ...m, active: m.status === 'active' };
 }
 
-export async function activateMembership({ userId, amount, currency, source, durationDays = 30, paymentId }) {
+export async function activateMembership({
+  userId,
+  amount,
+  currency,
+  source,
+  durationDays = 30,
+  paymentId,
+}) {
   const db = await readDb();
   let m = db.memberships.find((m) => m.userId === userId);
   const now = new Date();
-  const expiresAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
+  const expiresAt = new Date(
+    now.getTime() + durationDays * 24 * 60 * 60 * 1000
+  );
   if (m) {
     m.status = 'active';
     m.activatedAt = now.toISOString();
@@ -162,5 +175,7 @@ export async function updateJob(job) {
 
 export async function getTrialExportsCount(userId) {
   const db = await readDb();
-  return db.jobs.filter((j) => j.userId === userId && j.trial === true && j.status === 'completed').length;
+  return db.jobs.filter(
+    (j) => j.userId === userId && j.trial === true && j.status === 'completed'
+  ).length;
 }

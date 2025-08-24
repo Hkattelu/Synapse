@@ -31,7 +31,9 @@ if (!(globalThis as any).IntersectionObserver) {
     observe() {}
     unobserve() {}
     disconnect() {}
-    takeRecords() { return []; }
+    takeRecords() {
+      return [];
+    }
     root: Element | null = null;
     rootMargin: string = '';
     thresholds: ReadonlyArray<number> = [];

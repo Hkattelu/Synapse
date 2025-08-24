@@ -1,4 +1,10 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { api, type ApiUser, type ApiMembership } from '../lib/api';
 
 type AuthState = {
@@ -10,7 +16,11 @@ type AuthState = {
 };
 
 type AuthContextType = AuthState & {
-  signup: (input: { email: string; password: string; name?: string }) => Promise<void>;
+  signup: (input: {
+    email: string;
+    password: string;
+    name?: string;
+  }) => Promise<void>;
   login: (input: { email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -20,7 +30,10 @@ type AuthContextType = AuthState & {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AuthState>({ loading: true, authenticated: false });
+  const [state, setState] = useState<AuthState>({
+    loading: true,
+    authenticated: false,
+  });
 
   const refresh = useCallback(async () => {
     setState((s) => ({ ...s, loading: true, error: undefined }));
@@ -41,31 +54,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     void refresh();
   }, [refresh]);
 
-  const signup = useCallback(async (input: { email: string; password: string; name?: string }) => {
-    setState((s) => ({ ...s, loading: true, error: undefined }));
-    try {
-      const { user, membership } = await api.signup(input);
-      setState({ loading: false, authenticated: true, user, membership });
-    } catch (e: any) {
-      setState((s) => ({ ...s, loading: false, error: e?.message }));
-      throw e;
-    }
-  }, []);
+  const signup = useCallback(
+    async (input: { email: string; password: string; name?: string }) => {
+      setState((s) => ({ ...s, loading: true, error: undefined }));
+      try {
+        const { user, membership } = await api.signup(input);
+        setState({ loading: false, authenticated: true, user, membership });
+      } catch (e: any) {
+        setState((s) => ({ ...s, loading: false, error: e?.message }));
+        throw e;
+      }
+    },
+    []
+  );
 
-  const login = useCallback(async (input: { email: string; password: string }) => {
-    setState((s) => ({ ...s, loading: true, error: undefined }));
-    try {
-      const { user, membership } = await api.login(input);
-      setState({ loading: false, authenticated: true, user, membership });
-    } catch (e: any) {
-      setState((s) => ({ ...s, loading: false, error: e?.message }));
-      throw e;
-    }
-  }, []);
+  const login = useCallback(
+    async (input: { email: string; password: string }) => {
+      setState((s) => ({ ...s, loading: true, error: undefined }));
+      try {
+        const { user, membership } = await api.login(input);
+        setState({ loading: false, authenticated: true, user, membership });
+      } catch (e: any) {
+        setState((s) => ({ ...s, loading: false, error: e?.message }));
+        throw e;
+      }
+    },
+    []
+  );
 
   const logout = useCallback(async () => {
     // Clear client state immediately to avoid stale user/membership after logout
-    setState({ loading: false, authenticated: false, user: undefined, membership: undefined, error: undefined });
+    setState({
+      loading: false,
+      authenticated: false,
+      user: undefined,
+      membership: undefined,
+      error: undefined,
+    });
     try {
       await api.logout();
     } catch {

@@ -85,13 +85,16 @@ async function requireExportAccess(req, res, next) {
     req.isTrial = true;
     return next();
   }
-  return res.status(402).json({ error: 'Membership required', code: 'MEMBERSHIP_REQUIRED' });
+  return res
+    .status(402)
+    .json({ error: 'Membership required', code: 'MEMBERSHIP_REQUIRED' });
 }
 
 // Auth endpoints
 app.post('/api/auth/signup', async (req, res) => {
   const { email, password, name } = req.body || {};
-  if (!email || !password) return res.status(400).json({ error: 'Missing fields' });
+  if (!email || !password)
+    return res.status(400).json({ error: 'Missing fields' });
   try {
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await createUser({ email, passwordHash, name });
@@ -104,7 +107,10 @@ app.post('/api/auth/signup', async (req, res) => {
       maxAge: 60 * 60 * 24 * 30 * 1000, // 30 days
     });
     const membership = await getMembership(user.id);
-    res.json({ user: { id: user.id, email: user.email, name: user.name }, membership });
+    res.json({
+      user: { id: user.id, email: user.email, name: user.name },
+      membership,
+    });
   } catch (e) {
     res.status(400).json({ error: e.message || 'Sign up failed' });
   }
@@ -112,7 +118,8 @@ app.post('/api/auth/signup', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body || {};
-  if (!email || !password) return res.status(400).json({ error: 'Missing fields' });
+  if (!email || !password)
+    return res.status(400).json({ error: 'Missing fields' });
   const user = await findUserByEmail(email);
   if (!user) return res.status(401).json({ error: 'Invalid credentials' });
   const ok = await bcrypt.compare(password, user.passwordHash);
@@ -126,7 +133,10 @@ app.post('/api/auth/login', async (req, res) => {
     maxAge: 60 * 60 * 24 * 30 * 1000,
   });
   const membership = await getMembership(user.id);
-  res.json({ user: { id: user.id, email: user.email, name: user.name }, membership });
+  res.json({
+    user: { id: user.id, email: user.email, name: user.name },
+    membership,
+  });
 });
 
 app.post('/api/auth/logout', async (req, res) => {
@@ -176,7 +186,11 @@ app.post('/api/export/jobs', requireExportAccess, async (req, res) => {
   if (!jobSpec?.jobId || !jobSpec?.project?.name) {
     return res.status(400).json({ error: 'Invalid job spec' });
   }
-  const job = await createExportJob({ userId: req.user.id, job: jobSpec, trial: !!req.isTrial });
+  const job = await createExportJob({
+    userId: req.user.id,
+    job: jobSpec,
+    trial: !!req.isTrial,
+  });
   // Kick off simulation
   simulateJob(job.id).catch((e) => console.error('Job simulation error', e));
   res.status(201).json({ id: job.id, status: job.status });
@@ -185,15 +199,18 @@ app.post('/api/export/jobs', requireExportAccess, async (req, res) => {
 app.get('/api/export/jobs/:id', requireAuth, async (req, res) => {
   const job = await getJob(req.params.id);
   if (!job) return res.status(404).json({ error: 'Not found' });
-  if (job.userId !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
+  if (job.userId !== req.user.id)
+    return res.status(403).json({ error: 'Forbidden' });
   res.json(job);
 });
 
 app.post('/api/export/jobs/:id/cancel', requireAuth, async (req, res) => {
   const job = await getJob(req.params.id);
   if (!job) return res.status(404).json({ error: 'Not found' });
-  if (job.userId !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
-  if (['completed', 'failed', 'cancelled'].includes(job.status)) return res.json(job);
+  if (job.userId !== req.user.id)
+    return res.status(403).json({ error: 'Forbidden' });
+  if (['completed', 'failed', 'cancelled'].includes(job.status))
+    return res.json(job);
   job.status = 'cancelled';
   job.progress = job.progress ?? 0;
   job.endedAt = new Date().toISOString();

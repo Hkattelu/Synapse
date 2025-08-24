@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "electron/dist/main.js",
   "scripts": {
     "dev": "vite",
     "server": "node server/index.mjs",
@@ -16,7 +17,11 @@
     "test": "vitest --run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "generate:launch-og": "node ./scripts/generate-og.mjs public/launch/og-image.svg public/launch/og-image.png"
+    "generate:launch-og": "node ./scripts/generate-og.mjs public/launch/og-image.svg public/launch/og-image.png",
+    "electron:build": "tsc -p tsconfig.electron.json",
+    "desktop:dev": "npm run -s electron:build && cross-env SYNAPSE_ELECTRON_DEV_URL=http://localhost:5173 electron electron/dist/main.js",
+    "desktop:start": "npm run -s electron:build && electron electron/dist/main.js",
+    "desktop:build": "npm run -s build && npm run -s electron:build && electron-builder -c electron/packaging/electron-builder.yml"
   },
   "dependencies": {
     "@remotion/bundler": "^4.0.332",
@@ -41,6 +46,7 @@
     "@tailwindcss/postcss": "^4.1.11",
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
+    "@types/node": "^24.3.0",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
     "@typescript-eslint/eslint-plugin": "^8.39.1",
@@ -49,6 +55,9 @@
     "@vitejs/plugin-react-swc": "^4.0.0",
     "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.21",
+    "cross-env": "^10.0.0",
+    "electron": "^32.0.0",
+    "electron-builder": "^26.0.12",
     "eslint": "^9.33.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",

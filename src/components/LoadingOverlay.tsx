@@ -18,4 +18,3 @@ export const LoadingOverlay: React.FC = () => {
     </div>
   );
 };
-

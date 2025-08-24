@@ -23,19 +23,22 @@ function AppContent() {
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NotificationsProvider } from './state/notifications';
 import { HistoryProvider } from './state/history';
+import { AuthProvider } from './state/authContext';
 
 function App() {
   return (
-    cAppProvidere
-      cNotificationsProvidere
-        cErrorBoundarye
-          cHistoryProvidere
-            cAppContent /e
-            cLoadingOverlay /e
-          c/HistoryProvidere
-        c/ErrorBoundarye
-      c/NotificationsProvidere
-    c/AppProvidere
+    <AppProvider>
+      <AuthProvider>
+        <NotificationsProvider>
+          <ErrorBoundary>
+            <HistoryProvider>
+              <AppContent />
+              <LoadingOverlay />
+            </HistoryProvider>
+          </ErrorBoundary>
+        </NotificationsProvider>
+      </AuthProvider>
+    </AppProvider>
   );
 }
 
