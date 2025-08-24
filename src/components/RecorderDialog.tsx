@@ -49,7 +49,11 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
         await videoRef.current.play();
       }
     } catch (e) {
-      notify({ type: 'error', title: 'Recorder', message: 'Permission denied or device not available.' });
+      notify({
+        type: 'error',
+        title: 'Recorder',
+        message: 'Permission denied or device not available.',
+      });
     }
   };
 
@@ -57,7 +61,12 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     if (!stream) {
       await requestStream();
     }
-    const s = stream ?? (await navigator.mediaDevices.getUserMedia({ audio: true, video: withCamera }));
+    const s =
+      stream ??
+      (await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: withCamera,
+      }));
     chunksRef.current = [];
     const mime = withCamera
       ? 'video/webm;codecs=vp9,opus'
@@ -71,7 +80,10 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       const blob = new Blob(chunksRef.current, { type: mime });
       const url = URL.createObjectURL(blob);
       // Get duration
-      const duration = await getBlobDuration(url, withCamera ? 'video' : 'audio');
+      const duration = await getBlobDuration(
+        url,
+        withCamera ? 'video' : 'audio'
+      );
       setPending({ url, mime, duration: duration ?? null, withCamera });
       setIsRecording(false);
     };
@@ -95,38 +107,68 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       <div className="bg-white rounded-xl w-full max-w-md overflow-hidden">
         <div className="p-4 border-b flex items-center justify-between">
           <h3 className="font-semibold">Record Narration</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            ✕
+          </button>
         </div>
         <div className="p-4 space-y-4">
           {!pending && (
             <>
               <label className="flex items-center space-x-2">
-                <input type="checkbox" checked={withCamera} onChange={(e) => setWithCamera(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  checked={withCamera}
+                  onChange={(e) => setWithCamera(e.target.checked)}
+                />
                 <span>Include camera video</span>
               </label>
               {withCamera && (
                 <div className="aspect-video bg-black rounded overflow-hidden">
-                  <video ref={videoRef} muted playsInline className="w-full h-full object-cover" />
+                  <video
+                    ref={videoRef}
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               )}
               <div className="flex items-center space-x-2">
                 {!isRecording ? (
-                  <button onClick={startRecording} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">Start</button>
+                  <button
+                    onClick={startRecording}
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
+                  >
+                    Start
+                  </button>
                 ) : (
-                  <button onClick={stopRecording} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Stop</button>
+                  <button
+                    onClick={stopRecording}
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+                  >
+                    Stop
+                  </button>
                 )}
-                <button onClick={onClose} className="px-4 py-2 rounded border">Cancel</button>
+                <button onClick={onClose} className="px-4 py-2 rounded border">
+                  Cancel
+                </button>
               </div>
             </>
           )}
           {pending && (
             <div className="space-y-3">
-              <p className="text-sm text-gray-700">Recording ready. Choose an action:</p>
+              <p className="text-sm text-gray-700">
+                Recording ready. Choose an action:
+              </p>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => {
                     const id = addMediaAsset({
-                      name: pending.withCamera ? `Recording ${new Date().toISOString()}.webm` : `Narration ${new Date().toISOString()}.webm`,
+                      name: pending.withCamera
+                        ? `Recording ${new Date().toISOString()}.webm`
+                        : `Narration ${new Date().toISOString()}.webm`,
                       type: pending.withCamera ? 'video' : 'audio',
                       url: pending.url,
                       duration: pending.duration ?? undefined,
@@ -144,7 +186,11 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                       animations: [],
                       keyframes: [],
                     });
-                    notify({ type: 'success', title: 'Recorder', message: 'Added to Media Bin and timeline.' });
+                    notify({
+                      type: 'success',
+                      title: 'Recorder',
+                      message: 'Added to Media Bin and timeline.',
+                    });
                     setPending(null);
                     onClose();
                   }}
@@ -155,13 +201,19 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                 <button
                   onClick={() => {
                     addMediaAsset({
-                      name: pending.withCamera ? `Recording ${new Date().toISOString()}.webm` : `Narration ${new Date().toISOString()}.webm`,
+                      name: pending.withCamera
+                        ? `Recording ${new Date().toISOString()}.webm`
+                        : `Narration ${new Date().toISOString()}.webm`,
                       type: pending.withCamera ? 'video' : 'audio',
                       url: pending.url,
                       duration: pending.duration ?? undefined,
                       metadata: { fileSize: 0, mimeType: pending.mime },
                     });
-                    notify({ type: 'success', title: 'Recorder', message: 'Saved to Media Bin.' });
+                    notify({
+                      type: 'success',
+                      title: 'Recorder',
+                      message: 'Saved to Media Bin.',
+                    });
                     setPending(null);
                     onClose();
                   }}
@@ -169,7 +221,15 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                 >
                   Save to Media Bin
                 </button>
-                <button onClick={() => { setPending(null); onClose(); }} className="px-4 py-2 rounded border">Discard</button>
+                <button
+                  onClick={() => {
+                    setPending(null);
+                    onClose();
+                  }}
+                  className="px-4 py-2 rounded border"
+                >
+                  Discard
+                </button>
               </div>
             </div>
           )}
@@ -192,4 +252,3 @@ async function getBlobDuration(url: string, kind: 'audio' | 'video') {
     el.src = url;
   });
 }
-

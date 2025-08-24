@@ -154,9 +154,9 @@ function StudioViewContent() {
             </div>
 
             {/* Panel Controls */}
-            cdiv className="flex items-center space-x-2"e
+           <div className="flex items-center space-x-2">
               {/* Undo/Redo Buttons */}
-              cbutton
+             <button
                 onClick={undo}
                 disabled={!canUndo}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
@@ -165,13 +165,13 @@ function StudioViewContent() {
                     : 'bg-white border border-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
                 title="Undo (Ctrl+Z)"
-              e
-                csvg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"e
-                  cpath strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l-7-7 7-7"ec/pathe
-                  cpath strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 19V5"ec/pathe
-                c/svge
-              c/buttone
-              cbutton
+              >
+               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l-7-7 7-7"></path>
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 19V5"></path>
+               </svg>
+             </button>
+             <button
                 onClick={redo}
                 disabled={!canRedo}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
@@ -180,12 +180,12 @@ function StudioViewContent() {
                     : 'bg-white border border-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
                 title="Redo (Ctrl+Y / Shift+Ctrl+Z)"
-              e
-                csvg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"e
-                  cpath strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5l7 7-7 7"ec/pathe
-                  cpath strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5v14"ec/pathe
-                c/svge
-              c/buttone
+              >
+               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5l7 7-7 7"></path>
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5v14"></path>
+               </svg>
+             </button>
               <button
                 onClick={toggleMediaBin}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${

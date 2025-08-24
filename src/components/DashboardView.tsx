@@ -9,7 +9,7 @@ import {
   Users,
   Heart,
   Plus,
-  ArrowRight
+  ArrowRight,
 } from 'lucide-react';
 
 export function DashboardView() {
@@ -115,9 +115,26 @@ export function DashboardView() {
               className="inline-flex items-center px-4 py-2 rounded-full bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors"
               title="See our Product Hunt launch page"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="mr-2">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h-2v10h2a5 5 0 000-10z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h6a5 5 0 010 10H7V7z" />
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                className="mr-2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M13 7h-2v10h2a5 5 0 000-10z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M7 7h6a5 5 0 010 10H7V7z"
+                />
               </svg>
               Launch Page
             </a>

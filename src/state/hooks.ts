@@ -2,7 +2,14 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useAppContext } from './context';
-import { useHistory, createAddItemCommand, createRemoveItemCommand, createUpdateItemCommand, createMoveItemCommand, createResizeItemCommand } from './history';
+import {
+  useHistory,
+  createAddItemCommand,
+  createRemoveItemCommand,
+  createUpdateItemCommand,
+  createMoveItemCommand,
+  createResizeItemCommand,
+} from './history';
 import type { TimelineItem, MediaAsset, Project } from '../lib/types';
 import { generateId } from '../lib/utils';
 
@@ -74,9 +81,12 @@ export function useProject() {
     [dispatch]
   );
 
-  const exportProject = useCallback((projectId: string) => {
-    dispatch({ type: 'EXPORT_PROJECT', payload: projectId });
-  }, [dispatch]);
+  const exportProject = useCallback(
+    (projectId: string) => {
+      dispatch({ type: 'EXPORT_PROJECT', payload: projectId });
+    },
+    [dispatch]
+  );
 
   return {
     project: state.project,

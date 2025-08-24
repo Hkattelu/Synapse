@@ -24,8 +24,9 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
         // If sideBySideAssetId is set, render SideBySideSequence wrapper (companion media) plus code
         if (item.properties.sideBySideAssetId) {
           const companion =
-            mediaAssets.find((a) => a.id === item.properties.sideBySideAssetId) ||
-            null;
+            mediaAssets.find(
+              (a) => a.id === item.properties.sideBySideAssetId
+            ) || null;
           return (
             <SideBySideSequence
               key={item.id}

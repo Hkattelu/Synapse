@@ -40,13 +40,22 @@ vi.mock('../../state/exportContext', () => ({
         id: 'web-720p',
         name: 'Web 720p',
         description: 'Smaller size 720p',
-        settings: { format: 'mp4', quality: 'medium', width: 1280, height: 720 },
+        settings: {
+          format: 'mp4',
+          quality: 'medium',
+          width: 1280,
+          height: 720,
+        },
       },
     ],
     updateSettings: vi.fn(),
     applyPreset: vi.fn(),
   }),
-  useExportStatus: () => ({ isExporting: false, progress: null, canStartExport: true }),
+  useExportStatus: () => ({
+    isExporting: false,
+    progress: null,
+    canStartExport: true,
+  }),
 }));
 
 describe('ExportDialog', () => {

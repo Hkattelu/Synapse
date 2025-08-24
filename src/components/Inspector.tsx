@@ -441,7 +441,10 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
       />
       <TextInput
         label="Font Family"
-        value={localProperties.fontFamily ?? 'Monaco, Menlo, "Ubuntu Mono", monospace'}
+        value={
+          localProperties.fontFamily ??
+          'Monaco, Menlo, "Ubuntu Mono", monospace'
+        }
         onChange={(value) => updateProperty('fontFamily', value)}
         error={validationErrors.fontFamily}
       />
@@ -498,16 +501,32 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
     </div>
   );
 
-  function TextAreaWithFormat({ label, value, language, onChange, error }: { label: string; value: string; language: string; onChange: (v: string) => void; error?: string; }) {
+  function TextAreaWithFormat({
+    label,
+    value,
+    language,
+    onChange,
+    error,
+  }: {
+    label: string;
+    value: string;
+    language: string;
+    onChange: (v: string) => void;
+    error?: string;
+  }) {
     const inputId = React.useId();
     const [localValue, setLocalValue] = useState(value);
     React.useEffect(() => setLocalValue(value), [value]);
 
-    const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const handlePaste = async (
+      e: React.ClipboardEvent<HTMLTextAreaElement>
+    ) => {
       // Let paste happen, then format next tick
       setTimeout(async () => {
         const target = e.target as HTMLTextAreaElement;
-        const formatted = await import('../lib/format').then(m => m.formatCode(target.value, language));
+        const formatted = await import('../lib/format').then((m) =>
+          m.formatCode(target.value, language)
+        );
         setLocalValue(formatted);
         onChange(formatted);
       }, 0);
@@ -520,7 +539,12 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
 
     return (
       <div>
-        <label htmlFor={inputId} className="block text-sm font-medium text-text-secondary mb-1">{label}</label>
+        <label
+          htmlFor={inputId}
+          className="block text-sm font-medium text-text-secondary mb-1"
+        >
+          {label}
+        </label>
         <textarea
           id={inputId}
           value={localValue}
@@ -533,7 +557,13 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
           style={{ fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace' }}
         />
         {error && (
-          <p id={`${inputId}-error`} className="text-status-error text-xs mt-1" role="alert">{error}</p>
+          <p
+            id={`${inputId}-error`}
+            className="text-status-error text-xs mt-1"
+            role="alert"
+          >
+            {error}
+          </p>
         )}
       </div>
     );
@@ -592,24 +622,33 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
           </div>
         )}
 
-      {item.type === 'code' && (
+        {item.type === 'code' && (
           <div className="mb-4">
             <h5 className="text-sm font-medium text-text-secondary mb-2">
               Code
             </h5>
             {renderCodeProperties()}
             <div className="mt-4">
-              <h5 className="text-sm font-medium text-text-secondary mb-2">Side by Side</h5>
+              <h5 className="text-sm font-medium text-text-secondary mb-2">
+                Side by Side
+              </h5>
               <SelectInput
                 label="Companion Asset"
                 value={localProperties.sideBySideAssetId ?? ''}
-                onChange={(value) => updateProperty('sideBySideAssetId', value || undefined)}
-                options={[{ value: '', label: 'None' }, ...getSideBySideOptions()]}
+                onChange={(value) =>
+                  updateProperty('sideBySideAssetId', value || undefined)
+                }
+                options={[
+                  { value: '', label: 'None' },
+                  ...getSideBySideOptions(),
+                ]}
               />
               <SelectInput
                 label="Layout"
                 value={localProperties.sideBySideLayout ?? 'left-right'}
-                onChange={(value) => updateProperty('sideBySideLayout', value as any)}
+                onChange={(value) =>
+                  updateProperty('sideBySideLayout', value as any)
+                }
                 options={[
                   { value: 'left-right', label: 'Left • Right' },
                   { value: 'right-left', label: 'Right • Left' },
@@ -628,12 +667,19 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
               />
             </div>
             <div className="mt-4">
-              <h5 className="text-sm font-medium text-text-secondary mb-2">Focus (Ken Burns)</h5>
+              <h5 className="text-sm font-medium text-text-secondary mb-2">
+                Focus (Ken Burns)
+              </h5>
               <SelectInput
                 label="Auto Focus"
                 value={(localProperties.autoFocus ?? true) ? 'on' : 'off'}
-                onChange={(value) => updateProperty('autoFocus', value === 'on')}
-                options={[{ value: 'off', label: 'Off' }, { value: 'on', label: 'On' }]}
+                onChange={(value) =>
+                  updateProperty('autoFocus', value === 'on')
+                }
+                options={[
+                  { value: 'off', label: 'Off' },
+                  { value: 'on', label: 'On' },
+                ]}
               />
               <NumberInput
                 label="Focus X"

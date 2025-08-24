@@ -27,7 +27,6 @@ import {
   Phone,
 } from 'lucide-react';
 
-
 interface HeroSectionProps {
   title?: string;
   subtitle?: string;

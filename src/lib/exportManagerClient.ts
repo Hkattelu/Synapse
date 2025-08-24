@@ -276,7 +276,7 @@ export class ClientExportManager {
   // Simulate export process (placeholder for actual server communication)
   private async simulateExportProcess(filename: string): Promise<void> {
     const totalSteps = 10;
-    
+
     for (let step = 1; step <= totalSteps; step++) {
       // Check if cancelled
       if (this.abortController?.signal.aborted) {
@@ -284,10 +284,10 @@ export class ClientExportManager {
       }
 
       // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const progress = 20 + (step / totalSteps) * 70; // 20-90%
-      
+
       this.updateProgress({
         status: step <= 8 ? 'rendering' : 'finalizing',
         progress,
@@ -298,7 +298,7 @@ export class ClientExportManager {
     }
 
     // Simulate final processing
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     this.updateProgress({ status: 'finalizing', progress: 95 });
   }
 

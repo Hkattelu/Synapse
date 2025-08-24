@@ -5,7 +5,10 @@ interface WaveformProps {
   height?: number;
 }
 
-export const AudioWaveform: React.FC<WaveformProps> = ({ src, height = 54 }) => {
+export const AudioWaveform: React.FC<WaveformProps> = ({
+  src,
+  height = 54,
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,7 +18,8 @@ export const AudioWaveform: React.FC<WaveformProps> = ({ src, height = 54 }) => 
       try {
         const resp = await fetch(src);
         const buf = await resp.arrayBuffer();
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const ctx = new (window.AudioContext ||
+          (window as any).webkitAudioContext)();
         const audio = await ctx.decodeAudioData(buf.slice(0));
         if (isCancelled) return;
         const data = audio.getChannelData(0);
@@ -25,7 +29,8 @@ export const AudioWaveform: React.FC<WaveformProps> = ({ src, height = 54 }) => 
         for (let i = 0; i < sampleCount; i++) {
           const start = i * blockSize;
           let sum = 0;
-          for (let j = 0; j < blockSize; j++) sum += Math.abs(data[start + j] || 0);
+          for (let j = 0; j < blockSize; j++)
+            sum += Math.abs(data[start + j] || 0);
           samples.push(sum / blockSize);
         }
         const cvs = canvasRef.current;
@@ -64,4 +69,3 @@ export const AudioWaveform: React.FC<WaveformProps> = ({ src, height = 54 }) => 
     </div>
   );
 };
-
