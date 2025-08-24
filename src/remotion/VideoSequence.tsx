@@ -1,5 +1,14 @@
 import React from 'react';
-import * as Remotion from 'remotion';
+import {
+  AbsoluteFill,
+  Sequence,
+  Video,
+  Img,
+  useVideoConfig,
+} from 'remotion';
+// Keep a namespace import as well so we can defensively check for optional exports
+// like `Audio` in test environments where `remotion` is partially mocked.
+import * as RemotionNS from 'remotion';
 import type { VideoSequenceProps } from './types';
 
 export const VideoSequence: React.FC<VideoSequenceProps> = ({
@@ -23,7 +32,7 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
   const opacity = item.properties.opacity || 1;
 
   // Calculate track-based positioning based on composition height
-  const { height } = Remotion.useVideoConfig();
+  const { height } = useVideoConfig();
   const trackHeight = height / 4; // Assuming 4 tracks max for now
   const trackY = item.track * trackHeight;
 
@@ -50,15 +59,15 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
       };
 
   return (
-    <Remotion.Sequence from={startFrame} durationInFrames={durationInFrames}>
-      <Remotion.AbsoluteFill>
+    <Sequence from={startFrame} durationInFrames={durationInFrames}>
+      <AbsoluteFill>
         {talkingHead ? (
           <div style={style}>
             {asset.type === 'video' && (
-              <Remotion.Video
+              <Video
                 src={asset.url}
-                volume={item.properties.volume || 1}
-                playbackRate={item.properties.playbackRate || 1}
+                volume={item.properties.volume ?? 1}
+                playbackRate={item.properties.playbackRate ?? 1}
                 muted={item.muted}
                 style={{
                   width: '100%',
@@ -71,10 +80,10 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
         ) : (
           <div style={style}>
             {asset.type === 'video' && (
-              <Remotion.Video
+              <Video
                 src={asset.url}
-                volume={item.properties.volume || 1}
-                playbackRate={item.properties.playbackRate || 1}
+                volume={item.properties.volume ?? 1}
+                playbackRate={item.properties.playbackRate ?? 1}
                 muted={item.muted}
                 style={{
                   width: '100%',
@@ -85,7 +94,7 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
             )}
 
             {asset.type === 'image' && (
-              <Remotion.Img
+              <Img
                 src={asset.url}
                 style={{
                   width: '100%',
@@ -98,9 +107,9 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
             {asset.type === 'audio' && (
               <>
                 {/* Visual placeholder */}
-                <Remotion.AbsoluteFill
+                <AbsoluteFill
                   style={{
-                    backgroundColor: 'rgba(0, 255, 0, 0.18)',
+                    backgroundColor: 'rgba(0, 255, 0, 0.3)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -109,13 +118,15 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
                   }}
                 >
                   🎵 {asset.name}
-                </Remotion.AbsoluteFill>
-                {/* Actual audio playback */}
+                </AbsoluteFill>
+                {/* Actual audio playback (guarded for test mocks) */}
                 {
-                  'Audio' in (Remotion as any) && typeof (Remotion as any).Audio === 'function' ? (
-                    <Remotion.Audio
+                  'Audio' in (RemotionNS as any) &&
+                  typeof (RemotionNS as any).Audio === 'function' ? (
+                    <RemotionNS.Audio
                       src={asset.url}
                       volume={item.properties.volume ?? 1}
+                      playbackRate={item.properties.playbackRate ?? 1}
                       muted={item.muted}
                     />
                   ) : null
@@ -124,7 +135,7 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
             )}
 
             {asset.type === 'code' && (
-              <Remotion.AbsoluteFill
+              <AbsoluteFill
                 style={{
                   backgroundColor: '#1e1e1e',
                   padding: '20px',
@@ -138,11 +149,11 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
                   {/* Code content would be rendered here */}
                   {item.properties.text || '// Code content'}
                 </pre>
-              </Remotion.AbsoluteFill>
+              </AbsoluteFill>
             )}
           </div>
         )}
-      </Remotion.AbsoluteFill>
-    </Remotion.Sequence>
+      </AbsoluteFill>
+    </Sequence>
   );
 };
