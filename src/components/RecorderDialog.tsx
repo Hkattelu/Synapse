@@ -52,34 +52,33 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     } else {
       setEnvError(null);
     }
+
+    // Cleanup on dialog close/unmount: stop tracks, clear refs
     return () => {
-      // Cleanup when dialog closes/unmounts: stop recorder and release all tracks
-      try {
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-          mediaRecorderRef.current.stop();
-        }
-      } catch {}
+      mediaRecorderRef.current?.stop();
       mediaRecorderRef.current = null;
       setIsPaused(false);
-      setStream((s) => {
-        s?.getTracks().forEach((t) => t.stop());
-        return null;
-      });
+      const s = stream;
+      if (s) {
+        s.getTracks().forEach((t) => t.stop());
+      }
+      setStream(null);
       if (videoRef.current) {
-        videoRef.current.srcObject = null;
+        try {
+          (videoRef.current as any).srcObject = null;
+        } catch {}
       }
     };
   }, [isOpen]);
 
-  // Revoke any previous pending preview URL when it's replaced or on unmount
+  // Revoke any previously-created pending preview URL when it is replaced/cleared or on unmount
   useEffect(() => {
     return () => {
-      if (pending?.url) {
+      if (pending?.url && pending.url.startsWith('blob:')) {
         URL.revokeObjectURL(pending.url);
       }
     };
-  }, [pending]);
-
+  }, [pending?.url]);
   const requestStream = async (): Promise<MediaStream | null> => {
     try {
       const media = await navigator.mediaDevices.getUserMedia({
@@ -88,8 +87,10 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       });
       setStream(media);
       if (videoRef.current && withCamera) {
-        videoRef.current.srcObject = media;
-        await videoRef.current.play().catch(() => {});
+        try {
+          (videoRef.current as any).srcObject = media;
+          await videoRef.current.play().catch(() => {});
+        } catch {}
       }
       return media;
     } catch (e) {
@@ -107,12 +108,19 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       notify({ type: 'error', title: 'Recorder', message: envError });
       return;
     }
-    // Acquire a stream and ensure preview uses the exact same instance
+    // If a previous pending preview exists (user recorded before and didn't save), revoke it
+    if (pending?.url) {
+      try { URL.revokeObjectURL(pending.url); } catch {}
+      setPending(null);
+    }
     const s = stream ?? (await requestStream());
     if (!s) return;
-    if (withCamera && videoRef.current && videoRef.current.srcObject !== s) {
-      videoRef.current.srcObject = s;
-      await videoRef.current.play().catch(() => {});
+    // Ensure the live preview uses the same stream we are about to record
+    if (withCamera && videoRef.current && (videoRef.current as any).srcObject !== s) {
+      try {
+        (videoRef.current as any).srcObject = s;
+        await videoRef.current.play().catch(() => {});
+      } catch {}
     }
     chunksRef.current = [];
     // Pick a supported mime type
@@ -134,11 +142,11 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     };
     mr.onstop = async () => {
       const blob = new Blob(chunksRef.current, { type: mime });
-      // Create a temporary URL for duration probing (will be revoked inside helper)
-      const probeUrl = URL.createObjectURL(blob);
-      const duration = await getBlobDuration(probeUrl, withCamera ? 'video' : 'audio');
-      // Create a persistent URL for the pending preview
+      // Create a dedicated preview URL for the pending review step
       const previewUrl = URL.createObjectURL(blob);
+      // Measure duration via a temporary URL that we immediately revoke inside helper
+      const tempUrl = URL.createObjectURL(blob);
+      const duration = await getBlobDuration(tempUrl, withCamera ? 'video' : 'audio');
       setPending({ url: previewUrl, mime, duration: duration ?? null, withCamera, blob });
       setIsRecording(false);
       setIsPaused(false);
@@ -148,18 +156,23 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current) {
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current = null;
+    // Stop the recorder first (triggers onstop -> pending creation)
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try { mediaRecorderRef.current.stop(); } catch {}
     }
+    mediaRecorderRef.current = null;
     setIsPaused(false);
-    setStream((s) => {
-      s?.getTracks().forEach((t) => t.stop());
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
-      }
-      return null;
-    });
+    // Always stop and release all device tracks (audio and video)
+    const s = stream;
+    if (s) {
+      s.getTracks().forEach((t) => t.stop());
+    }
+    setStream(null);
+    if (videoRef.current) {
+      try {
+        (videoRef.current as any).srcObject = null;
+      } catch {}
+    }
   };
 
   const togglePause = () => {
@@ -178,19 +191,18 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     if (isRecording) {
       stopRecording();
     } else {
-      setStream((s) => {
-        s?.getTracks().forEach((t) => t.stop());
-        if (videoRef.current) {
-          videoRef.current.srcObject = null;
-        }
-        return null;
-      });
+      const s = stream;
+      if (s) s.getTracks().forEach((t) => t.stop());
+      setStream(null);
+      if (videoRef.current) {
+        try { (videoRef.current as any).srcObject = null; } catch {}
+      }
     }
     // If there is a pending preview, discard it and revoke the URL
-    if (pending?.url) {
-      URL.revokeObjectURL(pending.url);
-      setPending(null);
+    if (pending?.url && pending.url.startsWith('blob:')) {
+      try { URL.revokeObjectURL(pending.url); } catch {}
     }
+    setPending(null);
     onClose();
   };
 
@@ -341,7 +353,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                       type: pending.withCamera ? 'video' : 'audio',
                       url: assetUrl,
                       duration: pending.duration ?? undefined,
-                      metadata: { fileSize: 0, mimeType: pending.mime },
+                      metadata: { fileSize: pending.blob.size, mimeType: pending.mime },
                     });
                     // Add to timeline at playhead
                     const start = playback.currentTime || 0;
@@ -363,7 +375,11 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                       animations: [],
                       keyframes: [],
                     });
-                    URL.revokeObjectURL(pending.url);
+                    notify({ type: 'success', title: 'Recorder', message: 'Added to Media Bin and timeline.' });
+                    // Revoke the temporary preview URL now that the asset owns its own URL
+                    if (pending.url && pending.url.startsWith('blob:')) {
+                      try { URL.revokeObjectURL(pending.url); } catch {}
+                    }
                     setPending(null);
                     notify({
                       type: 'success',
@@ -387,9 +403,12 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                       type: pending.withCamera ? 'video' : 'audio',
                       url: assetUrl,
                       duration: pending.duration ?? undefined,
-                      metadata: { fileSize: 0, mimeType: pending.mime },
+                      metadata: { fileSize: pending.blob.size, mimeType: pending.mime },
                     });
-                    URL.revokeObjectURL(pending.url);
+                    notify({ type: 'success', title: 'Recorder', message: 'Saved to Media Bin.' });
+                    if (pending.url && pending.url.startsWith('blob:')) {
+                      try { URL.revokeObjectURL(pending.url); } catch {}
+                    }
                     setPending(null);
                     notify({
                       type: 'success',
@@ -404,7 +423,9 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                 </button>
                 <button
                   onClick={() => {
-                    if (pending?.url) URL.revokeObjectURL(pending.url);
+                    if (pending.url && pending.url.startsWith('blob:')) {
+                      try { URL.revokeObjectURL(pending.url); } catch {}
+                    }
                     setPending(null);
                     onClose();
                   }}
