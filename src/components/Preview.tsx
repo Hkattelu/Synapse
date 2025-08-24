@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Player, type PlayerRef } from '@remotion/player';
-import { useProject, usePlayback } from '../state/hooks';
+import { useProject, usePlayback, useTimeline } from '../state/hooks';
 import { MainComposition } from '../remotion/MainComposition';
 import type { MainCompositionProps } from '../remotion/types';
 
@@ -11,9 +11,24 @@ interface PreviewProps {
 export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   const { project } = useProject();
   const { playback, play, pause, seek, setVolume, toggleMute } = usePlayback();
+  const { timeline, updateTimelineItem } = useTimeline();
   const playerRef = React.useRef<PlayerRef>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartTime, setDragStartTime] = useState(0);
+
+  // Find any talking head items to enable viewer controls
+  const talkingHeads = useMemo(
+    () => timeline.filter((i) => i.type === 'video' && i.properties.talkingHeadEnabled),
+    [timeline]
+  );
+  const bubbleHidden = useMemo(
+    () => talkingHeads.length > 0 && talkingHeads.every((i) => i.properties.talkingHeadHidden === true),
+    [talkingHeads]
+  );
+  const bubbleMuted = useMemo(
+    () => talkingHeads.length > 0 && talkingHeads.every((i) => i.muted === true),
+    [talkingHeads]
+  );
 
   // Prepare composition props from project state
   const compositionProps: MainCompositionProps = useMemo(() => {
@@ -226,7 +241,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     <div className={`bg-background-primary flex flex-col ${className}`}>
       {/* Preview Area */}
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full h-full max-w-4xl max-h-full">
+        <div className="relative w-full h-full max-w-4xl max-h-full">
           <Player
             acknowledgeRemotionLicense
             ref={playerRef}
@@ -246,6 +261,39 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             clickToPlay={false}
             onTimeUpdate={handleTimeUpdate}
           />
+          {talkingHeads.length > 0 && (
+            <div className="absolute top-3 right-3 flex items-center space-x-2 bg-neutral-900/70 backdrop-blur px-2 py-1 rounded text-white text-xs">
+              <button
+                onClick={() => {
+                  // Toggle hidden for all talking head items
+                  for (const item of talkingHeads) {
+                    updateTimelineItem(item.id, {
+                      properties: {
+                        ...item.properties,
+                        talkingHeadHidden: !bubbleHidden,
+                      },
+                    });
+                  }
+                }}
+                className="px-2 py-1 rounded hover:bg-neutral-800"
+                title={bubbleHidden ? 'Show bubble' : 'Hide bubble'}
+              >
+                {bubbleHidden ? 'Show bubble' : 'Hide bubble'}
+              </button>
+              <button
+                onClick={() => {
+                  // Toggle mute for all talking head items
+                  for (const item of talkingHeads) {
+                    updateTimelineItem(item.id, { muted: !bubbleMuted });
+                  }
+                }}
+                className="px-2 py-1 rounded hover:bg-neutral-800"
+                title={bubbleMuted ? 'Unmute bubble' : 'Mute bubble'}
+              >
+                {bubbleMuted ? 'Unmute' : 'Mute'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
