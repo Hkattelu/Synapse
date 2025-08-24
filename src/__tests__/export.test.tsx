@@ -135,7 +135,9 @@ describe('Export System', () => {
       });
       // Verify a vertical preset exists
       expect(
-        DEFAULT_EXPORT_PRESETS.some((p: { id: string }) => p.id === 'vertical-1080x1920')
+        DEFAULT_EXPORT_PRESETS.some(
+          (p: { id: string }) => p.id === 'vertical-1080x1920'
+        )
       ).toBe(true);
     });
 
@@ -278,7 +280,10 @@ describe('Export System', () => {
       vi.mocked(bundle).mockResolvedValue('/mock/bundle');
       vi.mocked(renderMedia).mockImplementation(
         async (options: {
-          onProgress?: (p: { renderedFrames: number; encodedFrames: number }) => void;
+          onProgress?: (p: {
+            renderedFrames: number;
+            encodedFrames: number;
+          }) => void;
         }): Promise<void> => {
           // Simulate progress callback
           options.onProgress?.({ renderedFrames: 450, encodedFrames: 450 });
@@ -331,11 +336,18 @@ describe('Export System', () => {
         retryCount: number;
         maxRetries: number;
       };
-      (exportManager as unknown as {
-        currentJob: MinimalJob | null;
-        isExporting: boolean;
-      }).currentJob = job as MinimalJob;
-      (exportManager as unknown as { currentJob: MinimalJob | null; isExporting: boolean }).isExporting = true;
+      (
+        exportManager as unknown as {
+          currentJob: MinimalJob | null;
+          isExporting: boolean;
+        }
+      ).currentJob = job as MinimalJob;
+      (
+        exportManager as unknown as {
+          currentJob: MinimalJob | null;
+          isExporting: boolean;
+        }
+      ).isExporting = true;
 
       exportManager.cancelExport();
 

@@ -13,7 +13,6 @@ import { Button } from './ui/Button';
 import { Label } from './ui/Label';
 import { Input } from './ui/Input';
 import { Textarea } from './ui/Textarea';
-<<<<<<< HEAD
 import Play from 'lucide-react/dist/esm/icons/play.js';
 import Video from 'lucide-react/dist/esm/icons/video.js';
 import Users from 'lucide-react/dist/esm/icons/users.js';
@@ -25,20 +24,6 @@ import Youtube from 'lucide-react/dist/esm/icons/youtube.js';
 import Mail from 'lucide-react/dist/esm/icons/mail.js';
 import MapPin from 'lucide-react/dist/esm/icons/map-pin.js';
 import Phone from 'lucide-react/dist/esm/icons/phone.js';
-=======
-import {
-  Play,
-  Video,
-  Users,
-  Sparkles,
-  Heart,
-  Github,
-  Twitter,
-  Youtube,
-  Mail,
-  MapPin,
-  Phone,
-} from 'lucide-react';
 
 interface HeroSectionProps {
   title?: string;

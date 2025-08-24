@@ -86,22 +86,6 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     }, 100);
 
     return () => clearTimeout(timer);
-    // Add a small delay to ensure player is ready
-    const timer = setTimeout(() => {
-      if (!playerRef.current) return;
-
-      try {
-        if (playback.isPlaying) {
-          playerRef.current.play();
-        } else {
-          playerRef.current.pause();
-        }
-      } catch (error) {
-        console.error('Error controlling player:', error);
-      }
-    }, 100);
-
-    return () => clearTimeout(timer);
   }, [playback.isPlaying]);
 
   // Manual timer for updating playback time when Remotion's onTimeUpdate doesn't work
@@ -118,14 +102,12 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
 
             // Only update if time has changed significantly
             if (Math.abs(timeInSeconds - playback.currentTime) > 0.01) {
-              console.log('Manual time update from player:', timeInSeconds);
               seek(timeInSeconds);
             }
           } else {
             // Fallback: increment time manually based on real time
             const newTime = playback.currentTime + 1000 / 30 / 1000; // 30fps increment
             if (newTime <= compositionProps.settings.duration) {
-              console.log('Fallback time update:', newTime);
               seek(newTime);
             } else {
               // End of video, pause
@@ -133,7 +115,6 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             }
           }
         } catch (error) {
-          console.log('Error getting player time, using fallback:', error);
           // Fallback: increment time manually
           const newTime = playback.currentTime + 1000 / 30 / 1000;
           if (newTime <= compositionProps.settings.duration) {
@@ -179,8 +160,6 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     (frame: number) => {
       if (!isDragging) {
         const timeInSeconds = frame / compositionProps.settings.fps;
-        console.log('Time update:', timeInSeconds, 'frame:', frame);
-        console.log('Time update:', timeInSeconds, 'frame:', frame);
         seek(timeInSeconds);
       }
     },
@@ -189,15 +168,9 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
 
   // Handle player play/pause
   const handlePlayPause = useCallback(() => {
-    console.log('Play/Pause clicked, current state:', playback.isPlaying);
-    console.log('Play/Pause clicked, current state:', playback.isPlaying);
     if (playback.isPlaying) {
-      console.log('Calling pause()');
-      console.log('Calling pause()');
       pause();
     } else {
-      console.log('Calling play()');
-      console.log('Calling play()');
       play();
     }
   }, [playback.isPlaying, play, pause]);
@@ -358,16 +331,12 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               maxWidth: '100%',
               maxHeight: '100%',
               objectFit: 'contain',
-              maxWidth: '100%',
-              maxHeight: '100%',
-              objectFit: 'contain',
             }}
             controls={false}
             loop={false}
             showVolumeControls={false}
             clickToPlay={false}
             onTimeUpdate={handleTimeUpdate}
-
           />
           {talkingHeads.length > 0 && (
             <div className="absolute top-3 right-3 flex items-center space-x-2 bg-neutral-900/70 backdrop-blur px-2 py-1 rounded text-white text-xs">
@@ -410,7 +379,6 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
         <div className="relative">
           <div
             className="h-2 bg-gray-600 rounded-full cursor-pointer relative"
-            className="h-2 bg-gray-600 rounded-full cursor-pointer relative"
             onMouseDown={handleTimelineDragStart}
             onClick={handleTimelineScrub}
           >
@@ -425,7 +393,6 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             {/* Playhead handle */}
             <div
               className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white rounded-full border-2 border-purple-600 shadow-lg cursor-grab active:cursor-grabbing transition-all duration-100"
-              className="h-full bg-purple-600 rounded-full relative transition-all duration-100"
               style={{
                 width: `${Math.max(0, Math.min(100, (playback.currentTime / compositionProps.settings.duration) * 100))}%`,
               }}
@@ -436,10 +403,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               style={{
                 left: `${Math.max(0, Math.min(100, (playback.currentTime / compositionProps.settings.duration) * 100))}%`,
                 transform: 'translateX(-50%)',
-                left: `${Math.max(0, Math.min(100, (playback.currentTime / compositionProps.settings.duration) * 100))}%`,
-                transform: 'translateX(-50%)',
               }}
-            />
             />
           </div>
 
@@ -545,14 +509,12 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
 
             <div className="flex items-center space-x-2 text-sm text-text-secondary">
               <span className="font-mono">
-              <span className="font-mono">
                 {formatTime(
                   playback.currentTime,
                   compositionProps.settings.fps
                 )}
               </span>
               <span>/</span>
-              <span className="font-mono">
               <span className="font-mono">
                 {formatTime(
                   compositionProps.settings.duration,

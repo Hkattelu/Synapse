@@ -47,36 +47,6 @@ export const TitleSequence: React.FC<TitleSequenceProps> = ({
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  
-  console.log('TitleSequence rendering:', {
-    text: item.properties.text,
-    startFrame,
-    durationInFrames,
-    currentFrame: frame,
-    relativeFrame: frame - startFrame,
-    x: item.properties.x,
-    y: item.properties.y
-  });
-
-  console.log('TitleSequence rendering:', {
-    text: item.properties.text,
-    startFrame,
-    durationInFrames,
-    currentFrame: frame,
-    relativeFrame: frame - startFrame,
-    x: item.properties.x,
-    y: item.properties.y,
-  });
-
-  console.log('TitleSequence rendering:', {
-    text: item.properties.text,
-    startFrame,
-    durationInFrames,
-    currentFrame: frame,
-    relativeFrame: frame - startFrame,
-    x: item.properties.x,
-    y: item.properties.y,
-  });
 
   // Get title properties
   const text = item.properties.text || 'Title Text';

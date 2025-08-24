@@ -1,12 +1,9 @@
 import { AppProvider } from './state/context';
+import { AuthProvider } from './state/authContext';
 import { useUI } from './state/hooks';
 import { DashboardView } from './components/DashboardView';
 import { StudioView } from './components/StudioView';
 import { LoadingOverlay } from './components/LoadingOverlay';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import { NotificationsProvider } from './state/notifications';
-import { HistoryProvider } from './state/history';
-import './App.css';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NotificationsProvider } from './state/notifications';
 import { HistoryProvider } from './state/history';
@@ -29,16 +26,18 @@ function AppContent() {
 
 function App() {
   return (
-    <AppProvider>
-      <NotificationsProvider>
-        <ErrorBoundary>
-          <HistoryProvider>
-            <AppContent />
-            <LoadingOverlay />
-          </HistoryProvider>
-        </ErrorBoundary>
-      </NotificationsProvider>
-    </AppProvider>
+    <AuthProvider>
+      <AppProvider>
+        <NotificationsProvider>
+          <ErrorBoundary>
+            <HistoryProvider>
+              <AppContent />
+              <LoadingOverlay />
+            </HistoryProvider>
+          </ErrorBoundary>
+        </NotificationsProvider>
+      </AppProvider>
+    </AuthProvider>
   );
 }
 

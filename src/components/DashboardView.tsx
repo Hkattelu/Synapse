@@ -2,7 +2,6 @@ import React, { Fragment, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useProject, useUI } from '../state/hooks';
 import { ProjectManager } from './ProjectManager';
-<<<<<<< HEAD
 import Play from 'lucide-react/dist/esm/icons/play.js';
 import Video from 'lucide-react/dist/esm/icons/video.js';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
@@ -10,17 +9,6 @@ import Users from 'lucide-react/dist/esm/icons/users.js';
 import Heart from 'lucide-react/dist/esm/icons/heart.js';
 import Plus from 'lucide-react/dist/esm/icons/plus.js';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.js';
-=======
-import {
-  Play,
-  Video,
-  Sparkles,
-  Users,
-  Heart,
-  Plus,
-  ArrowRight,
-} from 'lucide-react';
->>>>>>> 9eda38b (Implement some more composition features)
 
 export function DashboardView() {
   const { project, projects, createProject } = useProject();

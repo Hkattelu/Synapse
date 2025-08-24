@@ -13,13 +13,6 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
 }) => {
   const { fps } = useVideoConfig();
 
-  // Convert timeline items to Remotion sequences
-  console.log('MainComposition rendering with:', {
-    timelineItems: timeline.length,
-    mediaAssets: mediaAssets.length,
-    settings,
-  });
-
   const sequences = timeline
     .map((item) => {
       const startFrame = Math.round(item.startTime * fps);
@@ -79,12 +72,6 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
       );
     })
     .filter(Boolean);
-
-  console.log(
-    'Rendered sequences:',
-    sequences.length,
-    sequences.map((s) => s?.key)
-  );
 
   return (
     <AbsoluteFill

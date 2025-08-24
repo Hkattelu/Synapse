@@ -98,8 +98,8 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               Export Video
             </h2>
             <p className="text-sm text-text-secondary mt-1">
-              Export "{project?.name ?? 'Test Project'}" as video file
-              Export "{project?.name ?? 'Test Project'}" as video file
+              Export "{project?.name ?? 'Test Project'}" as video file Export "
+              {project?.name ?? 'Test Project'}" as video file
             </p>
           </div>
           {!isExporting && (

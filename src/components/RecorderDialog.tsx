@@ -110,7 +110,12 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       } catch {}
       setPending(null);
     }
-    const s = stream ?? (await navigator.mediaDevices.getUserMedia({ audio: true, video: withCamera }));
+    const s =
+      stream ??
+      (await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: withCamera,
+      }));
     chunksRef.current = [];
     // Pick a supported mime type
     const pickMime = () => {
@@ -139,7 +144,10 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       const blob = new Blob(chunksRef.current, { type: mime });
       const url = URL.createObjectURL(blob);
       // Get duration
-      const duration = await getBlobDuration(url, withCamera ? 'video' : 'audio');
+      const duration = await getBlobDuration(
+        url,
+        withCamera ? 'video' : 'audio'
+      );
       setPending({ url, mime, duration: duration ?? null, withCamera });
       setIsRecording(false);
       setIsPaused(false);
@@ -215,7 +223,12 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       <div className="bg-white rounded-xl w-full max-w-md overflow-hidden">
         <div className="p-4 border-b flex items-center justify-between">
           <h3 className="font-semibold">Record Narration</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            ✕
+          </button>
         </div>
         <div className="p-4 space-y-4">
           {envError && (
@@ -245,17 +258,31 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
               )}
               <div className="flex items-center space-x-2">
                 {!isRecording ? (
-                  <button onClick={startRecording} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">Start</button>
+                  <button
+                    onClick={startRecording}
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
+                  >
+                    Start
+                  </button>
                 ) : (
-                  <button onClick={stopRecording} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Stop</button>
+                  <button
+                    onClick={stopRecording}
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+                  >
+                    Stop
+                  </button>
                 )}
-                <button onClick={onClose} className="px-4 py-2 rounded border">Cancel</button>
+                <button onClick={onClose} className="px-4 py-2 rounded border">
+                  Cancel
+                </button>
               </div>
             </>
           )}
           {pending && (
             <div className="space-y-3">
-              <p className="text-sm text-gray-700">Recording ready. Choose an action:</p>
+              <p className="text-sm text-gray-700">
+                Recording ready. Choose an action:
+              </p>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => {
@@ -293,7 +320,11 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                       animations: [],
                       keyframes: [],
                     });
-                    notify({ type: 'success', title: 'Recorder', message: 'Added to Media Bin and timeline.' });
+                    notify({
+                      type: 'success',
+                      title: 'Recorder',
+                      message: 'Added to Media Bin and timeline.',
+                    });
                     setPending(null);
                     notify({
                       type: 'success',
@@ -322,7 +353,11 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                         mimeType: pending.mime,
                       },
                     });
-                    notify({ type: 'success', title: 'Recorder', message: 'Saved to Media Bin.' });
+                    notify({
+                      type: 'success',
+                      title: 'Recorder',
+                      message: 'Saved to Media Bin.',
+                    });
                     setPending(null);
                     notify({
                       type: 'success',
@@ -335,7 +370,15 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                 >
                   Save to Media Bin
                 </button>
-                <button onClick={() => { setPending(null); onClose(); }} className="px-4 py-2 rounded border">Discard</button>
+                <button
+                  onClick={() => {
+                    setPending(null);
+                    onClose();
+                  }}
+                  className="px-4 py-2 rounded border"
+                >
+                  Discard
+                </button>
               </div>
             </div>
           )}
