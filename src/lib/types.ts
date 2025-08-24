@@ -204,6 +204,21 @@ export interface UIState {
   mediaBinVisible: boolean;
   playback: PlaybackState;
   timeline: TimelineViewState;
+  // Music library fetched at app load, used by Music tab
+  musicLibrary: {
+    tracks: MusicTrack[];
+  };
+}
+
+// CC0/Public-domain music track metadata used by the Music Library
+export interface MusicTrack {
+  id: string;
+  title: string;
+  duration: number; // seconds
+  genre: string; // e.g., Upbeat, Chill, Focused
+  url: string; // Direct CDN/HTTPS URL
+  license?: string; // Optional, e.g., "Public Domain (CC0)"
+  source?: string; // Optional source page URL
 }
 
 // Export system types

@@ -1,12 +1,8 @@
 import React from 'react';
-import {
-  AbsoluteFill,
-  Sequence,
-  Video,
-  Img,
-  staticFile,
-  useVideoConfig,
-} from 'remotion';
+import { AbsoluteFill, Sequence, Video, Img, useVideoConfig } from 'remotion';
+// Keep a namespace import as well so we can defensively check for optional exports
+// like `Audio` in test environments where `remotion` is partially mocked.
+import * as RemotionNS from 'remotion';
 import type { VideoSequenceProps } from './types';
 
 export const VideoSequence: React.FC<VideoSequenceProps> = ({
@@ -64,8 +60,8 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
             {asset.type === 'video' && (
               <Video
                 src={asset.url}
-                volume={item.properties.volume || 1}
-                playbackRate={item.properties.playbackRate || 1}
+                volume={item.properties.volume ?? 1}
+                playbackRate={item.properties.playbackRate ?? 1}
                 muted={item.muted}
                 style={{
                   width: '100%',
@@ -80,8 +76,8 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
             {asset.type === 'video' && (
               <Video
                 src={asset.url}
-                volume={item.properties.volume || 1}
-                playbackRate={item.properties.playbackRate || 1}
+                volume={item.properties.volume ?? 1}
+                playbackRate={item.properties.playbackRate ?? 1}
                 muted={item.muted}
                 style={{
                   width: '100%',
@@ -103,18 +99,47 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
             )}
 
             {asset.type === 'audio' && (
-              <AbsoluteFill
-                style={{
-                  backgroundColor: 'rgba(0, 255, 0, 0.3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '24px',
-                  color: 'white',
-                }}
-              >
-                🎵 {asset.name}
-              </AbsoluteFill>
+              <>
+                {/* Visual placeholder */}
+                <AbsoluteFill
+                  style={{
+                    backgroundColor: 'rgba(0, 255, 0, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '24px',
+                    color: 'white',
+                  }}
+                >
+                  🎵 {asset.name}
+                </AbsoluteFill>
+                {/* Actual audio playback (guarded for test mocks) */}
+                {(() => {
+                  type AudioProps = {
+                    src: string;
+                    volume?: number;
+                    playbackRate?: number;
+                    muted?: boolean;
+                  };
+                  const hasAudio =
+                    'Audio' in
+                    (RemotionNS as unknown as Record<string, unknown>);
+                  if (!hasAudio) return null;
+                  const AudioComp = (
+                    RemotionNS as unknown as {
+                      Audio: React.ComponentType<AudioProps>;
+                    }
+                  ).Audio;
+                  return (
+                    <AudioComp
+                      src={asset.url}
+                      volume={item.properties.volume ?? 1}
+                      playbackRate={item.properties.playbackRate ?? 1}
+                      muted={item.muted}
+                    />
+                  );
+                })()}
+              </>
             )}
 
             {asset.type === 'code' && (

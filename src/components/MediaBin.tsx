@@ -4,6 +4,7 @@ import { useNotifications } from '../state/notifications';
 import { validateMediaAsset } from '../lib/validation';
 import { RecorderDialog } from './RecorderDialog';
 import { AudioWaveform } from './Waveform';
+import { MusicLibrary } from './MusicLibrary';
 import type { MediaAsset, MediaAssetType } from '../lib/types';
 
 interface MediaBinProps {
@@ -39,6 +40,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
   const [uploadErrors, setUploadErrors] = useState<FileUploadError[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const { notify } = useNotifications();
+  const [activeTab, setActiveTab] = useState<'media' | 'music'>('media');
 
   // Determine media type from MIME type
   const getMediaType = (mimeType: string): MediaAssetType | null => {
@@ -395,9 +397,25 @@ export function MediaBin({ className = '' }: MediaBinProps) {
       {/* Header */}
       <div className="p-4 border-b border-border-subtle">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
-            Media Bin
-          </h3>
+          <div className="flex items-center space-x-2">
+            <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
+              Media
+            </h3>
+            <div className="flex bg-background-tertiary rounded-md overflow-hidden">
+              <button
+                onClick={() => setActiveTab('media')}
+                className={`px-3 py-1 text-xs ${activeTab === 'media' ? 'bg-primary-600 text-white shadow-glow' : 'text-text-secondary hover:text-text-primary'}`}
+              >
+                Library
+              </button>
+              <button
+                onClick={() => setActiveTab('music')}
+                className={`px-3 py-1 text-xs ${activeTab === 'music' ? 'bg-primary-600 text-white shadow-glow' : 'text-text-secondary hover:text-text-primary'}`}
+              >
+                Music
+              </button>
+            </div>
+          </div>
           <div className="flex space-x-2">
             <button
               onClick={() => setRecorderOpen(true)}
@@ -461,7 +479,9 @@ export function MediaBin({ className = '' }: MediaBinProps) {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        {mediaAssets.length === 0 ? (
+        {activeTab === 'music' ? (
+          <MusicLibrary />
+        ) : mediaAssets.length === 0 ? (
           /* Empty state with drag and drop */
           <div
             className={`h-full flex items-center justify-center border-2 border-dashed transition-colors ${
