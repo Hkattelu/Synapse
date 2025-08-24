@@ -26,6 +26,7 @@ vi.mock('remotion', () => ({
   ),
   Img: ({ src, style }: any) => <img src={src} style={style} alt="" />,
   staticFile: (path: string) => `/static/${path}`,
+  useVideoConfig: () => ({ width: 1920, height: 1080, fps: 30 }),
 }));
 
 const mockMediaAsset: MediaAsset = {

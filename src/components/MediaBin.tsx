@@ -579,7 +579,11 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                               />
                             </svg>
                             <div className="text-xs font-mono bg-background-tertiary px-2 py-1 rounded">
-                              {displayLanguage(asset.metadata.language)}
+                              {asset.metadata.language
+                                ? asset.metadata.language === 'javascript'
+                                  ? 'js'
+                                  : asset.metadata.language
+                                : 'js'}
                             </div>
                           </div>
                         )}

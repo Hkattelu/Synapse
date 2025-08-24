@@ -119,6 +119,17 @@ export interface ItemProperties {
   fontFamily?: string;
   color?: string;
   backgroundColor?: string;
+
+  // Talking head bubble overlay
+  // When enabled on a video timeline item, the video is rendered as a small
+  // circular (or rounded) bubble anchored to a screen corner. Intended for
+  // picture-in-picture narration overlays.
+  talkingHeadEnabled?: boolean;
+  talkingHeadShape?: 'circle' | 'rounded';
+  talkingHeadCorner?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  talkingHeadSize?: 'sm' | 'md';
+  // Viewer-controlled, non-destructive visibility toggle
+  talkingHeadHidden?: boolean;
 }
 
 export interface TimelineItem {

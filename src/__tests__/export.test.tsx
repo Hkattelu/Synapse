@@ -111,14 +111,18 @@ describe('Export System', () => {
       });
     });
 
-    it('should provide default export presets', () => {
-      expect(DEFAULT_EXPORT_PRESETS).toHaveLength(4);
+    it('should provide default export presets (including vertical)', () => {
+      expect(DEFAULT_EXPORT_PRESETS.length).toBeGreaterThanOrEqual(6);
       expect(DEFAULT_EXPORT_PRESETS[0]).toMatchObject({
         id: 'youtube-1080p',
         name: 'YouTube 1080p',
         category: 'web',
         isDefault: true,
       });
+      // Verify a vertical preset exists
+      expect(
+        DEFAULT_EXPORT_PRESETS.some((p: { id: string }) => p.id === 'vertical-1080x1920')
+      ).toBe(true);
     });
 
     it('should format file size correctly', () => {
@@ -213,6 +217,8 @@ describe('Export System', () => {
       fireEvent.click(screen.getByText('Cancel'));
       expect(onClose).toHaveBeenCalled();
     });
+
+    // Selection and value propagation to context are covered in component tests.
   });
 
   describe('Export Process', () => {
@@ -257,11 +263,11 @@ describe('Export System', () => {
 
       vi.mocked(bundle).mockResolvedValue('/mock/bundle');
       vi.mocked(renderMedia).mockImplementation(
-        async (options: any): Promise<any> => {
+        async (options: {
+          onProgress?: (p: { renderedFrames: number; encodedFrames: number }) => void;
+        }): Promise<void> => {
           // Simulate progress callback
-          if (options.onProgress) {
-            options.onProgress({ renderedFrames: 450, encodedFrames: 450 });
-          }
+          options.onProgress?.({ renderedFrames: 450, encodedFrames: 450 });
           return Promise.resolve();
         }
       );
@@ -301,8 +307,21 @@ describe('Export System', () => {
       };
 
       // Simulate active export
-      (exportManager as any).currentJob = job;
-      (exportManager as any).isExporting = true;
+      type MinimalJob = {
+        id: string;
+        projectId: string;
+        projectName: string;
+        settings: ReturnType<typeof getDefaultExportSettings>;
+        progress: { status: 'rendering'; progress: number };
+        createdAt: Date;
+        retryCount: number;
+        maxRetries: number;
+      };
+      (exportManager as unknown as {
+        currentJob: MinimalJob | null;
+        isExporting: boolean;
+      }).currentJob = job as MinimalJob;
+      (exportManager as unknown as { currentJob: MinimalJob | null; isExporting: boolean }).isExporting = true;
 
       exportManager.cancelExport();
 

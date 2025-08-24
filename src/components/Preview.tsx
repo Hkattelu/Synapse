@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Player, type PlayerRef } from '@remotion/player';
-import { useProject, usePlayback } from '../state/hooks';
+import { useProject, usePlayback, useTimeline } from '../state/hooks';
 import { MainComposition } from '../remotion/MainComposition';
 import type { MainCompositionProps } from '../remotion/types';
 
@@ -11,9 +11,30 @@ interface PreviewProps {
 export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   const { project } = useProject();
   const { playback, play, pause, seek, setVolume, toggleMute } = usePlayback();
+  const { timeline, updateTimelineItem } = useTimeline();
   const playerRef = React.useRef<PlayerRef>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartTime, setDragStartTime] = useState(0);
+
+  // Find any talking head items to enable viewer controls
+  const talkingHeads = useMemo(
+    () =>
+      timeline.filter(
+        (i) => i.type === 'video' && i.properties.talkingHeadEnabled
+      ),
+    [timeline]
+  );
+  const bubbleHidden = useMemo(
+    () =>
+      talkingHeads.length > 0 &&
+      talkingHeads.every((i) => i.properties.talkingHeadHidden === true),
+    [talkingHeads]
+  );
+  const bubbleMuted = useMemo(
+    () =>
+      talkingHeads.length > 0 && talkingHeads.every((i) => i.muted === true),
+    [talkingHeads]
+  );
 
   // Prepare composition props from project state
   const compositionProps: MainCompositionProps = useMemo(() => {
@@ -86,7 +107,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             }
           } else {
             // Fallback: increment time manually based on real time
-            const newTime = playback.currentTime + (1000 / 30) / 1000; // 30fps increment
+            const newTime = playback.currentTime + 1000 / 30 / 1000; // 30fps increment
             if (newTime <= compositionProps.settings.duration) {
               console.log('Fallback time update:', newTime);
               seek(newTime);
@@ -98,7 +119,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
         } catch (error) {
           console.log('Error getting player time, using fallback:', error);
           // Fallback: increment time manually
-          const newTime = playback.currentTime + (1000 / 30) / 1000;
+          const newTime = playback.currentTime + 1000 / 30 / 1000;
           if (newTime <= compositionProps.settings.duration) {
             seek(newTime);
           } else {
@@ -109,7 +130,15 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     }, 1000 / 30); // Update at 30fps
 
     return () => clearInterval(interval);
-  }, [playback.isPlaying, playback.currentTime, seek, compositionProps.settings.fps, compositionProps.settings.duration, isDragging, pause]);
+  }, [
+    playback.isPlaying,
+    playback.currentTime,
+    seek,
+    compositionProps.settings.fps,
+    compositionProps.settings.duration,
+    isDragging,
+    pause,
+  ]);
 
   // Sync current time with player (only when seeking manually)
   useEffect(() => {
@@ -120,7 +149,9 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     );
 
     // Only seek if there's a significant difference to avoid conflicts
-    const playerCurrentFrame = Math.round(playback.currentTime * compositionProps.settings.fps);
+    const playerCurrentFrame = Math.round(
+      playback.currentTime * compositionProps.settings.fps
+    );
     if (Math.abs(currentFrame - playerCurrentFrame) > 1) {
       playerRef.current.seekTo(currentFrame);
     }
@@ -312,8 +343,40 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             showVolumeControls={false}
             clickToPlay={false}
             onTimeUpdate={handleTimeUpdate}
-
           />
+          {talkingHeads.length > 0 && (
+            <div className="absolute top-3 right-3 flex items-center space-x-2 bg-neutral-900/70 backdrop-blur px-2 py-1 rounded text-white text-xs">
+              <button
+                onClick={() => {
+                  // Toggle hidden for all talking head items
+                  for (const item of talkingHeads) {
+                    updateTimelineItem(item.id, {
+                      properties: {
+                        ...item.properties,
+                        talkingHeadHidden: !bubbleHidden,
+                      },
+                    });
+                  }
+                }}
+                className="px-2 py-1 rounded hover:bg-neutral-800"
+                title={bubbleHidden ? 'Show bubble' : 'Hide bubble'}
+              >
+                {bubbleHidden ? 'Show bubble' : 'Hide bubble'}
+              </button>
+              <button
+                onClick={() => {
+                  // Toggle mute for all talking head items
+                  for (const item of talkingHeads) {
+                    updateTimelineItem(item.id, { muted: !bubbleMuted });
+                  }
+                }}
+                className="px-2 py-1 rounded hover:bg-neutral-800"
+                title={bubbleMuted ? 'Unmute bubble' : 'Mute bubble'}
+              >
+                {bubbleMuted ? 'Unmute' : 'Mute'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

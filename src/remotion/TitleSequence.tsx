@@ -47,7 +47,7 @@ export const TitleSequence: React.FC<TitleSequenceProps> = ({
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  
+
   console.log('TitleSequence rendering:', {
     text: item.properties.text,
     startFrame,
@@ -55,7 +55,7 @@ export const TitleSequence: React.FC<TitleSequenceProps> = ({
     currentFrame: frame,
     relativeFrame: frame - startFrame,
     x: item.properties.x,
-    y: item.properties.y
+    y: item.properties.y,
   });
 
   // Get title properties
