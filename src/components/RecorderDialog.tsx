@@ -127,7 +127,6 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
           ]
         : ['audio/webm;codecs=opus', 'audio/webm'];
       for (const m of candidates) {
-        // @ts-expect-error Safari types may not include isTypeSupported
         if (window.MediaRecorder?.isTypeSupported?.(m)) return m;
       }
       return '';
@@ -148,7 +147,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
         url,
         withCamera ? 'video' : 'audio'
       );
-      setPending({ url, mime, duration: duration ?? null, withCamera });
+      setPending({ url, mime, duration: duration ?? null, withCamera, blob });
       setIsRecording(false);
       setIsPaused(false);
     };

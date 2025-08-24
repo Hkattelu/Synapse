@@ -594,6 +594,8 @@ const ContactSection: React.FC<ContactFormProps> = ({ onSubmit }) => {
 };
 
 const Footer: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
     <footer className="bg-gray-900 text-white py-12">
       <div className="container mx-auto px-4">

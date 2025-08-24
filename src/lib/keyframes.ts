@@ -119,7 +119,7 @@ export class KeyframeManager {
     item: TimelineItem,
     property: keyof ItemProperties,
     time: number
-  ): number | string | undefined {
+  ): number | string | boolean | undefined {
     const keyframes = this.getPropertyKeyframes(item, property);
 
     if (keyframes.length === 0) {

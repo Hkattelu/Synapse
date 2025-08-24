@@ -29,7 +29,9 @@ export function MusicLibrary({ className = '' }: MusicLibraryProps) {
     }
     el.src = track.url;
     el.currentTime = 0;
-    el.play().catch(() => {/* ignore */});
+    el.play().catch(() => {
+      /* ignore */
+    });
     setPlayingId(track.id);
   };
 
@@ -48,7 +50,9 @@ export function MusicLibrary({ className = '' }: MusicLibraryProps) {
     );
     if (audioTracks.size === 0) {
       // Create a new track at the end
-      const maxTrack = timeline.length ? Math.max(...timeline.map((i) => i.track)) : -1;
+      const maxTrack = timeline.length
+        ? Math.max(...timeline.map((i) => i.track))
+        : -1;
       return maxTrack + 1;
     }
     // Use lowest existing audio track for now (simple rule)
@@ -94,7 +98,8 @@ export function MusicLibrary({ className = '' }: MusicLibraryProps) {
       map.get(t.genre)!.push(t);
     }
     // Sort each group by title
-    for (const arr of map.values()) arr.sort((a, b) => a.title.localeCompare(b.title));
+    for (const arr of map.values())
+      arr.sort((a, b) => a.title.localeCompare(b.title));
     return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
   }, [tracks]);
 
@@ -102,22 +107,37 @@ export function MusicLibrary({ className = '' }: MusicLibraryProps) {
     <div className={`flex flex-col h-full ${className}`}>
       <div className="p-3 border-b border-border-subtle">
         <div className="flex items-center justify-between">
-          <h4 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">Music</h4>
-          <span className="text-xs text-text-tertiary">{tracks.length} tracks</span>
+          <h4 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
+            Music
+          </h4>
+          <span className="text-xs text-text-tertiary">
+            {tracks.length} tracks
+          </span>
         </div>
-        <p className="text-xs text-text-tertiary mt-1">All tracks are Public Domain/CC0-equivalent from FreePD.</p>
+        <p className="text-xs text-text-tertiary mt-1">
+          All tracks are Public Domain/CC0-equivalent from FreePD.
+        </p>
       </div>
 
       <div className="flex-1 overflow-y-auto p-2 space-y-4">
         {byGenre.map(([genre, list]) => (
           <div key={genre}>
-            <div className="text-xs uppercase text-text-tertiary mb-1">{genre}</div>
+            <div className="text-xs uppercase text-text-tertiary mb-1">
+              {genre}
+            </div>
             <div className="divide-y divide-border-subtle border border-border-subtle rounded-md overflow-hidden">
               {list.map((t) => (
-                <div key={t.id} className="flex items-center justify-between bg-background-tertiary hover:bg-neutral-700/60 transition-colors px-3 py-2">
+                <div
+                  key={t.id}
+                  className="flex items-center justify-between bg-background-tertiary hover:bg-neutral-700/60 transition-colors px-3 py-2"
+                >
                   <div className="min-w-0 flex-1 mr-2">
-                    <div className="text-sm text-text-primary truncate">{t.title}</div>
-                    <div className="text-xs text-text-tertiary">{formatDuration(t.duration)}</div>
+                    <div className="text-sm text-text-primary truncate">
+                      {t.title}
+                    </div>
+                    <div className="text-xs text-text-tertiary">
+                      {formatDuration(t.duration)}
+                    </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <button

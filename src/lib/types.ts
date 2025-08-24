@@ -116,7 +116,6 @@ export interface ItemProperties {
 
   // Title-specific properties
   text?: string;
-  fontFamily?: string;
   color?: string;
   backgroundColor?: string;
 

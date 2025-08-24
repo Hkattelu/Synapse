@@ -255,23 +255,19 @@ function StudioViewContent() {
         className="flex-1 flex overflow-hidden bg-white/50 backdrop-blur-sm m-4 rounded-2xl border border-purple-200/50 shadow-xl"
       >
         {/* Main Editor Area */}
-        <main className="flex-1 flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-l-2xl overflow-hidden">
-          <div className="flex-1 flex flex-col">
-            {/* Preview Area */}
-            <div className="flex-1 bg-black border-r border-gray-700/50 rounded-tl-2xl overflow-hidden">
-              <Preview className="h-full" />
-            </div>
+        <main className="flex-1 flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-l-2xl overflow-hidden min-w-0">
+          {/* Preview Area */}
+          <div className="flex-1 bg-black border-r border-gray-700/50 rounded-tl-2xl overflow-hidden">
+            <Preview className="h-full w-full" />
+          </div>
 
-            {/* Timeline Area - Always visible */}
-            <div className="border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900">
-              {timelineMode === 'enhanced' ? (
-                <EnhancedTimelineView className="h-full" />
-              ) : (
-                <div className="h-full">
-                  <Timeline className="h-full" />
-                </div>
-              )}
-            </div>
+          {/* Timeline Area - Always visible with fixed height */}
+          <div className="h-64 border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900 flex-shrink-0">
+            {timelineMode === 'enhanced' ? (
+              <EnhancedTimelineView className="h-full w-full" />
+            ) : (
+              <Timeline className="h-full w-full" />
+            )}
           </div>
         </main>
 

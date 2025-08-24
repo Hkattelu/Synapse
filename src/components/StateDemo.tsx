@@ -12,7 +12,7 @@ export function StateDemo() {
   const { project, createProject, isDirty } = useProject();
   const { timeline, addTimelineItem, timelineDuration } = useTimeline();
   const { mediaAssets, addMediaAsset } = useMediaAssets();
-  const { ui, setCurrentView, toggleSidebar } = useUI();
+  const { ui, toggleSidebar } = useUI();
   const { playback, togglePlayback, setVolume } = usePlayback();
 
   const handleCreateProject = () => {
@@ -117,11 +117,9 @@ export function StateDemo() {
             {ui.sidebarVisible ? 'Visible' : 'Hidden'}
           </div>
           <button
-            onClick={() =>
-              setCurrentView(
-                ui.currentView === 'dashboard' ? 'studio' : 'dashboard'
-              )
-            }
+            onClick={() => {
+              // setCurrentView(ui.currentView === 'dashboard' ? 'studio' : 'dashboard');
+            }}
             className="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-sm mr-2"
           >
             Switch View

@@ -288,7 +288,7 @@ export function Timeline({ className = '' }: TimelineProps) {
 
   return (
     <div
-      className={`timeline bg-background-secondary border-t border-border-subtle ${className}`}
+      className={`timeline bg-background-secondary border-t border-border-subtle flex flex-col ${className}`}
     >
       {/* Timeline Header */}
       <div className="timeline-header bg-background-tertiary border-b border-border-subtle p-2 flex items-center justify-between">
@@ -357,8 +357,7 @@ export function Timeline({ className = '' }: TimelineProps) {
 
       {/* Timeline Content */}
       <div
-        className="timeline-content overflow-auto"
-        style={{ height: '200px' }}
+        className="timeline-content overflow-auto flex-1"
         onScroll={handleScroll}
       >
         <div

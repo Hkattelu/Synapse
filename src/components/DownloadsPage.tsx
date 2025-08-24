@@ -34,7 +34,7 @@ const Navigation: React.FC = () => {
             </div>
             <h1 className="text-xl font-bold text-gray-900">Synapse Studio</h1>
           </div>
-          
+
           <div className="flex items-center space-x-6">
             <button
               onClick={() => navigate('/')}
@@ -75,8 +75,8 @@ const DownloadCard: React.FC<{ option: DownloadOption }> = ({ option }) => {
       transition={{ duration: 0.5 }}
       viewport={{ once: true }}
       className={`relative bg-white border-2 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 ${
-        option.isRecommended 
-          ? 'border-purple-500 ring-2 ring-purple-200' 
+        option.isRecommended
+          ? 'border-purple-500 ring-2 ring-purple-200'
           : 'border-gray-200 hover:border-purple-300'
       }`}
     >
@@ -87,14 +87,16 @@ const DownloadCard: React.FC<{ option: DownloadOption }> = ({ option }) => {
           </span>
         </div>
       )}
-      
+
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
           <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
             {option.icon}
           </div>
           <div>
-            <h3 className="text-xl font-bold text-gray-900">{option.platform}</h3>
+            <h3 className="text-xl font-bold text-gray-900">
+              {option.platform}
+            </h3>
             <p className="text-sm text-gray-600">Version {option.version}</p>
           </div>
         </div>
@@ -107,10 +109,15 @@ const DownloadCard: React.FC<{ option: DownloadOption }> = ({ option }) => {
 
       {option.requirements && (
         <div className="mb-4">
-          <h4 className="text-sm font-semibold text-gray-900 mb-2">Requirements:</h4>
+          <h4 className="text-sm font-semibold text-gray-900 mb-2">
+            Requirements:
+          </h4>
           <ul className="space-y-1">
             {option.requirements.map((req, index) => (
-              <li key={index} className="flex items-center text-sm text-gray-600">
+              <li
+                key={index}
+                className="flex items-center text-sm text-gray-600"
+              >
                 <CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
                 {req}
               </li>
@@ -141,64 +148,68 @@ const DownloadsPage: React.FC = () => {
       icon: <Monitor className="w-6 h-6 text-purple-600" />,
       version: '1.0.0',
       size: '125 MB',
-      description: 'Native Windows application with full desktop integration and performance optimization.',
+      description:
+        'Native Windows application with full desktop integration and performance optimization.',
       downloadUrl: '#',
       isRecommended: true,
       requirements: [
         'Windows 10 or later (64-bit)',
         '4GB RAM minimum, 8GB recommended',
         '2GB free disk space',
-        'DirectX 11 compatible graphics'
-      ]
+        'DirectX 11 compatible graphics',
+      ],
     },
     {
       platform: 'macOS',
       icon: <Monitor className="w-6 h-6 text-purple-600" />,
       version: '1.0.0',
       size: '130 MB',
-      description: 'Optimized for macOS with native Apple Silicon support and seamless integration.',
+      description:
+        'Optimized for macOS with native Apple Silicon support and seamless integration.',
       downloadUrl: '#',
       requirements: [
         'macOS 11.0 (Big Sur) or later',
         'Intel or Apple Silicon processor',
         '4GB RAM minimum, 8GB recommended',
-        '2GB free disk space'
-      ]
+        '2GB free disk space',
+      ],
     },
     {
       platform: 'Linux',
       icon: <Monitor className="w-6 h-6 text-purple-600" />,
       version: '1.0.0',
       size: '120 MB',
-      description: 'AppImage format for universal Linux compatibility across all major distributions.',
+      description:
+        'AppImage format for universal Linux compatibility across all major distributions.',
       downloadUrl: '#',
       requirements: [
         'Ubuntu 18.04+ / Fedora 32+ / Arch Linux',
         'X11 or Wayland display server',
         '4GB RAM minimum, 8GB recommended',
-        '2GB free disk space'
-      ]
+        '2GB free disk space',
+      ],
     },
     {
       platform: 'Web App',
       icon: <Globe className="w-6 h-6 text-purple-600" />,
       version: '1.0.0',
       size: 'No download',
-      description: 'Run Synapse Studio directly in your browser. Perfect for quick edits and collaboration.',
+      description:
+        'Run Synapse Studio directly in your browser. Perfect for quick edits and collaboration.',
       downloadUrl: '/projects',
       requirements: [
         'Modern web browser (Chrome, Firefox, Safari, Edge)',
         'WebGL 2.0 support',
         'Stable internet connection',
-        '2GB RAM minimum'
-      ]
-    }
+        '2GB RAM minimum',
+      ],
+    },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      
+
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
@@ -212,8 +223,9 @@ const DownloadsPage: React.FC = () => {
               Download Synapse Studio
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Choose the perfect version for your platform. All versions include the same powerful features 
-              for creating authentic, human-powered video content.
+              Choose the perfect version for your platform. All versions include
+              the same powerful features for creating authentic, human-powered
+              video content.
             </p>
           </motion.div>
 
@@ -232,36 +244,47 @@ const DownloadsPage: React.FC = () => {
             viewport={{ once: true }}
             className="bg-white rounded-2xl p-8 shadow-lg"
           >
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">What's Included</h2>
-            
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              What's Included
+            </h2>
+
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <div className="text-center">
                 <div className="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                   <Sparkles className="w-8 h-8 text-purple-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Full Feature Set</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Full Feature Set
+                </h3>
                 <p className="text-gray-600">
-                  Complete video editing suite with timeline, effects, and export capabilities.
+                  Complete video editing suite with timeline, effects, and
+                  export capabilities.
                 </p>
               </div>
-              
+
               <div className="text-center">
                 <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                   <CheckCircle className="w-8 h-8 text-green-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Subscription</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No Subscription
+                </h3>
                 <p className="text-gray-600">
-                  One-time download, yours forever. No monthly fees or hidden costs.
+                  One-time download, yours forever. No monthly fees or hidden
+                  costs.
                 </p>
               </div>
-              
+
               <div className="text-center">
                 <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                   <Github className="w-8 h-8 text-blue-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Open Source</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Open Source
+                </h3>
                 <p className="text-gray-600">
-                  Built in the open with community contributions and transparency.
+                  Built in the open with community contributions and
+                  transparency.
                 </p>
               </div>
             </div>
@@ -269,7 +292,9 @@ const DownloadsPage: React.FC = () => {
             <div className="border-t border-gray-200 pt-6">
               <div className="flex flex-col md:flex-row items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Need Help?</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Need Help?
+                  </h3>
                   <p className="text-gray-600">
                     Check out our documentation and community support resources.
                   </p>
@@ -296,11 +321,15 @@ const DownloadsPage: React.FC = () => {
             viewport={{ once: true }}
             className="mt-8 bg-purple-50 border border-purple-200 rounded-2xl p-6"
           >
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Latest Release - v1.0.0</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              Latest Release - v1.0.0
+            </h3>
             <ul className="space-y-2 text-gray-700">
               <li className="flex items-start">
                 <CheckCircle className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                <span>Initial release with full video editing capabilities</span>
+                <span>
+                  Initial release with full video editing capabilities
+                </span>
               </li>
               <li className="flex items-start">
                 <CheckCircle className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />

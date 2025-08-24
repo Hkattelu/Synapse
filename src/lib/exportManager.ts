@@ -95,7 +95,7 @@ export const DEFAULT_EXPORT_PRESETS = [
     settings: {
       format: 'mp4',
       codec: 'h264',
-      quality: 'ultra',
+      quality: 'high',
       width: 2160,
       height: 3840,
       fps: 30,

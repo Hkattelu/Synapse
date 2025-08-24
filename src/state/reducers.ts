@@ -259,13 +259,6 @@ function projectReducer(state: AppState, action: ProjectAction): AppState {
         ui: { ...state.ui, currentView: 'dashboard' },
       };
 
-    case 'SET_LOADING':
-      return {
-        ...state,
-        isLoading: action.payload.isLoading,
-        loadingMessage: action.payload.message,
-      };
-
     default:
       return state;
   }

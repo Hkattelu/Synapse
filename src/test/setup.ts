@@ -4,11 +4,11 @@ import Prism from 'prismjs';
 
 // Silence AppProvider project loading and saving side-effects in tests
 vi.mock('../lib/projectManager', async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual = (await importOriginal()) as any;
   return {
     ...actual,
     ProjectManager: {
-      ...actual.ProjectManager,
+      ...(actual.ProjectManager || {}),
       getAllProjects: vi.fn(async () => []),
       getCurrentProject: vi.fn(() => null),
       saveProject: vi.fn(async () => {}),

@@ -307,6 +307,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
             fontSize: 16,
           },
           animations: [],
+          keyframes: [],
         });
       } else {
         addTimelineItem({

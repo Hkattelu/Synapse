@@ -349,7 +349,7 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
 
   return (
     <div
-      className={`advanced-timeline bg-gray-800 border-t border-gray-700 ${className}`}
+      className={`advanced-timeline bg-gray-800 border-t border-gray-700 flex flex-col ${className}`}
     >
       {/* Advanced Timeline Header */}
       <div className="timeline-header bg-gray-900 border-b border-gray-700 p-2 flex items-center justify-between">
@@ -465,8 +465,7 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
 
       {/* Timeline Content */}
       <div
-        className="timeline-content overflow-auto"
-        style={{ height: '400px' }} // Increased height for keyframe editing
+        className="timeline-content overflow-auto flex-1"
         onScroll={(e) => {
           const scrollLeft = e.currentTarget.scrollLeft;
           updateTimelineView({ scrollPosition: scrollLeft });

@@ -61,7 +61,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
       // downstream pipelines use the exact values (width/height, etc.).
       // Pass the currently selected settings explicitly so tests and
       // downstream pipelines use the exact values (width/height, etc.).
-      await startExport(project, { ...settings }, { ...settings });
+      await startExport(project, { ...settings });
       // Keep dialog open to show progress
     } catch (error) {
       console.error('Export failed:', error);

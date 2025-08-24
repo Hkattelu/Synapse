@@ -10,6 +10,14 @@ interface PreviewProps {
   className?: string;
 }
 
+// Helper function to format time with frame accuracy
+function formatTime(seconds: number, fps: number = 30): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  const frames = Math.floor((seconds % 1) * fps);
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${frames.toString().padStart(2, '0')}`;
+}
+
 export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   const { project } = useProject();
   const { playback, play, pause, seek, setVolume, toggleMute } = usePlayback();
@@ -23,7 +31,8 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   const noopUpdate: TimelineApi['updateTimelineItem'] = () => {};
   let useTimelineFn: (() => TimelineApi) | undefined;
   if (Object.prototype.hasOwnProperty.call(Hooks, 'useTimeline')) {
-    const candidate = (Hooks as unknown as { useTimeline: unknown }).useTimeline;
+    const candidate = (Hooks as unknown as { useTimeline: unknown })
+      .useTimeline;
     if (typeof candidate === 'function') {
       useTimelineFn = candidate as () => TimelineApi;
     }
@@ -34,7 +43,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   const { timeline, updateTimelineItem } = useTimelineOrStub();
   const playerRef = React.useRef<PlayerRef>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStartTime, setDragStartTime] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Find any talking head items to enable viewer controls
   const talkingHeads = useMemo(
@@ -100,8 +109,8 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
         } else {
           playerRef.current.pause();
         }
-      } catch (error) {
-        console.error('Error controlling player:', error);
+      } catch {
+        console.error('Error controlling player');
       }
     }, 100);
 
@@ -134,7 +143,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               pause();
             }
           }
-        } catch (error) {
+        } catch {
           // Fallback: increment time manually
           const newTime = playback.currentTime + 1000 / 30 / 1000;
           if (newTime <= compositionProps.settings.duration) {
@@ -175,17 +184,6 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     }
   }, [playback.currentTime, compositionProps.settings.fps, isDragging]);
 
-  // Handle player time updates
-  const handleTimeUpdate = useCallback(
-    (frame: number) => {
-      if (!isDragging) {
-        const timeInSeconds = frame / compositionProps.settings.fps;
-        seek(timeInSeconds);
-      }
-    },
-    [seek, compositionProps.settings.fps, isDragging]
-  );
-
   // Handle player play/pause
   const handlePlayPause = useCallback(() => {
     if (playback.isPlaying) {
@@ -224,11 +222,29 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     [handleSeek, compositionProps.settings.duration]
   );
 
+  // Handle fullscreen toggle
+  const handleFullscreenToggle = useCallback(() => {
+    setIsFullscreen(!isFullscreen);
+  }, [isFullscreen]);
+
+  // Handle escape key to exit fullscreen
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+      }
+    };
+
+    if (isFullscreen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isFullscreen]);
+
   // Handle timeline drag start
   const handleTimelineDragStart = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       setIsDragging(true);
-      setDragStartTime(playback.currentTime);
       handleTimelineScrub(event);
 
       const handleMouseMove = (e: MouseEvent) => {
@@ -356,10 +372,46 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             loop={false}
             showVolumeControls={false}
             clickToPlay={false}
-            onTimeUpdate={handleTimeUpdate}
           />
+          {/* Fullscreen Button */}
+          <button
+            onClick={handleFullscreenToggle}
+            className="absolute top-3 right-3 bg-neutral-900/70 backdrop-blur hover:bg-neutral-800/70 text-white p-2 rounded transition-colors"
+            title="Toggle Fullscreen"
+          >
+            {isFullscreen ? (
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+                />
+              </svg>
+            )}
+          </button>
+
           {talkingHeads.length > 0 && (
-            <div className="absolute top-3 right-3 flex items-center space-x-2 bg-neutral-900/70 backdrop-blur px-2 py-1 rounded text-white text-xs">
+            <div className="absolute top-3 left-3 flex items-center space-x-2 bg-neutral-900/70 backdrop-blur px-2 py-1 rounded text-white text-xs">
               <button
                 onClick={() => {
                   // Toggle hidden for all talking head items
@@ -393,7 +445,6 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
           )}
         </div>
       </div>
-
       {/* Timeline Scrubber */}
       <div className="bg-background-secondary border-t border-border-subtle px-4 py-2">
         <div className="relative">
@@ -673,14 +724,170 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
           </div>
         </div>
       </div>
+
+      {/* Fullscreen Overlay */}
+      {isFullscreen && (
+        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+          <div className="relative w-full h-full flex items-center justify-center">
+            <Player
+              acknowledgeRemotionLicense
+              ref={playerRef}
+              component={MainComposition}
+              inputProps={compositionProps}
+              durationInFrames={durationInFrames}
+              fps={compositionProps.settings.fps}
+              compositionWidth={compositionProps.settings.width}
+              compositionHeight={compositionProps.settings.height}
+              style={{
+                width: '100%',
+                height: '100%',
+                maxWidth: '100vw',
+                maxHeight: '100vh',
+                objectFit: 'contain',
+              }}
+              controls={false}
+              loop={false}
+              showVolumeControls={false}
+              clickToPlay={false}
+            />
+
+            {/* Fullscreen Exit Button */}
+            <button
+              onClick={handleFullscreenToggle}
+              className="absolute top-4 right-4 bg-neutral-900/70 backdrop-blur hover:bg-neutral-800/70 text-white p-3 rounded-full transition-colors z-10"
+              title="Exit Fullscreen (ESC)"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            {/* Fullscreen Controls */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-neutral-900/70 backdrop-blur rounded-lg p-4">
+              <div className="flex items-center space-x-4">
+                {/* Play/Pause */}
+                <button
+                  onClick={handlePlayPause}
+                  className="bg-primary-600 hover:bg-primary-700 text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors shadow-glow"
+                  title={playback.isPlaying ? 'Pause' : 'Play'}
+                >
+                  {playback.isPlaying ? (
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 9v6m4-6v6"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-6 h-6 ml-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                      />
+                    </svg>
+                  )}
+                </button>
+
+                {/* Time Display */}
+                <div className="flex items-center space-x-2 text-sm text-white">
+                  <span className="font-mono">
+                    {formatTime(
+                      playback.currentTime,
+                      compositionProps.settings.fps
+                    )}
+                  </span>
+                  <span>/</span>
+                  <span className="font-mono">
+                    {formatTime(
+                      compositionProps.settings.duration,
+                      compositionProps.settings.fps
+                    )}
+                  </span>
+                </div>
+
+                {/* Volume */}
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={toggleMute}
+                    className="text-white hover:text-gray-300 p-2 rounded transition-colors"
+                    title={playback.muted ? 'Unmute' : 'Mute'}
+                  >
+                    {playback.muted || playback.volume === 0 ? (
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={playback.muted ? 0 : playback.volume}
+                    onChange={handleVolumeChange}
+                    className="w-20 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
+                    title="Volume"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
-
-// Helper function to format time with frame accuracy
-function formatTime(seconds: number, fps: number = 30): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  const frames = Math.floor((seconds % 1) * fps);
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${frames.toString().padStart(2, '0')}`;
-}

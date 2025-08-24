@@ -7,7 +7,7 @@ export async function formatCode(
   code: string,
   language: string = 'javascript'
 ): Promise<string> {
-  const opts: prettier.Options = {
+  const opts: any = {
     printWidth: 100,
     tabWidth: 2,
     useTabs: false,
