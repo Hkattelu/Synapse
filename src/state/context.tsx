@@ -81,56 +81,59 @@ export function AppProvider({ children }: AppProviderProps) {
         // Fetch Music Library metadata (public JSON) in parallel to startup
         // Non-fatal if it fails; UI will simply show empty library
         try {
-          // Respect Vite's base URL so non-root deployments work
-          const base = (
-            import.meta as unknown as { env?: { BASE_URL?: string } }
-          )?.env?.BASE_URL ?? '/';
-          const url = base.endsWith('/')
-            ? `${base}music/library.json`
-            : `${base}/music/library.json`;
+          // Skip in non-window environments (e.g., Node tests) to avoid noisy fetches
+          if (typeof window !== 'undefined') {
+            // Build URL from Vite base so non-root deployments work (e.g., /app/)
+            const rawBase = (import.meta as any)?.env?.BASE_URL ?? '/';
+            const origin = window.location?.origin ?? 'http://localhost';
+            const baseUrl = new URL(rawBase, origin);
+            const url = new URL('music/library.json', baseUrl).toString();
 
-          const res = await fetch(url);
-          if (res.ok) {
-            const raw: unknown = await res.json();
-            // Validate: top-level must be an array; filter/coerce entries to MusicTrack shape
-            if (Array.isArray(raw)) {
-              const tracks = raw
-                .map((t) => (typeof t === 'object' && t !== null ? (t as Record<string, unknown>) : null))
-                .filter((t): t is Record<string, unknown> => {
-                  if (!t) return false;
-                  const { title, url, duration } = t as {
-                    title?: unknown;
-                    url?: unknown;
-                    duration?: unknown;
-                  };
-                  return (
-                    typeof title === 'string' &&
-                    typeof url === 'string' &&
-                    Number.isFinite(Number(duration))
-                  );
-                })
-                .map((t) => {
-                  const title = String(t.title as string);
-                  const url = String(t.url as string);
-                  const duration = Number(t.duration as number);
-                  const genre = typeof t.genre === 'string' ? t.genre : 'Misc';
-                  const idVal = t.id;
-                  const id = typeof idVal === 'string' ? idVal : `${title}-${url}`;
-                  const license = typeof t.license === 'string' ? t.license : undefined;
-                  const source = typeof t.source === 'string' ? t.source : undefined;
-                  return {
-                    id: String(id),
-                    title,
-                    duration,
-                    genre: String(genre),
-                    url,
-                    license,
-                    source,
-                  };
-                });
-
-              dispatch({ type: 'LOAD_MUSIC_LIBRARY', payload: tracks });
-            }
+            // Fire-and-forget; do not block startup loading state
+            void fetch(url)
+              .then(async (res) => {
+                if (!res.ok) return;
+                const raw = await res.json();
+                if (!Array.isArray(raw)) return;
+                const normalized = raw
+                  .filter(
+                    (t: unknown) =>
+                      t &&
+                      typeof (t as any).title === 'string' &&
+                      typeof (t as any).url === 'string' &&
+                      Number.isFinite(Number((t as any).duration))
+                  )
+                  .map((t: any) => {
+                    const duration = Number((t as any).duration);
+                    const title = String((t as any).title);
+                    const urlStr = String((t as any).url);
+                    const genre =
+                      typeof (t as any).genre === 'string' &&
+                      (t as any).genre.trim().length > 0
+                        ? (t as any).genre
+                        : 'Misc';
+                    const id = String((t as any).id ?? `${title}::${urlStr}`);
+                    return {
+                      id,
+                      title,
+                      duration,
+                      genre,
+                      url: urlStr,
+                      license:
+                        typeof (t as any).license === 'string'
+                          ? (t as any).license
+                          : undefined,
+                      source:
+                        typeof (t as any).source === 'string'
+                          ? (t as any).source
+                          : undefined,
+                    };
+                  });
+                dispatch({ type: 'LOAD_MUSIC_LIBRARY', payload: normalized });
+              })
+              .catch((err) => {
+                console.warn('Music library fetch failed:', err);
+              });
           }
         } catch (err) {
           console.warn('Music library fetch failed:', err);

@@ -14,24 +14,24 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   const { project } = useProject();
   const { playback, play, pause, seek, setVolume, toggleMute } = usePlayback();
   // Some tests partially mock the hooks module without providing useTimeline.
-  // Provide a strictly typed, no-op fallback to avoid leaking `any`.
+  // Tolerate that by falling back to a no-op implementation when missing,
+  // but keep everything strongly typed.
   type TimelineApi = {
     timeline: TimelineItem[];
     updateTimelineItem: (id: string, updates: Partial<TimelineItem>) => void;
   };
-  const hooksModule = Hooks as unknown as Record<string, unknown>;
-  const maybeUseTimeline = hooksModule['useTimeline'];
-  const hasUseTimeline = typeof maybeUseTimeline === 'function';
-  const timelineApi: TimelineApi = hasUseTimeline
-    ? (maybeUseTimeline as () => TimelineApi)()
-    : {
-        timeline: [],
-        updateTimelineItem: (() => {}) as unknown as (
-          id: string,
-          updates: Partial<TimelineItem>
-        ) => void,
-      };
-  const { timeline, updateTimelineItem } = timelineApi;
+  const noopUpdate: TimelineApi['updateTimelineItem'] = () => {};
+  let useTimelineFn: (() => TimelineApi) | undefined;
+  if (Object.prototype.hasOwnProperty.call(Hooks, 'useTimeline')) {
+    const candidate = (Hooks as unknown as { useTimeline: unknown }).useTimeline;
+    if (typeof candidate === 'function') {
+      useTimelineFn = candidate as () => TimelineApi;
+    }
+  }
+  const useTimelineOrStub: () => TimelineApi =
+    useTimelineFn ?? (() => ({ timeline: [], updateTimelineItem: noopUpdate }));
+
+  const { timeline, updateTimelineItem } = useTimelineOrStub();
   const playerRef = React.useRef<PlayerRef>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartTime, setDragStartTime] = useState(0);
