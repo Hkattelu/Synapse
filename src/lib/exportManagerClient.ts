@@ -279,17 +279,28 @@ export class ClientExportManager {
 
   private async pollServerJob(serverJobId: string): Promise<void> {
     if (!this.currentJob) return;
-    const start = Date.now();
+    const startedAt = Date.now();
+    const maxDurationMs = 5 * 60_000; // 5 minutes
+    let delay = 600; // initial delay
+    const maxDelay = 5000; // cap the backoff
+
     while (true) {
+      // Cancellation: request server cancel without using the aborted signal
       if (this.abortController?.signal.aborted) {
         try {
-          // Do not pass an already-aborted signal; use API client.
           await api.cancelExportJob(serverJobId);
-        } catch {}
+        } catch (err) {
+          // ignore cancellation errors
+          console.debug?.('cancelExportJob error ignored', err);
+        }
         throw new Error('Export cancelled');
       }
 
-      // Poll job status via centralized API client
+      // Timeout guard
+      if (Date.now() - startedAt > maxDurationMs) {
+        throw new Error('Export polling timed out');
+      }
+
       const job = await api.getExportJob(serverJobId);
       const status = job.status as ExportProgress['status'];
       const progress = Number(job.progress ?? 0);
@@ -298,19 +309,31 @@ export class ClientExportManager {
         progress,
         estimatedTimeRemaining: Math.max(
           0,
-          Math.round((Date.now() - start) * ((100 - progress) / Math.max(1, progress)))
+          Math.round(
+            (Date.now() - startedAt) *
+              ((100 - progress) / Math.max(1, progress))
+          )
         ),
       });
+
       if (status === 'completed') {
-        this.currentJob!.outputPath = job.outputPath || `./exports/${job.outputFilename}`;
+        this.currentJob!.outputPath =
+          job.outputPath || `./exports/${job.outputFilename}`;
         this.currentJob!.completedAt = new Date();
-        this.updateProgress({ status: 'completed', progress: 100, endTime: new Date() });
+        this.updateProgress({
+          status: 'completed',
+          progress: 100,
+          endTime: new Date(),
+        });
         return;
       }
       if (status === 'failed' || status === 'cancelled') {
         throw new Error(`Export ${status}`);
       }
-      await new Promise((r) => setTimeout(r, 600));
+
+      // Backoff between polls
+      await new Promise((r) => setTimeout(r, delay));
+      delay = Math.min(Math.round(delay * 1.5), maxDelay);
     }
   }
 

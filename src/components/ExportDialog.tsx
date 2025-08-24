@@ -29,7 +29,12 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const { settings, presets, updateSettings, applyPreset } =
     useExportSettings();
   const { isExporting, progress, canStartExport } = useExportStatus();
-  const { authenticated, membership, donateDemo, loading: authLoading } = useAuth();
+  const {
+    authenticated,
+    membership,
+    donateDemo,
+    loading: authLoading,
+  } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'presets' | 'custom'>('presets');
   const [selectedPresetId, setSelectedPresetId] =
@@ -73,7 +78,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     }
   }, [progress?.status, onClose]);
 
-if (!isOpen) return null;
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -85,7 +90,7 @@ if (!isOpen) return null;
               Export Video
             </h2>
             <p className="text-sm text-text-secondary mt-1">
-Export "{project?.name ?? 'Test Project'}" as video file
+              Export "{project?.name ?? 'Test Project'}" as video file
             </p>
           </div>
           {!isExporting && (
@@ -222,8 +227,12 @@ Export "{project?.name ?? 'Test Project'}" as video file
               {!authenticated && (
                 <div className="p-6 border-b border-border-subtle">
                   <div className="mb-2">
-                    <h3 className="text-lg font-semibold text-text-primary">Sign in required</h3>
-                    <p className="text-sm text-text-secondary">Create an account or sign in to export videos.</p>
+                    <h3 className="text-lg font-semibold text-text-primary">
+                      Sign in required
+                    </h3>
+                    <p className="text-sm text-text-secondary">
+                      Create an account or sign in to export videos.
+                    </p>
                   </div>
                   <AuthInlineForm />
                 </div>
@@ -231,8 +240,12 @@ Export "{project?.name ?? 'Test Project'}" as video file
               {authenticated && !membership?.active && (
                 <div className="p-6 border-b border-border-subtle">
                   <div className="mb-3">
-                    <h3 className="text-lg font-semibold text-text-primary">Unlock exports</h3>
-                    <p className="text-sm text-text-secondary">A one-time donation activates your membership for 30 days.</p>
+                    <h3 className="text-lg font-semibold text-text-primary">
+                      Unlock exports
+                    </h3>
+                    <p className="text-sm text-text-secondary">
+                      A one-time donation activates your membership for 30 days.
+                    </p>
                   </div>
                   <button
                     onClick={() => void donateDemo(500)}
@@ -389,7 +402,11 @@ Export "{project?.name ?? 'Test Project'}" as video file
                           <div className="flex gap-2">
                             <input
                               type="number"
-value={settings.width || project?.settings?.width || 1920}
+                              value={
+                                settings.width ||
+                                project?.settings?.width ||
+                                1920
+                              }
                               onChange={(e) =>
                                 updateSettings({
                                   width: parseInt(e.target.value),
@@ -403,7 +420,11 @@ value={settings.width || project?.settings?.width || 1920}
                             </span>
                             <input
                               type="number"
-value={settings.height || project?.settings?.height || 1080}
+                              value={
+                                settings.height ||
+                                project?.settings?.height ||
+                                1080
+                              }
                               onChange={(e) =>
                                 updateSettings({
                                   height: parseInt(e.target.value),
@@ -482,7 +503,7 @@ value={settings.height || project?.settings?.height || 1080}
               <div className="mt-1">
                 Duration:{' '}
                 <span className="text-text-primary">
-{formatDuration(project?.settings?.duration ?? 0)}
+                  {formatDuration(project?.settings?.duration ?? 0)}
                 </span>
               </div>
             </div>
@@ -496,10 +517,16 @@ value={settings.height || project?.settings?.height || 1080}
               </button>
               <button
                 onClick={handleStartExport}
-                disabled={!canStartExport || !authenticated || !membership?.active}
+                disabled={
+                  !canStartExport || !authenticated || !membership?.active
+                }
                 className="px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-600 disabled:cursor-not-allowed text-white rounded transition-colors"
               >
-                {!authenticated ? 'Sign in to export' : !membership?.active ? 'Unlock to export' : 'Start Export'}
+                {!authenticated
+                  ? 'Sign in to export'
+                  : !membership?.active
+                    ? 'Unlock to export'
+                    : 'Start Export'}
               </button>
             </div>
           </div>
