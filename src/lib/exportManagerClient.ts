@@ -275,6 +275,7 @@ export class ClientExportManager {
     }
   }
 
+<<<<<<< HEAD
   private async pollServerJob(serverJobId: string): Promise<void> {
     if (!this.currentJob) return;
     const start = Date.now();
@@ -284,6 +285,14 @@ export class ClientExportManager {
 
     while (true) {
       // Abort/cancel handling: do not pass the aborted signal to cancel request
+=======
+  // Simulate export process (placeholder for actual server communication)
+  private async simulateExportProcess(filename: string): Promise<void> {
+    const totalSteps = 10;
+
+    for (let step = 1; step <= totalSteps; step++) {
+      // Check if cancelled
+>>>>>>> 9eda38b (Implement some more composition features)
       if (this.abortController?.signal.aborted) {
         try {
           await api.cancelExportJob(serverJobId);
@@ -293,6 +302,7 @@ export class ClientExportManager {
         throw new Error('Export cancelled');
       }
 
+<<<<<<< HEAD
       // Timeout guard
       if (Date.now() - start > maxDurationMs) {
         throw new Error('Export polling timed out');
@@ -300,8 +310,22 @@ export class ClientExportManager {
 
       const job = await api.getExportJob(serverJobId, {
         signal: this.abortController?.signal,
+=======
+      // Simulate processing time
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const progress = 20 + (step / totalSteps) * 70; // 20-90%
+
+      this.updateProgress({
+        status: step <= 8 ? 'rendering' : 'finalizing',
+        progress,
+        currentFrame: step * 30, // Simulate frame progress
+        renderedFrames: step * 30,
+        totalFrames: totalSteps * 30,
+>>>>>>> 9eda38b (Implement some more composition features)
       });
 
+<<<<<<< HEAD
       const status = job.status as ExportProgress['status'];
       const progress = Number(job.progress ?? 0);
       this.updateProgress({
@@ -333,6 +357,11 @@ export class ClientExportManager {
       await new Promise((r) => setTimeout(r, delay));
       delay = Math.min(Math.floor(delay * 1.5), maxDelay);
     }
+=======
+    // Simulate final processing
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    this.updateProgress({ status: 'finalizing', progress: 95 });
+>>>>>>> 9eda38b (Implement some more composition features)
   }
 
   // Cancel current export

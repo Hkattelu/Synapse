@@ -155,9 +155,15 @@ function StudioViewContent() {
             </div>
 
             {/* Panel Controls */}
+<<<<<<< HEAD
             <div className="flex items-center space-x-2">
               {/* Undo/Redo Buttons */}
               <button
+=======
+           <div className="flex items-center space-x-2">
+              {/* Undo/Redo Buttons */}
+             <button
+>>>>>>> 9eda38b (Implement some more composition features)
                 onClick={undo}
                 disabled={!canUndo}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${canUndo
@@ -166,6 +172,7 @@ function StudioViewContent() {
                   }`}
                 title="Undo (Ctrl+Z)"
               >
+<<<<<<< HEAD
                 <svg
                   className="w-4 h-4"
                   viewBox="0 0 24 24"
@@ -187,6 +194,14 @@ function StudioViewContent() {
                 </svg>
               </button>
               <button
+=======
+               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l-7-7 7-7"></path>
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 19V5"></path>
+               </svg>
+             </button>
+             <button
+>>>>>>> 9eda38b (Implement some more composition features)
                 onClick={redo}
                 disabled={!canRedo}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${canRedo
@@ -195,6 +210,7 @@ function StudioViewContent() {
                   }`}
                 title="Redo (Ctrl+Y / Shift+Ctrl+Z)"
               >
+<<<<<<< HEAD
                 <svg
                   className="w-4 h-4"
                   viewBox="0 0 24 24"
@@ -215,6 +231,13 @@ function StudioViewContent() {
                   ></path>
                 </svg>
               </button>
+=======
+               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5l7 7-7 7"></path>
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5v14"></path>
+               </svg>
+             </button>
+>>>>>>> 9eda38b (Implement some more composition features)
               <button
                 onClick={toggleMediaBin}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${ui.mediaBinVisible

@@ -23,6 +23,7 @@ function AppContent() {
   }
 }
 
+<<<<<<< HEAD
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NotificationsProvider } from './state/notifications';
 import { HistoryProvider } from './state/history';
@@ -41,6 +42,19 @@ function App() {
           </ErrorBoundary>
         </NotificationsProvider>
       </AuthProvider>
+=======
+function App() {
+  return (
+    <AppProvider>
+      <NotificationsProvider>
+        <ErrorBoundary>
+          <HistoryProvider>
+            <AppContent />
+            <LoadingOverlay />
+          </HistoryProvider>
+        </ErrorBoundary>
+      </NotificationsProvider>
+>>>>>>> 9eda38b (Implement some more composition features)
     </AppProvider>
   );
 }
