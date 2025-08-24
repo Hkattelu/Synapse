@@ -154,9 +154,9 @@ function StudioViewContent() {
             </div>
 
             {/* Panel Controls */}
-           <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
               {/* Undo/Redo Buttons */}
-             <button
+              <button
                 onClick={undo}
                 disabled={!canUndo}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
@@ -166,12 +166,27 @@ function StudioViewContent() {
                 }`}
                 title="Undo (Ctrl+Z)"
               >
-               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l-7-7 7-7"></path>
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 19V5"></path>
-               </svg>
-             </button>
-             <button
+                <svg
+                  className="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 19l-7-7 7-7"
+                  ></path>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 19V5"
+                  ></path>
+                </svg>
+              </button>
+              <button
                 onClick={redo}
                 disabled={!canRedo}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
@@ -181,11 +196,26 @@ function StudioViewContent() {
                 }`}
                 title="Redo (Ctrl+Y / Shift+Ctrl+Z)"
               >
-               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5l7 7-7 7"></path>
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5v14"></path>
-               </svg>
-             </button>
+                <svg
+                  className="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 5l7 7-7 7"
+                  ></path>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 5v14"
+                  ></path>
+                </svg>
+              </button>
               <button
                 onClick={toggleMediaBin}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
@@ -222,14 +252,14 @@ function StudioViewContent() {
       >
         {/* Main Editor Area */}
         <main className="flex-1 flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-l-2xl overflow-hidden">
-          <div className="flex-1 flex">
+          <div className="flex-1 flex flex-col">
             {/* Preview Area */}
             <div className="flex-1 bg-black border-r border-gray-700/50 rounded-tl-2xl overflow-hidden">
               <Preview className="h-full" />
             </div>
 
             {/* Timeline Area - Always visible */}
-            <div className="w-96 border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900">
+            <div className="border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900">
               {timelineMode === 'enhanced' ? (
                 <EnhancedTimelineView className="h-full" />
               ) : (
