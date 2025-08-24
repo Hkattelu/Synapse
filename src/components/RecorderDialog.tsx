@@ -60,19 +60,27 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     };
   }, [isOpen]);
 
-  const requestStream = async () => {
+  const requestStream = async (): Promise<MediaStream | null> => {
     try {
       const media = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: withCamera,
       });
       setStream(media);
+      // Configure live preview to use the exact same MediaStream.
       if (videoRef.current && withCamera) {
         videoRef.current.srcObject = media;
-        await videoRef.current.play();
+        // Autoplay can reject; swallow to avoid noisy errors.
+        await videoRef.current.play().catch(() => {});
       }
+      return media;
     } catch (e) {
-      notify({ type: 'error', title: 'Recorder', message: 'Permission denied or device not available.' });
+      notify({
+        type: 'error',
+        title: 'Recorder',
+        message: 'Permission denied or device not available.',
+      });
+      return null;
     }
   };
 
@@ -81,10 +89,17 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       notify({ type: 'error', title: 'Recorder', message: envError });
       return;
     }
-    if (!stream) {
-      await requestStream();
+    // Obtain a single MediaStream (existing or newly requested).
+    const s = stream ?? (await requestStream());
+    if (!s) return;
+
+    // Ensure the preview element uses the same stream that will be recorded.
+    if (withCamera && videoRef.current) {
+      if (videoRef.current.srcObject !== s) {
+        videoRef.current.srcObject = s;
+      }
+      await videoRef.current.play().catch(() => {});
     }
-    const s = stream ?? (await navigator.mediaDevices.getUserMedia({ audio: true, video: withCamera }));
     chunksRef.current = [];
     // Pick a supported mime type
     const pickMime = () => {
