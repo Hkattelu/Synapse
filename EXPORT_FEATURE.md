@@ -43,6 +43,8 @@ The export feature allows users to render their video projects to various format
 - **User interface**: Comprehensive dialog for export configuration
 - **Preset selection**: Easy-to-use preset buttons for common formats
 - **Custom settings**: Advanced settings for video/audio configuration
+  - **Orientation toggle**: Quickly switch between Landscape (16:9) and Vertical (9:16)
+  - **Vertical presets**: 720×1280 (HD), 1080×1920 (Full HD), 2160×3840 (4K)
 - **Progress visualization**: Real-time progress bar and status updates
 - **Error feedback**: User-friendly error messages and retry options
 
@@ -91,8 +93,11 @@ interface ExportProgress {
 
 1. **YouTube 1080p**: Optimized for YouTube uploads (H.264, High quality)
 2. **Twitter/X 720p**: Optimized for Twitter posts (H.264, Medium quality)
-3. **Instagram Square**: Square format for Instagram (1080x1080)
-4. **High Quality Archive**: Lossless quality for archival purposes
+3. **Instagram Square**: Square format for Instagram (1080×1080)
+4. **Vertical 1080×1920**: Portrait Full HD for Shorts/Reels/TikTok
+5. **Vertical 720×1280**: Portrait HD
+6. **Vertical 2160×3840 (4K)**: Portrait 4K
+7. **High Quality Archive**: Lossless quality for archival purposes
 
 ## Usage Examples
 
@@ -121,6 +126,16 @@ updateExportSettings({
 });
 
 await startExport(project);
+
+// Portrait export example (Full HD Shorts)
+await startExport(project, {
+  format: 'mp4',
+  codec: 'h264',
+  quality: 'high',
+  width: 1080,
+  height: 1920,
+  audioCodec: 'aac',
+});
 ```
 
 ### Progress Tracking
@@ -199,3 +214,5 @@ src/
 - `@remotion/player`: Already integrated for preview functionality
 
 The export feature is now fully implemented and integrated into the Synapse Studio application, providing users with professional-grade video export capabilities directly from their browser.
+
+Note on aspect ratios: The selected resolution defines the output canvas. When clip content does not match the export aspect ratio, sequences currently render media with `object-fit: contain`, preserving the whole frame (letter/pillarboxing as needed). A future enhancement may add configurable fit/crop strategies.

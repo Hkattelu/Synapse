@@ -16,6 +16,8 @@ vi.mock('../../state/hooks', () => ({
 const startExport = vi.fn();
 const cancelExport = vi.fn();
 const getEstimatedFileSize = vi.fn(() => 1024 * 1024 * 50);
+const mockUpdateSettings = vi.fn();
+const mockApplyPreset = vi.fn();
 
 vi.mock('../../state/exportContext', () => ({
   useExport: () => ({ startExport, cancelExport, getEstimatedFileSize }),
@@ -42,9 +44,15 @@ vi.mock('../../state/exportContext', () => ({
         description: 'Smaller size 720p',
         settings: { format: 'mp4', quality: 'medium', width: 1280, height: 720 },
       },
+      {
+        id: 'vertical-1080x1920',
+        name: 'Vertical 1080×1920',
+        description: 'Portrait Full HD',
+        settings: { format: 'mp4', quality: 'high', width: 1080, height: 1920 },
+      },
     ],
-    updateSettings: vi.fn(),
-    applyPreset: vi.fn(),
+    updateSettings: mockUpdateSettings,
+    applyPreset: mockApplyPreset,
   }),
   useExportStatus: () => ({ isExporting: false, progress: null, canStartExport: true }),
 }));
@@ -85,5 +93,38 @@ describe('ExportDialog', () => {
     expect(selects.length).toBeGreaterThanOrEqual(3);
     const numberInputs = screen.getAllByRole('spinbutton');
     expect(numberInputs.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('supports Vertical mode toggle and custom resolution entry', () => {
+    render(<ExportDialog isOpen={true} onClose={vi.fn()} />);
+
+    // Go to Custom Settings
+    fireEvent.click(screen.getByRole('button', { name: /Custom Settings/i }));
+
+    // Orientation toggle should be present showing Landscape initially
+    const orientationBtn = screen.getByRole('button', { name: /Landscape \(16:9\)/i });
+    fireEvent.click(orientationBtn);
+
+    // Toggling should call updateSettings with portrait defaults
+    expect(mockUpdateSettings).toHaveBeenCalledWith({ width: 1080, height: 1920 });
+
+    // Enter a custom size via inputs
+    const spinboxes = screen.getAllByRole('spinbutton');
+    const widthInput = spinboxes[0];
+    const heightInput = spinboxes[1];
+    fireEvent.change(widthInput, { target: { value: '720' } });
+    fireEvent.change(heightInput, { target: { value: '1280' } });
+    expect(mockUpdateSettings).toHaveBeenCalledWith({ width: 720 });
+    expect(mockUpdateSettings).toHaveBeenCalledWith({ height: 1280 });
+  });
+
+  it('shows vertical presets and applies them from Presets tab', () => {
+    render(<ExportDialog isOpen={true} onClose={vi.fn()} />);
+
+    // Presets tab is default; click vertical card
+    fireEvent.click(screen.getByText('Vertical 1080×1920'));
+    expect(mockApplyPreset).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'vertical-1080x1920' })
+    );
   });
 });
