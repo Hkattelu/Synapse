@@ -6,7 +6,7 @@ import type {
   ExportPreset,
   ExportQuality,
 } from './types';
-import { api } from './api';
+import { api, ApiError } from './api';
 
 // Export presets for common use cases
 export const DEFAULT_EXPORT_PRESETS: ExportPreset[] = [
@@ -221,20 +221,10 @@ export class ClientExportManager {
         jobId: this.currentJob.id,
       };
 
-      // Create export job on server via centralized API client.
-      // Preserve explicit error messaging for 401/402.
-      let serverJobId: string;
-      try {
-        const { id } = await api.createExportJob(exportPayload);
-        serverJobId = id;
-      } catch (err) {
-        const status = (err as any)?.status;
-        if (status === 401)
-          throw new Error('Authentication required to export');
-        if (status === 402)
-          throw new Error('Membership required to export');
-        throw err;
-      }
+      // Create export job on server (enforces auth + gating)
+      const { id: serverJobId } = await api.createExportJob(exportPayload, {
+        signal: this.abortController?.signal,
+      });
       this.updateProgress({ status: 'preparing', progress: 10 });
 
       // Poll server job for progress until completion
@@ -245,8 +235,14 @@ export class ClientExportManager {
     } catch (error) {
       console.error('Export failed:', error);
 
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error occurred';
+      let errorMessage = 'Unknown error occurred';
+      if (error instanceof ApiError) {
+        if (error.status === 401) errorMessage = 'Authentication required to export';
+        else if (error.status === 402) errorMessage = 'Membership required to export';
+        else errorMessage = error.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
 
       this.updateProgress({
         status: 'failed',
@@ -279,75 +275,54 @@ export class ClientExportManager {
 
   private async pollServerJob(serverJobId: string): Promise<void> {
     if (!this.currentJob) return;
-    const startedAt = Date.now();
-    const maxDurationMs = 5 * 60_000; // 5 minutes absolute cap
-    const inactivityTimeoutMs = 2 * 60_000; // consider stalled if no progress for 2 minutes
-    let delay = 600; // initial delay
-    const maxDelay = 5000; // cap the backoff
-    let lastProgress = -1;
-    let lastChangeTs = startedAt;
+    const start = Date.now();
+    const maxDurationMs = 5 * 60_000; // 5 minutes
+    let delay = 600; // ms
+    const maxDelay = 5_000;
 
     while (true) {
-      // Cancellation: request server cancel without using the aborted signal
+      // Abort/cancel handling: do not pass the aborted signal to cancel request
       if (this.abortController?.signal.aborted) {
         try {
           await api.cancelExportJob(serverJobId);
-        } catch (err) {
-          // ignore cancellation errors
-          console.debug?.('cancelExportJob error ignored', err);
+        } catch {
+          // ignore; best-effort cancel
         }
         throw new Error('Export cancelled');
       }
 
       // Timeout guard
-      const elapsed = Date.now() - startedAt;
-      if (elapsed > maxDurationMs) {
+      if (Date.now() - start > maxDurationMs) {
         throw new Error('Export polling timed out');
       }
 
-      const job = await api.getExportJob(serverJobId);
+      const job = await api.getExportJob(serverJobId, {
+        signal: this.abortController?.signal,
+      });
+
       const status = job.status as ExportProgress['status'];
       const progress = Number(job.progress ?? 0);
-
       this.updateProgress({
         status,
         progress,
         estimatedTimeRemaining: Math.max(
           0,
-          Math.round(elapsed * ((100 - progress) / Math.max(1, progress)))
+          Math.round((Date.now() - start) * ((100 - progress) / Math.max(1, progress)))
         ),
       });
 
-      // Track progress changes for inactivity timeout
-      if (progress > lastProgress) {
-        lastProgress = progress;
-        lastChangeTs = Date.now();
-      }
-
-      // If no progress has been reported for a while, fail fast
-      if (Date.now() - lastChangeTs > inactivityTimeoutMs) {
-        throw new Error('Export stalled: no progress for 2 minutes');
-      }
-
       if (status === 'completed') {
-        this.currentJob!.outputPath =
-          job.outputPath || `./exports/${job.outputFilename}`;
+        this.currentJob!.outputPath = job.outputPath || `./exports/${job.outputFilename}`;
         this.currentJob!.completedAt = new Date();
-        this.updateProgress({
-          status: 'completed',
-          progress: 100,
-          endTime: new Date(),
-        });
+        this.updateProgress({ status: 'completed', progress: 100, endTime: new Date() });
         return;
       }
-
       if (status === 'failed' || status === 'cancelled') {
         throw new Error(`Export ${status}`);
       }
 
-      // Backoff between polls
       await new Promise((r) => setTimeout(r, delay));
-      delay = Math.min(Math.round(delay * 1.5), maxDelay);
+      delay = Math.min(Math.floor(delay * 1.5), maxDelay);
     }
   }
 

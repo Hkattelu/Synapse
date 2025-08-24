@@ -29,12 +29,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const { settings, presets, updateSettings, applyPreset } =
     useExportSettings();
   const { isExporting, progress, canStartExport } = useExportStatus();
-  const {
-    authenticated,
-    membership,
-    donateDemo,
-    loading: authLoading,
-  } = useAuth();
+  const { authenticated, membership, donateDemo, loading: authLoading } = useAuth();
+  const trialsUsed = Number(membership?.trialUsed ?? 0);
+  const trialsLimit = Number(membership?.trialLimit ?? 0);
+  const trialsRemaining = Math.max(0, trialsLimit - trialsUsed);
 
   const [activeTab, setActiveTab] = useState<'presets' | 'custom'>('presets');
   const [selectedPresetId, setSelectedPresetId] =
@@ -240,11 +238,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               {authenticated && !membership?.active && (
                 <div className="p-6 border-b border-border-subtle">
                   <div className="mb-3">
-                    <h3 className="text-lg font-semibold text-text-primary">
-                      Unlock exports
-                    </h3>
+                    <h3 className="text-lg font-semibold text-text-primary">Unlock exports</h3>
                     <p className="text-sm text-text-secondary">
-                      A one-time donation activates your membership for 30 days.
+                      You have {trialsRemaining} of {trialsLimit || 2} trial exports remaining.
+                      Support us on Ko‑fi to unlock unlimited exports for 30 days.
                     </p>
                   </div>
                   <button
@@ -252,7 +249,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                     disabled={authLoading}
                     className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded disabled:opacity-60"
                   >
-                    {authLoading ? 'Processing…' : 'Donate $5 (demo)'}
+                    {authLoading ? 'Processing…' : 'Support on Ko‑fi (demo)'}
                   </button>
                 </div>
               )}
@@ -518,15 +515,19 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               <button
                 onClick={handleStartExport}
                 disabled={
-                  !canStartExport || !authenticated || !membership?.active
+                  !canStartExport ||
+                  !authenticated ||
+                  !(membership?.active || trialsRemaining > 0)
                 }
                 className="px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-600 disabled:cursor-not-allowed text-white rounded transition-colors"
               >
                 {!authenticated
                   ? 'Sign in to export'
-                  : !membership?.active
-                    ? 'Unlock to export'
-                    : 'Start Export'}
+                  : membership?.active
+                  ? 'Start Export'
+                  : trialsRemaining > 0
+                  ? `Start Export (trial ${trialsUsed + 1}/${trialsLimit || 2})`
+                  : 'Unlock to export'}
               </button>
             </div>
           </div>

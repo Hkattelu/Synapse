@@ -132,7 +132,7 @@ export async function activateMembership({ userId, amount, currency, source, dur
 }
 
 // Export job management (simulated)
-export async function createExportJob({ userId, job }) {
+export async function createExportJob({ userId, job, trial = false }) {
   const db = await readDb();
   const j = {
     id: job.jobId,
@@ -142,6 +142,7 @@ export async function createExportJob({ userId, job }) {
     createdAt: new Date().toISOString(),
     projectName: job.project?.name,
     outputFilename: job.outputFilename,
+    trial,
   };
   db.jobs.push(j);
   await writeDb(db);
@@ -157,4 +158,9 @@ export async function updateJob(job) {
   const db = await readDb();
   db.jobs = db.jobs.map((j) => (j.id === job.id ? job : j));
   await writeDb(db);
+}
+
+export async function getTrialExportsCount(userId) {
+  const db = await readDb();
+  return db.jobs.filter((j) => j.userId === userId && j.trial === true && j.status === 'completed').length;
 }

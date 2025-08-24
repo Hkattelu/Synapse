@@ -16,10 +16,12 @@ import {
   createExportJob,
   getJob,
   updateJob,
+  getTrialExportsCount,
 } from './db.mjs';
 
 const app = express();
 const PORT = process.env.PORT || 8787;
+const TRIAL_EXPORT_LIMIT = 2;
 
 app.use(express.json({ limit: '4mb' }));
 app.use(cookieParser());
@@ -63,6 +65,27 @@ async function requireMembership(req, res, next) {
   req.user = user;
   req.membership = membership;
   next();
+}
+
+// Allow up to 2 trial exports for authenticated users without active membership.
+async function requireExportAccess(req, res, next) {
+  const user = await getAuthedUser(req);
+  if (!user) return res.status(401).json({ error: 'Authentication required' });
+  const membership = await getMembership(user.id);
+  if (membership.active) {
+    req.user = user;
+    req.membership = membership;
+    req.isTrial = false;
+    return next();
+  }
+  const used = await getTrialExportsCount(user.id);
+  if (used < TRIAL_EXPORT_LIMIT) {
+    req.user = user;
+    req.membership = membership;
+    req.isTrial = true;
+    return next();
+  }
+  return res.status(402).json({ error: 'Membership required', code: 'MEMBERSHIP_REQUIRED' });
 }
 
 // Auth endpoints
@@ -117,7 +140,13 @@ app.get('/api/auth/session', async (req, res) => {
   const user = await getAuthedUser(req);
   if (!user) return res.json({ authenticated: false });
   const membership = await getMembership(user.id);
-  res.json({ authenticated: true, user: { id: user.id, email: user.email, name: user.name }, membership });
+  const trialsUsed = await getTrialExportsCount(user.id);
+  const trialLimit = TRIAL_EXPORT_LIMIT;
+  res.json({
+    authenticated: true,
+    user: { id: user.id, email: user.email, name: user.name },
+    membership: { ...membership, trialUsed: trialsUsed, trialLimit },
+  });
 });
 
 // Membership endpoints
@@ -134,7 +163,7 @@ app.post('/api/payments/demo', requireAuth, async (req, res) => {
     userId: req.user.id,
     amount,
     currency,
-    source: 'demo',
+    source: 'kofi-demo',
     durationDays,
     paymentId,
   });
@@ -142,12 +171,12 @@ app.post('/api/payments/demo', requireAuth, async (req, res) => {
 });
 
 // Export endpoints (simulated job server)
-app.post('/api/export/jobs', requireMembership, async (req, res) => {
+app.post('/api/export/jobs', requireExportAccess, async (req, res) => {
   const jobSpec = req.body || {};
   if (!jobSpec?.jobId || !jobSpec?.project?.name) {
     return res.status(400).json({ error: 'Invalid job spec' });
   }
-  const job = await createExportJob({ userId: req.user.id, job: jobSpec });
+  const job = await createExportJob({ userId: req.user.id, job: jobSpec, trial: !!req.isTrial });
   // Kick off simulation
   simulateJob(job.id).catch((e) => console.error('Job simulation error', e));
   res.status(201).json({ id: job.id, status: job.status });

@@ -1,8 +1,21 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { vi } from 'vitest';
+// Mock auth to avoid real network I/O in tests (must be declared before imports that consume it)
+vi.mock('../state/authContext', () => ({
+  useAuth: () => ({
+    authenticated: true,
+    membership: { active: true },
+    login: vi.fn(),
+    signup: vi.fn(),
+    logout: vi.fn(),
+    donateDemo: vi.fn(),
+    loading: false,
+    error: undefined,
+  }),
+}));
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ExportDialog } from '../components/ExportDialog';
 import { ExportProvider } from '../state/exportContext';
-import { AuthProvider } from '../state/authContext';
 import { AppProvider } from '../state/context';
 import {
   exportManager,
@@ -84,9 +97,7 @@ const mockProject: Project = {
 // Test wrapper component
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AppProvider>
-    <AuthProvider>
-      <ExportProvider>{children}</ExportProvider>
-    </AuthProvider>
+    <ExportProvider>{children}</ExportProvider>
   </AppProvider>
 );
 

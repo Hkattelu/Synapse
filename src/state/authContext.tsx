@@ -64,8 +64,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    await api.logout();
-    setState({ loading: false, authenticated: false });
+    // Clear client state immediately to avoid stale user/membership after logout
+    setState({ loading: false, authenticated: false, user: undefined, membership: undefined, error: undefined });
+    try {
+      await api.logout();
+    } catch {
+      // ignore network errors on logout
+    }
   }, []);
 
   const donateDemo = useCallback(async (amount?: number) => {

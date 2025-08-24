@@ -11,11 +11,10 @@ export const AccountStatus: React.FC = () => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      if (mode === 'login') await login({ email, password });
-      else await signup({ email, password, name });
-      setOpen(false);
-    } catch {}
+    // Let provider surface any errors via `error`; don't swallow exceptions.
+    if (mode === 'login') await login({ email, password });
+    else await signup({ email, password, name });
+    setOpen(false);
   };
 
   if (authenticated) {
@@ -60,7 +59,7 @@ export const AccountStatus: React.FC = () => {
       </button>
       {open && (
         <div className="absolute right-0 mt-2 w-80 bg-white border border-purple-200 rounded-lg shadow-lg p-4 z-50">
-          <div className="flex items-center justify-between mb  -2">
+          <div className="flex items-center justify-between mb-2">
             <h3 className="font-semibold text-gray-900 text-sm">
               {mode === 'login' ? 'Sign in' : 'Create an account'}
             </h3>
