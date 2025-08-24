@@ -71,7 +71,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     };
   }, [isOpen]);
 
-  // Revoke any previous pending preview URL when it’s replaced or on unmount
+  // Revoke any previous pending preview URL when it's replaced or on unmount
   useEffect(() => {
     return () => {
       if (pending?.url) {
