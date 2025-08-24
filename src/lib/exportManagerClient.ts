@@ -6,6 +6,7 @@ import type {
   ExportPreset,
   ExportQuality,
 } from './types';
+import { api } from './api';
 
 // Export presets for common use cases
 export const DEFAULT_EXPORT_PRESETS: ExportPreset[] = [
@@ -286,24 +287,14 @@ export class ClientExportManager {
     while (true) {
       if (this.abortController?.signal.aborted) {
         try {
-          await fetch(`/api/export/jobs/${serverJobId}/cancel`, {
-            method: 'POST',
-            credentials: 'include',
-            signal: this.abortController.signal,
-          });
+          // Issue cancel without an (already-aborted) signal
+          await api.cancelExportJob(serverJobId);
         } catch {}
         throw new Error('Export cancelled');
       }
 
-      const res = await fetch(`/api/export/jobs/${serverJobId}`, {
-        credentials: 'include',
-        signal: this.abortController?.signal,
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error || 'Failed to fetch job');
-      }
-      const job = await res.json();
+      // Poll job status via centralized API client
+      const job = await api.getExportJob(serverJobId);
       const status = job.status as ExportProgress['status'];
       const progress = Number(job.progress ?? 0);
       this.updateProgress({
