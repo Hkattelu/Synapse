@@ -23,7 +23,8 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   const noopUpdate: TimelineApi['updateTimelineItem'] = () => {};
   let useTimelineFn: (() => TimelineApi) | undefined;
   if (Object.prototype.hasOwnProperty.call(Hooks, 'useTimeline')) {
-    const candidate = (Hooks as unknown as { useTimeline: unknown }).useTimeline;
+    const candidate = (Hooks as unknown as { useTimeline: unknown })
+      .useTimeline;
     if (typeof candidate === 'function') {
       useTimelineFn = candidate as () => TimelineApi;
     }

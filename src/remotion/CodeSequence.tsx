@@ -12,6 +12,11 @@ import { formatCode } from '../lib/format';
 
 // Import Prism.js - languages are loaded via vite-plugin-prismjs
 import Prism from 'prismjs';
+import { useAnimationStyles } from './animations/useAnimationStyles';
+import {
+  parseActiveLines,
+  useTypewriterCount,
+} from './animations/useCodeContentEffects';
 
 const THEMES = {
   dark: {
@@ -116,6 +121,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
   item,
   startFrame,
   durationInFrames,
+  animation,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -131,6 +137,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
   const showLineNumbers = item.properties.showLineNumbers ?? false;
   const animationMode = item.properties.animationMode || 'typing';
   const typingSpeedCps = item.properties.typingSpeedCps || 30;
+  const anim = animation ?? item.animation;
   const lineRevealIntervalMs = item.properties.lineRevealIntervalMs || 350;
 
   // Format code when pasted (placeholder: synchronous passthrough to avoid async in render)
@@ -172,10 +179,16 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
   const relativeFrame = frame - startFrame;
   // Typing speed based on characters per second
   const totalCharacters = codeContent.length;
-  const charsPerFrame = typingSpeedCps / fps;
-  const charactersToShow = Math.floor(
-    Math.max(0, relativeFrame) * charsPerFrame
+  const presetChars = useTypewriterCount(
+    anim?.preset === 'typewriter' ? anim : undefined,
+    totalCharacters,
+    startFrame
   );
+  const legacyChars = Math.floor(
+    Math.max(0, frame - startFrame) * (typingSpeedCps / fps)
+  );
+  const charactersToShow =
+    anim?.preset === 'typewriter' ? presetChars : legacyChars;
 
   // Line-by-line reveal calculations
   const lines = useMemo(() => codeContent.split(/\r?\n/), [codeContent]);
@@ -190,6 +203,39 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
   // Create animated code content
   const animatedCode = useMemo(() => {
     const prismLanguage = Prism.languages[language] ? language : 'javascript';
+
+    // New preset: Line Focus (dims non-active lines)
+    if (anim?.preset === 'lineFocus') {
+      let start = 1;
+      let end = lines.length;
+      try {
+        const parsed = parseActiveLines(anim.activeLines);
+        start = parsed.start;
+        end = parsed.end;
+      } catch {}
+      const linesArr = lines;
+      const html = linesArr
+        .map((ln, idx) => {
+          const lineNo = idx + 1;
+          const isActive = lineNo >= start && lineNo <= end;
+          let inner = '';
+          try {
+            inner = Prism.highlight(
+              ln,
+              Prism.languages[prismLanguage],
+              prismLanguage
+            );
+          } catch {
+            inner = ln;
+          }
+          const opacity = isActive
+            ? 1
+            : Math.max(0, Math.min(1, anim.focusOpacity));
+          return `<span class="code-line" style="opacity:${opacity}">${inner}</span>`;
+        })
+        .join('\n');
+      return html;
+    }
 
     if (animationMode === 'line-by-line') {
       const visible = lines
@@ -228,7 +274,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
     }
 
     // typing or none
-    if (animationMode === 'typing') {
+    if (anim?.preset === 'typewriter' || animationMode === 'typing') {
       if (charactersToShow >= totalCharacters) return highlightedCode;
       const truncated = codeContent.substring(0, Math.max(0, charactersToShow));
       try {
@@ -253,12 +299,23 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
     linesToShow,
     item.properties.codeText,
     item.properties.codeTextB,
+    anim,
   ]);
 
   // Style for the container
+  const motionAnim =
+    anim && (anim.preset === 'slide' || anim.preset === 'kenBurns')
+      ? anim
+      : undefined;
+  const animStyles = useAnimationStyles(motionAnim, {
+    startFrame,
+    durationInFrames,
+  });
+
   const containerStyle: React.CSSProperties = {
-    transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
-    opacity,
+    transform:
+      `${animStyles.transform ?? ''} translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`.trim(),
+    opacity: (animStyles.opacity ?? 1) * opacity,
     backgroundColor: themeColors.background,
     color: themeColors.color,
     fontFamily,
@@ -344,40 +401,42 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
             style={{ fontFamily: 'inherit' }}
           />
           {/* Typing cursor */}
-          {animationMode === 'typing' && charactersToShow < totalCharacters && (
-            <span
-              style={{
-                backgroundColor: themeColors.color,
-                width: '2px',
-                height: `${fontSize}px`,
-                display: 'inline-block',
-                animation: 'blink 1s infinite',
-                marginLeft: '2px',
-              }}
-            />
-          )}
+          {(anim?.preset === 'typewriter' || animationMode === 'typing') &&
+            charactersToShow < totalCharacters && (
+              <span
+                style={{
+                  backgroundColor: themeColors.color,
+                  width: '2px',
+                  height: `${fontSize}px`,
+                  display: 'inline-block',
+                  animation: 'blink 1s infinite',
+                  marginLeft: '2px',
+                }}
+              />
+            )}
         </pre>
 
         {/* Blinking cursor animation */}
         <style>
-          {`
-            @keyframes blink {
-              0%, 50% { opacity: 1; }
-              51%, 100% { opacity: 0; }
-            }
+          {(() => {
+            const numberingCss = showLineNumbers
+              ? anim?.preset === 'lineFocus'
+                ? `pre { counter-reset: line; }
+                   code > .code-line { counter-increment: line; }
+                   code > .code-line::before { content: counter(line); display: inline-block; width: 2.5em; margin-right: 1em; text-align: right; color: ${themeColors.comment}; }`
+                : `pre { counter-reset: line; }
+                   code span { counter-increment: line; }
+                   code span::before { content: counter(line); display: inline-block; width: 2.5em; margin-right: 1em; text-align: right; color: ${themeColors.comment}; }`
+              : '';
+            return `
+            @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
             .diff-added { background-color: rgba(16, 185, 129, 0.15); display: block; }
             .diff-removed { background-color: rgba(239, 68, 68, 0.15); display: block; text-decoration: line-through; opacity: 0.85; }
             .diff-unchanged { display: block; }
-            ${
-              showLineNumbers
-                ? `pre { counter-reset: line; }
-            code span { counter-increment: line; }
-            code span::before { content: counter(line);
-              display: inline-block; width: 2.5em; margin-right: 1em; text-align: right; color: ${themeColors.comment}; }
-            `
-                : ''
-            }
-          `}
+            .code-line { display: block; }
+            ${numberingCss}
+            `;
+          })()}
         </style>
       </AbsoluteFill>
     </Sequence>

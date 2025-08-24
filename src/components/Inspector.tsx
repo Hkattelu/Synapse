@@ -1,6 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { useTimeline, useMediaAssets } from '../state/hooks';
 import { validateItemProperties } from '../lib/validation';
+import { PresetSelector } from './animation/PresetSelector';
+import { getApplicablePresets } from '../remotion/animations/presets';
 import * as animationPresetsModule from '../lib/animationPresets';
 import type {
   TimelineItem,
@@ -85,12 +87,31 @@ export function Inspector({ className = '' }: InspectorProps) {
             updateTimelineItem(selectedItem.id, { properties })
           }
         />
-        <AnimationSettings
-          item={selectedItem}
-          onUpdateAnimations={(animations) =>
-            updateTimelineItem(selectedItem.id, { animations })
-          }
-        />
+        {/* Animation Presets - visible only when applicable presets exist for this item */}
+        {(() => {
+          const applicable = getApplicablePresets(
+            selectedItem.type,
+            selectedAsset?.type
+          );
+          if (applicable.length === 0) return null;
+          return (
+            <PresetSelector
+              item={selectedItem}
+              asset={selectedAsset}
+              onChange={(animation) =>
+                updateTimelineItem(selectedItem.id, { animation })
+              }
+            />
+          );
+        })()}
+        {!selectedItem.animation && (
+          <AnimationSettings
+            item={selectedItem}
+            onUpdateAnimations={(animations) =>
+              updateTimelineItem(selectedItem.id, { animations })
+            }
+          />
+        )}
       </div>
     </div>
   );

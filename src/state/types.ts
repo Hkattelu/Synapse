@@ -1,6 +1,12 @@
 // State management types for Synapse Studio
 
-import type { Project, TimelineItem, MediaAsset, UIState, MusicTrack } from '../lib/types';
+import type {
+  Project,
+  TimelineItem,
+  MediaAsset,
+  UIState,
+  MusicTrack,
+} from '../lib/types';
 import type { StoredProject } from '../lib/projectManager';
 
 // Action types for state management

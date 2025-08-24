@@ -4,12 +4,14 @@ import { AbsoluteFill, Sequence, Video, Img, useVideoConfig } from 'remotion';
 // like `Audio` in test environments where `remotion` is partially mocked.
 import * as RemotionNS from 'remotion';
 import type { VideoSequenceProps } from './types';
+import { useAnimationStyles } from './animations/useAnimationStyles';
 
 export const VideoSequence: React.FC<VideoSequenceProps> = ({
   item,
   asset,
   startFrame,
   durationInFrames,
+  animation,
 }) => {
   // If talking head overlay is enabled on this item, render as a small corner bubble
   const talkingHead = item.properties.talkingHeadEnabled === true;
@@ -30,6 +32,9 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
   const trackHeight = height / 4; // Assuming 4 tracks max for now
   const trackY = item.track * trackHeight;
 
+  const anim = animation ?? item.animation;
+  const animStyles = useAnimationStyles(anim, { startFrame, durationInFrames });
+
   const style: React.CSSProperties = talkingHead
     ? {
         // Corner-anchored bubble
@@ -40,7 +45,7 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
         ...(bubbleCorner.includes('top') ? { top: 24 } : { bottom: 24 }),
         ...(bubbleCorner.includes('left') ? { left: 24 } : { right: 24 }),
         transform: 'none',
-        opacity,
+        opacity: (animStyles.opacity ?? 1) * opacity,
         overflow: 'hidden',
         borderRadius: bubbleShape === 'circle' ? 9999 : 16,
         boxShadow: '0 6px 24px rgba(0,0,0,0.35)',
@@ -48,8 +53,10 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
         display: bubbleHidden ? 'none' : 'block',
       }
     : {
-        transform: `translate(${x}px, ${y + trackY}px) scale(${scale}) rotate(${rotation}deg)`,
-        opacity,
+        transform:
+          `${animStyles.transform ?? ''} translate(${x}px, ${y + trackY}px) scale(${scale}) rotate(${rotation}deg)`.trim(),
+        opacity: (animStyles.opacity ?? 1) * opacity,
+        overflow: animStyles.needsOverflowHidden ? 'hidden' : undefined,
       };
 
   return (
