@@ -1,11 +1,12 @@
 // React Context for global state management
 
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { AppState, AppAction, AppContextType } from './types';
 import { appReducer, initialState } from './reducers';
 import { ProjectManager } from '../lib/projectManager';
 import { loadSampleDataForDev } from '../data/sampleProjects';
+import { useProjectStore, clearProjectHistory } from './projectStore';
 
 // Create the context
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -21,6 +22,19 @@ interface AppProviderProps {
 export function AppProvider({ children }: AppProviderProps) {
   // Initialize state with project manager integration
   const [state, dispatch] = useReducer(appReducer, initialState);
+
+  // Keep zustand project store in sync with current project and reset history on project switches
+  const lastProjectIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    const currentId = state.project?.id ?? null;
+    if (currentId !== lastProjectIdRef.current) {
+      // Load current project timeline/media into the temporal store
+      useProjectStore.getState().loadProjectIntoStore(state.project);
+      // Clear undo/redo stacks when switching projects
+      clearProjectHistory();
+      lastProjectIdRef.current = currentId;
+    }
+  }, [state.project]);
 
   // Load projects on app startup
   useEffect(() => {

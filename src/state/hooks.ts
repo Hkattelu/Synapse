@@ -2,16 +2,10 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useAppContext } from './context';
-import {
-  useHistory,
-  createAddItemCommand,
-  createRemoveItemCommand,
-  createUpdateItemCommand,
-  createMoveItemCommand,
-  createResizeItemCommand,
-} from './history';
+// HistoryProvider remains for legacy consumers, but timeline/media now route through zustand temporal
 import type { TimelineItem, MediaAsset, Project } from '../lib/types';
 import { generateId } from '../lib/utils';
+import { useProjectStore } from './projectStore';
 
 // Hook for project operations
 export function useProject() {
@@ -111,9 +105,15 @@ export function useProject() {
 // Hook for timeline operations
 export function useTimeline() {
   const { state, dispatch } = useAppContext();
+  const timeline = useProjectStore((s) => s.timeline);
+  const addClipToTimeline = useProjectStore((s) => s.addClipToTimeline);
+  const deleteClip = useProjectStore((s) => s.deleteClip);
+  const updateClipProperties = useProjectStore((s) => s.updateClipProperties);
+  const moveClip = useProjectStore((s) => s.moveClip);
+  const resizeClip = useProjectStore((s) => s.resizeClip);
   const [currentTime, setCurrentTime] = useState(0);
 
-  const { execute } = useHistory();
+  // Temporal history is handled inside the zustand store; no explicit execute wrapper needed
 
   const addTimelineItem = useCallback(
     (item: Omit<TimelineItem, 'id'>) => {
@@ -122,71 +122,45 @@ export function useTimeline() {
         id: generateId(),
         keyframes: item.keyframes || [],
       };
-      execute(createAddItemCommand(newItem, dispatch));
+      // Single write path: mutate the Zustand store only; App-level bridge mirrors reducer state
+      addClipToTimeline(newItem);
       return newItem.id;
     },
-    [dispatch, execute]
+    [addClipToTimeline]
   );
 
   const removeTimelineItem = useCallback(
     (id: string) => {
-      const item = state.project?.timeline.find((i) => i.id === id);
-      if (!item) return;
-      execute(createRemoveItemCommand(item, dispatch));
+      // Single write path: zustand store only
+      deleteClip(id);
     },
-    [dispatch, state.project?.timeline, execute]
+    [deleteClip]
   );
 
   const updateTimelineItem = useCallback(
     (id: string, updates: Partial<TimelineItem>) => {
-      const before = state.project?.timeline.find((i) => i.id === id);
-      if (!before) return;
-      execute(
-        createUpdateItemCommand(
-          id,
-          { ...updatesKeysToBefore(updates, before) },
-          updates,
-          dispatch
-        )
-      );
+      // Single write path: zustand store only
+      updateClipProperties(id, updates);
     },
-    [dispatch, state.project?.timeline, execute]
+    [updateClipProperties]
   );
 
-  function updatesKeysToBefore(
-    updates: Partial<TimelineItem>,
-    before: TimelineItem
-  ): Partial<TimelineItem> {
-    const prev: Partial<TimelineItem> = {};
-    for (const k of Object.keys(updates) as (keyof TimelineItem)[]) {
-      (prev as any)[k] = (before as any)[k];
-    }
-    return prev;
-  }
+  // Note: undo/redo is handled by the temporal store; we no longer compute per-call reverse patches here.
 
   const moveTimelineItem = useCallback(
     (id: string, startTime: number, track: number) => {
-      const item = state.project?.timeline.find((i) => i.id === id);
-      if (!item) return;
-      execute(
-        createMoveItemCommand(
-          id,
-          { startTime: item.startTime, track: item.track },
-          { startTime, track },
-          dispatch
-        )
-      );
+      // Single write path: zustand store only
+      moveClip(id, startTime, track);
     },
-    [dispatch, state.project?.timeline, execute]
+    [moveClip]
   );
 
   const resizeTimelineItem = useCallback(
     (id: string, duration: number) => {
-      const item = state.project?.timeline.find((i) => i.id === id);
-      if (!item) return;
-      execute(createResizeItemCommand(id, item.duration, duration, dispatch));
+      // Single write path: zustand store only
+      resizeClip(id, duration);
     },
-    [dispatch, state.project?.timeline, execute]
+    [resizeClip]
   );
 
   const selectTimelineItems = useCallback(
@@ -202,13 +176,29 @@ export function useTimeline() {
 
   const duplicateTimelineItem = useCallback(
     (id: string) => {
-      dispatch({ type: 'DUPLICATE_TIMELINE_ITEM', payload: id });
+      const existing = timeline.find((t) => t.id === id);
+      if (!existing) return null;
+      const dup: TimelineItem = {
+        ...existing,
+        id: generateId(),
+        // Nudge start slightly to avoid perfect overlap; keep same track
+        startTime: existing.startTime + 0.05,
+        // Ensure keyframes are duplicated by value
+        keyframes: (existing.keyframes ?? []).map((k) => ({
+          ...k,
+          id: generateId(),
+        })),
+        // Shallow-copy nested properties to decouple references
+        properties: { ...(existing.properties ?? {}) },
+        animations: (existing.animations ?? []).map((a) => ({ ...a })),
+      };
+      addClipToTimeline(dup);
+      return dup.id;
     },
-    [dispatch]
+    [timeline, addClipToTimeline]
   );
 
   // Computed values
-  const timeline = state.project?.timeline || [];
   const selectedItems = state.ui.timeline.selectedItems;
   const selectedTimelineItems = useMemo(
     () => timeline.filter((item) => selectedItems.includes(item.id)),
@@ -259,7 +249,11 @@ export function useTimeline() {
 
 // Hook for media asset operations
 export function useMediaAssets() {
-  const { state, dispatch } = useAppContext();
+  // No reducer writes here—Zustand is the single write path. The App-level bridge mirrors state for legacy readers.
+  const mediaAssets = useProjectStore((s) => s.mediaAssets);
+  const addMedia = useProjectStore((s) => s.addMedia);
+  const removeMedia = useProjectStore((s) => s.removeMedia);
+  const updateMedia = useProjectStore((s) => s.updateMedia);
 
   const addMediaAsset = useCallback(
     (asset: Omit<MediaAsset, 'id' | 'createdAt'>) => {
@@ -268,27 +262,27 @@ export function useMediaAssets() {
         id: generateId(),
         createdAt: new Date(),
       };
-      dispatch({ type: 'ADD_MEDIA_ASSET', payload: newAsset });
+      addMedia(newAsset);
       return newAsset.id;
     },
-    [dispatch]
+    [addMedia]
   );
 
   const removeMediaAsset = useCallback(
     (id: string) => {
-      dispatch({ type: 'REMOVE_MEDIA_ASSET', payload: id });
+      // Single write path: zustand store only
+      removeMedia(id);
     },
-    [dispatch]
+    [removeMedia]
   );
 
   const updateMediaAsset = useCallback(
     (id: string, updates: Partial<MediaAsset>) => {
-      dispatch({ type: 'UPDATE_MEDIA_ASSET', payload: { id, updates } });
+      // Single write path: zustand store only
+      updateMedia(id, updates);
     },
-    [dispatch]
+    [updateMedia]
   );
-
-  const mediaAssets = state.project?.mediaAssets || [];
 
   const getMediaAssetById = useCallback(
     (id: string) => {
