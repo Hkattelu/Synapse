@@ -122,32 +122,27 @@ export function useTimeline() {
         id: generateId(),
         keyframes: item.keyframes || [],
       };
-      // Update temporal (Zustand) history first
+      // Single write path: update zustand temporal store; reducer is synced by App-level bridge
       addClipToTimeline(newItem);
-      // Keep reducer-based context in sync for components reading state.project
-      dispatch({ type: 'ADD_TIMELINE_ITEM', payload: newItem });
       return newItem.id;
     },
-    [dispatch, addClipToTimeline]
+    [addClipToTimeline]
   );
 
   const removeTimelineItem = useCallback(
     (id: string) => {
+      // Single write path: zustand store only
       deleteClip(id);
-      dispatch({ type: 'REMOVE_TIMELINE_ITEM', payload: id });
     },
-    [dispatch, deleteClip]
+    [deleteClip]
   );
 
   const updateTimelineItem = useCallback(
     (id: string, updates: Partial<TimelineItem>) => {
+      // Single write path: zustand store only
       updateClipProperties(id, updates);
-      dispatch({
-        type: 'UPDATE_TIMELINE_ITEM',
-        payload: { id, updates },
-      });
     },
-    [dispatch, updateClipProperties]
+    [updateClipProperties]
   );
 
   function updatesKeysToBefore(
@@ -163,24 +158,18 @@ export function useTimeline() {
 
   const moveTimelineItem = useCallback(
     (id: string, startTime: number, track: number) => {
+      // Single write path: zustand store only
       moveClip(id, startTime, track);
-      dispatch({
-        type: 'MOVE_TIMELINE_ITEM',
-        payload: { id, startTime, track },
-      });
     },
-    [dispatch, moveClip]
+    [moveClip]
   );
 
   const resizeTimelineItem = useCallback(
     (id: string, duration: number) => {
+      // Single write path: zustand store only
       resizeClip(id, duration);
-      dispatch({
-        type: 'RESIZE_TIMELINE_ITEM',
-        payload: { id, duration },
-      });
     },
-    [dispatch, resizeClip]
+    [resizeClip]
   );
 
   const selectTimelineItems = useCallback(
@@ -196,9 +185,20 @@ export function useTimeline() {
 
   const duplicateTimelineItem = useCallback(
     (id: string) => {
-      dispatch({ type: 'DUPLICATE_TIMELINE_ITEM', payload: id });
+      // Single write path: zustand store only
+      const itemToDup = timeline.find((t) => t.id === id);
+      if (!itemToDup) return;
+      const duplicated: TimelineItem = {
+        ...itemToDup,
+        id: generateId(),
+        startTime: itemToDup.startTime + itemToDup.duration,
+        keyframes: Array.isArray(itemToDup.keyframes)
+          ? itemToDup.keyframes.map((kf) => ({ ...kf }))
+          : [],
+      };
+      addClipToTimeline(duplicated);
     },
-    [dispatch]
+    [timeline, addClipToTimeline]
   );
 
   // Computed values
@@ -252,7 +252,6 @@ export function useTimeline() {
 
 // Hook for media asset operations
 export function useMediaAssets() {
-  const { state, dispatch } = useAppContext();
   const mediaAssets = useProjectStore((s) => s.mediaAssets);
   const addMedia = useProjectStore((s) => s.addMedia);
   const removeMedia = useProjectStore((s) => s.removeMedia);
@@ -266,26 +265,25 @@ export function useMediaAssets() {
         createdAt: new Date(),
       };
       addMedia(newAsset);
-      dispatch({ type: 'ADD_MEDIA_ASSET', payload: newAsset });
       return newAsset.id;
     },
-    [dispatch, addMedia]
+    [addMedia]
   );
 
   const removeMediaAsset = useCallback(
     (id: string) => {
+      // Single write path: zustand store only
       removeMedia(id);
-      dispatch({ type: 'REMOVE_MEDIA_ASSET', payload: id });
     },
-    [dispatch, removeMedia]
+    [removeMedia]
   );
 
   const updateMediaAsset = useCallback(
     (id: string, updates: Partial<MediaAsset>) => {
+      // Single write path: zustand store only
       updateMedia(id, updates);
-      dispatch({ type: 'UPDATE_MEDIA_ASSET', payload: { id, updates } });
     },
-    [dispatch, updateMedia]
+    [updateMedia]
   );
 
   const getMediaAssetById = useCallback(
