@@ -26,7 +26,9 @@ export function Inspector({ className = '' }: InspectorProps) {
 
   if (!selectedItem) {
     return (
-      <div className={`inspector bg-background-secondary flex flex-col h-full max-h-[calc(100vh-12rem)] ${className}`}>
+      <div
+        className={`inspector bg-background-secondary flex flex-col h-full max-h-[calc(100vh-12rem)] ${className}`}
+      >
         <div className="p-4 border-b border-border-subtle flex-shrink-0">
           <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
             Inspector
@@ -192,6 +194,22 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
               strokeLinejoin="round"
               strokeWidth={2}
               d="M4 6h16M4 12h16M4 18h7"
+            />
+          </svg>
+        );
+      case 'visual-asset':
+        return (
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM7 3H5a2 2 0 00-2 2v12a4 4 0 004 4h2a2 2 0 002-2V5a2 2 0 00-2-2z"
             />
           </svg>
         );
@@ -620,6 +638,227 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
     </div>
   );
 
+  const renderVisualAssetProperties = () => {
+    const assetType = localProperties.visualAssetType;
+    
+    return (
+      <div className="space-y-3">
+        <SelectInput
+          label="Asset Type"
+          value={assetType ?? 'arrow'}
+          onChange={(value) => updateProperty('visualAssetType', value as any)}
+          options={[
+            { value: 'arrow', label: 'Arrow' },
+            { value: 'box', label: 'Box' },
+            { value: 'finger-pointer', label: 'Finger Pointer' },
+            { value: 'circle', label: 'Circle' },
+            { value: 'line', label: 'Line' },
+          ]}
+        />
+        
+        <ColorInput
+          label="Stroke Color"
+          value={localProperties.strokeColor ?? '#ff0000'}
+          onChange={(value) => updateProperty('strokeColor', value)}
+          error={validationErrors.strokeColor}
+        />
+        
+        <NumberInput
+          label="Stroke Width"
+          value={localProperties.strokeWidth ?? 3}
+          onChange={(value) => updateProperty('strokeWidth', value)}
+          error={validationErrors.strokeWidth}
+          min={1}
+          max={20}
+          step={1}
+          suffix="px"
+        />
+
+        {(assetType === 'box' || assetType === 'circle') && (
+          <ColorInput
+            label="Fill Color"
+            value={localProperties.fillColor ?? 'transparent'}
+            onChange={(value) => updateProperty('fillColor', value)}
+            error={validationErrors.fillColor}
+          />
+        )}
+
+        {assetType === 'arrow' && (
+          <>
+            <SelectInput
+              label="Direction"
+              value={localProperties.arrowDirection ?? 'right'}
+              onChange={(value) => updateProperty('arrowDirection', value as any)}
+              options={[
+                { value: 'up', label: 'Up' },
+                { value: 'down', label: 'Down' },
+                { value: 'left', label: 'Left' },
+                { value: 'right', label: 'Right' },
+                { value: 'up-left', label: 'Up Left' },
+                { value: 'up-right', label: 'Up Right' },
+                { value: 'down-left', label: 'Down Left' },
+                { value: 'down-right', label: 'Down Right' },
+              ]}
+            />
+            <SelectInput
+              label="Style"
+              value={localProperties.arrowStyle ?? 'solid'}
+              onChange={(value) => updateProperty('arrowStyle', value as any)}
+              options={[
+                { value: 'solid', label: 'Solid' },
+                { value: 'dashed', label: 'Dashed' },
+                { value: 'curved', label: 'Curved' },
+              ]}
+            />
+          </>
+        )}
+
+        {assetType === 'box' && (
+          <>
+            <SelectInput
+              label="Style"
+              value={localProperties.boxStyle ?? 'solid'}
+              onChange={(value) => updateProperty('boxStyle', value as any)}
+              options={[
+                { value: 'solid', label: 'Solid' },
+                { value: 'dashed', label: 'Dashed' },
+                { value: 'dotted', label: 'Dotted' },
+              ]}
+            />
+            <NumberInput
+              label="Border Radius"
+              value={localProperties.borderRadius ?? 0}
+              onChange={(value) => updateProperty('borderRadius', value)}
+              error={validationErrors.borderRadius}
+              min={0}
+              max={50}
+              step={1}
+              suffix="px"
+            />
+          </>
+        )}
+
+        {assetType === 'finger-pointer' && (
+          <>
+            <SelectInput
+              label="Direction"
+              value={localProperties.fingerDirection ?? 'down'}
+              onChange={(value) => updateProperty('fingerDirection', value as any)}
+              options={[
+                { value: 'up', label: 'Up' },
+                { value: 'down', label: 'Down' },
+                { value: 'left', label: 'Left' },
+                { value: 'right', label: 'Right' },
+              ]}
+            />
+            <SelectInput
+              label="Style"
+              value={localProperties.fingerStyle ?? 'pointing'}
+              onChange={(value) => updateProperty('fingerStyle', value as any)}
+              options={[
+                { value: 'pointing', label: 'Pointing' },
+                { value: 'tapping', label: 'Tapping' },
+              ]}
+            />
+            <ColorInput
+              label="Fill Color"
+              value={localProperties.fillColor ?? '#ff0000'}
+              onChange={(value) => updateProperty('fillColor', value)}
+              error={validationErrors.fillColor}
+            />
+          </>
+        )}
+
+        {assetType === 'circle' && (
+          <SelectInput
+            label="Style"
+            value={localProperties.circleStyle ?? 'solid'}
+            onChange={(value) => updateProperty('circleStyle', value as any)}
+            options={[
+              { value: 'solid', label: 'Solid' },
+              { value: 'dashed', label: 'Dashed' },
+              { value: 'dotted', label: 'Dotted' },
+            ]}
+          />
+        )}
+
+        {assetType === 'line' && (
+          <>
+            <SelectInput
+              label="Style"
+              value={localProperties.lineStyle ?? 'solid'}
+              onChange={(value) => updateProperty('lineStyle', value as any)}
+              options={[
+                { value: 'solid', label: 'Solid' },
+                { value: 'dashed', label: 'Dashed' },
+                { value: 'dotted', label: 'Dotted' },
+              ]}
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <NumberInput
+                label="Start X"
+                value={localProperties.lineStartX ?? 0}
+                onChange={(value) => updateProperty('lineStartX', value)}
+                error={validationErrors.lineStartX}
+                step={1}
+                suffix="px"
+              />
+              <NumberInput
+                label="Start Y"
+                value={localProperties.lineStartY ?? 0}
+                onChange={(value) => updateProperty('lineStartY', value)}
+                error={validationErrors.lineStartY}
+                step={1}
+                suffix="px"
+              />
+              <NumberInput
+                label="End X"
+                value={localProperties.lineEndX ?? 100}
+                onChange={(value) => updateProperty('lineEndX', value)}
+                error={validationErrors.lineEndX}
+                step={1}
+                suffix="px"
+              />
+              <NumberInput
+                label="End Y"
+                value={localProperties.lineEndY ?? 0}
+                onChange={(value) => updateProperty('lineEndY', value)}
+                error={validationErrors.lineEndY}
+                step={1}
+                suffix="px"
+              />
+            </div>
+          </>
+        )}
+
+        <SelectInput
+          label="Animate In"
+          value={localProperties.animateIn ?? 'fade'}
+          onChange={(value) => updateProperty('animateIn', value as any)}
+          options={[
+            { value: 'none', label: 'None' },
+            { value: 'fade', label: 'Fade' },
+            { value: 'scale', label: 'Scale' },
+            { value: 'slide', label: 'Slide' },
+            { value: 'draw', label: 'Draw' },
+          ]}
+        />
+
+        <SelectInput
+          label="Animate Out"
+          value={localProperties.animateOut ?? 'fade'}
+          onChange={(value) => updateProperty('animateOut', value as any)}
+          options={[
+            { value: 'none', label: 'None' },
+            { value: 'fade', label: 'Fade' },
+            { value: 'scale', label: 'Scale' },
+            { value: 'slide', label: 'Slide' },
+          ]}
+        />
+      </div>
+    );
+  };
+
   return (
     <div className="border-b border-border-subtle">
       <div className="p-4">
@@ -736,6 +975,15 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
               Text
             </h5>
             {renderTitleProperties()}
+          </div>
+        )}
+
+        {item.type === 'visual-asset' && (
+          <div className="mb-4">
+            <h5 className="text-sm font-medium text-text-secondary mb-2">
+              Visual Asset
+            </h5>
+            {renderVisualAssetProperties()}
           </div>
         )}
       </div>

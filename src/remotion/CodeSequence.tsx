@@ -124,10 +124,16 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
   animation,
 }) => {
   const escapeHtml = (s: string): string =>
-    s.replace(/[&<>"']/g, (ch) =>
-      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[
-        ch as '&' | '<' | '>' | '"' | "'"
-      ] as string)
+    s.replace(
+      /[&<>"']/g,
+      (ch) =>
+        ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+        })[ch as '&' | '<' | '>' | '"' | "'"] as string
     );
   const encodeForHtml = (s: string): string => {
     const util = (Prism as any)?.util;

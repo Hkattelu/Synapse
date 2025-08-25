@@ -1,5 +1,10 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
-import { useTimeline, useMediaAssets, useUI, usePlayback } from '../state/hooks';
+import {
+  useTimeline,
+  useMediaAssets,
+  useUI,
+  usePlayback,
+} from '../state/hooks';
 import type { TimelineItem, MediaAsset, Keyframe } from '../lib/types';
 import { KeyframeManager, createKeyframe } from '../lib/keyframes';
 
@@ -473,7 +478,7 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
         }}
       >
         {/* Time Ruler */}
-        <div 
+        <div
           className="sticky top-0 z-40 bg-gray-800 border-b border-gray-700"
           style={{ width: `${timelineWidth}px`, height: '32px' }}
         >
@@ -509,7 +514,7 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
             if (e.target === e.currentTarget) {
               clearTimelineSelection();
               setSelectedKeyframes([]);
-              
+
               // Seek to clicked time
               const rect = timelineRef.current?.getBoundingClientRect();
               if (rect) {
@@ -563,7 +568,8 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
             {/* Playhead Handle */}
             <div className="absolute -top-2 -left-2 w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-lg pointer-events-auto cursor-pointer">
               <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                {Math.floor(playback.currentTime / 60)}:{(playback.currentTime % 60).toFixed(1).padStart(4, '0')}
+                {Math.floor(playback.currentTime / 60)}:
+                {(playback.currentTime % 60).toFixed(1).padStart(4, '0')}
               </div>
             </div>
           </div>

@@ -55,7 +55,8 @@ export function ResizablePanel({
     if (isResizing) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = direction === 'horizontal' ? 'ew-resize' : 'ns-resize';
+      document.body.style.cursor =
+        direction === 'horizontal' ? 'ew-resize' : 'ns-resize';
       document.body.style.userSelect = 'none';
 
       return () => {
@@ -67,14 +68,11 @@ export function ResizablePanel({
     }
   }, [isResizing, handleMouseMove, handleMouseUp, direction]);
 
-  const sizeStyle = direction === 'horizontal' ? { width: size } : { height: size };
+  const sizeStyle =
+    direction === 'horizontal' ? { width: size } : { height: size };
 
   return (
-    <div
-      ref={panelRef}
-      className={`relative ${className}`}
-      style={sizeStyle}
-    >
+    <div ref={panelRef} className={`relative ${className}`} style={sizeStyle}>
       {children}
       <div
         className={`absolute ${

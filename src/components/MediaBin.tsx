@@ -5,7 +5,7 @@ import { validateMediaAsset } from '../lib/validation';
 import { RecorderDialog } from './RecorderDialog';
 import { AudioWaveform } from './Waveform';
 import { MusicLibrary } from './MusicLibrary';
-import type { MediaAsset, MediaAssetType } from '../lib/types';
+import type { MediaAsset, MediaAssetType, VisualAssetType } from '../lib/types';
 
 interface MediaBinProps {
   className?: string;
@@ -41,6 +41,21 @@ export function MediaBin({ className = '' }: MediaBinProps) {
   const [isUploading, setIsUploading] = useState(false);
   const { notify } = useNotifications();
   const [activeTab, setActiveTab] = useState<'media' | 'music'>('media');
+
+  // Listen for upload files event from toolbar
+  React.useEffect(() => {
+    const handleUploadFiles = (event: CustomEvent) => {
+      const files = event.detail as FileList;
+      if (files && files.length > 0) {
+        processFiles(files);
+      }
+    };
+
+    window.addEventListener('uploadFiles', handleUploadFiles as EventListener);
+    return () => {
+      window.removeEventListener('uploadFiles', handleUploadFiles as EventListener);
+    };
+  }, []);
 
   // Determine media type from MIME type
   const getMediaType = (mimeType: string): MediaAssetType | null => {
@@ -309,6 +324,23 @@ export function MediaBin({ className = '' }: MediaBinProps) {
           animations: [],
           keyframes: [],
         });
+      } else if (asset.type === 'visual-asset') {
+        // For visual assets, create a visual-asset timeline item
+        addTimelineItem({
+          assetId: asset.id,
+          startTime: 0,
+          duration: asset.duration || 3, // Default 3 seconds for visual assets
+          track: 1, // Place on track 1 by default (overlay track)
+          type: 'visual-asset',
+          properties: {
+            visualAssetType: asset.metadata.visualAssetType,
+            x: 100, // Default position
+            y: 100,
+            ...asset.metadata.defaultProperties,
+          },
+          animations: [],
+          keyframes: [],
+        });
       } else {
         addTimelineItem({
           assetId: asset.id,
@@ -359,6 +391,40 @@ export function MediaBin({ className = '' }: MediaBinProps) {
     };
 
     addMediaAsset(titleAsset);
+  }, [addMediaAsset, mediaAssets]);
+
+  // Create a new visual asset
+  const createVisualAsset = useCallback((assetType: VisualAssetType) => {
+    const assetNames = {
+      'arrow': 'Arrow',
+      'box': 'Box',
+      'finger-pointer': 'Finger Pointer',
+      'circle': 'Circle',
+      'line': 'Line'
+    };
+
+    const defaultProperties = {
+      'arrow': { arrowDirection: 'right', strokeColor: '#ff0000', strokeWidth: 3 },
+      'box': { strokeColor: '#ff0000', strokeWidth: 3, fillColor: 'transparent' },
+      'finger-pointer': { fingerDirection: 'down', strokeColor: '#ff0000', fillColor: '#ff0000' },
+      'circle': { strokeColor: '#ff0000', strokeWidth: 3, fillColor: 'transparent' },
+      'line': { strokeColor: '#ff0000', strokeWidth: 3, lineEndX: 100, lineEndY: 0 }
+    };
+
+    const visualAsset: Omit<MediaAsset, 'id' | 'createdAt'> = {
+      name: `${assetNames[assetType]} ${mediaAssets.filter((a) => a.type === 'visual-asset' && a.metadata.visualAssetType === assetType).length + 1}`,
+      type: 'visual-asset',
+      url: '', // Visual assets don't need URLs
+      duration: 3, // Default 3 seconds
+      metadata: {
+        fileSize: 0,
+        mimeType: 'application/visual-asset',
+        visualAssetType: assetType,
+        defaultProperties: defaultProperties[assetType],
+      },
+    };
+
+    addMediaAsset(visualAsset);
   }, [addMediaAsset, mediaAssets]);
 
   // Open file dialog
@@ -446,6 +512,46 @@ export function MediaBin({ className = '' }: MediaBinProps) {
             >
               Add Title
             </button>
+            <div className="relative group">
+              <button
+                className="bg-accent-orange hover:bg-accent-orange/80 text-white text-xs font-medium py-1 px-3 rounded transition-colors"
+                title="Add visual assets"
+              >
+                Assets ▼
+              </button>
+              <div className="absolute right-0 top-full mt-1 bg-background-secondary border border-border-subtle rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 min-w-[140px]">
+                <button
+                  onClick={() => createVisualAsset('arrow')}
+                  className="w-full text-left px-3 py-2 text-xs text-text-primary hover:bg-background-tertiary transition-colors"
+                >
+                  Arrow
+                </button>
+                <button
+                  onClick={() => createVisualAsset('box')}
+                  className="w-full text-left px-3 py-2 text-xs text-text-primary hover:bg-background-tertiary transition-colors"
+                >
+                  Box
+                </button>
+                <button
+                  onClick={() => createVisualAsset('finger-pointer')}
+                  className="w-full text-left px-3 py-2 text-xs text-text-primary hover:bg-background-tertiary transition-colors"
+                >
+                  Finger Pointer
+                </button>
+                <button
+                  onClick={() => createVisualAsset('circle')}
+                  className="w-full text-left px-3 py-2 text-xs text-text-primary hover:bg-background-tertiary transition-colors"
+                >
+                  Circle
+                </button>
+                <button
+                  onClick={() => createVisualAsset('line')}
+                  className="w-full text-left px-3 py-2 text-xs text-text-primary hover:bg-background-tertiary transition-colors"
+                >
+                  Line
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -601,6 +707,38 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                             </svg>
                             <div className="text-xs font-mono bg-background-tertiary px-2 py-1 rounded">
                               {displayLanguage(asset.metadata.language)}
+                            </div>
+                          </div>
+                        )}
+                        {asset.type === 'visual-asset' && (
+                          <div className="text-center">
+                            {asset.metadata.visualAssetType === 'arrow' && (
+                              <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                              </svg>
+                            )}
+                            {asset.metadata.visualAssetType === 'box' && (
+                              <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16v12H4z" />
+                              </svg>
+                            )}
+                            {asset.metadata.visualAssetType === 'finger-pointer' && (
+                              <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 13l3 3 7-7" />
+                              </svg>
+                            )}
+                            {asset.metadata.visualAssetType === 'circle' && (
+                              <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" strokeWidth={2} />
+                              </svg>
+                            )}
+                            {asset.metadata.visualAssetType === 'line' && (
+                              <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14" />
+                              </svg>
+                            )}
+                            <div className="text-xs font-mono bg-background-tertiary px-2 py-1 rounded">
+                              {asset.metadata.visualAssetType?.toUpperCase()}
                             </div>
                           </div>
                         )}

@@ -88,13 +88,13 @@ export function EnhancedTimelineView({
       {/* Main Timeline Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Timeline Controls Header */}
-        <div className="bg-gray-900 border-b border-gray-700 p-3 flex items-center justify-between">
+        <div className="bg-gray-900 border-b border-gray-700 px-3 py-2 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             {/* Panel Toggle Buttons */}
-            <div className="flex items-center space-x-1 bg-gray-800 rounded p-1">
+            <div className="flex items-center space-x-1 bg-gray-800 rounded p-0.5">
               <button
                 onClick={() => togglePanel('tracks')}
-                className={`px-3 py-1 text-xs rounded transition-colors ${
+                className={`px-2 py-1.5 text-xs rounded transition-colors ${
                   activePanel === 'tracks'
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-gray-700'
@@ -102,7 +102,7 @@ export function EnhancedTimelineView({
                 title="Track Manager"
               >
                 <svg
-                  className="w-4 h-4 inline mr-1"
+                  className="w-3.5 h-3.5 inline mr-1"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -119,7 +119,7 @@ export function EnhancedTimelineView({
 
               <button
                 onClick={() => togglePanel('keyframes')}
-                className={`px-3 py-1 text-xs rounded transition-colors ${
+                className={`px-2 py-1.5 text-xs rounded transition-colors ${
                   activePanel === 'keyframes'
                     ? 'bg-purple-600 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-gray-700'
@@ -127,7 +127,7 @@ export function EnhancedTimelineView({
                 title="Keyframe Properties"
               >
                 <svg
-                  className="w-4 h-4 inline mr-1"
+                  className="w-3.5 h-3.5 inline mr-1"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -144,7 +144,7 @@ export function EnhancedTimelineView({
 
               <button
                 onClick={() => togglePanel('markers')}
-                className={`px-3 py-1 text-xs rounded transition-colors ${
+                className={`px-2 py-1.5 text-xs rounded transition-colors ${
                   activePanel === 'markers'
                     ? 'bg-green-600 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-gray-700'
@@ -152,7 +152,7 @@ export function EnhancedTimelineView({
                 title="Timeline Markers"
               >
                 <svg
-                  className="w-4 h-4 inline mr-1"
+                  className="w-3.5 h-3.5 inline mr-1"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -175,38 +175,30 @@ export function EnhancedTimelineView({
             </div>
 
             {/* Playback Controls */}
-            <div className="flex items-center space-x-2 bg-gray-800 rounded p-1">
+            <div className="flex items-center space-x-1 bg-gray-800 rounded p-0.5">
               <button
                 onClick={togglePlayback}
-                className="p-2 text-white hover:bg-gray-700 rounded transition-colors"
+                className="p-2.5 text-white hover:bg-gray-700 rounded transition-colors"
                 title={playback.isPlaying ? 'Pause' : 'Play'}
               >
                 {playback.isPlaying ? (
                   <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
+                    className="w-5 h-5"
+                    fill="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"
                     />
                   </svg>
                 ) : (
                   <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
+                    className="w-5 h-5"
+                    fill="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M15 14h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      d="M8 5v14l11-7z"
                     />
                   </svg>
                 )}
@@ -217,25 +209,21 @@ export function EnhancedTimelineView({
                   setCurrentTime(0);
                   seek(0);
                 }}
-                className="p-2 text-white hover:bg-gray-700 rounded transition-colors"
+                className="p-2.5 text-white hover:bg-gray-700 rounded transition-colors"
                 title="Go to Start"
               >
                 <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
+                  className="w-5 h-5"
+                  fill="currentColor"
                   viewBox="0 0 24 24"
                 >
                   <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                    d="M6 6h2v12H6V6zm3.5 6l8.5 6V6l-8.5 6z"
                   />
                 </svg>
               </button>
 
-              <div className="text-xs text-gray-400 min-w-[60px] text-center">
+              <div className="text-xs text-gray-400 min-w-[70px] text-center px-2 py-1">
                 {Math.floor(playback.currentTime / 60)}:
                 {(playback.currentTime % 60).toFixed(1).padStart(4, '0')}
               </div>
@@ -243,7 +231,7 @@ export function EnhancedTimelineView({
           </div>
 
           {/* Timeline Status */}
-          <div className="flex items-center space-x-4 text-sm text-gray-400">
+          <div className="flex items-center space-x-3 text-xs text-gray-400">
             {selectedItems.length > 0 && (
               <span>
                 {selectedItems.length} item{selectedItems.length > 1 ? 's' : ''}{' '}

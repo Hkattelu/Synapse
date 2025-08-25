@@ -1,7 +1,8 @@
 // Core data types for Synapse Studio
 
-export type MediaAssetType = 'video' | 'image' | 'audio' | 'code';
-export type TimelineItemType = 'video' | 'code' | 'title' | 'audio';
+export type MediaAssetType = 'video' | 'image' | 'audio' | 'code' | 'visual-asset';
+export type TimelineItemType = 'video' | 'code' | 'title' | 'audio' | 'visual-asset';
+export type VisualAssetType = 'arrow' | 'box' | 'finger-pointer' | 'circle' | 'line';
 export type AnimationType = 'entrance' | 'exit' | 'emphasis' | 'transition';
 
 export interface AssetMetadata {
@@ -15,6 +16,9 @@ export interface AssetMetadata {
   // Code-specific metadata
   codeContent?: string;
   language?: string;
+  // Visual asset metadata
+  visualAssetType?: VisualAssetType;
+  defaultProperties?: Partial<ItemProperties>;
 }
 
 export interface MediaAsset {
@@ -159,6 +163,36 @@ export interface ItemProperties {
   talkingHeadSize?: 'sm' | 'md';
   // Viewer-controlled, non-destructive visibility toggle
   talkingHeadHidden?: boolean;
+
+  // Visual asset properties
+  visualAssetType?: VisualAssetType;
+  // Arrow properties
+  arrowDirection?: 'up' | 'down' | 'left' | 'right' | 'up-left' | 'up-right' | 'down-left' | 'down-right';
+  arrowStyle?: 'solid' | 'dashed' | 'curved';
+  arrowThickness?: number;
+  // Box properties
+  boxStyle?: 'solid' | 'dashed' | 'dotted';
+  boxThickness?: number;
+  borderRadius?: number;
+  // Finger pointer properties
+  fingerDirection?: 'up' | 'down' | 'left' | 'right';
+  fingerStyle?: 'pointing' | 'tapping';
+  // Circle properties
+  circleStyle?: 'solid' | 'dashed' | 'dotted';
+  circleThickness?: number;
+  // Line properties
+  lineStyle?: 'solid' | 'dashed' | 'dotted';
+  lineThickness?: number;
+  lineStartX?: number;
+  lineStartY?: number;
+  lineEndX?: number;
+  lineEndY?: number;
+  // Common visual asset properties
+  strokeColor?: string;
+  fillColor?: string;
+  strokeWidth?: number;
+  animateIn?: 'fade' | 'scale' | 'slide' | 'draw' | 'none';
+  animateOut?: 'fade' | 'scale' | 'slide' | 'none';
 }
 
 export interface TimelineItem {

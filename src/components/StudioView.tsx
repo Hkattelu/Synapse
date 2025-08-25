@@ -9,6 +9,7 @@ import { Inspector } from './Inspector';
 import { ExportDialog } from './ExportDialog';
 import { ExportProvider } from '../state/exportContext';
 import { ResizablePanel } from './ResizablePanel';
+import { TimelineToolbar } from './TimelineToolbar';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left.js';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
 import Settings from 'lucide-react/dist/esm/icons/settings.js';
@@ -20,7 +21,6 @@ function StudioViewContent() {
   const { ui, toggleInspector, toggleMediaBin } = useUI();
   const navigate = useNavigate();
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
-  const [timelineHeight, setTimelineHeight] = useState(256);
   const { undo, redo, canUndo, canRedo } = useHistory();
 
   // Keyboard shortcuts for undo/redo
@@ -229,12 +229,13 @@ function StudioViewContent() {
           {/* Timeline Area - Resizable */}
           <ResizablePanel
             direction="vertical"
-            initialSize={timelineHeight}
-            minSize={200}
+            initialSize={300}
+            minSize={250}
             maxSize={500}
-            className="border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900 flex-shrink-0"
+            className="border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900 flex-shrink-0 flex flex-col"
           >
-            <EnhancedTimelineView className="h-full w-full" />
+            <TimelineToolbar />
+            <EnhancedTimelineView className="flex-1" />
           </ResizablePanel>
         </main>
 

@@ -4,6 +4,7 @@ import { VideoSequence } from './VideoSequence';
 import { CodeSequence } from './CodeSequence';
 import { TitleSequence } from './TitleSequence';
 import { SideBySideSequence } from './SideBySideSequence';
+import { VisualAssetSequence } from './VisualAssetSequence';
 import type { MainCompositionProps } from './types';
 
 export const MainComposition: React.FC<MainCompositionProps> = ({
@@ -55,6 +56,17 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
             startFrame={startFrame}
             durationInFrames={durationInFrames}
             animation={item.animation}
+          />
+        );
+      }
+
+      if (item.type === 'visual-asset') {
+        return (
+          <VisualAssetSequence
+            key={item.id}
+            item={item}
+            startFrame={startFrame}
+            durationInFrames={durationInFrames}
           />
         );
       }
