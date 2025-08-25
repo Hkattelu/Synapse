@@ -2,16 +2,10 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useAppContext } from './context';
-import {
-  useHistory,
-  createAddItemCommand,
-  createRemoveItemCommand,
-  createUpdateItemCommand,
-  createMoveItemCommand,
-  createResizeItemCommand,
-} from './history';
+// HistoryProvider remains for legacy consumers, but timeline/media now route through zustand temporal
 import type { TimelineItem, MediaAsset, Project } from '../lib/types';
 import { generateId } from '../lib/utils';
+import { useProjectStore } from './projectStore';
 
 // Hook for project operations
 export function useProject() {
@@ -111,9 +105,15 @@ export function useProject() {
 // Hook for timeline operations
 export function useTimeline() {
   const { state, dispatch } = useAppContext();
+  const timeline = useProjectStore((s) => s.timeline);
+  const addClipToTimeline = useProjectStore((s) => s.addClipToTimeline);
+  const deleteClip = useProjectStore((s) => s.deleteClip);
+  const updateClipProperties = useProjectStore((s) => s.updateClipProperties);
+  const moveClip = useProjectStore((s) => s.moveClip);
+  const resizeClip = useProjectStore((s) => s.resizeClip);
   const [currentTime, setCurrentTime] = useState(0);
 
-  const { execute } = useHistory();
+  // Temporal history is handled inside the zustand store; no explicit execute wrapper needed
 
   const addTimelineItem = useCallback(
     (item: Omit<TimelineItem, 'id'>) => {
@@ -122,35 +122,32 @@ export function useTimeline() {
         id: generateId(),
         keyframes: item.keyframes || [],
       };
-      execute(createAddItemCommand(newItem, dispatch));
+      // Update temporal (Zustand) history first
+      addClipToTimeline(newItem);
+      // Keep reducer-based context in sync for components reading state.project
+      dispatch({ type: 'ADD_TIMELINE_ITEM', payload: newItem });
       return newItem.id;
     },
-    [dispatch, execute]
+    [dispatch, addClipToTimeline]
   );
 
   const removeTimelineItem = useCallback(
     (id: string) => {
-      const item = state.project?.timeline.find((i) => i.id === id);
-      if (!item) return;
-      execute(createRemoveItemCommand(item, dispatch));
+      deleteClip(id);
+      dispatch({ type: 'REMOVE_TIMELINE_ITEM', payload: id });
     },
-    [dispatch, state.project?.timeline, execute]
+    [dispatch, deleteClip]
   );
 
   const updateTimelineItem = useCallback(
     (id: string, updates: Partial<TimelineItem>) => {
-      const before = state.project?.timeline.find((i) => i.id === id);
-      if (!before) return;
-      execute(
-        createUpdateItemCommand(
-          id,
-          { ...updatesKeysToBefore(updates, before) },
-          updates,
-          dispatch
-        )
-      );
+      updateClipProperties(id, updates);
+      dispatch({
+        type: 'UPDATE_TIMELINE_ITEM',
+        payload: { id, updates },
+      });
     },
-    [dispatch, state.project?.timeline, execute]
+    [dispatch, updateClipProperties]
   );
 
   function updatesKeysToBefore(
@@ -166,27 +163,24 @@ export function useTimeline() {
 
   const moveTimelineItem = useCallback(
     (id: string, startTime: number, track: number) => {
-      const item = state.project?.timeline.find((i) => i.id === id);
-      if (!item) return;
-      execute(
-        createMoveItemCommand(
-          id,
-          { startTime: item.startTime, track: item.track },
-          { startTime, track },
-          dispatch
-        )
-      );
+      moveClip(id, startTime, track);
+      dispatch({
+        type: 'MOVE_TIMELINE_ITEM',
+        payload: { id, startTime, track },
+      });
     },
-    [dispatch, state.project?.timeline, execute]
+    [dispatch, moveClip]
   );
 
   const resizeTimelineItem = useCallback(
     (id: string, duration: number) => {
-      const item = state.project?.timeline.find((i) => i.id === id);
-      if (!item) return;
-      execute(createResizeItemCommand(id, item.duration, duration, dispatch));
+      resizeClip(id, duration);
+      dispatch({
+        type: 'RESIZE_TIMELINE_ITEM',
+        payload: { id, duration },
+      });
     },
-    [dispatch, state.project?.timeline, execute]
+    [dispatch, resizeClip]
   );
 
   const selectTimelineItems = useCallback(
@@ -208,7 +202,6 @@ export function useTimeline() {
   );
 
   // Computed values
-  const timeline = state.project?.timeline || [];
   const selectedItems = state.ui.timeline.selectedItems;
   const selectedTimelineItems = useMemo(
     () => timeline.filter((item) => selectedItems.includes(item.id)),
@@ -260,6 +253,10 @@ export function useTimeline() {
 // Hook for media asset operations
 export function useMediaAssets() {
   const { state, dispatch } = useAppContext();
+  const mediaAssets = useProjectStore((s) => s.mediaAssets);
+  const addMedia = useProjectStore((s) => s.addMedia);
+  const removeMedia = useProjectStore((s) => s.removeMedia);
+  const updateMedia = useProjectStore((s) => s.updateMedia);
 
   const addMediaAsset = useCallback(
     (asset: Omit<MediaAsset, 'id' | 'createdAt'>) => {
@@ -268,27 +265,28 @@ export function useMediaAssets() {
         id: generateId(),
         createdAt: new Date(),
       };
+      addMedia(newAsset);
       dispatch({ type: 'ADD_MEDIA_ASSET', payload: newAsset });
       return newAsset.id;
     },
-    [dispatch]
+    [dispatch, addMedia]
   );
 
   const removeMediaAsset = useCallback(
     (id: string) => {
+      removeMedia(id);
       dispatch({ type: 'REMOVE_MEDIA_ASSET', payload: id });
     },
-    [dispatch]
+    [dispatch, removeMedia]
   );
 
   const updateMediaAsset = useCallback(
     (id: string, updates: Partial<MediaAsset>) => {
+      updateMedia(id, updates);
       dispatch({ type: 'UPDATE_MEDIA_ASSET', payload: { id, updates } });
     },
-    [dispatch]
+    [dispatch, updateMedia]
   );
-
-  const mediaAssets = state.project?.mediaAssets || [];
 
   const getMediaAssetById = useCallback(
     (id: string) => {
