@@ -105,12 +105,9 @@ export function useProject() {
 // Hook for timeline operations
 export function useTimeline() {
   const { state, dispatch } = useAppContext();
-  const timeline = useProjectStore((s) => s.timeline);
-  const addClipToTimeline = useProjectStore((s) => s.addClipToTimeline);
-  const deleteClip = useProjectStore((s) => s.deleteClip);
-  const updateClipProperties = useProjectStore((s) => s.updateClipProperties);
-  const moveClip = useProjectStore((s) => s.moveClip);
-  const resizeClip = useProjectStore((s) => s.resizeClip);
+  
+  // Temporarily use the base store directly to avoid temporal issues
+  const timeline = state.project?.timeline || [];
   const [currentTime, setCurrentTime] = useState(0);
 
   // Temporal history is handled inside the zustand store; no explicit execute wrapper needed
@@ -122,45 +119,55 @@ export function useTimeline() {
         id: generateId(),
         keyframes: item.keyframes || [],
       };
-      // Single write path: mutate the Zustand store only; App-level bridge mirrors reducer state
-      addClipToTimeline(newItem);
+      // Use dispatch for now to avoid temporal store issues
+      dispatch({ type: 'UPDATE_PROJECT', payload: { timeline: [...timeline, newItem] } });
       return newItem.id;
     },
-    [addClipToTimeline]
+    [dispatch, timeline]
   );
 
   const removeTimelineItem = useCallback(
     (id: string) => {
-      // Single write path: zustand store only
-      deleteClip(id);
+      // Use dispatch for now to avoid temporal store issues
+      const newTimeline = timeline.filter((item) => item.id !== id);
+      dispatch({ type: 'UPDATE_PROJECT', payload: { timeline: newTimeline } });
     },
-    [deleteClip]
+    [dispatch, timeline]
   );
 
   const updateTimelineItem = useCallback(
     (id: string, updates: Partial<TimelineItem>) => {
-      // Single write path: zustand store only
-      updateClipProperties(id, updates);
+      // Use dispatch for now to avoid temporal store issues
+      const newTimeline = timeline.map((item) => 
+        item.id === id ? { ...item, ...updates } : item
+      );
+      dispatch({ type: 'UPDATE_PROJECT', payload: { timeline: newTimeline } });
     },
-    [updateClipProperties]
+    [dispatch, timeline]
   );
 
   // Note: undo/redo is handled by the temporal store; we no longer compute per-call reverse patches here.
 
   const moveTimelineItem = useCallback(
     (id: string, startTime: number, track: number) => {
-      // Single write path: zustand store only
-      moveClip(id, startTime, track);
+      // Use dispatch for now to avoid temporal store issues
+      const newTimeline = timeline.map((item) => 
+        item.id === id ? { ...item, startTime, track } : item
+      );
+      dispatch({ type: 'UPDATE_PROJECT', payload: { timeline: newTimeline } });
     },
-    [moveClip]
+    [dispatch, timeline]
   );
 
   const resizeTimelineItem = useCallback(
     (id: string, duration: number) => {
-      // Single write path: zustand store only
-      resizeClip(id, duration);
+      // Use dispatch for now to avoid temporal store issues
+      const newTimeline = timeline.map((item) => 
+        item.id === id ? { ...item, duration: Math.max(0.1, Number(duration) || 0) } : item
+      );
+      dispatch({ type: 'UPDATE_PROJECT', payload: { timeline: newTimeline } });
     },
-    [resizeClip]
+    [dispatch, timeline]
   );
 
   const selectTimelineItems = useCallback(
@@ -192,10 +199,11 @@ export function useTimeline() {
         properties: { ...(existing.properties ?? {}) },
         animations: (existing.animations ?? []).map((a) => ({ ...a })),
       };
-      addClipToTimeline(dup);
+      const newTimeline = [...timeline, dup];
+      dispatch({ type: 'UPDATE_PROJECT', payload: { timeline: newTimeline } });
       return dup.id;
     },
-    [timeline, addClipToTimeline]
+    [timeline, dispatch]
   );
 
   // Computed values
@@ -249,11 +257,9 @@ export function useTimeline() {
 
 // Hook for media asset operations
 export function useMediaAssets() {
-  // No reducer writes here—Zustand is the single write path. The App-level bridge mirrors state for legacy readers.
-  const mediaAssets = useProjectStore((s) => s.mediaAssets);
-  const addMedia = useProjectStore((s) => s.addMedia);
-  const removeMedia = useProjectStore((s) => s.removeMedia);
-  const updateMedia = useProjectStore((s) => s.updateMedia);
+  const { state, dispatch } = useAppContext();
+  // Temporarily use the reducer state to avoid temporal store issues
+  const mediaAssets = state.project?.mediaAssets || [];
 
   const addMediaAsset = useCallback(
     (asset: Omit<MediaAsset, 'id' | 'createdAt'>) => {
@@ -262,26 +268,30 @@ export function useMediaAssets() {
         id: generateId(),
         createdAt: new Date(),
       };
-      addMedia(newAsset);
+      const newMediaAssets = [...mediaAssets, newAsset];
+      dispatch({ type: 'UPDATE_PROJECT', payload: { mediaAssets: newMediaAssets } });
       return newAsset.id;
     },
-    [addMedia]
+    [dispatch, mediaAssets]
   );
 
   const removeMediaAsset = useCallback(
     (id: string) => {
-      // Single write path: zustand store only
-      removeMedia(id);
+      const newMediaAssets = mediaAssets.filter((asset) => asset.id !== id);
+      const newTimeline = state.project?.timeline?.filter((item) => item.assetId !== id) || [];
+      dispatch({ type: 'UPDATE_PROJECT', payload: { mediaAssets: newMediaAssets, timeline: newTimeline } });
     },
-    [removeMedia]
+    [dispatch, mediaAssets, state.project?.timeline]
   );
 
   const updateMediaAsset = useCallback(
     (id: string, updates: Partial<MediaAsset>) => {
-      // Single write path: zustand store only
-      updateMedia(id, updates);
+      const newMediaAssets = mediaAssets.map((asset) => 
+        asset.id === id ? { ...asset, ...updates } : asset
+      );
+      dispatch({ type: 'UPDATE_PROJECT', payload: { mediaAssets: newMediaAssets } });
     },
-    [updateMedia]
+    [dispatch, mediaAssets]
   );
 
   const getMediaAssetById = useCallback(

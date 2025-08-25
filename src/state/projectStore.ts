@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { temporal } from 'zundo';
-import type { MediaAsset, Project, TimelineItem } from '@/lib/types';
+import type { MediaAsset, Project, TimelineItem } from '../lib/types';
 
 // Utility: omit null/undefined fields from a partial update object
 function omitNil<T extends object>(obj: Partial<T> | undefined): Partial<T> {
@@ -67,102 +67,126 @@ export type ProjectStoreState = {
   loadProjectIntoStore: (project: Project | null) => void;
 };
 
-// Vanilla store with temporal history. We track only timeline and mediaAssets in history.
-export const useProjectStore = create(
-  temporal<ProjectStoreState>(
-    (set) => ({
-      timeline: [],
-      mediaAssets: [],
-      selectedItemId: null,
+// Create the base store first
+const useProjectStoreBase = create<ProjectStoreState>((set) => ({
+  timeline: [],
+  mediaAssets: [],
+  selectedItemId: null,
 
-      addClipToTimeline: (clip) =>
-        set((s) => ({ timeline: [...s.timeline, clip] })),
+  addClipToTimeline: (clip) =>
+    set((s) => ({ timeline: [...s.timeline, clip] })),
 
-      deleteClip: (clipId) =>
-        set((s) => ({ timeline: s.timeline.filter((c) => c.id !== clipId) })),
+  deleteClip: (clipId) =>
+    set((s) => ({ timeline: s.timeline.filter((c) => c.id !== clipId) })),
 
-      updateClipProperties: (clipId, updates) =>
-        set((s) => ({
-          timeline: s.timeline.map((c) => {
-            if (c.id !== clipId) return c;
-            const u = updates as Partial<TimelineItem> & {
-              properties?: Partial<TimelineItem['properties']>;
-            };
-            const { properties, ...rest } = u;
-            const next: TimelineItem = {
-              ...c,
-              ...omitNil<TimelineItem>(rest),
-              properties: properties
-                ? {
-                    ...c.properties,
-                    ...omitNil<typeof c.properties>(properties),
-                  }
-                : c.properties,
-            };
-            return next;
-          }),
-        })),
-
-      moveClip: (clipId, startTime, track) =>
-        set((s) => ({
-          timeline: s.timeline.map((c) =>
-            c.id === clipId ? { ...c, startTime, track } : c
-          ),
-        })),
-
-      resizeClip: (clipId, duration) =>
-        set((s) => ({
-          timeline: s.timeline.map((c) =>
-            c.id === clipId
-              ? { ...c, duration: Math.max(0.1, Number(duration) || 0) }
-              : c
-          ),
-        })),
-
-      addMedia: (asset) =>
-        set((s) => ({ mediaAssets: [...s.mediaAssets, asset] })),
-
-      removeMedia: (assetId) =>
-        set((s) => ({
-          mediaAssets: s.mediaAssets.filter((a) => a.id !== assetId),
-          timeline: s.timeline.filter((t) => t.assetId !== assetId),
-        })),
-
-      updateMedia: (assetId, updates) =>
-        set((s) => ({
-          mediaAssets: s.mediaAssets.map((a) =>
-            a.id === assetId ? { ...a, ...updates } : a
-          ),
-        })),
-
-      clearSelection: () => set(() => ({ selectedItemId: null })),
-
-      loadProjectIntoStore: (project) =>
-        set(() => ({
-          timeline: project?.timeline ?? [],
-          mediaAssets: project?.mediaAssets ?? [],
-          selectedItemId: null,
-        })),
-    }),
-    {
-      // Only record timeline + media changes in history
-      partialize: (state) => ({
-        timeline: state.timeline,
-        mediaAssets: state.mediaAssets,
+  updateClipProperties: (clipId, updates) =>
+    set((s) => ({
+      timeline: s.timeline.map((c) => {
+        if (c.id !== clipId) return c;
+        const u = updates as Partial<TimelineItem> & {
+          properties?: Partial<TimelineItem['properties']>;
+        };
+        const { properties, ...rest } = u;
+        const next: TimelineItem = {
+          ...c,
+          ...omitNil<TimelineItem>(rest),
+          properties: properties
+            ? {
+                ...c.properties,
+                ...omitNil<typeof c.properties>(properties),
+              }
+            : c.properties,
+        };
+        return next;
       }),
-      // Group rapid successive updates (e.g., drag/resize)
-      handleSet: (handle) => throttle(handle, 150),
-      // Keep a reasonable cap on history
-      limit: 200,
-    }
-  )
-);
+    })),
+
+  moveClip: (clipId, startTime, track) =>
+    set((s) => ({
+      timeline: s.timeline.map((c) =>
+        c.id === clipId ? { ...c, startTime, track } : c
+      ),
+    })),
+
+  resizeClip: (clipId, duration) =>
+    set((s) => ({
+      timeline: s.timeline.map((c) =>
+        c.id === clipId
+          ? { ...c, duration: Math.max(0.1, Number(duration) || 0) }
+          : c
+      ),
+    })),
+
+  addMedia: (asset) =>
+    set((s) => ({ mediaAssets: [...s.mediaAssets, asset] })),
+
+  removeMedia: (assetId) =>
+    set((s) => ({
+      mediaAssets: s.mediaAssets.filter((a) => a.id !== assetId),
+      timeline: s.timeline.filter((t) => t.assetId !== assetId),
+    })),
+
+  updateMedia: (assetId, updates) =>
+    set((s) => ({
+      mediaAssets: s.mediaAssets.map((a) =>
+        a.id === assetId ? { ...a, ...updates } : a
+      ),
+    })),
+
+  clearSelection: () => set(() => ({ selectedItemId: null })),
+
+  loadProjectIntoStore: (project) =>
+    set(() => ({
+      timeline: project?.timeline ?? [],
+      mediaAssets: project?.mediaAssets ?? [],
+      selectedItemId: null,
+    })),
+}));
+
+// Wrap with temporal for undo/redo functionality
+export const useProjectStore = temporal(useProjectStoreBase, {
+  // Only record timeline + media changes in history
+  partialize: (state) => ({
+    timeline: state.timeline,
+    mediaAssets: state.mediaAssets,
+  }),
+  // Group rapid successive updates (e.g., drag/resize)
+  handleSet: (handle) => throttle(handle, 150),
+  // Keep a reasonable cap on history
+  limit: 200,
+});
 
 // React-friendly hook for the temporal store state (history stacks, undo/redo)
-export const useProjectTemporal = create(useProjectStore.temporal);
+export const useProjectTemporal = () => {
+  try {
+    return useProjectStore.temporal();
+  } catch {
+    // Fallback if temporal store isn't ready yet
+    return { 
+      undo: () => {}, 
+      redo: () => {}, 
+      pastStates: [], 
+      futureStates: [],
+      clear: () => {}
+    };
+  }
+};
 
-// Convenience functions for outside-react usage
-export const undoProject = () => useProjectStore.temporal.getState().undo();
-export const redoProject = () => useProjectStore.temporal.getState().redo();
-export const clearProjectHistory = () =>
-  useProjectStore.temporal.getState().clear();
+// Export the base store for imperative access
+export const projectStoreApi = useProjectStoreBase;
+
+// Convenience functions for outside-react usage - with safe access
+export const undoProject = () => {
+  const temporal = useProjectStore.temporal?.getState?.();
+  if (temporal?.undo) temporal.undo();
+};
+
+export const redoProject = () => {
+  const temporal = useProjectStore.temporal?.getState?.();
+  if (temporal?.redo) temporal.redo();
+};
+
+export const clearProjectHistory = () => {
+  const temporal = useProjectStore.temporal?.getState?.();
+  if (temporal?.clear) temporal.clear();
+};

@@ -6,7 +6,7 @@ import type { AppState, AppAction, AppContextType } from './types';
 import { appReducer, initialState } from './reducers';
 import { ProjectManager } from '../lib/projectManager';
 import { loadSampleDataForDev } from '../data/sampleProjects';
-import { useProjectStore, clearProjectHistory } from './projectStore';
+import { projectStoreApi, clearProjectHistory } from './projectStore';
 
 // Create the context
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -29,7 +29,7 @@ export function AppProvider({ children }: AppProviderProps) {
     const currentId = state.project?.id ?? null;
     if (currentId !== lastProjectIdRef.current) {
       // Load current project timeline/media into the temporal store
-      useProjectStore.getState().loadProjectIntoStore(state.project);
+      projectStoreApi.getState().loadProjectIntoStore(state.project);
       // Clear undo/redo stacks when switching projects
       clearProjectHistory();
       lastProjectIdRef.current = currentId;

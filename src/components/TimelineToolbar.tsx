@@ -16,44 +16,7 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
     // Show hint if user hasn't seen it before
     return !localStorage.getItem('timelineToolbarHintSeen');
   });
-
-  // Keyboard shortcuts and escape handling
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Close dropdown on Escape
-      if (e.key === 'Escape' && showVisualAssets) {
-        setShowVisualAssets(false);
-        return;
-      }
-
-      // Only trigger shortcuts if not typing in an input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-
-      const isCtrl = e.ctrlKey || e.metaKey;
-      
-      if (isCtrl && e.shiftKey) {
-        switch (e.key.toLowerCase()) {
-          case 'c':
-            e.preventDefault();
-            addCodeClip();
-            break;
-          case 't':
-            e.preventDefault();
-            addTitleClip();
-            break;
-          case 'a':
-            e.preventDefault();
-            setShowVisualAssets(!showVisualAssets);
-            break;
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showVisualAssets, addCodeClip, addTitleClip]);
+  const [recentlyAdded, setRecentlyAdded] = useState<string | null>(null);
 
   // Add code clip directly to timeline
   const addCodeClip = useCallback(() => {
@@ -82,10 +45,15 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
       type: 'code',
       properties: {
         codeText: codeAsset.metadata.codeContent,
+        text: codeAsset.metadata.codeContent, // Also set text for compatibility
         language: codeAsset.metadata.language,
         theme: 'dark',
         fontSize: 16,
         showLineNumbers: true,
+        x: 0,
+        y: 0,
+        scale: 1,
+        opacity: 1,
       },
       animations: [],
       keyframes: [],
@@ -96,6 +64,10 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
       title: 'Added',
       message: 'Code clip added to timeline',
     });
+
+    // Show visual feedback
+    setRecentlyAdded('code');
+    setTimeout(() => setRecentlyAdded(null), 1000);
   }, [addMediaAsset, addTimelineItem, notify]);
 
   // Add title clip directly to timeline
@@ -127,6 +99,10 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
         backgroundColor: 'transparent',
         fontSize: 48,
         fontFamily: 'Inter',
+        x: 0,
+        y: 0,
+        scale: 1,
+        opacity: 1,
       },
       animations: [],
       keyframes: [],
@@ -137,6 +113,10 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
       title: 'Added',
       message: 'Title added to timeline',
     });
+
+    // Show visual feedback
+    setRecentlyAdded('title');
+    setTimeout(() => setRecentlyAdded(null), 1000);
   }, [addMediaAsset, addTimelineItem, notify]);
 
   // Add visual asset directly to timeline
@@ -180,8 +160,10 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
       type: 'visual-asset',
       properties: {
         visualAssetType: assetType,
-        x: 100,
-        y: 100,
+        x: 200, // Center-ish position
+        y: 150,
+        scale: 1,
+        opacity: 1,
         ...defaultProperties[assetType],
       },
       animations: [],
@@ -194,8 +176,50 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
       message: `${assetNames[assetType]} added to timeline`,
     });
 
+    // Show visual feedback
+    setRecentlyAdded('visual-asset');
+    setTimeout(() => setRecentlyAdded(null), 1000);
+
     setShowVisualAssets(false);
   }, [addMediaAsset, addTimelineItem, notify]);
+
+  // Keyboard shortcuts and escape handling
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Close dropdown on Escape
+      if (e.key === 'Escape' && showVisualAssets) {
+        setShowVisualAssets(false);
+        return;
+      }
+
+      // Only trigger shortcuts if not typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      const isCtrl = e.ctrlKey || e.metaKey;
+      
+      if (isCtrl && e.shiftKey) {
+        switch (e.key.toLowerCase()) {
+          case 'c':
+            e.preventDefault();
+            addCodeClip();
+            break;
+          case 't':
+            e.preventDefault();
+            addTitleClip();
+            break;
+          case 'a':
+            e.preventDefault();
+            setShowVisualAssets(!showVisualAssets);
+            break;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showVisualAssets, addCodeClip, addTitleClip]);
 
   // Dismiss hint
   const dismissHint = useCallback(() => {
@@ -238,7 +262,7 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center space-x-2">
           <div className="flex items-center space-x-4">
             <span className="text-sm font-medium text-gray-300">Add to Timeline:</span>
@@ -248,7 +272,11 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
           {/* Code Button */}
           <button
             onClick={addCodeClip}
-            className="flex items-center space-x-2 bg-accent-green hover:bg-accent-green/80 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+            className={`flex items-center space-x-2 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-sm ${
+              recentlyAdded === 'code' 
+                ? 'bg-accent-green scale-105 shadow-lg' 
+                : 'bg-accent-green hover:bg-accent-green/80'
+            }`}
             title="Add code clip to timeline (Ctrl+Shift+C)"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -260,7 +288,11 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
           {/* Title Button */}
           <button
             onClick={addTitleClip}
-            className="flex items-center space-x-2 bg-accent-mauve hover:bg-accent-mauve/80 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+            className={`flex items-center space-x-2 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-sm ${
+              recentlyAdded === 'title' 
+                ? 'bg-accent-mauve scale-105 shadow-lg' 
+                : 'bg-accent-mauve hover:bg-accent-mauve/80'
+            }`}
             title="Add title to timeline (Ctrl+Shift+T)"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -273,7 +305,11 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
           <div className="relative">
             <button
               onClick={() => setShowVisualAssets(!showVisualAssets)}
-              className="flex items-center space-x-2 bg-accent-orange hover:bg-accent-orange/80 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+              className={`flex items-center space-x-2 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-sm ${
+                recentlyAdded === 'visual-asset' 
+                  ? 'bg-accent-orange scale-105 shadow-lg' 
+                  : 'bg-accent-orange hover:bg-accent-orange/80'
+              }`}
               title="Add visual assets to timeline (Ctrl+Shift+A)"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -338,7 +374,7 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
         </div>
 
         {/* Right side - Upload Media Button */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 flex-shrink-0">
           <button
             onClick={() => {
               // Trigger file input click

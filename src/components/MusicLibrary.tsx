@@ -1,7 +1,7 @@
 import React from 'react';
-import { useAppState } from '@/state/context';
-import { useMediaAssets, useTimeline } from '@/state/hooks';
-import type { MusicTrack, TimelineItem } from '@/lib/types';
+import { useAppState } from '../state/context';
+import { useMediaAssets, useTimeline } from '../state/hooks';
+import type { MusicTrack, TimelineItem } from '../lib/types';
 
 interface MusicLibraryProps {
   className?: string;

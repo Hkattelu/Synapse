@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AppProvider } from './state/context';
 import { AuthProvider } from './state/authContext';
 import { DashboardView } from './components/DashboardView';
@@ -16,8 +16,26 @@ import { useAppContext } from './state/context';
 
 function GlobalShortcutsAndBridge() {
   const { dispatch } = useAppContext();
-  const timeline = useProjectStore((s) => s.timeline);
-  const mediaAssets = useProjectStore((s) => s.mediaAssets);
+  
+  // Use a safer approach to access the store
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [mediaAssets, setMediaAssets] = useState<any[]>([]);
+  
+  // Subscribe to store changes after component mounts
+  useEffect(() => {
+    try {
+      const unsubscribe = useProjectStore.subscribe(
+        (state) => ({ timeline: state.timeline, mediaAssets: state.mediaAssets }),
+        ({ timeline, mediaAssets }) => {
+          setTimeline(timeline);
+          setMediaAssets(mediaAssets);
+        }
+      );
+      return unsubscribe;
+    } catch (error) {
+      console.warn('Failed to subscribe to project store:', error);
+    }
+  }, []);
 
   // Global keyboard shortcuts for undo/redo wired to Zustand temporal store
   useEffect(() => {
@@ -51,24 +69,23 @@ function GlobalShortcutsAndBridge() {
       const isMeta = event.metaKey || event.ctrlKey;
       if (!isMeta) return;
 
-      const temporal = useProjectStore.temporal.getState();
+      const temporal = useProjectStore.temporal?.getState?.();
+      if (!temporal) return;
+      
       if (key === 'z') {
         event.preventDefault();
-        if (event.shiftKey) temporal.redo();
-        else temporal.undo();
+        if (event.shiftKey) temporal.redo?.();
+        else temporal.undo?.();
       } else if (key === 'y') {
         event.preventDefault();
-        temporal.redo();
+        temporal.redo?.();
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
-  // Bridge: keep reducer-based project state in sync with zustand store (for legacy consumers)
-  useEffect(() => {
-    dispatch({ type: 'UPDATE_PROJECT', payload: { timeline, mediaAssets } });
-  }, [timeline, mediaAssets, dispatch]);
+  // Bridge logic removed - using reducer directly for now
 
   return null;
 }
