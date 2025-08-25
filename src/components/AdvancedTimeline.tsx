@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
-import { useTimeline, useMediaAssets, useUI } from '../state/hooks';
+import { useTimeline, useMediaAssets, useUI, usePlayback } from '../state/hooks';
 import type { TimelineItem, MediaAsset, Keyframe } from '../lib/types';
 import { KeyframeManager, createKeyframe } from '../lib/keyframes';
 
@@ -37,6 +37,7 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
 
   const { getMediaAssetById } = useMediaAssets();
   const { ui, updateTimelineView } = useUI();
+  const { playback, seek } = usePlayback();
 
   const timelineRef = useRef<HTMLDivElement>(null);
   const [dragState, setDragState] = useState<DragState>({
@@ -471,6 +472,25 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
           updateTimelineView({ scrollPosition: scrollLeft });
         }}
       >
+        {/* Time Ruler */}
+        <div 
+          className="sticky top-0 z-40 bg-gray-800 border-b border-gray-700"
+          style={{ width: `${timelineWidth}px`, height: '32px' }}
+        >
+          {Array.from({ length: Math.ceil(maxDuration) + 1 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute top-0 bottom-0 flex flex-col justify-between text-xs text-gray-400"
+              style={{ left: `${timeToPixels(i)}px` }}
+            >
+              <div className="border-l border-gray-600 h-full" />
+              <div className="absolute -bottom-6 -left-4 w-8 text-center">
+                {Math.floor(i / 60)}:{(i % 60).toString().padStart(2, '0')}
+              </div>
+            </div>
+          ))}
+        </div>
+
         <div
           ref={timelineRef}
           className="timeline-canvas relative cursor-crosshair"
@@ -489,6 +509,14 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
             if (e.target === e.currentTarget) {
               clearTimelineSelection();
               setSelectedKeyframes([]);
+              
+              // Seek to clicked time
+              const rect = timelineRef.current?.getBoundingClientRect();
+              if (rect) {
+                const x = e.clientX - rect.left;
+                const clickedTime = pixelsToTime(x);
+                seek(Math.max(0, clickedTime));
+              }
             }
           }}
         >
@@ -524,6 +552,21 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
               </div>
             </div>
           ))}
+
+          {/* Playhead */}
+          <div
+            className="absolute top-0 bottom-0 w-0.5 bg-red-500 pointer-events-none z-50"
+            style={{
+              left: `${timeToPixels(playback.currentTime)}px`,
+            }}
+          >
+            {/* Playhead Handle */}
+            <div className="absolute -top-2 -left-2 w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-lg pointer-events-auto cursor-pointer">
+              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                {Math.floor(playback.currentTime / 60)}:{(playback.currentTime % 60).toFixed(1).padStart(4, '0')}
+              </div>
+            </div>
+          </div>
 
           {/* Timeline Items with Keyframes */}
           {timeline.map((item) => {

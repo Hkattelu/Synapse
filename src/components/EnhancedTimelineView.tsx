@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { useTimeline } from '../state/hooks';
+import { useTimeline, usePlayback } from '../state/hooks';
 import type {
   TimelineItem,
   TimelineMarker,
@@ -21,11 +21,10 @@ export function EnhancedTimelineView({
 }: EnhancedTimelineViewProps) {
   const { timeline, selectedItems, currentTime, setCurrentTime } =
     useTimeline();
+  const { playback, play, pause, togglePlayback, seek } = usePlayback();
 
   const [activePanel, setActivePanel] = useState<PanelType>('keyframes');
   const [selectedKeyframes, setSelectedKeyframes] = useState<string[]>([]);
-  const [currentPlaybackTime, setCurrentPlaybackTime] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   // Get selected timeline item
   const selectedItem =
@@ -42,18 +41,18 @@ export function EnhancedTimelineView({
   const handleMarkerSelect = useCallback(
     (marker: TimelineMarker) => {
       setCurrentTime(marker.time);
-      setCurrentPlaybackTime(marker.time);
+      seek(marker.time);
     },
-    [setCurrentTime]
+    [setCurrentTime, seek]
   );
 
   // Handle region navigation
   const handleRegionSelect = useCallback(
     (region: TimelineRegion) => {
       setCurrentTime(region.startTime);
-      setCurrentPlaybackTime(region.startTime);
+      seek(region.startTime);
     },
-    [setCurrentTime]
+    [setCurrentTime, seek]
   );
 
   // Handle keyframe selection changes
@@ -178,11 +177,11 @@ export function EnhancedTimelineView({
             {/* Playback Controls */}
             <div className="flex items-center space-x-2 bg-gray-800 rounded p-1">
               <button
-                onClick={() => setIsPlaying(!isPlaying)}
+                onClick={togglePlayback}
                 className="p-2 text-white hover:bg-gray-700 rounded transition-colors"
-                title={isPlaying ? 'Pause' : 'Play'}
+                title={playback.isPlaying ? 'Pause' : 'Play'}
               >
-                {isPlaying ? (
+                {playback.isPlaying ? (
                   <svg
                     className="w-4 h-4"
                     fill="none"
@@ -216,7 +215,7 @@ export function EnhancedTimelineView({
               <button
                 onClick={() => {
                   setCurrentTime(0);
-                  setCurrentPlaybackTime(0);
+                  seek(0);
                 }}
                 className="p-2 text-white hover:bg-gray-700 rounded transition-colors"
                 title="Go to Start"
@@ -237,8 +236,8 @@ export function EnhancedTimelineView({
               </button>
 
               <div className="text-xs text-gray-400 min-w-[60px] text-center">
-                {Math.floor(currentPlaybackTime / 60)}:
-                {(currentPlaybackTime % 60).toFixed(1).padStart(4, '0')}
+                {Math.floor(playback.currentTime / 60)}:
+                {(playback.currentTime % 60).toFixed(1).padStart(4, '0')}
               </div>
             </div>
           </div>
@@ -283,7 +282,7 @@ export function EnhancedTimelineView({
           {activePanel === 'markers' && (
             <TimelineMarkerManager
               className="h-full"
-              currentTime={currentPlaybackTime}
+              currentTime={playback.currentTime}
               onMarkerSelect={handleMarkerSelect}
               onRegionSelect={handleRegionSelect}
             />

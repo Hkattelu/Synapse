@@ -3,12 +3,12 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useProject, useUI } from '../state/hooks';
 import { MediaBin } from './MediaBin';
-import { Timeline } from './Timeline';
 import { EnhancedTimelineView } from './EnhancedTimelineView';
 import { Preview } from './Preview';
 import { Inspector } from './Inspector';
 import { ExportDialog } from './ExportDialog';
 import { ExportProvider } from '../state/exportContext';
+import { ResizablePanel } from './ResizablePanel';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left.js';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
 import Settings from 'lucide-react/dist/esm/icons/settings.js';
@@ -19,10 +19,8 @@ function StudioViewContent() {
   const { project } = useProject();
   const { ui, toggleInspector, toggleMediaBin } = useUI();
   const navigate = useNavigate();
-  const [timelineMode, setTimelineMode] = useState<'standard' | 'enhanced'>(
-    'enhanced'
-  );
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [timelineHeight, setTimelineHeight] = useState(256);
   const { undo, redo, canUndo, canRedo } = useHistory();
 
   // Keyboard shortcuts for undo/redo
@@ -124,39 +122,6 @@ function StudioViewContent() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <a
-              href="/launch"
-              className="px-3 py-2 text-sm font-medium rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition-colors"
-              title="Open Launch Page"
-            >
-              Launch
-            </a>
-            {/* Timeline Mode Toggle */}
-            <div className="flex bg-purple-100 rounded-xl p-1">
-              <button
-                onClick={() => setTimelineMode('standard')}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                  timelineMode === 'standard'
-                    ? 'bg-purple-600 text-white shadow-sm'
-                    : 'text-purple-700 hover:text-purple-900 hover:bg-purple-200'
-                }`}
-                title="Standard Timeline"
-              >
-                Standard
-              </button>
-              <button
-                onClick={() => setTimelineMode('enhanced')}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                  timelineMode === 'enhanced'
-                    ? 'bg-purple-600 text-white shadow-sm'
-                    : 'text-purple-700 hover:text-purple-900 hover:bg-purple-200'
-                }`}
-                title="Enhanced Timeline with Keyframes"
-              >
-                Enhanced
-              </button>
-            </div>
-
             {/* Panel Controls */}
             <div className="flex items-center space-x-2">
               {/* Undo/Redo Buttons */}
@@ -261,42 +226,56 @@ function StudioViewContent() {
             <Preview className="h-full w-full" />
           </div>
 
-          {/* Timeline Area - Always visible with fixed height */}
-          <div className="h-64 border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900 flex-shrink-0">
-            {timelineMode === 'enhanced' ? (
-              <EnhancedTimelineView className="h-full w-full" />
-            ) : (
-              <Timeline className="h-full w-full" />
-            )}
-          </div>
+          {/* Timeline Area - Resizable */}
+          <ResizablePanel
+            direction="vertical"
+            initialSize={timelineHeight}
+            minSize={200}
+            maxSize={500}
+            className="border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900 flex-shrink-0"
+          >
+            <EnhancedTimelineView className="h-full w-full" />
+          </ResizablePanel>
         </main>
 
         {/* Right Panels */}
         {(ui.mediaBinVisible || ui.inspectorVisible) && (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4 }}
-            className="w-80 flex flex-col bg-white/95 backdrop-blur-sm border-l border-purple-200 rounded-r-2xl overflow-hidden shadow-inner"
+          <ResizablePanel
+            direction="horizontal"
+            initialSize={320}
+            minSize={250}
+            maxSize={600}
+            className="flex flex-col bg-white/95 backdrop-blur-sm border-l border-purple-200 rounded-r-2xl overflow-hidden shadow-inner"
           >
-            {/* Media Bin */}
-            {ui.mediaBinVisible && (
-              <div
-                className={`${ui.inspectorVisible ? 'flex-1' : 'h-full'} border-b border-purple-200/50 bg-gradient-to-b from-white to-purple-50/30`}
-              >
-                <MediaBin />
-              </div>
-            )}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4 }}
+              className="h-full flex flex-col"
+            >
+              {/* Media Bin */}
+              {ui.mediaBinVisible && (
+                <ResizablePanel
+                  direction="vertical"
+                  initialSize={ui.inspectorVisible ? 300 : 600}
+                  minSize={200}
+                  maxSize={800}
+                  className={`${ui.inspectorVisible ? '' : 'h-full'} border-b border-purple-200/50 bg-gradient-to-b from-white to-purple-50/30`}
+                >
+                  <MediaBin />
+                </ResizablePanel>
+              )}
 
-            {/* Inspector Panel */}
-            {ui.inspectorVisible && (
-              <div
-                className={`${ui.mediaBinVisible ? 'flex-1' : 'h-full'} bg-gradient-to-b from-purple-50/30 to-white`}
-              >
-                <Inspector />
-              </div>
-            )}
-          </motion.div>
+              {/* Inspector Panel */}
+              {ui.inspectorVisible && (
+                <div
+                  className={`${ui.mediaBinVisible ? 'flex-1' : 'h-full'} bg-gradient-to-b from-purple-50/30 to-white`}
+                >
+                  <Inspector />
+                </div>
+              )}
+            </motion.div>
+          </ResizablePanel>
         )}
       </motion.div>
 
