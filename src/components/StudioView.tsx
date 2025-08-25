@@ -14,34 +14,15 @@ import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left.js';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
 import Settings from 'lucide-react/dist/esm/icons/settings.js';
 import Archive from 'lucide-react/dist/esm/icons/archive.js';
-import { useHistory } from '../state/history';
+import { UndoButton } from './UndoButton';
+import { RedoButton } from './RedoButton';
 
 function StudioViewContent() {
   const { project } = useProject();
   const { ui, toggleInspector, toggleMediaBin } = useUI();
   const navigate = useNavigate();
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
-  const { undo, redo, canUndo, canRedo } = useHistory();
-
-  // Keyboard shortcuts for undo/redo
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      const isCtrl = e.ctrlKey || e.metaKey;
-      if (isCtrl && e.key.toLowerCase() === 'z') {
-        e.preventDefault();
-        if (e.shiftKey) {
-          redo();
-        } else {
-          undo();
-        }
-      } else if (isCtrl && e.key.toLowerCase() === 'y') {
-        e.preventDefault();
-        redo();
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo]);
+  // Global undo/redo keyboard shortcuts live in App.tsx
 
   // Listen for export dialog open event from Preview component
   useEffect(() => {
@@ -125,66 +106,14 @@ function StudioViewContent() {
             {/* Panel Controls */}
             <div className="flex items-center space-x-2">
               {/* Undo/Redo Buttons */}
-              <button
-                onClick={undo}
-                disabled={!canUndo}
-                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
-                  canUndo
-                    ? 'bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300'
-                    : 'bg-white border border-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
+              <UndoButton
+                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border text-purple-600 hover:bg-purple-50 hover:border-purple-300 disabled:border-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed`}
                 title="Undo (Ctrl+Z)"
-              >
-                <svg
-                  className="w-4 h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 19l-7-7 7-7"
-                  ></path>
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 19V5"
-                  ></path>
-                </svg>
-              </button>
-              <button
-                onClick={redo}
-                disabled={!canRedo}
-                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
-                  canRedo
-                    ? 'bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300'
-                    : 'bg-white border border-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
+              />
+              <RedoButton
+                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border text-purple-600 hover:bg-purple-50 hover:border-purple-300 disabled:border-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed`}
                 title="Redo (Ctrl+Y / Shift+Ctrl+Z)"
-              >
-                <svg
-                  className="w-4 h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 5l7 7-7 7"
-                  ></path>
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 5v14"
-                  ></path>
-                </svg>
-              </button>
+              />
               <button
                 onClick={toggleMediaBin}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
