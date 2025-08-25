@@ -42,7 +42,9 @@ export type ProjectStoreState = {
   deleteClip: (clipId: string) => void;
   updateClipProperties: (
     clipId: string,
-    updates: Partial<TimelineItem> | { properties?: Partial<TimelineItem['properties']> }
+    updates: Partial<TimelineItem> & {
+      properties?: Partial<TimelineItem['properties']>;
+    }
   ) => void;
   moveClip: (clipId: string, startTime: number, track: number) => void;
   resizeClip: (clipId: string, duration: number) => void;
@@ -76,21 +78,34 @@ export const useProjectStore = create(
         set((s) => ({
           timeline: s.timeline.map((c) => {
             if (c.id !== clipId) return c;
-            const next: TimelineItem = { ...c };
-            const u = updates as Partial<TimelineItem>;
-            // If properties provided as nested object, merge into c.properties
-            if ((u as any).properties) {
-              next.properties = {
-                ...c.properties,
-                ...(u as any).properties,
-              };
+            const u = updates;
+
+            // Start with existing item
+            let next: TimelineItem = c;
+
+            // Apply defined top-level fields (excluding 'properties')
+            (Object.keys(u) as (keyof TimelineItem)[]).forEach((k) => {
+              if (k === 'properties') return;
+              const v = u[k];
+              if (v !== undefined) {
+                next = { ...next, [k]: v } as TimelineItem;
+              }
+            });
+
+            // Merge nested properties, ignoring undefined entries
+            if (u.properties) {
+              const definedProps = Object.fromEntries(
+                Object.entries(u.properties).filter(([, v]) => v !== undefined)
+              ) as Partial<TimelineItem['properties']>;
+
+              if (Object.keys(definedProps).length > 0) {
+                next = {
+                  ...next,
+                  properties: { ...next.properties, ...definedProps },
+                };
+              }
             }
-            // Shallow-merge other top-level fields
-            for (const k of Object.keys(u) as (keyof TimelineItem)[]) {
-              if (k === 'properties') continue;
-              // @ts-expect-error index access is fine here
-              (next as any)[k] = (u as any)[k] ?? (next as any)[k];
-            }
+
             return next;
           }),
         })),
