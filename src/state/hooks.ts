@@ -249,10 +249,7 @@ export function useTimeline() {
 
 // Hook for media asset operations
 export function useMediaAssets() {
-<<<<<<< HEAD
-=======
   // No reducer writes here—Zustand is the single write path. The App-level bridge mirrors state for legacy readers.
->>>>>>> f9aebc4 (refactor(state): single write path via Zustand in timeline/media hooks; typed updateClipProperties merge; robust editable detection; tidy Undo/Redo buttons)
   const mediaAssets = useProjectStore((s) => s.mediaAssets);
   const addMedia = useProjectStore((s) => s.addMedia);
   const removeMedia = useProjectStore((s) => s.removeMedia);
