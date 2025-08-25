@@ -122,7 +122,7 @@ export function useTimeline() {
         id: generateId(),
         keyframes: item.keyframes || [],
       };
-      // Single write path: update zustand temporal store; reducer is synced by App-level bridge
+      // Single write path: mutate the Zustand store only; App-level bridge mirrors reducer state
       addClipToTimeline(newItem);
       return newItem.id;
     },
@@ -145,16 +145,7 @@ export function useTimeline() {
     [updateClipProperties]
   );
 
-  function updatesKeysToBefore(
-    updates: Partial<TimelineItem>,
-    before: TimelineItem
-  ): Partial<TimelineItem> {
-    const prev: Partial<TimelineItem> = {};
-    for (const k of Object.keys(updates) as (keyof TimelineItem)[]) {
-      (prev as any)[k] = (before as any)[k];
-    }
-    return prev;
-  }
+  // Note: undo/redo is handled by the temporal store; we no longer compute per-call reverse patches here.
 
   const moveTimelineItem = useCallback(
     (id: string, startTime: number, track: number) => {
@@ -185,18 +176,24 @@ export function useTimeline() {
 
   const duplicateTimelineItem = useCallback(
     (id: string) => {
-      // Single write path: zustand store only
-      const itemToDup = timeline.find((t) => t.id === id);
-      if (!itemToDup) return;
-      const duplicated: TimelineItem = {
-        ...itemToDup,
+      const existing = timeline.find((t) => t.id === id);
+      if (!existing) return null;
+      const dup: TimelineItem = {
+        ...existing,
         id: generateId(),
-        startTime: itemToDup.startTime + itemToDup.duration,
-        keyframes: Array.isArray(itemToDup.keyframes)
-          ? itemToDup.keyframes.map((kf) => ({ ...kf }))
-          : [],
+        // Nudge start slightly to avoid perfect overlap; keep same track
+        startTime: existing.startTime + 0.05,
+        // Ensure keyframes are duplicated by value
+        keyframes: (existing.keyframes ?? []).map((k) => ({
+          ...k,
+          id: generateId(),
+        })),
+        // Shallow-copy nested properties to decouple references
+        properties: { ...(existing.properties ?? {}) },
+        animations: (existing.animations ?? []).map((a) => ({ ...a })),
       };
-      addClipToTimeline(duplicated);
+      addClipToTimeline(dup);
+      return dup.id;
     },
     [timeline, addClipToTimeline]
   );
@@ -252,6 +249,10 @@ export function useTimeline() {
 
 // Hook for media asset operations
 export function useMediaAssets() {
+<<<<<<< HEAD
+=======
+  // No reducer writes here—Zustand is the single write path. The App-level bridge mirrors state for legacy readers.
+>>>>>>> f9aebc4 (refactor(state): single write path via Zustand in timeline/media hooks; typed updateClipProperties merge; robust editable detection; tidy Undo/Redo buttons)
   const mediaAssets = useProjectStore((s) => s.mediaAssets);
   const addMedia = useProjectStore((s) => s.addMedia);
   const removeMedia = useProjectStore((s) => s.removeMedia);

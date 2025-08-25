@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { AppProvider } from './state/context';
 import { AuthProvider } from './state/authContext';
 import { DashboardView } from './components/DashboardView';
@@ -21,12 +21,31 @@ function GlobalShortcutsAndBridge() {
 
   // Global keyboard shortcuts for undo/redo wired to Zustand temporal store
   useEffect(() => {
+    const isInEditableContext = (el: EventTarget | null): boolean => {
+      let node = (el as HTMLElement | null) ?? null;
+      while (node && node !== document.body) {
+        const tag = node.tagName?.toLowerCase();
+        const role = node.getAttribute?.('role');
+        // Native inputs/textarea/select
+        if (tag === 'input' || tag === 'textarea' || tag === 'select') {
+          return true;
+        }
+        // contenteditable (direct or ancestor)
+        if (
+          node.isContentEditable ||
+          node.getAttribute?.('contenteditable') === 'true'
+        )
+          return true;
+        // ARIA textbox role (covers custom editors)
+        if (role === 'textbox') return true;
+        node = node.parentElement;
+      }
+      return false;
+    };
+
     const onKeyDown = (event: KeyboardEvent) => {
-      // Don't hijack typing in inputs/contenteditable/selects
-      const target = event.target as HTMLElement | null;
-      const tag = target?.tagName?.toLowerCase();
-      const isEditable = !!target && (target.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select');
-      if (isEditable) return;
+      // Don't hijack typing anywhere inside an editable context
+      if (isInEditableContext(event.target)) return;
 
       const key = event.key.toLowerCase();
       const isMeta = event.metaKey || event.ctrlKey;
@@ -35,7 +54,8 @@ function GlobalShortcutsAndBridge() {
       const temporal = useProjectStore.temporal.getState();
       if (key === 'z') {
         event.preventDefault();
-        if (event.shiftKey) temporal.redo(); else temporal.undo();
+        if (event.shiftKey) temporal.redo();
+        else temporal.undo();
       } else if (key === 'y') {
         event.preventDefault();
         temporal.redo();
@@ -54,7 +74,6 @@ function GlobalShortcutsAndBridge() {
 }
 
 function App() {
-
   return (
     <AuthProvider>
       <AppProvider>

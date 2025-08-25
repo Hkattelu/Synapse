@@ -2,11 +2,20 @@ import { create } from 'zustand';
 import { temporal } from 'zundo';
 import type { MediaAsset, Project, TimelineItem } from '@/lib/types';
 
+// Utility: omit null/undefined fields from a partial update object
+function omitNil<T extends object>(obj: Partial<T> | undefined): Partial<T> {
+  if (!obj) return {} as Partial<T>;
+  const entries = Object.entries(obj as Record<string, unknown>);
+  return Object.fromEntries(
+    entries.filter(([, v]) => v !== undefined && v !== null)
+  ) as Partial<T>;
+}
+
 // Simple throttle to coalesce rapid updates (e.g., drag/resize) into one history step
-function throttle<T extends (...args: any[]) => void>(fn: T, wait = 150) {
+function throttle<T extends (...args: unknown[]) => void>(fn: T, wait = 150) {
   let last = 0;
   let timeout: ReturnType<typeof setTimeout> | null = null;
-  let pendingArgs: any[] | null = null;
+  let pendingArgs: Parameters<T> | null = null;
   return (...args: Parameters<T>) => {
     const now = Date.now();
     const remaining = wait - (now - last);
@@ -17,14 +26,12 @@ function throttle<T extends (...args: any[]) => void>(fn: T, wait = 150) {
         timeout = null;
       }
       last = now;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      fn(...(pendingArgs as any[]));
+      fn(...(pendingArgs as Parameters<T>));
       pendingArgs = null;
     } else if (!timeout) {
       timeout = setTimeout(() => {
         last = Date.now();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        fn(...(pendingArgs as any[]));
+        fn(...(pendingArgs as Parameters<T>));
         pendingArgs = null;
         timeout = null;
       }, remaining);
@@ -42,9 +49,9 @@ export type ProjectStoreState = {
   deleteClip: (clipId: string) => void;
   updateClipProperties: (
     clipId: string,
-    updates: Partial<TimelineItem> & {
-      properties?: Partial<TimelineItem['properties']>;
-    }
+    updates:
+      | Partial<TimelineItem>
+      | { properties?: Partial<TimelineItem['properties']> }
   ) => void;
   moveClip: (clipId: string, startTime: number, track: number) => void;
   resizeClip: (clipId: string, duration: number) => void;
@@ -63,7 +70,7 @@ export type ProjectStoreState = {
 // Vanilla store with temporal history. We track only timeline and mediaAssets in history.
 export const useProjectStore = create(
   temporal<ProjectStoreState>(
-    (set, get) => ({
+    (set) => ({
       timeline: [],
       mediaAssets: [],
       selectedItemId: null,
@@ -78,34 +85,20 @@ export const useProjectStore = create(
         set((s) => ({
           timeline: s.timeline.map((c) => {
             if (c.id !== clipId) return c;
-            const u = updates;
-
-            // Start with existing item
-            let next: TimelineItem = c;
-
-            // Apply defined top-level fields (excluding 'properties')
-            (Object.keys(u) as (keyof TimelineItem)[]).forEach((k) => {
-              if (k === 'properties') return;
-              const v = u[k];
-              if (v !== undefined) {
-                next = { ...next, [k]: v } as TimelineItem;
-              }
-            });
-
-            // Merge nested properties, ignoring undefined entries
-            if (u.properties) {
-              const definedProps = Object.fromEntries(
-                Object.entries(u.properties).filter(([, v]) => v !== undefined)
-              ) as Partial<TimelineItem['properties']>;
-
-              if (Object.keys(definedProps).length > 0) {
-                next = {
-                  ...next,
-                  properties: { ...next.properties, ...definedProps },
-                };
-              }
-            }
-
+            const u = updates as Partial<TimelineItem> & {
+              properties?: Partial<TimelineItem['properties']>;
+            };
+            const { properties, ...rest } = u;
+            const next: TimelineItem = {
+              ...c,
+              ...omitNil<TimelineItem>(rest),
+              properties: properties
+                ? {
+                    ...c.properties,
+                    ...omitNil<typeof c.properties>(properties),
+                  }
+                : c.properties,
+            };
             return next;
           }),
         })),
@@ -126,7 +119,8 @@ export const useProjectStore = create(
           ),
         })),
 
-      addMedia: (asset) => set((s) => ({ mediaAssets: [...s.mediaAssets, asset] })),
+      addMedia: (asset) =>
+        set((s) => ({ mediaAssets: [...s.mediaAssets, asset] })),
 
       removeMedia: (assetId) =>
         set((s) => ({
