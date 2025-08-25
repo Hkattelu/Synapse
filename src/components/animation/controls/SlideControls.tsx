@@ -1,6 +1,25 @@
 import React from 'react';
 import type { AnimationConfig } from '../../../lib/types';
 
+type SlideConfig = Extract<AnimationConfig, { preset: 'slide' }>;
+type SlideDirection = SlideConfig['direction'];
+type SlideEasing = SlideConfig['easing'];
+
+const DURATION_MIN = 1;
+const DURATION_MAX = 300;
+
+const clampInt = (raw: string, min: number, max: number) => {
+  const n = parseInt(raw, 10);
+  if (!Number.isFinite(n)) return min;
+  return Math.min(max, Math.max(min, n));
+};
+
+const isSlideDirection = (v: string): v is SlideDirection =>
+  v === 'left' || v === 'right' || v === 'up' || v === 'down';
+
+const isSlideEasing = (v: string): v is SlideEasing =>
+  v === 'gentle' || v === 'bouncy' || v === 'stiff';
+
 export function SlideControls({
   value,
   onChange,
@@ -20,9 +39,12 @@ export function SlideControls({
           </label>
           <select
             value={value.direction}
-            onChange={(e) =>
-              onChange({ ...value, direction: e.target.value as any })
-            }
+            onChange={(e) => {
+              const raw = e.target.value;
+              if (isSlideDirection(raw)) {
+                onChange({ ...value, direction: raw });
+              }
+            }}
             className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-sm text-text-primary"
           >
             <option value="left">From Left</option>
@@ -37,16 +59,14 @@ export function SlideControls({
           </label>
           <input
             type="number"
-            min={1}
-            max={300}
+            min={DURATION_MIN}
+            max={DURATION_MAX}
             step={1}
             value={value.duration}
-            onChange={(e) =>
-              onChange({
-                ...value,
-                duration: Math.max(1, Number(e.target.value)),
-              })
-            }
+            onChange={(e) => {
+              const next = clampInt(e.target.value, DURATION_MIN, DURATION_MAX);
+              onChange({ ...value, duration: next });
+            }}
             className="w-28 bg-background-tertiary border border-border-subtle rounded px-2 py-1 text-sm text-text-primary"
           />
         </div>
@@ -56,9 +76,12 @@ export function SlideControls({
           </label>
           <select
             value={value.easing}
-            onChange={(e) =>
-              onChange({ ...value, easing: e.target.value as any })
-            }
+            onChange={(e) => {
+              const raw = e.target.value;
+              if (isSlideEasing(raw)) {
+                onChange({ ...value, easing: raw });
+              }
+            }}
             className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-sm text-text-primary"
           >
             <option value="gentle">Gentle</option>

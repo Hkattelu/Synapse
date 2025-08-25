@@ -123,6 +123,23 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
   durationInFrames,
   animation,
 }) => {
+  const escapeHtml = (s: string): string =>
+    s.replace(/[&<>"']/g, (ch) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[
+        ch as '&' | '<' | '>' | '"' | "'"
+      ] as string)
+    );
+  const encodeForHtml = (s: string): string => {
+    const util = (Prism as any)?.util;
+    if (util && typeof util.encode === 'function') {
+      try {
+        return String(util.encode(s));
+      } catch {
+        // fall through
+      }
+    }
+    return escapeHtml(s);
+  };
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -158,7 +175,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
   // Highlight code using Prism
   const highlightedCode = useMemo(() => {
     if (!Prism) {
-      return codeContent;
+      return encodeForHtml(codeContent);
     }
 
     try {
@@ -171,7 +188,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
       );
     } catch (error) {
       console.warn('Failed to highlight code:', error);
-      return codeContent;
+      return encodeForHtml(codeContent);
     }
   }, [codeContent, language]);
 
@@ -226,7 +243,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
               prismLanguage
             );
           } catch {
-            inner = ln;
+            inner = encodeForHtml(ln);
           }
           const opacity = isActive
             ? 1
@@ -248,7 +265,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
           prismLanguage
         );
       } catch {
-        return visible;
+        return encodeForHtml(visible);
       }
     }
 
@@ -267,7 +284,8 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
             );
             return `<span class="diff-${cls}">${inner}</span>`;
           } catch {
-            return `<span class="diff-${cls}">${p.value}</span>`;
+            const safe = encodeForHtml(p.value);
+            return `<span class="diff-${cls}">${safe}</span>`;
           }
         })
         .join('');
@@ -284,7 +302,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
           prismLanguage
         );
       } catch {
-        return truncated;
+        return encodeForHtml(truncated);
       }
     }
 
