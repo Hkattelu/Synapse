@@ -26,13 +26,13 @@ export function Inspector({ className = '' }: InspectorProps) {
 
   if (!selectedItem) {
     return (
-      <div className={`inspector bg-background-secondary ${className}`}>
-        <div className="p-4 border-b border-border-subtle">
+      <div className={`inspector bg-background-secondary flex flex-col h-full max-h-[calc(100vh-12rem)] ${className}`}>
+        <div className="p-4 border-b border-border-subtle flex-shrink-0">
           <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
             Inspector
           </h3>
         </div>
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-4 min-h-0">
           <div className="h-full flex items-center justify-center text-text-secondary">
             <div className="text-center">
               <div className="w-12 h-12 bg-background-tertiary rounded-lg mx-auto mb-3 flex items-center justify-center">
@@ -67,9 +67,9 @@ export function Inspector({ className = '' }: InspectorProps) {
 
   return (
     <div
-      className={`inspector bg-background-secondary flex flex-col ${className}`}
+      className={`inspector bg-background-secondary flex flex-col h-full max-h-[calc(100vh-12rem)] ${className}`}
     >
-      <div className="p-4 border-b border-border-subtle">
+      <div className="p-4 border-b border-border-subtle flex-shrink-0">
         <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
           Inspector
         </h3>
@@ -79,7 +79,7 @@ export function Inspector({ className = '' }: InspectorProps) {
         </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-0">
         <ClipMetadata item={selectedItem} asset={selectedAsset} />
         <ClipProperties
           item={selectedItem}
