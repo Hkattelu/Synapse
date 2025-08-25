@@ -42,6 +42,7 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
             item={item}
             startFrame={startFrame}
             durationInFrames={durationInFrames}
+            animation={item.animation}
           />
         );
       }
@@ -53,6 +54,7 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
             item={item}
             startFrame={startFrame}
             durationInFrames={durationInFrames}
+            animation={item.animation}
           />
         );
       }
@@ -68,6 +70,7 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
           asset={asset}
           startFrame={startFrame}
           durationInFrames={durationInFrames}
+          animation={item.animation}
         />
       );
     })

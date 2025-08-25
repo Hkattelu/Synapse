@@ -37,6 +37,36 @@ export interface AnimationPreset {
   easing?: string;
 }
 
+// Core animation config (new modular preset system)
+// Discriminated union keyed by `preset` for runtime branching in Remotion hooks
+export type AnimationConfig =
+  | {
+      preset: 'typewriter';
+      // characters per second
+      speedCps: number;
+      // Reserved for future: cursor visibility, etc.
+    }
+  | {
+      preset: 'lineFocus';
+      // "5" or "5-8"
+      activeLines: string;
+      // Opacity to apply to non-active lines (0..1)
+      focusOpacity: number;
+    }
+  | {
+      preset: 'kenBurns';
+      direction: 'zoomIn' | 'zoomOut' | 'panLeft' | 'panRight';
+      // 0..1 intensity multiplier
+      intensity: number;
+    }
+  | {
+      preset: 'slide';
+      direction: 'left' | 'right' | 'up' | 'down';
+      // duration in frames
+      duration: number;
+      easing: 'gentle' | 'bouncy' | 'stiff';
+    };
+
 // Keyframe system types
 export interface Keyframe {
   id: string;
@@ -139,6 +169,12 @@ export interface TimelineItem {
   track: number;
   type: TimelineItemType;
   properties: ItemProperties;
+  // New, modular, single animation preset per item (optional).
+  // When present, renderers should ignore the legacy `animations` array.
+  animation?: AnimationConfig;
+  /**
+   * @deprecated Use `animation` instead. Kept for backward compatibility and will be removed in a future release.
+   */
   animations: AnimationPreset[];
   keyframes: Keyframe[]; // Keyframe animations
   locked?: boolean;
