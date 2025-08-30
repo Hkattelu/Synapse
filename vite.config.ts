@@ -24,6 +24,8 @@ export default defineConfig({
         'sql',
         'xml',
         'yaml',
+        'glsl',
+        'gdscript',
       ],
       plugins: ['line-numbers', 'show-language', 'copy-to-clipboard'],
       theme: 'tomorrow',

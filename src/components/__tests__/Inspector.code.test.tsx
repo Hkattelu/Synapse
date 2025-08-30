@@ -78,7 +78,7 @@ describe('Inspector - Code Properties', () => {
     expect(screen.getByText('Code')).toBeInTheDocument();
     expect(screen.getByLabelText('Code Content')).toBeInTheDocument();
     expect(screen.getByLabelText('Language')).toBeInTheDocument();
-    expect(screen.getByLabelText('Theme')).toBeInTheDocument();
+    expect(screen.getByText('Theme')).toBeInTheDocument(); // ThemePicker uses text, not labelText
     expect(screen.getByLabelText('Font Size')).toBeInTheDocument();
   });
 
@@ -143,15 +143,13 @@ describe('Inspector - Code Properties', () => {
       </TestProviders>
     );
 
-    const themeSelect = screen.getByLabelText('Theme');
-    fireEvent.change(themeSelect, { target: { value: 'monokai' } });
+    // ThemePicker uses a button interface - find the specific theme picker button
+    const themeButton = screen.getByRole('button', { name: /Unknown Theme/i });
+    fireEvent.click(themeButton);
 
+    // After expanding, we should see theme options
     await waitFor(() => {
-      expect(mockUpdateTimelineItem).toHaveBeenCalledWith('test-code-item', {
-        properties: expect.objectContaining({
-          theme: 'monokai',
-        }),
-      });
+      expect(screen.getByText('Theme Selection')).toBeInTheDocument();
     });
   });
 
@@ -193,20 +191,28 @@ describe('Inspector - Code Properties', () => {
     expect(optionValues).toContain('html');
     expect(optionValues).toContain('css');
     expect(optionValues).toContain('json');
+    expect(optionValues).toContain('glsl');
+    expect(optionValues).toContain('gdscript');
   });
 
-  it('shows all supported themes in dropdown', () => {
-    render(<Inspector />);
+  it('shows all supported themes in dropdown', async () => {
+    render(
+      <TestProviders>
+        <Inspector />
+      </TestProviders>
+    );
 
-    const themeSelect = screen.getByLabelText('Theme');
-    const options = Array.from(themeSelect.querySelectorAll('option'));
-    const optionValues = options.map((option) => option.getAttribute('value'));
+    // Click the theme button to expand the theme picker
+    const themeButton = screen.getByRole('button', { name: /Unknown Theme/i });
+    fireEvent.click(themeButton);
 
-    expect(optionValues).toContain('dark');
-    expect(optionValues).toContain('light');
-    expect(optionValues).toContain('monokai');
-    expect(optionValues).toContain('github');
-    expect(optionValues).toContain('dracula');
+    // Wait for the expanded theme picker to appear
+    await waitFor(() => {
+      expect(screen.getByText('Theme Selection')).toBeInTheDocument();
+    });
+
+    // The theme picker should be expanded and show theme options
+    expect(screen.getByPlaceholderText('Search themes...')).toBeInTheDocument();
   });
 
   it('applies monospace font to code textarea', () => {

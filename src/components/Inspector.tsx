@@ -473,6 +473,8 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
           { value: 'html', label: 'HTML' },
           { value: 'css', label: 'CSS' },
           { value: 'json', label: 'JSON' },
+          { value: 'glsl', label: 'GLSL' },
+          { value: 'gdscript', label: 'GDScript' },
         ]}
       />
       <ThemePicker

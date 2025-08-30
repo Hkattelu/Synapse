@@ -174,6 +174,7 @@
 
 
 
+
   - [x] 7.1 Implement theme and background validation
 
 
