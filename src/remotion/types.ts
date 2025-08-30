@@ -3,12 +3,14 @@ import type {
   MediaAsset,
   ProjectSettings,
   AnimationConfig,
+  ExportSettings,
 } from '../lib/types';
 
 export interface MainCompositionProps extends Record<string, unknown> {
   timeline: TimelineItem[];
   mediaAssets: MediaAsset[];
   settings: ProjectSettings;
+  exportSettings?: ExportSettings;
 }
 
 export interface VideoSequenceProps {
@@ -24,6 +26,7 @@ export interface CodeSequenceProps {
   startFrame: number;
   durationInFrames: number;
   animation?: AnimationConfig;
+  exportSettings?: ExportSettings;
 }
 
 export interface TitleSequenceProps {

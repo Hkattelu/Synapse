@@ -12,6 +12,10 @@ import { KenBurnsControls } from './controls/KenBurnsControls';
 import { SlideControls } from './controls/SlideControls';
 import { TypewriterControls } from './controls/TypewriterControls';
 import { LineFocusControls } from './controls/LineFocusControls';
+import { DiffSlideControls } from './controls/DiffSlideControls';
+import { DiffFadeControls } from './controls/DiffFadeControls';
+import { DiffHighlightControls } from './controls/DiffHighlightControls';
+import { TypewriterDiffControls } from './controls/TypewriterDiffControls';
 
 export function PresetSelector({
   item,
@@ -69,6 +73,18 @@ export function PresetSelector({
             )}
             {active.preset === 'lineFocus' && (
               <LineFocusControls value={active} onChange={onChange} />
+            )}
+            {active.preset === 'diffSlide' && (
+              <DiffSlideControls value={active} onChange={onChange} />
+            )}
+            {active.preset === 'diffFade' && (
+              <DiffFadeControls value={active} onChange={onChange} />
+            )}
+            {active.preset === 'diffHighlight' && (
+              <DiffHighlightControls value={active} onChange={onChange} />
+            )}
+            {active.preset === 'typewriterDiff' && (
+              <TypewriterDiffControls value={active} onChange={onChange} />
             )}
           </div>
         )}

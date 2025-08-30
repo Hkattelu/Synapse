@@ -62,6 +62,50 @@ export const PRESET_REGISTRY: Applicable[] = [
       easing: 'gentle',
     }),
   },
+  {
+    id: 'diffSlide',
+    title: 'Diff Slide Animation',
+    supports: { timelineTypes: ['code'], assetTypes: ['code'] },
+    makeDefault: () => ({
+      preset: 'diffSlide',
+      direction: 'left',
+      speed: 1.0,
+      highlightColor: '#4ade80',
+    }),
+  },
+  {
+    id: 'diffFade',
+    title: 'Diff Fade Animation',
+    supports: { timelineTypes: ['code'], assetTypes: ['code'] },
+    makeDefault: () => ({
+      preset: 'diffFade',
+      fadeInDuration: 20,
+      fadeOutDuration: 20,
+      highlightIntensity: 0.7,
+    }),
+  },
+  {
+    id: 'diffHighlight',
+    title: 'Diff Highlight Animation',
+    supports: { timelineTypes: ['code'], assetTypes: ['code'] },
+    makeDefault: () => ({
+      preset: 'diffHighlight',
+      highlightColor: '#fbbf24',
+      pulseEffect: true,
+      duration: 60,
+    }),
+  },
+  {
+    id: 'typewriterDiff',
+    title: 'Typewriter Diff Animation',
+    supports: { timelineTypes: ['code'], assetTypes: ['code'] },
+    makeDefault: () => ({
+      preset: 'typewriterDiff',
+      speedCps: 25,
+      showCursor: true,
+      highlightChanges: true,
+    }),
+  },
 ];
 
 export function getApplicablePresets(

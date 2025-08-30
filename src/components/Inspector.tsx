@@ -4,6 +4,8 @@ import { validateItemProperties } from '../lib/validation';
 import { PresetSelector } from './animation/PresetSelector';
 import { getApplicablePresets } from '../remotion/animations/presets';
 import * as animationPresetsModule from '../lib/animationPresets';
+import { ThemePicker } from './ui/ThemePicker';
+import { VisualControlsTabs } from './ui/VisualControlsTabs';
 import type {
   TimelineItem,
   ItemProperties,
@@ -114,6 +116,16 @@ export function Inspector({ className = '' }: InspectorProps) {
             }
           />
         )}
+        
+        {/* Visual Controls Tabs - Enhanced visual settings */}
+        <div className="border-t border-border-subtle">
+          <VisualControlsTabs
+            item={selectedItem}
+            onUpdateProperties={(properties) =>
+              updateTimelineItem(selectedItem.id, { properties: { ...selectedItem.properties, ...properties } })
+            }
+          />
+        </div>
       </div>
     </div>
   );
@@ -463,20 +475,9 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
           { value: 'json', label: 'JSON' },
         ]}
       />
-      <SelectInput
-        label="Theme"
-        value={localProperties.theme ?? 'dark'}
+      <ThemePicker
+        value={localProperties.theme ?? 'vscode-dark-plus'}
         onChange={(value) => updateProperty('theme', value)}
-        options={[
-          { value: 'dark', label: 'Dark' },
-          { value: 'light', label: 'Light' },
-          { value: 'monokai', label: 'Monokai' },
-          { value: 'github', label: 'GitHub' },
-          { value: 'dracula', label: 'Dracula' },
-          { value: 'solarized-dark', label: 'Solarized Dark' },
-          { value: 'solarized-light', label: 'Solarized Light' },
-          { value: 'vscode-dark-plus', label: 'VS Code Dark+' },
-        ]}
       />
       <TextInput
         label="Font Family"

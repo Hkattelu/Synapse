@@ -130,6 +130,58 @@ export const DEFAULT_EXPORT_PRESETS: ExportPreset[] = [
       enableHardwareAcceleration: false,
     },
   },
+  // Transparency-enabled presets
+  {
+    id: 'transparent-overlay',
+    name: 'Transparent Overlay',
+    description: 'Transparent background for compositing over other content',
+    category: 'custom',
+    settings: {
+      format: 'mov',
+      codec: 'h264',
+      quality: 'high',
+      audioCodec: 'aac',
+      audioBitrate: 128,
+      audioSampleRate: 48000,
+      transparentBackground: true,
+      includeWallpaper: false,
+      includeGradient: false,
+    },
+  },
+  {
+    id: 'transparent-with-backgrounds',
+    name: 'Transparent with Backgrounds',
+    description: 'Transparent background but includes wallpapers and gradients',
+    category: 'custom',
+    settings: {
+      format: 'mov',
+      codec: 'h264',
+      quality: 'high',
+      audioCodec: 'aac',
+      audioBitrate: 128,
+      audioSampleRate: 48000,
+      transparentBackground: true,
+      includeWallpaper: true,
+      includeGradient: true,
+    },
+  },
+  {
+    id: 'webm-transparent',
+    name: 'WebM Transparent',
+    description: 'WebM format with VP9 codec for web transparency',
+    category: 'web',
+    settings: {
+      format: 'webm',
+      codec: 'vp9',
+      quality: 'high',
+      audioCodec: 'opus',
+      audioBitrate: 128,
+      audioSampleRate: 48000,
+      transparentBackground: true,
+      includeWallpaper: false,
+      includeGradient: false,
+    },
+  },
 ];
 
 // Default export settings
@@ -146,6 +198,10 @@ export const getDefaultExportSettings = (project: Project): ExportSettings => ({
   enableHardwareAcceleration: true,
   enableMultithreading: true,
   concurrency: 4,
+  // Transparency settings (default to false for backward compatibility)
+  transparentBackground: false,
+  includeWallpaper: true,
+  includeGradient: true,
 });
 
 // Quality settings mapping
@@ -243,6 +299,36 @@ export class ClientExportManager {
   ): Promise<string> {
     if (this.isExporting) {
       throw new Error('Export already in progress');
+    }
+
+    // Validate export settings before starting
+    const validation = validateExportSettings(settings);
+    if (!validation.isValid) {
+      const errorMessage = `Export validation failed: ${validation.errors.join(', ')}`;
+      throw new Error(errorMessage);
+    }
+
+    // Log warnings and recommendations
+    if (validation.warnings.length > 0) {
+      console.warn('Export warnings:', validation.warnings);
+    }
+
+    if (validation.recommendations.length > 0) {
+      console.info('Export recommendations:', validation.recommendations);
+    }
+
+    // Log compatibility issues
+    if (validation.compatibilityIssues.length > 0) {
+      const errors = validation.compatibilityIssues.filter(issue => issue.severity === 'error');
+      const warnings = validation.compatibilityIssues.filter(issue => issue.severity === 'warning');
+      
+      if (errors.length > 0) {
+        console.error('Export compatibility errors:', errors);
+      }
+      
+      if (warnings.length > 0) {
+        console.warn('Export compatibility warnings:', warnings);
+      }
     }
 
     this.currentJob = createExportJob(project, settings);
@@ -479,6 +565,152 @@ export const estimateFileSize = (
   const estimatedBytes = (totalBitrate * 1000 * durationSeconds) / 8; // Convert to bytes
 
   return Math.round(estimatedBytes);
+};
+
+// Enhanced export validation using the validation module
+export const validateExportSettings = (settings: ExportSettings) => {
+  try {
+    const { validateExportSettings: validateFull } = require('./validation/exportValidation');
+    return validateFull(settings);
+  } catch (error) {
+    console.error('Export validation error:', error);
+    // Fallback to basic validation
+    return validateTransparencySettingsBasic(settings);
+  }
+};
+
+export const getExportRecommendations = (requirements: {
+  needsTransparency?: boolean;
+  targetPlatform?: 'web' | 'mobile' | 'desktop' | 'broadcast';
+  prioritizeFileSize?: boolean;
+  prioritizeQuality?: boolean;
+  prioritizeCompatibility?: boolean;
+}) => {
+  try {
+    const { getFormatRecommendations } = require('./validation/exportValidation');
+    return getFormatRecommendations(requirements);
+  } catch (error) {
+    console.error('Export recommendations error:', error);
+    return [];
+  }
+};
+
+// Transparency format validation (enhanced)
+export const isTransparencySupported = (format: string, codec?: string): boolean => {
+  try {
+    const { isTransparencySupported: isSupported } = require('./validation/exportValidation');
+    return isSupported(format);
+  } catch (error) {
+    console.error('Transparency support check error:', error);
+    // Fallback to basic check
+    return isTransparencySupportedBasic(format, codec);
+  }
+};
+
+// Basic transparency support check (fallback)
+const isTransparencySupportedBasic = (format: string, codec?: string): boolean => {
+  // MOV with H.264/H.265 supports alpha channel
+  if (format === 'mov' && (!codec || codec === 'h264' || codec === 'h265')) {
+    return true;
+  }
+  
+  // WebM with VP8/VP9 supports alpha channel
+  if (format === 'webm' && (!codec || codec === 'vp8' || codec === 'vp9')) {
+    return true;
+  }
+  
+  return false;
+};
+
+export const getTransparencyCompatibilityWarning = (
+  settings: ExportSettings
+): string | null => {
+  try {
+    const { getTransparencyCompatibilityWarning: getWarning } = require('./validation/exportValidation');
+    return getWarning(settings);
+  } catch (error) {
+    console.error('Transparency warning error:', error);
+    // Fallback to basic warning
+    return getTransparencyCompatibilityWarningBasic(settings);
+  }
+};
+
+// Basic transparency warning (fallback)
+const getTransparencyCompatibilityWarningBasic = (
+  settings: ExportSettings
+): string | null => {
+  if (!settings.transparentBackground) {
+    return null;
+  }
+  
+  if (!isTransparencySupportedBasic(settings.format, settings.codec)) {
+    return `Transparent backgrounds are not supported with ${settings.format.toUpperCase()} + ${settings.codec.toUpperCase()}. Consider using MOV + H.264 or WebM + VP9.`;
+  }
+  
+  return null;
+};
+
+export const getRecommendedTransparencySettings = (): Partial<ExportSettings> => {
+  return {
+    format: 'mov',
+    codec: 'h264',
+    quality: 'high',
+    audioCodec: 'aac',
+    transparentBackground: true,
+    includeWallpaper: false,
+    includeGradient: false,
+  };
+};
+
+// Validate export settings for transparency compatibility (enhanced)
+export const validateTransparencySettings = (
+  settings: ExportSettings
+): { isValid: boolean; warnings: string[]; errors: string[] } => {
+  try {
+    const { validateTransparencySettings: validateFull } = require('./validation/exportValidation');
+    return validateFull(settings);
+  } catch (error) {
+    console.error('Transparency validation error:', error);
+    // Fallback to basic validation
+    return validateTransparencySettingsBasic(settings);
+  }
+};
+
+// Basic transparency validation (fallback)
+const validateTransparencySettingsBasic = (
+  settings: ExportSettings
+): { isValid: boolean; warnings: string[]; errors: string[] } => {
+  const warnings: string[] = [];
+  const errors: string[] = [];
+  
+  if (settings.transparentBackground) {
+    // Check format/codec compatibility
+    if (!isTransparencySupportedBasic(settings.format, settings.codec)) {
+      errors.push(
+        `Transparent backgrounds require MOV + H.264/H.265 or WebM + VP8/VP9. Current: ${settings.format.toUpperCase()} + ${settings.codec.toUpperCase()}`
+      );
+    }
+    
+    // Warn about background inclusion settings
+    if (settings.includeWallpaper && settings.includeGradient) {
+      warnings.push(
+        'Both wallpaper and gradient backgrounds are enabled. This may reduce the transparency effect.'
+      );
+    }
+    
+    // Warn about quality settings for transparency
+    if (settings.quality === 'low') {
+      warnings.push(
+        'Low quality settings may affect alpha channel quality. Consider using medium or higher quality.'
+      );
+    }
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    warnings,
+    errors,
+  };
 };
 
 // Download exported file (for web usage)

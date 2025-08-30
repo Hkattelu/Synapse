@@ -41,6 +41,27 @@ export interface AnimationPreset {
   easing?: string;
 }
 
+// Gradient configuration for backgrounds
+export interface GradientConfig {
+  type: 'linear' | 'radial';
+  colors: Array<{ color: string; position: number }>;
+  angle?: number; // for linear gradients (0-360 degrees)
+  centerX?: number; // for radial gradients (0-1 normalized)
+  centerY?: number; // for radial gradients (0-1 normalized)
+}
+
+// Background configuration
+export interface BackgroundConfig {
+  type: 'none' | 'color' | 'gradient' | 'wallpaper';
+  color?: string;
+  gradient?: GradientConfig;
+  wallpaper?: {
+    assetId: string;
+    opacity: number; // 0-1
+    blendMode: 'normal' | 'multiply' | 'overlay' | 'soft-light';
+  };
+}
+
 // Core animation config (new modular preset system)
 // Discriminated union keyed by `preset` for runtime branching in Remotion hooks
 export type AnimationConfig =
@@ -69,6 +90,31 @@ export type AnimationConfig =
       // duration in frames
       duration: number;
       easing: 'gentle' | 'bouncy' | 'stiff';
+    }
+  // Enhanced diff animations
+  | {
+      preset: 'diffSlide';
+      direction: 'left' | 'right' | 'up' | 'down';
+      speed: number; // animation speed multiplier
+      highlightColor: string;
+    }
+  | {
+      preset: 'diffFade';
+      fadeInDuration: number; // duration in frames
+      fadeOutDuration: number; // duration in frames
+      highlightIntensity: number; // 0-1 intensity of highlight effect
+    }
+  | {
+      preset: 'diffHighlight';
+      highlightColor: string;
+      pulseEffect: boolean;
+      duration: number; // duration in frames
+    }
+  | {
+      preset: 'typewriterDiff';
+      speedCps: number; // characters per second
+      showCursor: boolean;
+      highlightChanges: boolean;
     };
 
 // Keyframe system types
@@ -137,6 +183,31 @@ export interface ItemProperties {
   typingSpeedCps?: number; // characters per second for typing
   lineRevealIntervalMs?: number; // interval per line for line-by-line
 
+  // Enhanced diff animation properties
+  diffAnimationType?: 'none' | 'slide' | 'fade' | 'highlight' | 'typewriter-diff' | 'line-focus-diff';
+  diffAnimationSpeed?: number; // animation speed multiplier
+  diffHighlightColor?: string; // color for highlighting changes
+  
+  // Diff slide animation properties
+  diffSlideDirection?: 'left' | 'right' | 'up' | 'down';
+  
+  // Diff fade animation properties
+  diffFadeInDuration?: number; // duration in seconds
+  diffFadeOutDuration?: number; // duration in seconds
+  diffHighlightIntensity?: number; // 0-1 intensity of highlight effect
+  
+  // Typewriter diff animation properties
+  typewriterDiffSpeedCps?: number; // characters per second
+  typewriterDiffShowCursor?: boolean;
+  typewriterDiffHighlightChanges?: boolean;
+
+  // Background system properties
+  backgroundType?: 'none' | 'color' | 'gradient' | 'wallpaper';
+  backgroundColor?: string; // solid background color
+  backgroundWallpaper?: string; // URL or asset ID
+  backgroundGradient?: GradientConfig;
+  backgroundOpacity?: number; // 0-1 opacity for background elements
+
   // Side-by-side companion media with code
   sideBySideAssetId?: string; // media asset (image/video) to render alongside code
   sideBySideLayout?: 'left-right' | 'right-left' | 'top-bottom' | 'bottom-top';
@@ -151,7 +222,6 @@ export interface ItemProperties {
   // Title-specific properties
   text?: string;
   color?: string;
-  backgroundColor?: string;
 
   // Talking head bubble overlay
   // When enabled on a video timeline item, the video is rendered as a small
@@ -226,6 +296,9 @@ export interface ProjectSettings {
   duration: number;
   backgroundColor: string;
   audioSampleRate?: number;
+  // Enhanced visual settings
+  globalBackground?: BackgroundConfig;
+  defaultTheme?: string;
 }
 
 export interface Project {
@@ -330,6 +403,11 @@ export interface ExportSettings {
   concurrency?: number; // Number of concurrent render jobs
   imageSequence?: boolean; // Export as image sequence instead of video
   frameRange?: [number, number]; // Specific frame range [start, end]
+
+  // Transparency and background settings
+  transparentBackground?: boolean; // Enable alpha channel support
+  includeWallpaper?: boolean; // Include wallpaper in export when transparency is enabled
+  includeGradient?: boolean; // Include gradient backgrounds in export when transparency is enabled
 }
 
 export interface ExportProgress {

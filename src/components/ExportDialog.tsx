@@ -12,7 +12,13 @@ import type {
   VideoCodec,
   AudioCodec,
 } from '../lib/types';
-import { formatFileSize, formatDuration } from '../lib/exportManagerClient';
+import { 
+  formatFileSize, 
+  formatDuration,
+  isTransparencySupported,
+  getTransparencyCompatibilityWarning,
+  validateTransparencySettings
+} from '../lib/exportManagerClient';
 import { useAuth } from '../state/authContext';
 
 interface ExportDialogProps {
@@ -590,6 +596,123 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                         </div>
                       </div>
                     </div>
+
+                    {/* Transparency Settings */}
+                    <div>
+                      <h3 className="text-sm font-medium text-text-primary mb-3">
+                        Transparency Settings
+                      </h3>
+                      
+                      {/* Transparency Toggle */}
+                      <div className="mb-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={settings.transparentBackground || false}
+                            onChange={(e) =>
+                              updateSettings({
+                                transparentBackground: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 text-primary-600 bg-background-secondary border-border-subtle rounded focus:ring-primary-500 focus:ring-2"
+                          />
+                          <span className="text-sm text-text-primary">
+                            Enable transparent background
+                          </span>
+                        </label>
+                        <p className="text-xs text-text-secondary mt-1 ml-6">
+                          Export with alpha channel for compositing over other content
+                        </p>
+                      </div>
+
+                      {/* Format Compatibility Warning */}
+                      {(() => {
+                        const warning = getTransparencyCompatibilityWarning(settings);
+                        if (!warning) return null;
+                        
+                        return (
+                          <div className="mb-4 p-3 bg-yellow-900/20 border border-yellow-700 rounded">
+                            <div className="flex items-start gap-2">
+                              <svg className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                              <p className="text-xs text-yellow-200">{warning}</p>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Background Inclusion Options */}
+                      {settings.transparentBackground && (
+                        <div className="space-y-3">
+                          <div className="text-xs font-medium text-text-secondary mb-2">
+                            Background Elements to Include:
+                          </div>
+                          
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={settings.includeWallpaper ?? true}
+                              onChange={(e) =>
+                                updateSettings({
+                                  includeWallpaper: e.target.checked,
+                                })
+                              }
+                              className="w-4 h-4 text-primary-600 bg-background-secondary border-border-subtle rounded focus:ring-primary-500 focus:ring-2"
+                            />
+                            <span className="text-sm text-text-primary">
+                              Include wallpaper backgrounds
+                            </span>
+                          </label>
+                          
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={settings.includeGradient ?? true}
+                              onChange={(e) =>
+                                updateSettings({
+                                  includeGradient: e.target.checked,
+                                })
+                              }
+                              className="w-4 h-4 text-primary-600 bg-background-secondary border-border-subtle rounded focus:ring-primary-500 focus:ring-2"
+                            />
+                            <span className="text-sm text-text-primary">
+                              Include gradient backgrounds
+                            </span>
+                          </label>
+                          
+                          <div className="mt-3 p-3 bg-blue-900/20 border border-blue-700 rounded">
+                            <div className="flex items-start gap-2">
+                              <svg className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                              </svg>
+                              <div className="text-xs text-blue-200">
+                                <p className="font-medium mb-1">Transparency Preview</p>
+                                <div className="w-full h-8 bg-transparent border border-blue-400 rounded relative overflow-hidden">
+                                  <div 
+                                    className="absolute inset-0 opacity-20"
+                                    style={{
+                                      backgroundImage: `
+                                        linear-gradient(45deg, #666 25%, transparent 25%), 
+                                        linear-gradient(-45deg, #666 25%, transparent 25%), 
+                                        linear-gradient(45deg, transparent 75%, #666 75%), 
+                                        linear-gradient(-45deg, transparent 75%, #666 75%)
+                                      `,
+                                      backgroundSize: '8px 8px',
+                                      backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0px'
+                                    }}
+                                  />
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-xs text-blue-300 font-mono">Transparent</span>
+                                  </div>
+                                </div>
+                                <p className="mt-1">Checkerboard pattern indicates transparent areas</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -616,30 +739,60 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 text-text-secondary hover:text-text-primary border border-border-subtle rounded hover:bg-background-primary transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleStartExport}
-                disabled={
-                  !canStartExport ||
-                  !authenticated ||
-                  !(membership?.active || trialsRemaining > 0)
-                }
-                className="px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-600 disabled:cursor-not-allowed text-white rounded transition-colors"
-              >
-                {!authenticated
-                  ? 'Sign in to export'
-                  : membership?.active
-                    ? 'Start Export'
-                    : trialsRemaining > 0
-                      ? `Start Export (trial ${trialsUsed + 1}/${trialsLimit || 2})`
-                      : 'Unlock to export'}
-              </button>
+            <div className="flex flex-col gap-3">
+              {/* Validation Warnings */}
+              {(() => {
+                const validation = validateTransparencySettings(settings);
+                if (!validation.errors.length && !validation.warnings.length) return null;
+                
+                return (
+                  <div className="space-y-2">
+                    {validation.errors.map((error, index) => (
+                      <div key={`error-${index}`} className="flex items-start gap-2 p-2 bg-red-900/20 border border-red-700 rounded">
+                        <svg className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        <p className="text-xs text-red-200">{error}</p>
+                      </div>
+                    ))}
+                    {validation.warnings.map((warning, index) => (
+                      <div key={`warning-${index}`} className="flex items-start gap-2 p-2 bg-yellow-900/20 border border-yellow-700 rounded">
+                        <svg className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        <p className="text-xs text-yellow-200">{warning}</p>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 text-text-secondary hover:text-text-primary border border-border-subtle rounded hover:bg-background-primary transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleStartExport}
+                  disabled={
+                    !canStartExport ||
+                    !authenticated ||
+                    !(membership?.active || trialsRemaining > 0) ||
+                    !validateTransparencySettings(settings).isValid
+                  }
+                  className="px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-600 disabled:cursor-not-allowed text-white rounded transition-colors"
+                >
+                  {!authenticated
+                    ? 'Sign in to export'
+                    : membership?.active
+                      ? 'Start Export'
+                      : trialsRemaining > 0
+                        ? `Start Export (trial ${trialsUsed + 1}/${trialsLimit || 2})`
+                        : 'Unlock to export'}
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -11,6 +11,7 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
   timeline,
   mediaAssets,
   settings,
+  exportSettings,
 }) => {
   const { fps } = useVideoConfig();
 
@@ -44,6 +45,7 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
             startFrame={startFrame}
             durationInFrames={durationInFrames}
             animation={item.animation}
+            exportSettings={exportSettings}
           />
         );
       }
@@ -88,10 +90,13 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
     })
     .filter(Boolean);
 
+  // Determine if background should be transparent
+  const shouldUseTransparentBackground = exportSettings?.transparentBackground ?? false;
+  
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: settings.backgroundColor,
+        backgroundColor: shouldUseTransparentBackground ? 'transparent' : settings.backgroundColor,
       }}
     >
       {sequences.length > 0 ? (
@@ -104,6 +109,7 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
             justifyContent: 'center',
             color: 'white',
             fontSize: '24px',
+            backgroundColor: shouldUseTransparentBackground ? 'transparent' : undefined,
           }}
         >
           No content to display

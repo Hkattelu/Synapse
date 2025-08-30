@@ -23,6 +23,15 @@ export const RemotionRoot: React.FC = () => {
               duration: 60,
               backgroundColor: '#000000',
             },
+            exportSettings: {
+              format: 'mp4',
+              codec: 'h264',
+              quality: 'high',
+              audioCodec: 'aac',
+              transparentBackground: false,
+              includeWallpaper: true,
+              includeGradient: true,
+            },
           } satisfies MainCompositionProps
         }
       />
