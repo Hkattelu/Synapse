@@ -436,15 +436,7 @@ export class BackgroundManager {
     }
   }
 
-  validateGradientConfig(config: GradientConfig) {
-    try {
-      const { validateGradient } = require('../validation/backgroundValidation');
-      return validateGradient(config);
-    } catch (error) {
-      console.error('Gradient validation error:', error);
-      return { isValid: false, errors: ['Validation module unavailable'], warnings: [], colorValidation: {} };
-    }
-  }
+
 
   validateWallpaperAsset(asset: WallpaperAsset) {
     try {

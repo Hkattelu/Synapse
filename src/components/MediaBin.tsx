@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { useMediaAssets, useTimeline } from '../state/hooks';
 import { useNotifications } from '../state/notifications';
 import { validateMediaAsset } from '../lib/validation';
-import { RecorderDialog } from './RecorderDialog';
+
 import { AudioWaveform } from './Waveform';
 import { MusicLibrary } from './MusicLibrary';
 import type { MediaAsset, MediaAssetType, VisualAssetType } from '../lib/types';
@@ -33,7 +33,7 @@ const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 export function MediaBin({ className = '' }: MediaBinProps) {
   const { mediaAssets, addMediaAsset, removeMediaAsset } = useMediaAssets();
-  const [recorderOpen, setRecorderOpen] = useState(false);
+
   const { addTimelineItem } = useTimeline();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -404,9 +404,9 @@ export function MediaBin({ className = '' }: MediaBinProps) {
     };
 
     const defaultProperties = {
-      'arrow': { arrowDirection: 'right', strokeColor: '#ff0000', strokeWidth: 3 },
+      'arrow': { arrowDirection: 'right' as const, strokeColor: '#ff0000', strokeWidth: 3 },
       'box': { strokeColor: '#ff0000', strokeWidth: 3, fillColor: 'transparent' },
-      'finger-pointer': { fingerDirection: 'down', strokeColor: '#ff0000', fillColor: '#ff0000' },
+      'finger-pointer': { fingerDirection: 'down' as const, strokeColor: '#ff0000', fillColor: '#ff0000' },
       'circle': { strokeColor: '#ff0000', strokeWidth: 3, fillColor: 'transparent' },
       'line': { strokeColor: '#ff0000', strokeWidth: 3, lineEndX: 100, lineEndY: 0 }
     };
@@ -462,96 +462,43 @@ export function MediaBin({ className = '' }: MediaBinProps) {
       className={`flex flex-col h-full bg-background-secondary ${className}`}
     >
       {/* Header */}
-      <div className="p-4 border-b border-border-subtle">
+      <div className="p-4 border-b border-border-subtle bg-background-tertiary">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
-              Media
+          <div className="flex items-center space-x-3">
+            <h3 className="font-semibold text-sm text-text-primary">
+              Media Library
             </h3>
-            <div className="flex bg-background-tertiary rounded-md overflow-hidden">
+            <div className="flex bg-background-secondary rounded-lg overflow-hidden border border-border-subtle">
               <button
                 onClick={() => setActiveTab('media')}
-                className={`px-3 py-1 text-xs ${activeTab === 'media' ? 'bg-primary-600 text-white shadow-glow' : 'text-text-secondary hover:text-text-primary'}`}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  activeTab === 'media' 
+                    ? 'bg-primary-600 text-white' 
+                    : 'text-text-secondary hover:text-text-primary hover:bg-background-tertiary'
+                }`}
               >
                 Library
               </button>
               <button
                 onClick={() => setActiveTab('music')}
-                className={`px-3 py-1 text-xs ${activeTab === 'music' ? 'bg-primary-600 text-white shadow-glow' : 'text-text-secondary hover:text-text-primary'}`}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  activeTab === 'music' 
+                    ? 'bg-primary-600 text-white' 
+                    : 'text-text-secondary hover:text-text-primary hover:bg-background-tertiary'
+                }`}
               >
                 Music
               </button>
             </div>
           </div>
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setRecorderOpen(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium py-1 px-3 rounded transition-colors shadow-glow"
-              title="Record audio narration or camera"
-            >
-              Record
-            </button>
+          <div className="flex items-center">
             <button
               onClick={openFileDialog}
-              className="bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium py-1 px-3 rounded transition-colors shadow-glow disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium py-2 px-4 rounded transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isUploading}
             >
-              {isUploading ? 'Uploading...' : 'Add Media'}
+              {isUploading ? 'Uploading...' : '+ Add Media'}
             </button>
-            <button
-              onClick={createCodeClip}
-              className="bg-accent-green hover:bg-accent-green/80 text-white text-xs font-medium py-1 px-3 rounded transition-colors"
-              title="Create a new code clip"
-            >
-              Add Code
-            </button>
-            <button
-              onClick={createTitleClip}
-              className="bg-accent-mauve hover:bg-accent-mauve/80 text-white text-xs font-medium py-1 px-3 rounded transition-colors"
-              title="Create a new title clip"
-            >
-              Add Title
-            </button>
-            <div className="relative group">
-              <button
-                className="bg-accent-orange hover:bg-accent-orange/80 text-white text-xs font-medium py-1 px-3 rounded transition-colors"
-                title="Add visual assets"
-              >
-                Assets ▼
-              </button>
-              <div className="absolute right-0 top-full mt-1 bg-background-secondary border border-border-subtle rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 min-w-[140px]">
-                <button
-                  onClick={() => createVisualAsset('arrow')}
-                  className="w-full text-left px-3 py-2 text-xs text-text-primary hover:bg-background-tertiary transition-colors"
-                >
-                  Arrow
-                </button>
-                <button
-                  onClick={() => createVisualAsset('box')}
-                  className="w-full text-left px-3 py-2 text-xs text-text-primary hover:bg-background-tertiary transition-colors"
-                >
-                  Box
-                </button>
-                <button
-                  onClick={() => createVisualAsset('finger-pointer')}
-                  className="w-full text-left px-3 py-2 text-xs text-text-primary hover:bg-background-tertiary transition-colors"
-                >
-                  Finger Pointer
-                </button>
-                <button
-                  onClick={() => createVisualAsset('circle')}
-                  className="w-full text-left px-3 py-2 text-xs text-text-primary hover:bg-background-tertiary transition-colors"
-                >
-                  Circle
-                </button>
-                <button
-                  onClick={() => createVisualAsset('line')}
-                  className="w-full text-left px-3 py-2 text-xs text-text-primary hover:bg-background-tertiary transition-colors"
-                >
-                  Line
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -803,12 +750,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
           </div>
         )}
       </div>
-      {recorderOpen && (
-        <RecorderDialog
-          isOpen={recorderOpen}
-          onClose={() => setRecorderOpen(false)}
-        />
-      )}
+
     </div>
   );
 }

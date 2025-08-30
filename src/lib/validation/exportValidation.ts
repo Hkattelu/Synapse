@@ -434,7 +434,13 @@ export function getFormatRecommendations(requirements: {
   pros: string[];
   cons: string[];
 }> {
-  const recommendations = [];
+  const recommendations: Array<{
+    format: VideoFormat;
+    codec: VideoCodec;
+    reason: string;
+    pros: string[];
+    cons: string[];
+  }> = [];
 
   if (requirements.needsTransparency) {
     recommendations.push({

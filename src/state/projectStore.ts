@@ -146,15 +146,27 @@ const useProjectStoreBase = create<ProjectStoreState>((set) => ({
 // Wrap with temporal for undo/redo functionality
 export const useProjectStore = temporal(useProjectStoreBase, {
   // Only record timeline + media changes in history
-  partialize: (state) => ({
-    timeline: state.timeline,
-    mediaAssets: state.mediaAssets,
-  }),
+  partialize: (state) => {
+    const typedState = state as ProjectStoreState;
+    return {
+      timeline: typedState.timeline,
+      mediaAssets: typedState.mediaAssets,
+    };
+  },
   // Group rapid successive updates (e.g., drag/resize)
-  handleSet: (handle) => throttle(handle, 150),
+  handleSet: (handle: any) => throttle(handle, 150),
   // Keep a reasonable cap on history
   limit: 200,
-});
+}) as typeof useProjectStoreBase & {
+  temporal: () => {
+    undo: () => void;
+    redo: () => void;
+    pastStates: any[];
+    futureStates: any[];
+    clear: () => void;
+  };
+  subscribe: (listener: (state: any) => void) => () => void;
+};
 
 // React-friendly hook for the temporal store state (history stacks, undo/redo)
 export const useProjectTemporal = () => {
@@ -177,16 +189,28 @@ export const projectStoreApi = useProjectStoreBase;
 
 // Convenience functions for outside-react usage - with safe access
 export const undoProject = () => {
-  const temporal = useProjectStore.temporal?.getState?.();
-  if (temporal?.undo) temporal.undo();
+  try {
+    const temporal = useProjectStore.temporal();
+    if (temporal?.undo) temporal.undo();
+  } catch (error) {
+    console.warn('Failed to undo:', error);
+  }
 };
 
 export const redoProject = () => {
-  const temporal = useProjectStore.temporal?.getState?.();
-  if (temporal?.redo) temporal.redo();
+  try {
+    const temporal = useProjectStore.temporal();
+    if (temporal?.redo) temporal.redo();
+  } catch (error) {
+    console.warn('Failed to redo:', error);
+  }
 };
 
 export const clearProjectHistory = () => {
-  const temporal = useProjectStore.temporal?.getState?.();
-  if (temporal?.clear) temporal.clear();
+  try {
+    const temporal = useProjectStore.temporal();
+    if (temporal?.clear) temporal.clear();
+  } catch (error) {
+    console.warn('Failed to clear history:', error);
+  }
 };

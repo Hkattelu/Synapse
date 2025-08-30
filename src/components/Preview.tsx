@@ -597,6 +597,24 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
 
           {/* Right controls */}
           <div className="flex items-center space-x-2">
+            {/* Record button */}
+            <button
+              onClick={() =>
+                window.dispatchEvent(new CustomEvent('openRecorderDialog'))
+              }
+              className="text-red-400 hover:text-red-300 p-2 rounded transition-colors hover:bg-neutral-700"
+              title="Record Narration"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="currentColor"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="12" r="8" strokeWidth={0} />
+              </svg>
+            </button>
+            
             {/* Export button */}
             <button
               onClick={() =>

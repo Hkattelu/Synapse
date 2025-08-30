@@ -130,9 +130,9 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
     };
 
     const defaultProperties = {
-      'arrow': { arrowDirection: 'right', strokeColor: '#ff0000', strokeWidth: 3 },
+      'arrow': { arrowDirection: 'right' as const, strokeColor: '#ff0000', strokeWidth: 3 },
       'box': { strokeColor: '#ff0000', strokeWidth: 3, fillColor: 'transparent' },
-      'finger-pointer': { fingerDirection: 'down', strokeColor: '#ff0000', fillColor: '#ff0000' },
+      'finger-pointer': { fingerDirection: 'down' as const, strokeColor: '#ff0000', fillColor: '#ff0000' },
       'circle': { strokeColor: '#ff0000', strokeWidth: 3, fillColor: 'transparent' },
       'line': { strokeColor: '#ff0000', strokeWidth: 3, lineEndX: 100, lineEndY: 0 }
     };

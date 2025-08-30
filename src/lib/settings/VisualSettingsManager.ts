@@ -241,7 +241,10 @@ class VisualSettingsManager {
       // Import custom gradients
       if (config.backgrounds?.customGradients?.length > 0) {
         for (const gradient of config.backgrounds.customGradients) {
-          this.saveCustomGradient(gradient);
+          // Ensure gradient has required properties
+          if ('id' in gradient && 'name' in gradient) {
+            this.saveCustomGradient(gradient as GradientConfig & { id: string; name: string });
+          }
         }
       }
 

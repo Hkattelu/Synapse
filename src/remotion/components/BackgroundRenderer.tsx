@@ -68,7 +68,7 @@ export const BackgroundRenderer: React.FC<BackgroundRendererProps> = ({
 
     const wallpaperStyle: React.CSSProperties = {
       ...backgroundStyle,
-      opacity: (backgroundStyle.opacity || 1) * config.wallpaper.opacity,
+      opacity: (typeof backgroundStyle.opacity === 'number' ? backgroundStyle.opacity : 1) * config.wallpaper.opacity,
       mixBlendMode: config.wallpaper.blendMode,
       objectFit: 'cover',
       width: '100%',
@@ -80,7 +80,6 @@ export const BackgroundRenderer: React.FC<BackgroundRendererProps> = ({
         <Img
           src={wallpaper.url}
           style={wallpaperStyle}
-          placeholder="Loading wallpaper..."
         />
       </AbsoluteFill>
     );

@@ -25,10 +25,9 @@ function GlobalShortcutsAndBridge() {
   useEffect(() => {
     try {
       const unsubscribe = useProjectStore.subscribe(
-        (state) => ({ timeline: state.timeline, mediaAssets: state.mediaAssets }),
-        ({ timeline, mediaAssets }) => {
-          setTimeline(timeline);
-          setMediaAssets(mediaAssets);
+        (state: any) => {
+          setTimeline(state.timeline || []);
+          setMediaAssets(state.mediaAssets || []);
         }
       );
       return unsubscribe;
@@ -69,16 +68,20 @@ function GlobalShortcutsAndBridge() {
       const isMeta = event.metaKey || event.ctrlKey;
       if (!isMeta) return;
 
-      const temporal = useProjectStore.temporal?.getState?.();
-      if (!temporal) return;
+      try {
+        const temporal = useProjectStore.temporal();
+        if (!temporal) return;
       
-      if (key === 'z') {
-        event.preventDefault();
-        if (event.shiftKey) temporal.redo?.();
-        else temporal.undo?.();
-      } else if (key === 'y') {
-        event.preventDefault();
-        temporal.redo?.();
+        if (key === 'z') {
+          event.preventDefault();
+          if (event.shiftKey) temporal.redo?.();
+          else temporal.undo?.();
+        } else if (key === 'y') {
+          event.preventDefault();
+          temporal.redo?.();
+        }
+      } catch (error) {
+        console.warn('Failed to access temporal store:', error);
       }
     };
     window.addEventListener('keydown', onKeyDown);

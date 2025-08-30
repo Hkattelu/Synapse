@@ -76,52 +76,18 @@ export function EnhancedTimelineView({
 
   return (
     <div className={`enhanced-timeline-view flex h-full ${className}`}>
-      {/* Left Sidebar - Track Manager */}
-      {activePanel === 'tracks' && (
-        <div
-          className={`${getPanelWidth('tracks')} flex-shrink-0 transition-all duration-200`}
-        >
-          <TrackManager className="h-full" />
-        </div>
-      )}
-
       {/* Main Timeline Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Timeline Controls Header */}
         <div className="bg-gray-900 border-b border-gray-700 px-3 py-2 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            {/* Panel Toggle Buttons */}
+            {/* Panel Toggle Buttons - Simplified and Consistent */}
             <div className="flex items-center space-x-1 bg-gray-800 rounded p-0.5">
               <button
-                onClick={() => togglePanel('tracks')}
-                className={`px-2 py-1.5 text-xs rounded transition-colors ${
-                  activePanel === 'tracks'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                }`}
-                title="Track Manager"
-              >
-                <svg
-                  className="w-3.5 h-3.5 inline mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 10h16M4 14h16M4 18h16"
-                  />
-                </svg>
-                Tracks
-              </button>
-
-              <button
                 onClick={() => togglePanel('keyframes')}
-                className={`px-2 py-1.5 text-xs rounded transition-colors ${
+                className={`px-3 py-1.5 text-xs rounded transition-colors ${
                   activePanel === 'keyframes'
-                    ? 'bg-purple-600 text-white'
+                    ? 'bg-primary-600 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-gray-700'
                 }`}
                 title="Keyframe Properties"
@@ -144,9 +110,9 @@ export function EnhancedTimelineView({
 
               <button
                 onClick={() => togglePanel('markers')}
-                className={`px-2 py-1.5 text-xs rounded transition-colors ${
+                className={`px-3 py-1.5 text-xs rounded transition-colors ${
                   activePanel === 'markers'
-                    ? 'bg-green-600 text-white'
+                    ? 'bg-primary-600 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-gray-700'
                 }`}
                 title="Timeline Markers"
@@ -257,7 +223,7 @@ export function EnhancedTimelineView({
       {/* Right Sidebar - Properties/Markers Panel */}
       {activePanel && (
         <div
-          className={`${getPanelWidth(activePanel)} flex-shrink-0 transition-all duration-200`}
+          className={`${getPanelWidth(activePanel)} flex-shrink-0 transition-all duration-200 border-l border-gray-700`}
         >
           {activePanel === 'keyframes' && (
             <KeyframePropertiesPanel

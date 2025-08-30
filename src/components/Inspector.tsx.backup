@@ -19,7 +19,6 @@ interface InspectorProps {
 export function Inspector({ className = '' }: InspectorProps) {
   const { selectedTimelineItems, updateTimelineItem } = useTimeline();
   const { getMediaAssetById } = useMediaAssets();
-  const [activeTab, setActiveTab] = useState<'properties' | 'animation' | 'visual'>('properties');
 
   // Get the first selected item (for now, we'll handle single selection)
   const selectedItem = selectedTimelineItems[0];
@@ -33,12 +32,12 @@ export function Inspector({ className = '' }: InspectorProps) {
         className={`inspector bg-background-secondary flex flex-col h-full max-h-[calc(100vh-12rem)] ${className}`}
       >
         <div className="p-4 border-b border-border-subtle flex-shrink-0">
-          <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
+          <h3 className="font-semibold text-sm text-gray-200 uppercase tracking-wide">
             Inspector
           </h3>
         </div>
         <div className="flex-1 p-4 min-h-0">
-          <div className="h-full flex items-center justify-center text-text-secondary">
+          <div className="h-full flex items-center justify-center text-gray-300">
             <div className="text-center">
               <div className="w-12 h-12 bg-background-tertiary rounded-lg mx-auto mb-3 flex items-center justify-center">
                 <svg
@@ -61,8 +60,8 @@ export function Inspector({ className = '' }: InspectorProps) {
                   />
                 </svg>
               </div>
-              <p className="font-medium text-text-primary">No Selection</p>
-              <p className="text-sm">Select a clip to edit properties</p>
+              <p className="font-medium text-white">No Selection</p>
+              <p className="text-sm text-gray-400">Select a clip to edit properties</p>
             </div>
           </div>
         </div>
@@ -70,95 +69,36 @@ export function Inspector({ className = '' }: InspectorProps) {
     );
   }
 
-  // Check if animation tab should be available
-  const hasAnimationPresets = getApplicablePresets(selectedItem.type, selectedAsset?.type).length > 0;
-
   return (
     <div
       className={`inspector bg-background-secondary flex flex-col h-full max-h-[calc(100vh-12rem)] ${className}`}
     >
-      {/* Header with clip info */}
       <div className="p-4 border-b border-border-subtle flex-shrink-0">
-        <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
+        <h3 className="font-semibold text-sm text-gray-200 uppercase tracking-wide">
           Inspector
         </h3>
-        <p className="text-xs text-text-tertiary mt-1">
+        <p className="text-xs text-gray-400 mt-1">
           {selectedTimelineItems.length} item
           {selectedTimelineItems.length !== 1 ? 's' : ''} selected
         </p>
       </div>
 
-      {/* Clip Metadata - Always visible */}
-      <ClipMetadata item={selectedItem} asset={selectedAsset} />
-
-      {/* Tab Navigation */}
-      <div className="border-b border-border-subtle bg-background-tertiary">
-        <div className="flex">
-          <button
-            onClick={() => setActiveTab('properties')}
-            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-              activeTab === 'properties'
-                ? 'text-text-primary bg-background-secondary border-b-2 border-primary-500'
-                : 'text-text-secondary hover:text-text-primary hover:bg-background-secondary/50'
-            }`}
-          >
-            <div className="flex items-center justify-center space-x-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-              </svg>
-              <span>Properties</span>
-            </div>
-          </button>
-          
-          {hasAnimationPresets && (
-            <button
-              onClick={() => setActiveTab('animation')}
-              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'animation'
-                  ? 'text-text-primary bg-background-secondary border-b-2 border-primary-500'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-background-secondary/50'
-              }`}
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span>Animation</span>
-              </div>
-            </button>
-          )}
-          
-          <button
-            onClick={() => setActiveTab('visual')}
-            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-              activeTab === 'visual'
-                ? 'text-text-primary bg-background-secondary border-b-2 border-primary-500'
-                : 'text-text-secondary hover:text-text-primary hover:bg-background-secondary/50'
-            }`}
-          >
-            <div className="flex items-center justify-center space-x-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
-              </svg>
-              <span>Visual</span>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      {/* Tab Content */}
       <div className="flex-1 overflow-y-auto min-h-0">
-        {activeTab === 'properties' && (
-          <ClipProperties
-            item={selectedItem}
-            onUpdateProperties={(properties) =>
-              updateTimelineItem(selectedItem.id, { properties })
-            }
-          />
-        )}
-        
-        {activeTab === 'animation' && hasAnimationPresets && (
-          <div>
+        <ClipMetadata item={selectedItem} asset={selectedAsset} />
+        <ClipProperties
+          item={selectedItem}
+          onUpdateProperties={(properties) =>
+            updateTimelineItem(selectedItem.id, { properties })
+          }
+        />
+        {/* Animation Presets - visible only when applicable presets exist for this item */}
+        {(() => {
+          const applicable = getApplicablePresets(
+            selectedItem.type,
+            selectedAsset?.type
+          );
+          if (applicable.length === 0) return null;
+          return (
             <PresetSelector
               item={selectedItem}
               asset={selectedAsset}
@@ -166,25 +106,26 @@ export function Inspector({ className = '' }: InspectorProps) {
                 updateTimelineItem(selectedItem.id, { animation })
               }
             />
-            {!selectedItem.animation && (
-              <AnimationSettings
-                item={selectedItem}
-                onUpdateAnimations={(animations) =>
-                  updateTimelineItem(selectedItem.id, { animations })
-                }
-              />
-            )}
-          </div>
+          );
+        })()}
+        {!selectedItem.animation && (
+          <AnimationSettings
+            item={selectedItem}
+            onUpdateAnimations={(animations) =>
+              updateTimelineItem(selectedItem.id, { animations })
+            }
+          />
         )}
         
-        {activeTab === 'visual' && (
+        {/* Visual Controls Tabs - Enhanced visual settings */}
+        <div className="border-t border-border-subtle">
           <VisualControlsTabs
             item={selectedItem}
             onUpdateProperties={(properties) =>
               updateTimelineItem(selectedItem.id, { properties: { ...selectedItem.properties, ...properties } })
             }
           />
-        )}
+        </div>
       </div>
     </div>
   );
@@ -305,16 +246,16 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
 
   return (
     <div className="p-4 border-b border-border-subtle">
-      <h4 className="font-medium text-text-primary mb-3">Clip Information</h4>
+      <h4 className="font-medium text-white mb-3">Clip Information</h4>
 
       <div className="space-y-3">
         <div className="flex items-center space-x-2">
-          <div className="text-text-secondary">{getTypeIcon(item.type)}</div>
+          <div className="text-gray-300">{getTypeIcon(item.type)}</div>
           <div>
-            <p className="text-sm font-medium text-text-primary">
+            <p className="text-sm font-medium text-white">
               {asset?.name || 'Unknown Asset'}
             </p>
-            <p className="text-xs text-text-tertiary capitalize">
+            <p className="text-xs text-gray-400 capitalize">
               {item.type} clip
             </p>
           </div>
@@ -322,24 +263,24 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
 
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <p className="text-text-secondary">Duration</p>
-            <p className="text-text-primary font-mono">
+            <p className="text-gray-300">Duration</p>
+            <p className="text-white font-mono">
               {formatDuration(item.duration)}
             </p>
           </div>
           <div>
-            <p className="text-text-secondary">Start Time</p>
-            <p className="text-text-primary font-mono">
+            <p className="text-gray-300">Start Time</p>
+            <p className="text-white font-mono">
               {formatDuration(item.startTime)}
             </p>
           </div>
           <div>
-            <p className="text-text-secondary">Track</p>
-            <p className="text-text-primary">Track {item.track + 1}</p>
+            <p className="text-gray-300">Track</p>
+            <p className="text-white">Track {item.track + 1}</p>
           </div>
           <div>
-            <p className="text-text-secondary">End Time</p>
-            <p className="text-text-primary font-mono">
+            <p className="text-gray-300">End Time</p>
+            <p className="text-white font-mono">
               {formatDuration(item.startTime + item.duration)}
             </p>
           </div>
@@ -347,8 +288,8 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
 
         {asset && (
           <div className="pt-2 border-t border-border-subtle">
-            <p className="text-xs text-text-tertiary mb-2">Source File</p>
-            <div className="text-xs text-text-secondary">
+            <p className="text-xs text-gray-400 mb-2">Source File</p>
+            <div className="text-xs text-gray-300">
               <p>
                 Size: {(asset.metadata.fileSize / 1024 / 1024).toFixed(1)} MB
               </p>
@@ -642,7 +583,7 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
       <div>
         <label
           htmlFor={inputId}
-          className="block text-sm font-medium text-text-secondary mb-1"
+          className="block text-sm font-medium text-gray-200 mb-1"
         >
           {label}
         </label>
@@ -652,7 +593,7 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
           onChange={handleChange}
           onPaste={handlePaste}
           rows={8}
-          className={`w-full bg-background-tertiary border rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500 ${error ? 'border-status-error' : 'border-border-subtle'}`}
+          className={`w-full bg-background-tertiary border rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-primary-500 ${error ? 'border-status-error' : 'border-border-subtle'}`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}
           style={{ fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace' }}
@@ -924,34 +865,17 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
   return (
     <div className="border-b border-border-subtle">
       <div className="p-4">
-        <h4 className="font-medium text-text-primary mb-3">Properties</h4>
+        <h4 className="font-medium text-white mb-3">Properties</h4>
 
-        {/* Transform Properties - Always shown */}
-        <div className="mb-4">
-          <h5 className="text-sm font-medium text-text-secondary mb-2">
-            Transform
-          </h5>
-          {renderTransformProperties()}
-        </div>
-
-        {/* Type-specific Properties */}
-        {(item.type === 'video' || item.type === 'audio') && (
-          <div className="mb-4">
-            <h5 className="text-sm font-medium text-text-secondary mb-2">
-              Media
-            </h5>
-            {renderVideoProperties()}
-          </div>
-        )}
-
+        {/* Code Properties - Show first for code items */}
         {item.type === 'code' && (
           <div className="mb-4">
-            <h5 className="text-sm font-medium text-text-secondary mb-2">
+            <h5 className="text-sm font-medium text-gray-200 mb-2">
               Code
             </h5>
             {renderCodeProperties()}
             <div className="mt-4">
-              <h5 className="text-sm font-medium text-text-secondary mb-2">
+              <h5 className="text-sm font-medium text-gray-200 mb-2">
                 Side by Side
               </h5>
               <SelectInput
@@ -968,9 +892,7 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
               <SelectInput
                 label="Layout"
                 value={localProperties.sideBySideLayout ?? 'left-right'}
-                onChange={(value) =>
-                  updateProperty('sideBySideLayout', value as any)
-                }
+                onChange={(value) => updateProperty('sideBySideLayout', value as any)}
                 options={[
                   { value: 'left-right', label: 'Left • Right' },
                   { value: 'right-left', label: 'Right • Left' },
@@ -982,14 +904,466 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
                 label="Gap"
                 value={localProperties.sideBySideGap ?? 16}
                 onChange={(value) => updateProperty('sideBySideGap', value)}
+                error={validationErrors.sideBySideGap}
                 min={0}
                 max={128}
                 step={1}
                 suffix="px"
               />
             </div>
-            <div className="mt-4">
-              <h5 className="text-sm font-medium text-text-secondary mb-2">
+          </div>
+        )}
+
+        {/* Transform Properties - Always shown */}
+        <div className="mb-4">
+          <h5 className="text-sm font-medium text-gray-200 mb-2">
+            Transform
+          </h5>
+          {renderTransformProperties()}
+        </div>
+
+        {/* Type-specific Properties */}
+        {(item.type === 'video' || item.type === 'audio') && (
+          <div className="mb-4">
+            <h5 className="text-sm font-medium text-gray-200 mb-2">
+              Media
+            </h5>
+            {renderVideoProperties()}
+          </div>
+        )}
+
+        {item.type === 'title' && (
+          <div className="mb-4">
+            <h5 className="text-sm font-medium text-gray-200 mb-2">
+              Title
+            </h5>
+            {renderTitleProperties()}
+          </div>
+        )}
+
+        {item.type === 'visual-asset' && (
+          <div className="mb-4">
+            <h5 className="text-sm font-medium text-gray-200 mb-2">
+              Visual Asset
+            </h5>
+            {renderVisualAssetProperties()}
+          </div>
+        )}
+
+        {/* Focus (Ken Burns) - Show for applicable items */}
+        {(item.type === 'video' || item.type === 'code') && (
+          <div className="mb-4">
+            <h5 className="text-sm font-medium text-gray-200 mb-2">
+              Focus (Ken Burns)
+            </h5>
+            <SelectInput
+              label="Auto Focus"
+              value={(localProperties.autoFocus ?? false) ? 'on' : 'off'}
+              onChange={(value) => updateProperty('autoFocus', value === 'on')}
+              options={[
+                { value: 'off', label: 'Off' },
+                { value: 'on', label: 'On' },
+              ]}
+            />
+            <NumberInput
+              label="Focus X"
+              value={localProperties.focusPointX ?? 0.5}
+              onChange={(value) => updateProperty('focusPointX', value)}
+              error={validationErrors.focusPointX}
+              min={0}
+              max={1}
+              step={0.01}
+            />
+            <NumberInput
+              label="Focus Y"
+              value={localProperties.focusPointY ?? 0.5}
+              onChange={(value) => updateProperty('focusPointY', value)}
+              error={validationErrors.focusPointY}
+              min={0}
+              max={1}
+              step={0.01}
+            />
+            <NumberInput
+              label="Focus Scale"
+              value={localProperties.focusScale ?? 1.2}
+              onChange={(value) => updateProperty('focusScale', value)}
+              error={validationErrors.focusScale}
+              min={1}
+              max={3}
+              step={0.05}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Input component definitions with improved contrast
+interface NumberInputProps {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  error?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  suffix?: string;
+}
+
+function NumberInput({
+  label,
+  value,
+  onChange,
+  error,
+  min,
+  max,
+  step = 1,
+  suffix,
+}: NumberInputProps) {
+  const inputId = React.useId();
+
+  return (
+    <div>
+      <label
+        htmlFor={inputId}
+        className="block text-sm font-medium text-gray-200 mb-1"
+      >
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          id={inputId}
+          type="number"
+          value={value}
+          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+          min={min}
+          max={max}
+          step={step}
+          className={`w-full bg-background-tertiary border rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-primary-500 ${
+            error ? 'border-status-error' : 'border-border-subtle'
+          }`}
+          aria-invalid={error ? 'true' : 'false'}
+          aria-describedby={error ? `${inputId}-error` : undefined}
+        />
+        {suffix && (
+          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm pointer-events-none">
+            {suffix}
+          </span>
+        )}
+      </div>
+      {error && (
+        <p
+          id={`${inputId}-error`}
+          className="text-status-error text-xs mt-1"
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+interface TextInputProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  multiline?: boolean;
+}
+
+function TextInput({ label, value, onChange, error, multiline }: TextInputProps) {
+  const inputId = React.useId();
+
+  return (
+    <div>
+      <label
+        htmlFor={inputId}
+        className="block text-sm font-medium text-gray-200 mb-1"
+      >
+        {label}
+      </label>
+      {multiline ? (
+        <textarea
+          id={inputId}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          rows={3}
+          className={`w-full bg-background-tertiary border rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-primary-500 ${
+            error ? 'border-status-error' : 'border-border-subtle'
+          }`}
+          aria-invalid={error ? 'true' : 'false'}
+          aria-describedby={error ? `${inputId}-error` : undefined}
+        />
+      ) : (
+        <input
+          id={inputId}
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={`w-full bg-background-tertiary border rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-primary-500 ${
+            error ? 'border-status-error' : 'border-border-subtle'
+          }`}
+          aria-invalid={error ? 'true' : 'false'}
+          aria-describedby={error ? `${inputId}-error` : undefined}
+        />
+      )}
+      {error && (
+        <p
+          id={`${inputId}-error`}
+          className="text-status-error text-xs mt-1"
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+interface SelectInputProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ value: string; label: string }>;
+  error?: string;
+}
+
+function SelectInput({ label, value, onChange, options, error }: SelectInputProps) {
+  const inputId = React.useId();
+
+  return (
+    <div>
+      <label
+        htmlFor={inputId}
+        className="block text-sm font-medium text-gray-200 mb-1"
+      >
+        {label}
+      </label>
+      <select
+        id={inputId}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`w-full bg-background-tertiary border rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-primary-500 ${
+          error ? 'border-status-error' : 'border-border-subtle'
+        }`}
+        aria-invalid={error ? 'true' : 'false'}
+        aria-describedby={error ? `${inputId}-error` : undefined}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      {error && (
+        <p
+          id={`${inputId}-error`}
+          className="text-status-error text-xs mt-1"
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+interface ColorInputProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+}
+
+function ColorInput({ label, value, onChange, error }: ColorInputProps) {
+  const inputId = React.useId();
+
+  return (
+    <div>
+      <label
+        htmlFor={inputId}
+        className="block text-sm font-medium text-gray-200 mb-1"
+      >
+        {label}
+      </label>
+      <div className="flex space-x-2">
+        <input
+          id={inputId}
+          type="color"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-12 h-8 bg-background-tertiary border border-border-subtle rounded cursor-pointer"
+        />
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={`flex-1 bg-background-tertiary border rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-primary-500 ${
+            error ? 'border-status-error' : 'border-border-subtle'
+          }`}
+          aria-invalid={error ? 'true' : 'false'}
+          aria-describedby={error ? `${inputId}-error` : undefined}
+        />
+      </div>
+      {error && (
+        <p
+          id={`${inputId}-error`}
+          className="text-status-error text-xs mt-1"
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+interface AnimationSettingsProps {
+  item: TimelineItem;
+  onUpdateAnimations: (animations: AnimationPreset[]) => void;
+}
+
+function AnimationSettings({ item, onUpdateAnimations }: AnimationSettingsProps) {
+  const [selectedType, setSelectedType] = useState<AnimationType>('entrance');
+  const [selectedPreset, setSelectedPreset] = useState<string>('');
+
+  const availableAnimations = React.useMemo(() => {
+    try {
+      return animationPresetsModule.getAnimationsByType(selectedType);
+    } catch {
+      return [];
+    }
+  }, [selectedType]);
+
+  const compatibleAnimations = React.useMemo(() => {
+    try {
+      return animationPresetsModule.getCompatibleAnimations(item.type, selectedType);
+    } catch {
+      return [];
+    }
+  }, [item.type, selectedType]);
+
+  const handleAddAnimation = () => {
+    if (!selectedPreset) return;
+
+    try {
+      const preset = animationPresetsModule.ANIMATION_PRESETS.find(
+        (p) => p.id === selectedPreset
+      );
+      if (preset) {
+        onUpdateAnimations([...item.animations, preset]);
+        setSelectedPreset('');
+      }
+    } catch (error) {
+      console.warn('Failed to add animation:', error);
+    }
+  };
+
+  const handleRemoveAnimation = (index: number) => {
+    const newAnimations = [...item.animations];
+    newAnimations.splice(index, 1);
+    onUpdateAnimations(newAnimations);
+  };
+
+  return (
+    <div className="p-4 border-b border-border-subtle">
+      <h4 className="font-medium text-white mb-3">Animations</h4>
+
+      {/* Current Animations */}
+      {item.animations.length > 0 && (
+        <div className="mb-4">
+          <h5 className="text-sm font-medium text-gray-200 mb-2">
+            Current Animations ({item.animations.length})
+          </h5>
+          <div className="space-y-2">
+            {item.animations.map((animation, index) => (
+              <div
+                key={`${animation.id}-${index}`}
+                className="flex items-center justify-between p-2 bg-background-tertiary rounded border border-border-subtle"
+              >
+                <div>
+                  <p className="text-sm font-medium text-white">
+                    {animation.name}
+                  </p>
+                  <p className="text-xs text-gray-400 capitalize">
+                    {animation.type} • {animation.duration}s
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleRemoveAnimation(index)}
+                  className="text-status-error hover:text-red-400 p-1 rounded transition-colors"
+                  title="Remove animation"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Add Animation */}
+      <div>
+        <h5 className="text-sm font-medium text-gray-200 mb-2">
+          Add Animation
+        </h5>
+
+        {/* Animation Type Selector */}
+        <div className="flex space-x-1 mb-3 p-1 bg-background-tertiary rounded">
+          {(['entrance', 'exit', 'emphasis', 'transition'] as AnimationType[]).map((type) => (
+            <button
+              key={type}
+              onClick={() => {
+                setSelectedType(type);
+                setSelectedPreset('');
+              }}
+              className={`flex-1 px-2 py-1 text-xs font-medium rounded capitalize transition-colors ${
+                selectedType === type
+                  ? 'bg-primary-600 text-white shadow-glow'
+                  : 'text-gray-300 hover:text-white hover:bg-neutral-700'
+              }`}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+
+        {/* Animation Preset Selector */}
+        <div className="flex space-x-2">
+          <select
+            value={selectedPreset}
+            onChange={(e) => setSelectedPreset(e.target.value)}
+            className="flex-1 bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-primary-500"
+          >
+            <option value="">Select {selectedType} animation...</option>
+            {compatibleAnimations.map((animation) => (
+              <option key={animation.id} value={animation.id}>
+                {animation.name}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={handleAddAnimation}
+            disabled={!selectedPreset}
+            className="bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 text-white px-3 py-2 rounded text-sm transition-colors shadow-glow"
+          >
+            Add
+          </button>
+        </div>
+
+        {compatibleAnimations.length === 0 && (
+          <p className="text-xs text-gray-400 mt-2">
+            No {selectedType} animations available for {item.type} items.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
                 Focus (Ken Burns)
               </h5>
               <SelectInput

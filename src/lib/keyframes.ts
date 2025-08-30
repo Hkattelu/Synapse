@@ -1,6 +1,6 @@
 // Keyframe animation system utilities
 
-import type { Keyframe, ItemProperties, TimelineItem } from './types';
+import type { Keyframe, ItemProperties, TimelineItem, GradientConfig } from './types';
 import { generateId } from './utils';
 
 // Easing functions for keyframe interpolation
@@ -119,7 +119,7 @@ export class KeyframeManager {
     item: TimelineItem,
     property: keyof ItemProperties,
     time: number
-  ): number | string | boolean | undefined {
+  ): number | string | boolean | GradientConfig | undefined {
     const keyframes = this.getPropertyKeyframes(item, property);
 
     if (keyframes.length === 0) {

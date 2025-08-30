@@ -7,6 +7,7 @@ import { EnhancedTimelineView } from './EnhancedTimelineView';
 import { Preview } from './Preview';
 import { Inspector } from './Inspector';
 import { ExportDialog } from './ExportDialog';
+import { RecorderDialog } from './RecorderDialog';
 import { ExportProvider } from '../state/exportContext';
 import { ResizablePanel } from './ResizablePanel';
 import { TimelineToolbar } from './TimelineToolbar';
@@ -22,6 +23,7 @@ function StudioViewContent() {
   const { ui, toggleInspector, toggleMediaBin } = useUI();
   const navigate = useNavigate();
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [isRecorderDialogOpen, setIsRecorderDialogOpen] = useState(false);
   // Global undo/redo keyboard shortcuts live in App.tsx
 
   // Listen for export dialog open event from Preview component
@@ -30,10 +32,16 @@ function StudioViewContent() {
       setIsExportDialogOpen(true);
     };
 
+    const handleOpenRecorderDialog = () => {
+      setIsRecorderDialogOpen(true);
+    };
+
     window.addEventListener('openExportDialog', handleOpenExportDialog);
+    window.addEventListener('openRecorderDialog', handleOpenRecorderDialog);
 
     return () => {
       window.removeEventListener('openExportDialog', handleOpenExportDialog);
+      window.removeEventListener('openRecorderDialog', handleOpenRecorderDialog);
     };
   }, []);
 
@@ -107,11 +115,11 @@ function StudioViewContent() {
             <div className="flex items-center space-x-2">
               {/* Undo/Redo Buttons */}
               <UndoButton
-                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border text-purple-600 hover:bg-purple-50 hover:border-purple-300 disabled:border-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed`}
+                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border text-purple-600 hover:bg-purple-50 hover:border-purple-300 disabled:border-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:bg-gray-50`}
                 title="Undo (Ctrl+Z)"
               />
               <RedoButton
-                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border text-purple-600 hover:bg-purple-50 hover:border-purple-300 disabled:border-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed`}
+                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border text-purple-600 hover:bg-purple-50 hover:border-purple-300 disabled:border-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:bg-gray-50`}
                 title="Redo (Ctrl+Y / Shift+Ctrl+Z)"
               />
               <button
@@ -213,6 +221,12 @@ function StudioViewContent() {
       <ExportDialog
         isOpen={isExportDialogOpen}
         onClose={() => setIsExportDialogOpen(false)}
+      />
+
+      {/* Recorder Dialog */}
+      <RecorderDialog
+        isOpen={isRecorderDialogOpen}
+        onClose={() => setIsRecorderDialogOpen(false)}
       />
     </div>
   );
