@@ -243,15 +243,6 @@ export function EnhancedTimelineView({
           )}
         </div>
       )}
-
-      {/* Floating Timeline Info */}
-      <div className="absolute bottom-4 left-4 bg-black bg-opacity-75 rounded px-3 py-2 text-xs text-white">
-        <div>Items: {timeline.length}</div>
-        <div>Selected: {selectedItems.length}</div>
-        {selectedItem && selectedItem.keyframes.length > 0 && (
-          <div>Keyframes: {selectedItem.keyframes.length}</div>
-        )}
-      </div>
     </div>
   );
 }

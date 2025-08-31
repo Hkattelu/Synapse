@@ -7,6 +7,13 @@ import type {
   ExportQuality,
 } from './types';
 import { api, ApiError } from './api';
+import { 
+  validateExportSettings as validateFull,
+  getFormatRecommendations,
+  isTransparencySupported as isSupported,
+  getTransparencyCompatibilityWarning as getWarning,
+  validateTransparencySettings as validateTransparencyFull
+} from './validation/exportValidation';
 
 // Export presets for common use cases
 export const DEFAULT_EXPORT_PRESETS: ExportPreset[] = [
@@ -570,7 +577,6 @@ export const estimateFileSize = (
 // Enhanced export validation using the validation module
 export const validateExportSettings = (settings: ExportSettings) => {
   try {
-    const { validateExportSettings: validateFull } = require('./validation/exportValidation');
     return validateFull(settings);
   } catch (error) {
     console.error('Export validation error:', error);
@@ -587,7 +593,6 @@ export const getExportRecommendations = (requirements: {
   prioritizeCompatibility?: boolean;
 }) => {
   try {
-    const { getFormatRecommendations } = require('./validation/exportValidation');
     return getFormatRecommendations(requirements);
   } catch (error) {
     console.error('Export recommendations error:', error);
@@ -598,7 +603,6 @@ export const getExportRecommendations = (requirements: {
 // Transparency format validation (enhanced)
 export const isTransparencySupported = (format: string, codec?: string): boolean => {
   try {
-    const { isTransparencySupported: isSupported } = require('./validation/exportValidation');
     return isSupported(format);
   } catch (error) {
     console.error('Transparency support check error:', error);
@@ -626,7 +630,6 @@ export const getTransparencyCompatibilityWarning = (
   settings: ExportSettings
 ): string | null => {
   try {
-    const { getTransparencyCompatibilityWarning: getWarning } = require('./validation/exportValidation');
     return getWarning(settings);
   } catch (error) {
     console.error('Transparency warning error:', error);
@@ -667,8 +670,7 @@ export const validateTransparencySettings = (
   settings: ExportSettings
 ): { isValid: boolean; warnings: string[]; errors: string[] } => {
   try {
-    const { validateTransparencySettings: validateFull } = require('./validation/exportValidation');
-    return validateFull(settings);
+    return validateTransparencyFull(settings);
   } catch (error) {
     console.error('Transparency validation error:', error);
     // Fallback to basic validation

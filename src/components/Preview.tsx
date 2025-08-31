@@ -454,16 +454,8 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             onClick={handleTimelineScrub}
           >
             {/* Progress bar (colored left side) */}
-            {/* Progress bar (colored left side) */}
             <div
               className="h-full bg-purple-600 rounded-full relative transition-all duration-100"
-              style={{
-                width: `${Math.max(0, Math.min(100, (playback.currentTime / compositionProps.settings.duration) * 100))}%`,
-              }}
-            />
-            {/* Playhead handle */}
-            <div
-              className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white rounded-full border-2 border-purple-600 shadow-lg cursor-grab active:cursor-grabbing transition-all duration-100"
               style={{
                 width: `${Math.max(0, Math.min(100, (playback.currentTime / compositionProps.settings.duration) * 100))}%`,
               }}

@@ -2,6 +2,7 @@
 
 import type { ThemeDefinition, ThemeCategory, ThemePreferences } from './types';
 import { BUILT_IN_THEMES, THEME_CATEGORIES } from './definitions';
+import { validateTheme, createFallbackTheme } from '../validation/themeValidation';
 
 export class ThemeManager {
   private themes: Map<string, ThemeDefinition> = new Map();
@@ -298,7 +299,6 @@ export class ThemeManager {
    */
   private validateTheme(theme: ThemeDefinition): boolean {
     try {
-      const { validateTheme } = require('../validation/themeValidation');
       const result = validateTheme(theme, {
         strictColorValidation: true,
         checkContrast: false, // Don't fail on contrast issues, just warn
@@ -395,7 +395,6 @@ export class ThemeManager {
    */
   private createFallbackTheme(originalTheme: ThemeDefinition): ThemeDefinition {
     try {
-      const { createFallbackTheme } = require('../validation/themeValidation');
       return createFallbackTheme(originalTheme);
     } catch (error) {
       console.error('Failed to create fallback theme:', error);

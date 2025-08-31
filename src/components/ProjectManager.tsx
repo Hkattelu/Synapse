@@ -30,14 +30,14 @@ interface ProjectCardProps {
   onDelete: (projectId: string) => void;
 }
 
-function ProjectCard({
+const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
   project,
   onOpen,
   onRename,
   onDuplicate,
   onExport,
   onDelete,
-}: ProjectCardProps) {
+}, ref) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showRename, setShowRename] = useState(false);
@@ -55,6 +55,7 @@ function ProjectCard({
 
   return (
     <motion.div
+      ref={ref}
       layout
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -290,7 +291,7 @@ function ProjectCard({
       </AnimatePresence>
     </motion.div>
   );
-}
+});
 
 export function ProjectManager() {
   const navigate = useNavigate();

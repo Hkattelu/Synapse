@@ -7,6 +7,12 @@ import type {
   BackgroundManagerEvents 
 } from './types';
 import type { BackgroundConfig, GradientConfig } from '../types';
+import { validateAnyColor } from '../validation/colorValidation';
+import { 
+  validateWallpaperAsset, 
+  validateImageFile, 
+  createFallbackBackground 
+} from '../validation/backgroundValidation';
 import { 
   builtInCollections, 
   getAllBuiltInWallpapers, 
@@ -428,7 +434,6 @@ export class BackgroundManager {
   // Validation methods
   validateColor(color: string) {
     try {
-      const { validateAnyColor } = require('../validation/colorValidation');
       return validateAnyColor(color);
     } catch (error) {
       console.error('Color validation error:', error);
@@ -440,7 +445,6 @@ export class BackgroundManager {
 
   validateWallpaperAsset(asset: WallpaperAsset) {
     try {
-      const { validateWallpaperAsset } = require('../validation/backgroundValidation');
       return validateWallpaperAsset(asset);
     } catch (error) {
       console.error('Wallpaper asset validation error:', error);
@@ -450,7 +454,6 @@ export class BackgroundManager {
 
   validateImageFile(file: File) {
     try {
-      const { validateImageFile } = require('../validation/backgroundValidation');
       return validateImageFile(file);
     } catch (error) {
       console.error('Image file validation error:', error);
@@ -460,7 +463,6 @@ export class BackgroundManager {
 
   createFallbackBackground(originalConfig?: Partial<BackgroundConfig>): BackgroundConfig {
     try {
-      const { createFallbackBackground } = require('../validation/backgroundValidation');
       return createFallbackBackground(originalConfig);
     } catch (error) {
       console.error('Failed to create fallback background:', error);

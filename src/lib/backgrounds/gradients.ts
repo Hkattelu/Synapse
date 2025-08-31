@@ -1,6 +1,7 @@
 // Gradient configuration and utilities
 
 import type { GradientConfig } from '../types';
+import { validateGradient as validateGradientFull } from '../validation/backgroundValidation';
 
 export interface GradientColorStop {
   color: string;
@@ -290,7 +291,6 @@ export interface GradientValidationResult {
 
 export function validateGradient(config: GradientConfig): GradientValidationResult {
   try {
-    const { validateGradient: validateGradientFull } = require('../validation/backgroundValidation');
     const result = validateGradientFull(config);
     return {
       isValid: result.isValid,

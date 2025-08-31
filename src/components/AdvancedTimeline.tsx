@@ -519,7 +519,7 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
               style={{ left: `${timeToPixels(i)}px` }}
             >
               <div className="border-l border-gray-600 h-full" />
-              <div className="absolute -bottom-6 -left-4 w-8 text-center bg-gray-800 px-1 rounded">
+              <div className="absolute bottom-2 -left-4 w-8 text-center bg-gray-800 px-1 rounded">
                 {Math.floor(i / 60)}:{(i % 60).toString().padStart(2, '0')}
               </div>
             </div>
