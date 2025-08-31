@@ -7,7 +7,7 @@ import Plus from 'lucide-react/dist/esm/icons/plus.js';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.js';
 
 export function DashboardView() {
-  const { project, createProject } = useProject();
+  const { project, createProject, switchProject } = useProject();
   const navigate = useNavigate();
   const [projectName, setProjectName] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -21,7 +21,10 @@ export function DashboardView() {
     }
   };
 
-  const handleOpenProject = () => {
+  const handleOpenProject = (projectId?: string) => {
+    if (projectId) {
+      switchProject(projectId);
+    }
     navigate('/studio');
   };
 
@@ -114,25 +117,13 @@ export function DashboardView() {
                 </div>
               </div>
             ) : (
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setShowCreateForm(true)}
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-6 py-3 rounded-lg transition-colors flex items-center space-x-2"
-                >
-                  <Plus className="w-5 h-5" />
-                  <span>New Project</span>
-                </button>
-
-                {project && (
-                  <button
-                    onClick={handleOpenProject}
-                    className="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 font-medium px-6 py-3 rounded-lg transition-colors flex items-center space-x-2"
-                  >
-                    <ArrowRight className="w-5 h-5" />
-                    <span>Continue "{project.name}"</span>
-                  </button>
-                )}
-              </div>
+              <button
+                onClick={() => setShowCreateForm(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-6 py-3 rounded-lg transition-colors flex items-center space-x-2"
+              >
+                <Plus className="w-5 h-5" />
+                <span>New Project</span>
+              </button>
             )}
           </div>
 
@@ -154,7 +145,7 @@ export function DashboardView() {
                   </h3>
                 </div>
                 <button
-                  onClick={handleOpenProject}
+                  onClick={() => handleOpenProject()}
                   className="text-purple-600 hover:text-purple-700 font-medium"
                 >
                   Open Studio →

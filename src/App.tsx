@@ -24,13 +24,15 @@ function GlobalShortcutsAndBridge() {
   // Subscribe to store changes after component mounts
   useEffect(() => {
     try {
-      const unsubscribe = useProjectStore.subscribe(
-        (state: any) => {
-          setTimeline(state.timeline || []);
-          setMediaAssets(state.mediaAssets || []);
-        }
-      );
-      return unsubscribe;
+      if (useProjectStore?.subscribe) {
+        const unsubscribe = useProjectStore.subscribe(
+          (state: any) => {
+            setTimeline(state.timeline || []);
+            setMediaAssets(state.mediaAssets || []);
+          }
+        );
+        return unsubscribe;
+      }
     } catch (error) {
       console.warn('Failed to subscribe to project store:', error);
     }
@@ -69,16 +71,18 @@ function GlobalShortcutsAndBridge() {
       if (!isMeta) return;
 
       try {
-        const temporal = useProjectStore.temporal();
-        if (!temporal) return;
-      
-        if (key === 'z') {
-          event.preventDefault();
-          if (event.shiftKey) temporal.redo?.();
-          else temporal.undo?.();
-        } else if (key === 'y') {
-          event.preventDefault();
-          temporal.redo?.();
+        if (useProjectStore && typeof useProjectStore.temporal === 'function') {
+          const temporal = useProjectStore.temporal();
+          if (!temporal) return;
+        
+          if (key === 'z') {
+            event.preventDefault();
+            if (event.shiftKey) temporal.redo?.();
+            else temporal.undo?.();
+          } else if (key === 'y') {
+            event.preventDefault();
+            temporal.redo?.();
+          }
         }
       } catch (error) {
         console.warn('Failed to access temporal store:', error);

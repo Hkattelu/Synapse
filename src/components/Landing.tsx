@@ -19,9 +19,7 @@ import Video from 'lucide-react/dist/esm/icons/video.js';
 import Users from 'lucide-react/dist/esm/icons/users.js';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
 import Heart from 'lucide-react/dist/esm/icons/heart.js';
-import Github from 'lucide-react/dist/esm/icons/github.js';
-import Twitter from 'lucide-react/dist/esm/icons/twitter.js';
-import Youtube from 'lucide-react/dist/esm/icons/youtube.js';
+
 import Mail from 'lucide-react/dist/esm/icons/mail.js';
 import MapPin from 'lucide-react/dist/esm/icons/map-pin.js';
 import Phone from 'lucide-react/dist/esm/icons/phone.js';
@@ -29,7 +27,7 @@ import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.js';
 import Zap from 'lucide-react/dist/esm/icons/zap.js';
 import Shield from 'lucide-react/dist/esm/icons/shield.js';
 import Layers from 'lucide-react/dist/esm/icons/layers.js';
-import Download from 'lucide-react/dist/esm/icons/download.js';
+
 
 interface HeroSectionProps {
   title?: string;
@@ -172,20 +170,20 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           >
             <Button
               size="lg"
-              onClick={() => navigate('/downloads')}
+              onClick={() => navigate('/projects')}
               className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
             >
               <Play className="w-5 h-5 mr-2" />
-              Download Now
+              Start Creating
             </Button>
             <Button
               variant="outline"
               size="lg"
-              onClick={() => navigate('/projects')}
+              onClick={() => navigate('/downloads')}
               className="border-purple-200 text-purple-700 hover:bg-purple-50 px-8 py-4 rounded-full font-semibold text-lg"
             >
               <Video className="w-5 h-5 mr-2" />
-              Try Web Version
+              Download App
             </Button>
           </motion.div>
 
@@ -424,25 +422,14 @@ const PowerSection: React.FC = () => {
             viewport={{ once: true }}
             className="text-center mt-12"
           >
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button
-                size="lg"
-                onClick={() => navigate('/downloads')}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-              >
-                <Download className="w-5 h-5 mr-2" />
-                Download Desktop App
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => navigate('/projects')}
-                className="border-purple-200 text-purple-700 hover:bg-purple-50 px-8 py-4 rounded-full font-semibold text-lg"
-              >
-                <ArrowRight className="w-5 h-5 mr-2" />
-                Try Web Version
-              </Button>
-            </div>
+            <Button
+              size="lg"
+              onClick={() => navigate('/projects')}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+            >
+              <ArrowRight className="w-5 h-5 mr-2" />
+              Get Started Now
+            </Button>
           </motion.div>
         </div>
       </div>
@@ -496,34 +483,7 @@ const ContactSection: React.FC<ContactFormProps> = ({ onSubmit }) => {
                 </div>
               </div>
 
-              <div className="mt-8">
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                  Follow Our Journey
-                </h4>
-                <div className="flex space-x-4">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="rounded-full"
-                  >
-                    <Youtube className="w-5 h-5" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="rounded-full"
-                  >
-                    <Twitter className="w-5 h-5" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="rounded-full"
-                  >
-                    <Github className="w-5 h-5" />
-                  </Button>
-                </div>
-              </div>
+
             </div>
 
             <Card className="p-8 shadow-lg">
@@ -616,14 +576,6 @@ const Footer: React.FC = () => {
             <h4 className="font-semibold mb-4">Product</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li>
-                <button
-                  onClick={() => navigate('/downloads')}
-                  className="hover:text-white transition-colors text-left"
-                >
-                  Downloads
-                </button>
-              </li>
-              <li>
                 <a
                   href="#features"
                   className="hover:text-white transition-colors"
@@ -633,42 +585,11 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <button
-                  onClick={() => navigate('/projects')}
+                  onClick={() => navigate('/downloads')}
                   className="hover:text-white transition-colors text-left"
                 >
-                  Web App
+                  Downloads
                 </button>
-              </li>
-              <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Roadmap
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">Community</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Discord
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  YouTube
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Twitter
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  GitHub
-                </a>
               </li>
             </ul>
           </div>
@@ -677,17 +598,7 @@ const Footer: React.FC = () => {
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Documentation
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Tutorials
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="#contact" className="hover:text-white transition-colors">
                   Contact
                 </a>
               </li>
@@ -698,6 +609,8 @@ const Footer: React.FC = () => {
               </li>
             </ul>
           </div>
+
+          <div></div>
         </div>
 
         <Separator className="my-8 bg-gray-800" />
@@ -706,15 +619,6 @@ const Footer: React.FC = () => {
           <p>
             &copy; 2024 Synapse Studio. Made with ❤️ by creators, for creators.
           </p>
-          <p className="mt-2 md:mt-0">
-            Building the future of authentic content creation.
-          </p>
-        </div>
-
-        <Separator className="my-8 bg-gray-800" />
-
-        <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
-          <p>2024 Synapse Studio. Made with ❤️ by creators, for creators.</p>
           <p className="mt-2 md:mt-0">
             Building the future of authentic content creation.
           </p>
@@ -768,13 +672,6 @@ const Navigation: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/projects')}
-              className="border-purple-200 text-purple-700 hover:bg-purple-50"
-            >
-              Projects
-            </Button>
             <Button
               onClick={() => navigate('/projects')}
               className="bg-purple-600 hover:bg-purple-700 text-white"

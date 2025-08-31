@@ -28,11 +28,18 @@ export function AppProvider({ children }: AppProviderProps) {
   useEffect(() => {
     const currentId = state.project?.id ?? null;
     if (currentId !== lastProjectIdRef.current) {
-      // Load current project timeline/media into the temporal store
-      projectStoreApi.getState().loadProjectIntoStore(state.project);
-      // Clear undo/redo stacks when switching projects
-      clearProjectHistory();
-      lastProjectIdRef.current = currentId;
+      try {
+        // Load current project timeline/media into the temporal store
+        if (projectStoreApi?.getState) {
+          projectStoreApi.getState().loadProjectIntoStore(state.project);
+        }
+        // Clear undo/redo stacks when switching projects
+        clearProjectHistory();
+        lastProjectIdRef.current = currentId;
+      } catch (error) {
+        console.warn('Failed to sync project store:', error);
+        lastProjectIdRef.current = currentId;
+      }
     }
   }, [state.project]);
 

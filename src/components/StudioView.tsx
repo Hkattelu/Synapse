@@ -17,6 +17,8 @@ import Settings from 'lucide-react/dist/esm/icons/settings.js';
 import Archive from 'lucide-react/dist/esm/icons/archive.js';
 import { UndoButton } from './UndoButton';
 import { RedoButton } from './RedoButton';
+import { ShortcutsDialog } from './ShortcutsDialog';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 
 function StudioViewContent() {
   const { project } = useProject();
@@ -24,7 +26,21 @@ function StudioViewContent() {
   const navigate = useNavigate();
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isRecorderDialogOpen, setIsRecorderDialogOpen] = useState(false);
-  // Global undo/redo keyboard shortcuts live in App.tsx
+  const [isShortcutsDialogOpen, setIsShortcutsDialogOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  // Get selected item for keyboard shortcuts
+  const selectedItemId = project?.timeline.find(item => 
+    // This is a simplified way to get selected item - you might need to adjust based on your selection logic
+    false // Replace with actual selection logic
+  )?.id || null;
+
+  // Setup keyboard shortcuts
+  useKeyboardShortcuts({
+    selectedItemId,
+    onToggleFullscreen: () => setIsFullscreen(!isFullscreen),
+    onShowShortcuts: () => setIsShortcutsDialogOpen(true),
+  });
 
   // Listen for export dialog open event from Preview component
   useEffect(() => {
@@ -144,6 +160,17 @@ function StudioViewContent() {
               >
                 <Settings className="w-4 h-4" />
               </button>
+              
+              {/* Shortcuts Button */}
+              <button
+                onClick={() => setIsShortcutsDialogOpen(true)}
+                className="p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300"
+                title="Keyboard Shortcuts (?)"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -227,6 +254,12 @@ function StudioViewContent() {
       <RecorderDialog
         isOpen={isRecorderDialogOpen}
         onClose={() => setIsRecorderDialogOpen(false)}
+      />
+
+      {/* Shortcuts Dialog */}
+      <ShortcutsDialog
+        isOpen={isShortcutsDialogOpen}
+        onClose={() => setIsShortcutsDialogOpen(false)}
       />
     </div>
   );

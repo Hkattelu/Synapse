@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useProject } from '../state/hooks';
 import {
   ProjectManager as PM,
@@ -292,6 +293,7 @@ function ProjectCard({
 }
 
 export function ProjectManager() {
+  const navigate = useNavigate();
   const {
     projects,
     switchProject,
@@ -303,6 +305,11 @@ export function ProjectManager() {
   } = useProject();
 
   const [isImporting, setIsImporting] = useState(false);
+
+  const handleOpenProject = (projectId: string) => {
+    switchProject(projectId);
+    navigate('/studio');
+  };
 
   const handleImportProject = async () => {
     try {
@@ -385,7 +392,7 @@ export function ProjectManager() {
             <ProjectCard
               key={project.project.id}
               project={project}
-              onOpen={switchProject}
+              onOpen={handleOpenProject}
               onRename={renameProject}
               onDuplicate={handleDuplicateProject}
               onExport={handleExportProject}

@@ -10,12 +10,21 @@ export const RedoButton: React.FC<Props> = ({
   onClick,
   ...rest
 }) => {
-  const { redo, futureStates } = useProjectTemporal();
-  const canRedo = (futureStates?.length ?? 0) > 0;
+  let temporal;
+  let canRedo = false;
+  
+  try {
+    temporal = useProjectTemporal();
+    canRedo = (temporal?.futureStates?.length ?? 0) > 0;
+  } catch (error) {
+    console.warn('Failed to access temporal state in RedoButton:', error);
+    temporal = { redo: () => {}, futureStates: [] };
+  }
+
   return (
     <button
       type="button"
-      onClick={onClick ?? redo}
+      onClick={onClick ?? temporal?.redo ?? (() => {})}
       disabled={!canRedo}
       className={className}
       title={title ?? 'Redo (Ctrl/Cmd+Shift+Z)'}

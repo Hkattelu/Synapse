@@ -33,16 +33,16 @@ export function Inspector({ className = '' }: InspectorProps) {
         className={`inspector bg-background-secondary flex flex-col h-full max-h-[calc(100vh-12rem)] ${className}`}
       >
         <div className="p-4 border-b border-border-subtle flex-shrink-0">
-          <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
+          <h3 className="font-semibold text-sm text-gray-900 uppercase tracking-wide">
             Inspector
           </h3>
         </div>
         <div className="flex-1 p-4 min-h-0">
-          <div className="h-full flex items-center justify-center text-text-secondary">
+          <div className="h-full flex items-center justify-center text-gray-600">
             <div className="text-center">
-              <div className="w-12 h-12 bg-background-tertiary rounded-lg mx-auto mb-3 flex items-center justify-center">
+              <div className="w-12 h-12 bg-gray-100 rounded-lg mx-auto mb-3 flex items-center justify-center">
                 <svg
-                  className="w-6 h-6"
+                  className="w-6 h-6 text-gray-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -61,8 +61,8 @@ export function Inspector({ className = '' }: InspectorProps) {
                   />
                 </svg>
               </div>
-              <p className="font-medium text-text-primary">No Selection</p>
-              <p className="text-sm">Select a clip to edit properties</p>
+              <p className="font-medium text-gray-900">No Selection</p>
+              <p className="text-sm text-gray-600">Select a clip to edit properties</p>
             </div>
           </div>
         </div>
@@ -79,10 +79,10 @@ export function Inspector({ className = '' }: InspectorProps) {
     >
       {/* Header with clip info */}
       <div className="p-4 border-b border-border-subtle flex-shrink-0">
-        <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
+        <h3 className="font-semibold text-sm text-gray-900 uppercase tracking-wide">
           Inspector
         </h3>
-        <p className="text-xs text-text-tertiary mt-1">
+        <p className="text-xs text-gray-600 mt-1">
           {selectedTimelineItems.length} item
           {selectedTimelineItems.length !== 1 ? 's' : ''} selected
         </p>
@@ -98,8 +98,8 @@ export function Inspector({ className = '' }: InspectorProps) {
             onClick={() => setActiveTab('properties')}
             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === 'properties'
-                ? 'text-text-primary bg-background-secondary border-b-2 border-primary-500'
-                : 'text-text-secondary hover:text-text-primary hover:bg-background-secondary/50'
+                ? 'text-gray-900 bg-white border-b-2 border-purple-500'
+                : 'text-gray-700 hover:text-gray-900 hover:bg-white/50'
             }`}
           >
             <div className="flex items-center justify-center space-x-2">
@@ -115,8 +115,8 @@ export function Inspector({ className = '' }: InspectorProps) {
               onClick={() => setActiveTab('animation')}
               className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                 activeTab === 'animation'
-                  ? 'text-text-primary bg-background-secondary border-b-2 border-primary-500'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-background-secondary/50'
+                  ? 'text-gray-900 bg-white border-b-2 border-purple-500'
+                  : 'text-gray-700 hover:text-gray-900 hover:bg-white/50'
               }`}
             >
               <div className="flex items-center justify-center space-x-2">
@@ -132,8 +132,8 @@ export function Inspector({ className = '' }: InspectorProps) {
             onClick={() => setActiveTab('visual')}
             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === 'visual'
-                ? 'text-text-primary bg-background-secondary border-b-2 border-primary-500'
-                : 'text-text-secondary hover:text-text-primary hover:bg-background-secondary/50'
+                ? 'text-gray-900 bg-white border-b-2 border-purple-500'
+                : 'text-gray-700 hover:text-gray-900 hover:bg-white/50'
             }`}
           >
             <div className="flex items-center justify-center space-x-2">
@@ -305,16 +305,16 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
 
   return (
     <div className="p-4 border-b border-border-subtle">
-      <h4 className="font-medium text-text-primary mb-3">Clip Information</h4>
+      <h4 className="font-medium text-gray-900 mb-3">Clip Information</h4>
 
       <div className="space-y-3">
         <div className="flex items-center space-x-2">
-          <div className="text-text-secondary">{getTypeIcon(item.type)}</div>
+          <div className="text-gray-600">{getTypeIcon(item.type)}</div>
           <div>
-            <p className="text-sm font-medium text-text-primary">
+            <p className="text-sm font-medium text-gray-900">
               {asset?.name || 'Unknown Asset'}
             </p>
-            <p className="text-xs text-text-tertiary capitalize">
+            <p className="text-xs text-gray-600 capitalize">
               {item.type} clip
             </p>
           </div>
@@ -322,24 +322,24 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
 
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <p className="text-text-secondary">Duration</p>
-            <p className="text-text-primary font-mono">
+            <p className="text-gray-700 font-medium">Duration</p>
+            <p className="text-gray-900 font-mono">
               {formatDuration(item.duration)}
             </p>
           </div>
           <div>
-            <p className="text-text-secondary">Start Time</p>
-            <p className="text-text-primary font-mono">
+            <p className="text-gray-700 font-medium">Start Time</p>
+            <p className="text-gray-900 font-mono">
               {formatDuration(item.startTime)}
             </p>
           </div>
           <div>
-            <p className="text-text-secondary">Track</p>
-            <p className="text-text-primary">Track {item.track + 1}</p>
+            <p className="text-gray-700 font-medium">Track</p>
+            <p className="text-gray-900">Track {item.track + 1}</p>
           </div>
           <div>
-            <p className="text-text-secondary">End Time</p>
-            <p className="text-text-primary font-mono">
+            <p className="text-gray-700 font-medium">End Time</p>
+            <p className="text-gray-900 font-mono">
               {formatDuration(item.startTime + item.duration)}
             </p>
           </div>
@@ -347,8 +347,8 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
 
         {asset && (
           <div className="pt-2 border-t border-border-subtle">
-            <p className="text-xs text-text-tertiary mb-2">Source File</p>
-            <div className="text-xs text-text-secondary">
+            <p className="text-xs text-gray-700 font-medium mb-2">Source File</p>
+            <div className="text-xs text-gray-600">
               <p>
                 Size: {(asset.metadata.fileSize / 1024 / 1024).toFixed(1)} MB
               </p>
@@ -642,7 +642,7 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
       <div>
         <label
           htmlFor={inputId}
-          className="block text-sm font-medium text-text-secondary mb-1"
+          className="block text-sm font-medium text-gray-800 mb-1"
         >
           {label}
         </label>
@@ -652,7 +652,7 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
           onChange={handleChange}
           onPaste={handlePaste}
           rows={8}
-          className={`w-full bg-background-tertiary border rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500 ${error ? 'border-status-error' : 'border-border-subtle'}`}
+          className={`w-full bg-white border rounded px-3 py-2 text-gray-900 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 ${error ? 'border-red-500' : 'border-gray-300'}`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}
           style={{ fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace' }}
@@ -1255,7 +1255,7 @@ function NumberInput({
     <div>
       <label
         htmlFor={inputId}
-        className="block text-sm font-medium text-text-secondary mb-1"
+        className="block text-sm font-medium text-gray-800 mb-1"
       >
         {label}
       </label>
@@ -1269,14 +1269,14 @@ function NumberInput({
           min={min}
           max={max}
           step={step}
-          className={`w-full bg-background-tertiary border rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500 ${
-            error ? 'border-status-error' : 'border-border-subtle'
+          className={`w-full bg-white border rounded px-3 py-2 text-gray-900 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 ${
+            error ? 'border-red-500' : 'border-gray-300'
           }`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}
         />
         {suffix && (
-          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-tertiary text-sm">
+          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 text-sm">
             {suffix}
           </span>
         )}
@@ -1317,15 +1317,11 @@ function TextInput({
     onChange(e.target.value);
   };
 
-  const inputClasses = `w-full bg-background-tertiary border rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500 ${
-    error ? 'border-status-error' : 'border-border-subtle'
-  }`;
-
   return (
     <div>
       <label
         htmlFor={inputId}
-        className="block text-sm font-medium text-text-secondary mb-1"
+        className="block text-sm font-medium text-gray-800 mb-1"
       >
         {label}
       </label>
@@ -1335,7 +1331,9 @@ function TextInput({
           value={value}
           onChange={handleChange}
           rows={label === 'Code Content' ? 8 : 3}
-          className={inputClasses}
+          className={`w-full bg-white border rounded px-3 py-2 text-gray-900 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 ${
+            error ? 'border-red-500' : 'border-gray-300'
+          }`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}
           style={
@@ -1350,7 +1348,9 @@ function TextInput({
           type="text"
           value={value}
           onChange={handleChange}
-          className={inputClasses}
+          className={`w-full bg-white border rounded px-3 py-2 text-gray-900 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 ${
+            error ? 'border-red-500' : 'border-gray-300'
+          }`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}
         />
@@ -1389,7 +1389,7 @@ function SelectInput({
     <div>
       <label
         htmlFor={inputId}
-        className="block text-sm font-medium text-text-secondary mb-1"
+        className="block text-sm font-medium text-gray-800 mb-1"
       >
         {label}
       </label>
@@ -1397,8 +1397,8 @@ function SelectInput({
         id={inputId}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`w-full bg-background-tertiary border rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500 ${
-          error ? 'border-status-error' : 'border-border-subtle'
+        className={`w-full bg-white border rounded px-3 py-2 text-gray-900 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 ${
+          error ? 'border-red-500' : 'border-gray-300'
         }`}
         aria-invalid={error ? 'true' : 'false'}
         aria-describedby={error ? `${inputId}-error` : undefined}
@@ -1462,7 +1462,7 @@ function ColorInput({ label, value, onChange, error }: ColorInputProps) {
     <div>
       <label
         htmlFor={inputId}
-        className="block text-sm font-medium text-text-secondary mb-1"
+        className="block text-sm font-medium text-gray-800 mb-1"
       >
         {label}
       </label>
@@ -1472,7 +1472,7 @@ function ColorInput({ label, value, onChange, error }: ColorInputProps) {
           type="color"
           value={localValue.startsWith('#') ? localValue : '#ffffff'}
           onChange={handleColorChange}
-          className="w-12 h-10 bg-background-tertiary border border-border-subtle rounded cursor-pointer"
+          className="w-12 h-10 bg-white border border-gray-300 rounded cursor-pointer"
           aria-label={`${label} color picker`}
         />
         <input
@@ -1481,8 +1481,8 @@ function ColorInput({ label, value, onChange, error }: ColorInputProps) {
           value={localValue}
           onChange={handleTextChange}
           placeholder="#ffffff"
-          className={`flex-1 bg-background-tertiary border rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500 ${
-            error ? 'border-status-error' : 'border-border-subtle'
+          className={`flex-1 bg-white border rounded px-3 py-2 text-gray-900 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 ${
+            error ? 'border-red-500' : 'border-gray-300'
           }`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}

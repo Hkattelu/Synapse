@@ -10,12 +10,21 @@ export const UndoButton: React.FC<Props> = ({
   onClick,
   ...rest
 }) => {
-  const { undo, pastStates } = useProjectTemporal();
-  const canUndo = (pastStates?.length ?? 0) > 0;
+  let temporal;
+  let canUndo = false;
+  
+  try {
+    temporal = useProjectTemporal();
+    canUndo = (temporal?.pastStates?.length ?? 0) > 0;
+  } catch (error) {
+    console.warn('Failed to access temporal state in UndoButton:', error);
+    temporal = { undo: () => {}, pastStates: [] };
+  }
+
   return (
     <button
       type="button"
-      onClick={onClick ?? undo}
+      onClick={onClick ?? temporal?.undo ?? (() => {})}
       disabled={!canUndo}
       className={className}
       title={title ?? 'Undo (Ctrl/Cmd+Z)'}

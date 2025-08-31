@@ -5,6 +5,7 @@ import {
   useUI,
   usePlayback,
 } from '../state/hooks';
+import { useProjectStore } from '../state/projectStore';
 import type { TimelineItem, MediaAsset, Keyframe } from '../lib/types';
 import { KeyframeManager, createKeyframe } from '../lib/keyframes';
 
@@ -59,6 +60,17 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
 
   const [showKeyframes, setShowKeyframes] = useState(true);
   const [selectedKeyframes, setSelectedKeyframes] = useState<string[]>([]);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Track fullscreen state
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   // Calculate timeline dimensions
   const maxDuration = Math.max(timelineDuration, 60);
@@ -320,17 +332,35 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts when typing in inputs
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
       if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        
+        // Delete selected keyframes first, then selected clips
         if (selectedKeyframes.length > 0) {
-          e.preventDefault();
           deleteSelectedKeyframes();
+        } else if (selectedItems.length > 0) {
+          // Delete selected timeline items
+          selectedItems.forEach(itemId => {
+            const item = timeline.find(item => item.id === itemId);
+            if (item) {
+              // Remove from timeline using the project store
+              const { deleteClip } = useProjectStore.getState();
+              deleteClip(itemId);
+            }
+          });
+          clearTimelineSelection();
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [deleteSelectedKeyframes, selectedKeyframes]);
+  }, [deleteSelectedKeyframes, selectedKeyframes, selectedItems, timeline, clearTimelineSelection]);
 
   // Add global mouse event listeners
   useEffect(() => {
@@ -485,11 +515,11 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
           {Array.from({ length: Math.ceil(maxDuration) + 1 }).map((_, i) => (
             <div
               key={i}
-              className="absolute top-0 bottom-0 flex flex-col justify-between text-xs text-gray-400"
+              className="absolute top-0 bottom-0 flex flex-col justify-between text-xs text-gray-200 font-medium"
               style={{ left: `${timeToPixels(i)}px` }}
             >
               <div className="border-l border-gray-600 h-full" />
-              <div className="absolute -bottom-6 -left-4 w-8 text-center">
+              <div className="absolute -bottom-6 -left-4 w-8 text-center bg-gray-800 px-1 rounded">
                 {Math.floor(i / 60)}:{(i % 60).toString().padStart(2, '0')}
               </div>
             </div>
@@ -552,27 +582,29 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
                 height: `${TRACK_HEIGHT}px`,
               }}
             >
-              <div className="absolute left-2 top-2 text-xs text-gray-500">
+              <div className="absolute left-2 top-2 text-xs text-gray-200 font-medium bg-gray-800/80 px-2 py-1 rounded">
                 Track {trackIndex + 1}
               </div>
             </div>
           ))}
 
-          {/* Playhead */}
-          <div
-            className="absolute top-0 bottom-0 w-0.5 bg-red-500 pointer-events-none z-50"
-            style={{
-              left: `${timeToPixels(playback.currentTime)}px`,
-            }}
-          >
-            {/* Playhead Handle */}
-            <div className="absolute -top-2 -left-2 w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-lg pointer-events-auto cursor-pointer">
-              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                {Math.floor(playback.currentTime / 60)}:
-                {(playback.currentTime % 60).toFixed(1).padStart(4, '0')}
+          {/* Playhead - Hidden when fullscreen is active */}
+          {!isFullscreen && (
+            <div
+              className="absolute top-0 bottom-0 w-0.5 bg-red-500 pointer-events-none z-50"
+              style={{
+                left: `${timeToPixels(playback.currentTime)}px`,
+              }}
+            >
+              {/* Playhead Handle */}
+              <div className="absolute -top-2 -left-2 w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-lg pointer-events-auto cursor-pointer">
+                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                  {Math.floor(playback.currentTime / 60)}:
+                  {(playback.currentTime % 60).toFixed(1).padStart(4, '0')}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Timeline Items with Keyframes */}
           {timeline.map((item) => {
