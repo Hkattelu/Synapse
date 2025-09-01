@@ -5,7 +5,7 @@ export function compareVersions(a: string, b: string): number {
   const core = (v: string) => {
     const noV = v.replace(/^v/i, '');
     const dropBuild = noV.split('+', 1)[0];
-    // Drop hyphen only when it starts a prerelease label (letters), e.g., "1.2.3-alpha" → "1.2.3"
+    // Drop hyphen only when it starts a prerelease label (letters), e.g., "1.2.3-alpha" -> "1.2.3"
     return dropBuild.replace(/-[A-Za-z].*$/, '');
   };
   const toNums = (v: string) => {
