@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { backgroundManager, type WallpaperAsset } from '../../lib/backgrounds';
+import { backgroundManager } from '../../lib/backgrounds';
 
 interface WallpaperPickerProps {
   value?: string; // wallpaper ID
@@ -7,7 +7,11 @@ interface WallpaperPickerProps {
   className?: string;
 }
 
-export function WallpaperPicker({ value, onChange, className = '' }: WallpaperPickerProps) {
+export function WallpaperPicker({
+  value,
+  onChange,
+  className = '',
+}: WallpaperPickerProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isExpanded, setIsExpanded] = useState(false);
@@ -16,8 +20,11 @@ export function WallpaperPicker({ value, onChange, className = '' }: WallpaperPi
   // Get all wallpapers and categories
   const allWallpapers = useMemo(() => backgroundManager.getAllWallpapers(), []);
   const categories = useMemo(() => {
-    const cats = new Set(allWallpapers.map(w => w.category));
-    return Array.from(cats).map(cat => ({ id: cat, name: cat.charAt(0).toUpperCase() + cat.slice(1) }));
+    const cats = new Set(allWallpapers.map((w) => w.category));
+    return Array.from(cats).map((cat) => ({
+      id: cat,
+      name: cat.charAt(0).toUpperCase() + cat.slice(1),
+    }));
   }, [allWallpapers]);
 
   // Filter wallpapers based on search and category
@@ -26,15 +33,16 @@ export function WallpaperPicker({ value, onChange, className = '' }: WallpaperPi
 
     // Filter by category
     if (selectedCategory !== 'all') {
-      wallpapers = wallpapers.filter(w => w.category === selectedCategory);
+      wallpapers = wallpapers.filter((w) => w.category === selectedCategory);
     }
 
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      wallpapers = wallpapers.filter(w => 
-        w.name.toLowerCase().includes(query) ||
-        w.tags?.some(tag => tag.toLowerCase().includes(query))
+      wallpapers = wallpapers.filter(
+        (w) =>
+          w.name.toLowerCase().includes(query) ||
+          w.tags?.some((tag) => tag.toLowerCase().includes(query))
       );
     }
 
@@ -42,43 +50,51 @@ export function WallpaperPicker({ value, onChange, className = '' }: WallpaperPi
   }, [allWallpapers, selectedCategory, searchQuery]);
 
   // Get current wallpaper
-  const currentWallpaper = value ? backgroundManager.getWallpaperById(value) : null;
+  const currentWallpaper = value
+    ? backgroundManager.getWallpaperById(value)
+    : null;
 
   const handleWallpaperSelect = (wallpaperId: string | null) => {
     onChange(wallpaperId);
     setIsExpanded(false);
   };
 
-  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleFileUpload = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
-      return;
-    }
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
 
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      alert('File size must be less than 10MB');
-      return;
-    }
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size must be less than 10MB');
+        return;
+      }
 
-    setIsUploading(true);
-    try {
-      const wallpaper = await backgroundManager.addCustomWallpaper(file, 'custom');
-      onChange(wallpaper.id);
-      setIsExpanded(false);
-    } catch (error) {
-      console.error('Failed to upload wallpaper:', error);
-      alert('Failed to upload wallpaper. Please try again.');
-    } finally {
-      setIsUploading(false);
-      // Reset file input
-      event.target.value = '';
-    }
-  }, [onChange]);
+      setIsUploading(true);
+      try {
+        const wallpaper = await backgroundManager.addCustomWallpaper(
+          file,
+          'custom'
+        );
+        onChange(wallpaper.id);
+        setIsExpanded(false);
+      } catch (error) {
+        console.error('Failed to upload wallpaper:', error);
+        alert('Failed to upload wallpaper. Please try again.');
+      } finally {
+        setIsUploading(false);
+        // Reset file input
+        event.target.value = '';
+      }
+    },
+    [onChange]
+  );
 
   if (!isExpanded) {
     return (
@@ -94,8 +110,8 @@ export function WallpaperPicker({ value, onChange, className = '' }: WallpaperPi
             <div className="flex items-center space-x-2">
               {currentWallpaper ? (
                 <>
-                  <img 
-                    src={currentWallpaper.thumbnail} 
+                  <img
+                    src={currentWallpaper.thumbnail}
                     alt={currentWallpaper.name}
                     className="w-4 h-4 rounded object-cover border border-border-subtle"
                   />
@@ -111,8 +127,18 @@ export function WallpaperPicker({ value, onChange, className = '' }: WallpaperPi
                 </>
               )}
             </div>
-            <svg className="w-4 h-4 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg
+              className="w-4 h-4 text-text-secondary"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </div>
         </button>
@@ -130,8 +156,18 @@ export function WallpaperPicker({ value, onChange, className = '' }: WallpaperPi
           onClick={() => setIsExpanded(false)}
           className="text-text-secondary hover:text-text-primary p-1"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -145,7 +181,7 @@ export function WallpaperPicker({ value, onChange, className = '' }: WallpaperPi
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
         />
-        
+
         <div className="flex items-center space-x-2">
           <select
             value={selectedCategory}
@@ -153,13 +189,13 @@ export function WallpaperPicker({ value, onChange, className = '' }: WallpaperPi
             className="flex-1 bg-background-tertiary border border-border-subtle rounded px-2 py-1 text-text-primary text-xs focus:outline-none focus:border-primary-500"
           >
             <option value="all">All Categories</option>
-            {categories.map(category => (
+            {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}
               </option>
             ))}
           </select>
-          
+
           <label className="relative cursor-pointer">
             <input
               type="file"
@@ -168,11 +204,13 @@ export function WallpaperPicker({ value, onChange, className = '' }: WallpaperPi
               disabled={isUploading}
               className="sr-only"
             />
-            <span className={`px-2 py-1 text-xs rounded transition-colors border border-border-subtle ${
-              isUploading 
-                ? 'bg-background-secondary text-text-tertiary cursor-not-allowed' 
-                : 'bg-background-tertiary text-text-secondary hover:text-text-primary hover:border-primary-500'
-            }`}>
+            <span
+              className={`px-2 py-1 text-xs rounded transition-colors border border-border-subtle ${
+                isUploading
+                  ? 'bg-background-secondary text-text-tertiary cursor-not-allowed'
+                  : 'bg-background-tertiary text-text-secondary hover:text-text-primary hover:border-primary-500'
+              }`}
+            >
               {isUploading ? 'Uploading...' : '+ Upload'}
             </span>
           </label>
@@ -185,39 +223,51 @@ export function WallpaperPicker({ value, onChange, className = '' }: WallpaperPi
         <div
           onClick={() => handleWallpaperSelect(null)}
           className={`wallpaper-card cursor-pointer border rounded p-2 mb-2 transition-all hover:border-primary-500 ${
-            !value 
-              ? 'border-primary-500 bg-primary-500/10' 
+            !value
+              ? 'border-primary-500 bg-primary-500/10'
               : 'border-border-subtle hover:bg-background-tertiary'
           }`}
         >
           <div className="flex items-center space-x-2">
             <div className="w-12 h-8 rounded border border-border-subtle bg-background-secondary flex items-center justify-center">
-              <svg className="w-4 h-4 text-text-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-4 h-4 text-text-tertiary"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </div>
-            <span className="text-sm font-medium text-text-primary">No wallpaper</span>
+            <span className="text-sm font-medium text-text-primary">
+              No wallpaper
+            </span>
           </div>
         </div>
 
         {/* Wallpaper options */}
         <div className="grid grid-cols-1 gap-2">
-          {filteredWallpapers.map(wallpaper => {
+          {filteredWallpapers.map((wallpaper) => {
             const isSelected = wallpaper.id === value;
-            
+
             return (
               <div
                 key={wallpaper.id}
                 onClick={() => handleWallpaperSelect(wallpaper.id)}
                 className={`wallpaper-card cursor-pointer border rounded p-2 transition-all hover:border-primary-500 ${
-                  isSelected 
-                    ? 'border-primary-500 bg-primary-500/10' 
+                  isSelected
+                    ? 'border-primary-500 bg-primary-500/10'
                     : 'border-border-subtle hover:bg-background-tertiary'
                 }`}
               >
                 <div className="flex items-center space-x-2 mb-2">
-                  <img 
-                    src={wallpaper.thumbnail} 
+                  <img
+                    src={wallpaper.thumbnail}
                     alt={wallpaper.name}
                     className="w-12 h-8 rounded object-cover border border-border-subtle"
                     loading="lazy"
@@ -232,7 +282,8 @@ export function WallpaperPicker({ value, onChange, className = '' }: WallpaperPi
                       </span>
                     </div>
                     <div className="text-xs text-text-tertiary">
-                      {wallpaper.dimensions.width} × {wallpaper.dimensions.height}
+                      {wallpaper.dimensions.width} ×{' '}
+                      {wallpaper.dimensions.height}
                       {wallpaper.fileSize && (
                         <span className="ml-2">
                           {(wallpaper.fileSize / 1024 / 1024).toFixed(1)}MB
@@ -241,29 +292,38 @@ export function WallpaperPicker({ value, onChange, className = '' }: WallpaperPi
                     </div>
                   </div>
                 </div>
-                
-                {wallpaper.tags && wallpaper.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {wallpaper.tags.slice(0, 3).map(tag => (
-                      <span 
+
+                <div className="flex flex-wrap gap-1">
+                  {wallpaper.animated && (
+                    <span className="text-[10px] px-1 py-0.5 rounded bg-primary-500/10 text-primary-500 border border-primary-500/30">
+                      Animated
+                    </span>
+                  )}
+                  {wallpaper.format && (
+                    <span className="text-[10px] px-1 py-0.5 rounded bg-background-secondary text-text-tertiary border border-border-subtle">
+                      {wallpaper.format.toUpperCase()}
+                    </span>
+                  )}
+                  {wallpaper.tags &&
+                    wallpaper.tags.slice(0, 2).map((tag) => (
+                      <span
                         key={tag}
-                        className="text-xs px-1 py-0.5 bg-background-secondary text-text-tertiary rounded"
+                        className="text-[10px] px-1 py-0.5 bg-background-secondary text-text-tertiary rounded border border-border-subtle"
                       >
                         {tag}
                       </span>
                     ))}
-                    {wallpaper.tags.length > 3 && (
-                      <span className="text-xs text-text-tertiary">
-                        +{wallpaper.tags.length - 3} more
-                      </span>
-                    )}
-                  </div>
-                )}
+                  {wallpaper.tags && wallpaper.tags.length > 2 && (
+                    <span className="text-[10px] text-text-tertiary">
+                      +{wallpaper.tags.length - 2} more
+                    </span>
+                  )}
+                </div>
               </div>
             );
           })}
         </div>
-        
+
         {filteredWallpapers.length === 0 && (
           <div className="text-center py-4 text-text-secondary">
             <p className="text-sm">No wallpapers found</p>
