@@ -36,12 +36,30 @@ export const LicenseProvider: React.FC<{ children: React.ReactNode }> = ({
             setStatus(payload)
           );
         } else {
-          // Non-Electron/web fallback: treat as valid to avoid blocking web demo
-          setStatus({
-            state: 'valid',
-            message: 'web environment',
-            licenseMasked: null,
-          });
+          // Non-Electron/web fallback: gate behind an explicit flag or dev-only condition
+          const meta =
+            (import.meta as unknown as {
+              env?: Record<string, string | undefined>;
+            }) || undefined;
+          const allowWeb =
+            // Vite-style env flag for explicit opt-in
+            (typeof import.meta !== 'undefined' &&
+              meta.env?.VITE_ALLOW_WEB_NO_LICENSE === 'true') ||
+            // Common dev-only allowance when no flag is set
+            process.env.NODE_ENV !== 'production';
+
+          if (allowWeb) {
+            setStatus({
+              state: 'valid',
+              message: 'web environment',
+              licenseMasked: null,
+            });
+          } else {
+            setStatus({
+              state: 'unknown',
+              message: 'license unavailable in web build',
+            });
+          }
         }
       } catch (e) {
         setStatus({ state: 'unknown', message: String(e) });

@@ -1,15 +1,18 @@
 export function compareVersions(a: string, b: string): number {
-  // Ignore any pre-release ("-") and build metadata ("+") when comparing.
-  // Only compare the numeric core segments separated by dots, padding with zeros.
-  // Tolerate a leading "v" prefix and numeric prefixes within segments (e.g., "1.2.3beta" → 1.2.3).
-  const core = (v: string) => v.replace(/^v/i, '').split(/[+-]/, 1)[0];
-  const toNums = (v: string) =>
-    core(v)
-      .split('.')
-      .map((p) => {
-        const m = p.match(/^\d+/);
-        return m ? Number(m[0]) : 0;
-      });
+  // Ignore build metadata ("+") and only strip a hyphen when it begins a prerelease label (letters).
+  // Preserve numeric hyphenated cores like date-style versions (e.g., "2024-09-01").
+  // Compare only the numeric dot segments, padding with zeros; tolerate a leading "v" and numeric prefixes in segments.
+  const core = (v: string) => {
+    const noV = v.replace(/^v/i, '');
+    const dropBuild = noV.split('+', 1)[0];
+    // Drop hyphen only when it starts a prerelease label (letters), e.g., "1.2.3-alpha" → "1.2.3"
+    return dropBuild.replace(/-[A-Za-z].*$/, '');
+  };
+  const toNums = (v: string) => {
+    const c = core(v);
+    const parts = c.match(/\d+/g) || [];
+    return parts.map(Number);
+  };
   const pa = toNums(a);
   const pb = toNums(b);
   const len = Math.max(pa.length, pb.length);
@@ -59,11 +62,11 @@ export function parseUpdatePayload(
         name: String(a?.name || ''),
         url: a.browser_download_url as string,
       }));
+    const platLC = platKey.toLowerCase();
+    const basePlat = platLC.split('-')[0];
     const prefer =
-      candidates.find((c) => c.name.includes(platKey)) ||
-      candidates.find((c) =>
-        c.name.toLowerCase().includes(platKey.split('-')[0])
-      );
+      candidates.find((c) => c.name.toLowerCase().includes(platLC)) ||
+      candidates.find((c) => c.name.toLowerCase().includes(basePlat));
     url = prefer?.url;
   }
   return { latestVersion: latest, downloadUrl: url };

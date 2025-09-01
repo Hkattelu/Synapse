@@ -42,8 +42,8 @@ const SynapseLicense = Object.freeze({
       if (
         payload &&
         typeof payload === 'object' &&
-        // minimal shape check to avoid forwarding arbitrary data
-        'state' in (payload as Record<string, unknown>)
+        'state' in (payload as Record<string, unknown>) &&
+        typeof (payload as Record<string, unknown>).state === 'string'
       ) {
         handler(payload as PreloadLicenseStatus);
       }
@@ -64,8 +64,9 @@ const SynapseUpdates = Object.freeze({
       if (
         payload &&
         typeof payload === 'object' &&
-        // minimal shape check: presence of updateAvailable boolean-like field
-        'updateAvailable' in (payload as Record<string, unknown>)
+        'updateAvailable' in (payload as Record<string, unknown>) &&
+        typeof (payload as Record<string, unknown>).updateAvailable ===
+          'boolean'
       ) {
         handler(payload as PreloadUpdateStatus);
       }

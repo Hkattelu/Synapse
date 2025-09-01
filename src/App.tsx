@@ -87,8 +87,8 @@ function App() {
             <ErrorBoundary>
               <HistoryProvider>
                 <GlobalShortcutsAndBridge />
-                <UpdateBanner />
                 <Router>
+                  <UpdateBanner />
                   <Routes>
                     <Route path="/" element={<Landing />} />
                     <Route path="/projects" element={<DashboardView />} />

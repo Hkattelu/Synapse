@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { UpdateStatus } from '../types/preload';
 
 export const UpdateBanner: React.FC = () => {
@@ -45,25 +46,33 @@ export const UpdateBanner: React.FC = () => {
         A new version {status?.latestVersion} is available (you have{' '}
         {status?.currentVersion}).
       </span>
-      <a
-        className="px-3 py-1 rounded bg-amber-600 text-white hover:bg-amber-700"
-        href={href}
-        {...(isExternal
-          ? { target: '_blank', rel: 'noopener noreferrer' }
-          : {})}
-        onClick={(e) => {
-          if (isExternal && window.SynapseUpdates && downloadUrl) {
-            e.preventDefault();
-            try {
-              void window.SynapseUpdates.openDownload(downloadUrl);
-            } catch {
-              window.open(downloadUrl, '_blank', 'noopener');
+      {isExternal ? (
+        <a
+          className="px-3 py-1 rounded bg-amber-600 text-white hover:bg-amber-700"
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => {
+            if (window.SynapseUpdates && downloadUrl) {
+              e.preventDefault();
+              try {
+                void window.SynapseUpdates.openDownload(downloadUrl);
+              } catch {
+                window.open(downloadUrl, '_blank', 'noopener');
+              }
             }
-          }
-        }}
-      >
-        Get Update
-      </a>
+          }}
+        >
+          Get Update
+        </a>
+      ) : (
+        <Link
+          className="px-3 py-1 rounded bg-amber-600 text-white hover:bg-amber-700"
+          to={href}
+        >
+          Get Update
+        </Link>
+      )}
       <button
         className="text-amber-900/80 underline-offset-2 hover:underline disabled:opacity-60"
         disabled={checking}
