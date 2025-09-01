@@ -65,6 +65,11 @@ Security posture:
 - External links open in the system browser, and in‑window navigations to http/https are blocked.
 - Remote dev URLs are used only in development (`!app.isPackaged`); packaged apps load local files.
 
+License & updates (desktop only):
+
+- Configure endpoints via environment variables. See [docs/electron/licenses-and-updates.md](docs/electron/licenses-and-updates.md).
+- The app shows a license entry modal on first launch. Updates are checked at startup and via Help → Check for Updates…
+
 ## Requirements
 
 This project addresses the following key requirements:

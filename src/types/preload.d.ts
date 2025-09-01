@@ -19,9 +19,45 @@ export type SynapseFSApi = {
   getAppPath: () => Promise<string>;
 };
 
+export type LicenseStatus = {
+  state: 'valid' | 'invalid' | 'expired' | 'unknown';
+  message?: string;
+  lastChecked?: number;
+  expiresAt?: string;
+  user?: { email?: string; name?: string; plan?: string };
+  licenseMasked?: string | null;
+};
+
+export type UpdateStatus = {
+  currentVersion: string;
+  latestVersion?: string;
+  updateAvailable: boolean;
+  downloadUrl?: string;
+  platform?: string;
+  message?: string;
+  lastChecked?: number;
+};
+
+export type SynapseLicenseApi = {
+  getStatus: () => Promise<LicenseStatus>;
+  set: (license: string) => Promise<LicenseStatus>;
+  validateNow: () => Promise<LicenseStatus>;
+  clear: () => Promise<LicenseStatus>;
+  onStatus: (handler: (status: LicenseStatus) => void) => () => void;
+};
+
+export type SynapseUpdatesApi = {
+  checkNow: () => Promise<UpdateStatus>;
+  getLast: () => Promise<UpdateStatus>;
+  openDownload: (url?: string) => Promise<true>;
+  onStatus: (handler: (status: UpdateStatus) => void) => () => void;
+};
+
 declare global {
   interface Window {
     readonly SynapseFS: Readonly<SynapseFSApi>;
+    readonly SynapseLicense?: Readonly<SynapseLicenseApi>;
+    readonly SynapseUpdates?: Readonly<SynapseUpdatesApi>;
   }
 }
 
