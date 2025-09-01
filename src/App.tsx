@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { AppProvider } from './state/context';
 import { AuthProvider } from './state/authContext';
 import { DashboardView } from './components/DashboardView';
@@ -12,31 +12,12 @@ import Landing from './components/Landing';
 import DownloadsPage from './components/DownloadsPage';
 import './App.css';
 import { useProjectStore } from './state/projectStore';
-import { useAppContext } from './state/context';
+import { LicenseProvider } from './state/license';
+import { UpdateBanner } from './components/UpdateBanner';
+import { LicenseGate } from './components/LicenseGate';
 
 function GlobalShortcutsAndBridge() {
-  const { dispatch } = useAppContext();
-  
-  // Use a safer approach to access the store
-  const [timeline, setTimeline] = useState<any[]>([]);
-  const [mediaAssets, setMediaAssets] = useState<any[]>([]);
-  
-  // Subscribe to store changes after component mounts
-  useEffect(() => {
-    try {
-      if (useProjectStore?.subscribe) {
-        const unsubscribe = useProjectStore.subscribe(
-          (state: any) => {
-            setTimeline(state.timeline || []);
-            setMediaAssets(state.mediaAssets || []);
-          }
-        );
-        return unsubscribe;
-      }
-    } catch (error) {
-      console.warn('Failed to subscribe to project store:', error);
-    }
-  }, []);
+  // Bridge removed; direct reducer usage everywhere else
 
   // Global keyboard shortcuts for undo/redo wired to Zustand temporal store
   useEffect(() => {
@@ -74,7 +55,7 @@ function GlobalShortcutsAndBridge() {
         if (useProjectStore && typeof useProjectStore.temporal === 'function') {
           const temporal = useProjectStore.temporal();
           if (!temporal) return;
-        
+
           if (key === 'z') {
             event.preventDefault();
             if (event.shiftKey) temporal.redo?.();
@@ -101,22 +82,26 @@ function App() {
   return (
     <AuthProvider>
       <AppProvider>
-        <NotificationsProvider>
-          <ErrorBoundary>
-            <HistoryProvider>
-              <GlobalShortcutsAndBridge />
-              <Router>
-                <Routes>
-                  <Route path="/" element={<Landing />} />
-                  <Route path="/projects" element={<DashboardView />} />
-                  <Route path="/studio" element={<StudioView />} />
-                  <Route path="/downloads" element={<DownloadsPage />} />
-                </Routes>
-              </Router>
-              <LoadingOverlay />
-            </HistoryProvider>
-          </ErrorBoundary>
-        </NotificationsProvider>
+        <LicenseProvider>
+          <NotificationsProvider>
+            <ErrorBoundary>
+              <HistoryProvider>
+                <GlobalShortcutsAndBridge />
+                <UpdateBanner />
+                <Router>
+                  <Routes>
+                    <Route path="/" element={<Landing />} />
+                    <Route path="/projects" element={<DashboardView />} />
+                    <Route path="/studio" element={<StudioView />} />
+                    <Route path="/downloads" element={<DownloadsPage />} />
+                  </Routes>
+                </Router>
+                <LoadingOverlay />
+                <LicenseGate />
+              </HistoryProvider>
+            </ErrorBoundary>
+          </NotificationsProvider>
+        </LicenseProvider>
       </AppProvider>
     </AuthProvider>
   );
