@@ -17,7 +17,7 @@ import { UpdateBanner } from './components/UpdateBanner';
 import { LicenseGate } from './components/LicenseGate';
 
 function GlobalShortcutsAndBridge() {
-  // Bridge removed; direct reducer usage everywhere else
+  // Global shortcuts only; no store subscription needed here
 
   // Global keyboard shortcuts for undo/redo wired to Zustand temporal store
   useEffect(() => {
@@ -73,7 +73,7 @@ function GlobalShortcutsAndBridge() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
-  // Bridge logic removed - using reducer directly for now
+  // Component renders nothing; attaches global keyboard handlers above
 
   return null;
 }
