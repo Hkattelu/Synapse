@@ -21,8 +21,8 @@ export const BackgroundRenderer: React.FC<BackgroundRendererProps> = ({
   const { fps } = useVideoConfig();
   const frame = useCurrentFrame();
 
-  // Determine whether to reduce/disable motion
-  const reduceMotion = useMemo(() => {
+  // Determine whether to reduce/disable motion (re-evaluated each render)
+  const reduceMotion = (() => {
     try {
       // Explicit app preference wins, falling back to system
       const pref = visualSettingsManager.getReduceMotion?.();
@@ -38,7 +38,7 @@ export const BackgroundRenderer: React.FC<BackgroundRendererProps> = ({
       }
     }
     return false;
-  }, []);
+  })();
 
   const backgroundStyle = useMemo(() => {
     if (!config || config.type === 'none') {
