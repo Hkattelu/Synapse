@@ -1,4 +1,6 @@
 import type { LicenseStatus } from '../types/preload';
+export type { LicenseStatus } from '../types/preload';
+export type LicenseState = LicenseStatus['state'];
 
 export function mapLicenseResponse(input: unknown): LicenseStatus {
   try {
