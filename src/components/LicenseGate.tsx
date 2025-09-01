@@ -44,7 +44,14 @@ export const LicenseGate: React.FC = () => {
           {status?.message && (
             <div className="text-xs text-red-600">{status.message}</div>
           )}
+          <label
+            htmlFor="license-key"
+            className="block text-xs font-medium text-gray-700"
+          >
+            License key
+          </label>
           <input
+            id="license-key"
             className="w-full p-2 border border-gray-300 rounded text-sm"
             placeholder="Paste your license key…"
             value={input}
