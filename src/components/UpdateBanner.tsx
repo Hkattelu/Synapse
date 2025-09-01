@@ -40,20 +40,33 @@ export const UpdateBanner: React.FC = () => {
         A new version {status!.latestVersion} is available (you have{' '}
         {status!.currentVersion}).
       </span>
-      <a
-        className="px-3 py-1 rounded bg-amber-600 text-white hover:bg-amber-700"
-        href={status!.downloadUrl || '/downloads'}
-        target="_blank"
-        rel="noreferrer"
-        onClick={(e) => {
-          if (window.SynapseUpdates && status!.downloadUrl) {
-            e.preventDefault();
-            void window.SynapseUpdates.openDownload(status!.downloadUrl);
-          }
-        }}
-      >
-        Get Update
-      </a>
+      {(() => {
+        const url = status!.downloadUrl;
+        const isExternal = typeof url === 'string' && /^https?:\/\//i.test(url);
+        const href = typeof url === 'string' ? url : '/downloads';
+        const anchorProps = isExternal
+          ? { target: '_blank' as const, rel: 'noopener noreferrer' as const }
+          : {};
+        return (
+          <a
+            className="px-3 py-1 rounded bg-amber-600 text-white hover:bg-amber-700"
+            href={href}
+            {...anchorProps}
+            onClick={(e) => {
+              if (isExternal && window.SynapseUpdates && url) {
+                e.preventDefault();
+                try {
+                  void window.SynapseUpdates.openDownload(url);
+                } catch {
+                  window.open(url, '_blank', 'noopener');
+                }
+              }
+            }}
+          >
+            Get Update
+          </a>
+        );
+      })()}
       <button
         className="text-amber-900/80 underline-offset-2 hover:underline disabled:opacity-60"
         disabled={checking}
