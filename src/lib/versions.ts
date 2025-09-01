@@ -1,16 +1,22 @@
 export function compareVersions(a: string, b: string): number {
-  const pa = a
-    .split(/[.-]/)
-    .map((p) => parseInt(p.replace(/\D+/g, ''), 10) || 0);
-  const pb = b
-    .split(/[.-]/)
-    .map((p) => parseInt(p.replace(/\D+/g, ''), 10) || 0);
+  // Ignore any pre-release ("-") and build metadata ("+") when comparing.
+  // Only compare the numeric core segments separated by dots, padding with zeros.
+  // Tolerate a leading "v" prefix and numeric prefixes within segments (e.g., "1.2.3beta" → 1.2.3).
+  const core = (v: string) => v.replace(/^v/i, '').split(/[+-]/, 1)[0];
+  const toNums = (v: string) =>
+    core(v)
+      .split('.')
+      .map((p) => {
+        const m = p.match(/^\d+/);
+        return m ? Number(m[0]) : 0;
+      });
+  const pa = toNums(a);
+  const pb = toNums(b);
   const len = Math.max(pa.length, pb.length);
   for (let i = 0; i < len; i++) {
     const na = pa[i] ?? 0;
     const nb = pb[i] ?? 0;
-    if (na > nb) return 1;
-    if (na < nb) return -1;
+    if (na !== nb) return na > nb ? 1 : -1;
   }
   return 0;
 }
