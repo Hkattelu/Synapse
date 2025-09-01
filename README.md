@@ -76,3 +76,7 @@ This project addresses the following key requirements:
 - Animated code snippet integration
 - Animation presets and effects
 - Responsive design and performance optimization
+
+### Backgrounds & Themes
+
+See docs/BACKGROUNDS.md for details on code themes, wallpapers (including subtle animated GIFs), and the Reduce Motion toggle.

@@ -13,7 +13,7 @@ const abstractWallpapers: WallpaperAsset[] = [
     category: 'abstract',
     format: 'jpg',
     tags: ['gradient', 'purple', 'smooth'],
-    license: 'CC0'
+    license: 'CC0',
   },
   {
     id: 'abstract-gradient-2',
@@ -24,7 +24,7 @@ const abstractWallpapers: WallpaperAsset[] = [
     category: 'abstract',
     format: 'jpg',
     tags: ['wave', 'blue', 'flowing'],
-    license: 'CC0'
+    license: 'CC0',
   },
   {
     id: 'abstract-geometric-1',
@@ -35,8 +35,21 @@ const abstractWallpapers: WallpaperAsset[] = [
     category: 'abstract',
     format: 'svg',
     tags: ['geometric', 'shapes', 'modern'],
-    license: 'CC0'
-  }
+    license: 'CC0',
+  },
+  {
+    id: 'abstract-shimmer-1',
+    name: 'Shimmer Gradient (Subtle)',
+    url: '/wallpapers/abstract/shimmer-gradient.gif',
+    stillUrl: '/wallpapers/abstract/shimmer-gradient-still.jpg',
+    thumbnail: '/wallpapers/abstract/thumbs/shimmer-gradient-thumb.jpg',
+    dimensions: { width: 1920, height: 1080 },
+    category: 'abstract',
+    format: 'gif',
+    animated: true,
+    tags: ['animated', 'gradient', 'subtle'],
+    license: 'CC0',
+  },
 ];
 
 // Built-in tech wallpapers
@@ -50,7 +63,7 @@ const techWallpapers: WallpaperAsset[] = [
     category: 'tech',
     format: 'jpg',
     tags: ['circuit', 'technology', 'dark'],
-    license: 'CC0'
+    license: 'CC0',
   },
   {
     id: 'tech-code-1',
@@ -61,7 +74,7 @@ const techWallpapers: WallpaperAsset[] = [
     category: 'tech',
     format: 'jpg',
     tags: ['code', 'matrix', 'programming'],
-    license: 'CC0'
+    license: 'CC0',
   },
   {
     id: 'tech-binary-1',
@@ -72,8 +85,8 @@ const techWallpapers: WallpaperAsset[] = [
     category: 'tech',
     format: 'jpg',
     tags: ['binary', 'flow', 'data'],
-    license: 'CC0'
-  }
+    license: 'CC0',
+  },
 ];
 
 // Built-in minimal wallpapers
@@ -87,7 +100,7 @@ const minimalWallpapers: WallpaperAsset[] = [
     category: 'minimal',
     format: 'jpg',
     tags: ['white', 'clean', 'simple'],
-    license: 'CC0'
+    license: 'CC0',
   },
   {
     id: 'minimal-solid-2',
@@ -98,7 +111,7 @@ const minimalWallpapers: WallpaperAsset[] = [
     category: 'minimal',
     format: 'jpg',
     tags: ['gray', 'soft', 'neutral'],
-    license: 'CC0'
+    license: 'CC0',
   },
   {
     id: 'minimal-texture-1',
@@ -109,8 +122,21 @@ const minimalWallpapers: WallpaperAsset[] = [
     category: 'minimal',
     format: 'jpg',
     tags: ['paper', 'texture', 'subtle'],
-    license: 'CC0'
-  }
+    license: 'CC0',
+  },
+  {
+    id: 'minimal-noise-flow-1',
+    name: 'Gentle Noise Flow',
+    url: '/wallpapers/minimal/noise-flow.gif',
+    stillUrl: '/wallpapers/minimal/noise-flow-still.jpg',
+    thumbnail: '/wallpapers/minimal/thumbs/noise-flow-thumb.jpg',
+    dimensions: { width: 1920, height: 1080 },
+    category: 'minimal',
+    format: 'gif',
+    animated: true,
+    tags: ['animated', 'noise', 'subtle'],
+    license: 'CC0',
+  },
 ];
 
 // Built-in nature wallpapers
@@ -124,7 +150,7 @@ const natureWallpapers: WallpaperAsset[] = [
     category: 'nature',
     format: 'jpg',
     tags: ['forest', 'path', 'green'],
-    license: 'CC0'
+    license: 'CC0',
   },
   {
     id: 'nature-mountain-1',
@@ -135,7 +161,7 @@ const natureWallpapers: WallpaperAsset[] = [
     category: 'nature',
     format: 'jpg',
     tags: ['mountain', 'vista', 'landscape'],
-    license: 'CC0'
+    license: 'CC0',
   },
   {
     id: 'nature-ocean-1',
@@ -146,8 +172,8 @@ const natureWallpapers: WallpaperAsset[] = [
     category: 'nature',
     format: 'jpg',
     tags: ['ocean', 'waves', 'blue'],
-    license: 'CC0'
-  }
+    license: 'CC0',
+  },
 ];
 
 // Built-in wallpaper collections
@@ -157,44 +183,46 @@ export const builtInCollections: WallpaperCollection[] = [
     name: 'Abstract',
     description: 'Modern abstract designs and gradients',
     wallpapers: abstractWallpapers,
-    category: 'abstract'
+    category: 'abstract',
   },
   {
     id: 'tech',
     name: 'Technology',
     description: 'Tech-themed backgrounds for coding content',
     wallpapers: techWallpapers,
-    category: 'tech'
+    category: 'tech',
   },
   {
     id: 'minimal',
     name: 'Minimal',
     description: 'Clean and simple backgrounds',
     wallpapers: minimalWallpapers,
-    category: 'minimal'
+    category: 'minimal',
   },
   {
     id: 'nature',
     name: 'Nature',
     description: 'Beautiful natural landscapes',
     wallpapers: natureWallpapers,
-    category: 'nature'
-  }
+    category: 'nature',
+  },
 ];
 
 // Get all built-in wallpapers as a flat array
 export const getAllBuiltInWallpapers = (): WallpaperAsset[] => {
-  return builtInCollections.flatMap(collection => collection.wallpapers);
+  return builtInCollections.flatMap((collection) => collection.wallpapers);
 };
 
 // Get wallpapers by category
-export const getWallpapersByCategory = (category: WallpaperAsset['category']): WallpaperAsset[] => {
-  const collection = builtInCollections.find(c => c.category === category);
+export const getWallpapersByCategory = (
+  category: WallpaperAsset['category']
+): WallpaperAsset[] => {
+  const collection = builtInCollections.find((c) => c.category === category);
   return collection ? collection.wallpapers : [];
 };
 
 // Get wallpaper by ID
 export const getWallpaperById = (id: string): WallpaperAsset | null => {
   const allWallpapers = getAllBuiltInWallpapers();
-  return allWallpapers.find(w => w.id === id) || null;
+  return allWallpapers.find((w) => w.id === id) || null;
 };

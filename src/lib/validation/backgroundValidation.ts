@@ -2,7 +2,10 @@
 
 import type { BackgroundConfig, GradientConfig } from '../types';
 import type { WallpaperAsset } from '../backgrounds/types';
-import { validateAnyColor, type ColorValidationResult } from './colorValidation';
+import {
+  validateAnyColor,
+  type ColorValidationResult,
+} from './colorValidation';
 
 export interface BackgroundValidationResult {
   isValid: boolean;
@@ -32,7 +35,9 @@ export interface GradientValidationResult {
 /**
  * Validates a background configuration
  */
-export function validateBackground(config: BackgroundConfig): BackgroundValidationResult {
+export function validateBackground(
+  config: BackgroundConfig
+): BackgroundValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
   const colorValidation: Record<string, ColorValidationResult> = {};
@@ -43,8 +48,13 @@ export function validateBackground(config: BackgroundConfig): BackgroundValidati
   }
 
   // Validate type
-  if (!config.type || !['none', 'color', 'gradient', 'wallpaper'].includes(config.type)) {
-    errors.push('Background type must be "none", "color", "gradient", or "wallpaper"');
+  if (
+    !config.type ||
+    !['none', 'color', 'gradient', 'wallpaper'].includes(config.type)
+  ) {
+    errors.push(
+      'Background type must be "none", "color", "gradient", or "wallpaper"'
+    );
   }
 
   // Type-specific validation
@@ -95,14 +105,16 @@ export function validateBackground(config: BackgroundConfig): BackgroundValidati
     isValid: errors.length === 0,
     errors,
     warnings,
-    colorValidation
+    colorValidation,
   };
 }
 
 /**
  * Validates a gradient configuration
  */
-export function validateGradient(config: GradientConfig): GradientValidationResult {
+export function validateGradient(
+  config: GradientConfig
+): GradientValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
   const colorValidation: Record<string, ColorValidationResult> = {};
@@ -139,7 +151,9 @@ export function validateGradient(config: GradientConfig): GradientValidationResu
         const validation = validateAnyColor(colorStop.color);
         colorValidation[`color-${index}`] = validation;
         if (!validation.isValid) {
-          errors.push(`Color stop ${index} has invalid color: ${validation.error}`);
+          errors.push(
+            `Color stop ${index} has invalid color: ${validation.error}`
+          );
         }
       }
 
@@ -147,13 +161,15 @@ export function validateGradient(config: GradientConfig): GradientValidationResu
       if (typeof colorStop.position !== 'number') {
         errors.push(`Color stop ${index} is missing position value`);
       } else if (colorStop.position < 0 || colorStop.position > 1) {
-        errors.push(`Color stop ${index} position must be between 0 and 1, got ${colorStop.position}`);
+        errors.push(
+          `Color stop ${index} position must be between 0 and 1, got ${colorStop.position}`
+        );
       }
     });
 
     // Check for duplicate positions
     if (config.colors.length > 1) {
-      const positions = config.colors.map(c => c.position);
+      const positions = config.colors.map((c) => c.position);
       const uniquePositions = new Set(positions);
       if (positions.length !== uniquePositions.size) {
         warnings.push('Multiple color stops have the same position');
@@ -173,7 +189,9 @@ export function validateGradient(config: GradientConfig): GradientValidationResu
       if (typeof config.angle !== 'number') {
         errors.push('Linear gradient angle must be a number');
       } else if (config.angle < 0 || config.angle >= 360) {
-        warnings.push('Linear gradient angle should be between 0 and 359 degrees');
+        warnings.push(
+          'Linear gradient angle should be between 0 and 359 degrees'
+        );
       }
     }
   } else if (config.type === 'radial') {
@@ -198,14 +216,16 @@ export function validateGradient(config: GradientConfig): GradientValidationResu
     isValid: errors.length === 0,
     errors,
     warnings,
-    colorValidation
+    colorValidation,
   };
 }
 
 /**
  * Validates wallpaper configuration
  */
-function validateWallpaperConfig(config: BackgroundConfig['wallpaper']): BackgroundValidationResult {
+function validateWallpaperConfig(
+  config: BackgroundConfig['wallpaper']
+): BackgroundValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -227,27 +247,34 @@ function validateWallpaperConfig(config: BackgroundConfig['wallpaper']): Backgro
   }
 
   // Validate blend mode
-  if (!config.blendMode || !['normal', 'multiply', 'overlay', 'soft-light'].includes(config.blendMode)) {
-    errors.push('Wallpaper blend mode must be "normal", "multiply", "overlay", or "soft-light"');
+  if (
+    !config.blendMode ||
+    !['normal', 'multiply', 'overlay', 'soft-light'].includes(config.blendMode)
+  ) {
+    errors.push(
+      'Wallpaper blend mode must be "normal", "multiply", "overlay", or "soft-light"'
+    );
   }
 
   return {
     isValid: errors.length === 0,
     errors,
-    warnings
+    warnings,
   };
 }
 
 /**
  * Validates a wallpaper asset
  */
-export function validateWallpaperAsset(asset: WallpaperAsset): WallpaperValidationResult {
+export function validateWallpaperAsset(
+  asset: WallpaperAsset
+): WallpaperValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
   const fileValidation = {
     format: true,
     size: true,
-    dimensions: true
+    dimensions: true,
   };
 
   if (!asset) {
@@ -287,29 +314,46 @@ export function validateWallpaperAsset(asset: WallpaperAsset): WallpaperValidati
     errors.push('Wallpaper asset dimensions are required');
     fileValidation.dimensions = false;
   } else {
-    if (typeof asset.dimensions.width !== 'number' || asset.dimensions.width <= 0) {
+    if (
+      typeof asset.dimensions.width !== 'number' ||
+      asset.dimensions.width <= 0
+    ) {
       errors.push('Wallpaper asset width must be a positive number');
       fileValidation.dimensions = false;
     }
 
-    if (typeof asset.dimensions.height !== 'number' || asset.dimensions.height <= 0) {
+    if (
+      typeof asset.dimensions.height !== 'number' ||
+      asset.dimensions.height <= 0
+    ) {
       errors.push('Wallpaper asset height must be a positive number');
       fileValidation.dimensions = false;
     }
 
     // Check for reasonable dimensions
     if (asset.dimensions.width > 8192 || asset.dimensions.height > 8192) {
-      warnings.push('Wallpaper dimensions are very large and may cause performance issues');
+      warnings.push(
+        'Wallpaper dimensions are very large and may cause performance issues'
+      );
     }
 
     if (asset.dimensions.width < 100 || asset.dimensions.height < 100) {
-      warnings.push('Wallpaper dimensions are very small and may appear pixelated');
+      warnings.push(
+        'Wallpaper dimensions are very small and may appear pixelated'
+      );
     }
   }
 
   // Validate category
-  if (!asset.category || !['abstract', 'nature', 'tech', 'minimal', 'custom'].includes(asset.category)) {
-    errors.push('Wallpaper asset category must be "abstract", "nature", "tech", "minimal", or "custom"');
+  if (
+    !asset.category ||
+    !['abstract', 'nature', 'tech', 'minimal', 'custom'].includes(
+      asset.category
+    )
+  ) {
+    errors.push(
+      'Wallpaper asset category must be "abstract", "nature", "tech", "minimal", or "custom"'
+    );
   }
 
   // Validate optional fields
@@ -320,14 +364,18 @@ export function validateWallpaperAsset(asset: WallpaperAsset): WallpaperValidati
     } else {
       // Check for reasonable file sizes (warn if > 10MB)
       if (asset.fileSize > 10 * 1024 * 1024) {
-        warnings.push('Wallpaper file size is very large and may cause performance issues');
+        warnings.push(
+          'Wallpaper file size is very large and may cause performance issues'
+        );
       }
     }
   }
 
   if (asset.format !== undefined) {
-    if (!['jpg', 'png', 'svg', 'webp'].includes(asset.format)) {
-      errors.push('Wallpaper asset format must be "jpg", "png", "svg", or "webp"');
+    if (!['jpg', 'png', 'svg', 'webp', 'gif'].includes(asset.format)) {
+      errors.push(
+        'Wallpaper asset format must be "jpg", "png", "svg", "webp", or "gif"'
+      );
       fileValidation.format = false;
     }
   }
@@ -338,7 +386,9 @@ export function validateWallpaperAsset(asset: WallpaperAsset): WallpaperValidati
     } else {
       asset.tags.forEach((tag, index) => {
         if (typeof tag !== 'string') {
-          warnings.push(`Wallpaper asset tag at index ${index} should be a string`);
+          warnings.push(
+            `Wallpaper asset tag at index ${index} should be a string`
+          );
         }
       });
     }
@@ -356,7 +406,7 @@ export function validateWallpaperAsset(asset: WallpaperAsset): WallpaperValidati
     isValid: errors.length === 0,
     errors,
     warnings,
-    fileValidation
+    fileValidation,
   };
 }
 
@@ -374,21 +424,33 @@ export function validateImageFile(file: File): {
   const warnings: string[] = [];
 
   // Validate file type
-  const supportedTypes = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp'];
+  const supportedTypes = [
+    'image/jpeg',
+    'image/png',
+    'image/svg+xml',
+    'image/webp',
+    'image/gif',
+  ];
   if (!supportedTypes.includes(file.type)) {
-    errors.push(`Unsupported image format: ${file.type}. Supported formats: JPEG, PNG, SVG, WebP`);
+    errors.push(
+      `Unsupported image format: ${file.type}. Supported formats: JPEG, PNG, SVG, WebP, GIF`
+    );
   }
 
   // Validate file size (max 50MB)
   const maxSize = 50 * 1024 * 1024; // 50MB
   if (file.size > maxSize) {
-    errors.push(`File size too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum allowed: 50MB`);
+    errors.push(
+      `File size too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum allowed: 50MB`
+    );
   }
 
   // Warn about large files
   const warningSize = 10 * 1024 * 1024; // 10MB
   if (file.size > warningSize) {
-    warnings.push(`Large file size: ${(file.size / 1024 / 1024).toFixed(2)}MB. Consider optimizing for better performance`);
+    warnings.push(
+      `Large file size: ${(file.size / 1024 / 1024).toFixed(2)}MB. Consider optimizing for better performance`
+    );
   }
 
   // Validate file name
@@ -402,30 +464,43 @@ export function validateImageFile(file: File): {
     isValid: errors.length === 0,
     errors,
     warnings,
-    format
+    format,
   };
 }
 
 /**
  * Creates a fallback background configuration
  */
-export function createFallbackBackground(originalConfig?: Partial<BackgroundConfig>): BackgroundConfig {
+export function createFallbackBackground(
+  originalConfig?: Partial<BackgroundConfig>
+): BackgroundConfig {
   // If original config exists and has a valid type, try to preserve it
-  if (originalConfig?.type && ['none', 'color', 'gradient', 'wallpaper'].includes(originalConfig.type)) {
+  if (
+    originalConfig?.type &&
+    ['none', 'color', 'gradient', 'wallpaper'].includes(originalConfig.type)
+  ) {
     switch (originalConfig.type) {
       case 'color':
-        if (originalConfig.color && validateAnyColor(originalConfig.color).isValid) {
+        if (
+          originalConfig.color &&
+          validateAnyColor(originalConfig.color).isValid
+        ) {
           return { type: 'color', color: originalConfig.color };
         }
         break;
       case 'gradient':
-        if (originalConfig.gradient && validateGradient(originalConfig.gradient).isValid) {
+        if (
+          originalConfig.gradient &&
+          validateGradient(originalConfig.gradient).isValid
+        ) {
           return { type: 'gradient', gradient: originalConfig.gradient };
         }
         break;
       case 'wallpaper':
         if (originalConfig.wallpaper) {
-          const wallpaperResult = validateWallpaperConfig(originalConfig.wallpaper);
+          const wallpaperResult = validateWallpaperConfig(
+            originalConfig.wallpaper
+          );
           if (wallpaperResult.isValid) {
             return { type: 'wallpaper', wallpaper: originalConfig.wallpaper };
           }
