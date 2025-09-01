@@ -737,6 +737,10 @@ export const THEME_CATEGORIES = [
       'solarized-dark',
       'one-dark-pro',
       'material-ocean',
+      'tokyo-night',
+      'nord',
+      'gruvbox-dark',
+      'catppuccin-mocha',
     ],
   },
   {
