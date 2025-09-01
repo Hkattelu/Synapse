@@ -77,71 +77,54 @@ export function Inspector({ className = '' }: InspectorProps) {
     <div
       className={`inspector bg-background-secondary flex flex-col h-full max-h-[calc(100vh-12rem)] ${className}`}
     >
-      {/* Header with clip info */}
-      <div className="p-4 border-b border-border-subtle flex-shrink-0">
-        <h3 className="font-semibold text-sm text-gray-900 uppercase tracking-wide">
-          Inspector
-        </h3>
-        <p className="text-xs text-gray-600 mt-1">
-          {selectedTimelineItems.length} item
-          {selectedTimelineItems.length !== 1 ? 's' : ''} selected
-        </p>
+      {/* Simplified Header */}
+      <div className="p-3 border-b border-border-subtle flex-shrink-0">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-sm text-gray-900">
+            Inspector
+          </h3>
+          <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+            {selectedItem.type.toUpperCase()}
+          </span>
+        </div>
       </div>
 
-      {/* Clip Metadata - Always visible */}
-      <ClipMetadata item={selectedItem} asset={selectedAsset} />
-
-      {/* Tab Navigation */}
+      {/* Simplified Tab Navigation */}
       <div className="border-b border-border-subtle bg-background-tertiary">
         <div className="flex">
           <button
             onClick={() => setActiveTab('properties')}
-            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+            className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
               activeTab === 'properties'
                 ? 'text-gray-900 bg-white border-b-2 border-purple-500'
                 : 'text-gray-700 hover:text-gray-900 hover:bg-white/50'
             }`}
           >
-            <div className="flex items-center justify-center space-x-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-              </svg>
-              <span>Properties</span>
-            </div>
+            Properties
           </button>
           
           {hasAnimationPresets && (
             <button
               onClick={() => setActiveTab('animation')}
-              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
                 activeTab === 'animation'
                   ? 'text-gray-900 bg-white border-b-2 border-purple-500'
                   : 'text-gray-700 hover:text-gray-900 hover:bg-white/50'
               }`}
             >
-              <div className="flex items-center justify-center space-x-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span>Animation</span>
-              </div>
+              Animation
             </button>
           )}
           
           <button
             onClick={() => setActiveTab('visual')}
-            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+            className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
               activeTab === 'visual'
                 ? 'text-gray-900 bg-white border-b-2 border-purple-500'
                 : 'text-gray-700 hover:text-gray-900 hover:bg-white/50'
             }`}
           >
-            <div className="flex items-center justify-center space-x-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
-              </svg>
-              <span>Visual</span>
-            </div>
+            Visual
           </button>
         </div>
       </div>

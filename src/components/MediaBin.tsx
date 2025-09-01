@@ -468,26 +468,26 @@ export function MediaBin({ className = '' }: MediaBinProps) {
             <h3 className="font-semibold text-sm text-text-primary">
               Media Library
             </h3>
-            <div className="flex bg-background-secondary rounded-lg overflow-hidden border border-border-subtle">
+            <div className="flex bg-gray-800 rounded-lg overflow-hidden border border-gray-600">
               <button
                 onClick={() => setActiveTab('media')}
-                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
                   activeTab === 'media' 
-                    ? 'bg-primary-600 text-white' 
-                    : 'text-text-secondary hover:text-text-primary hover:bg-background-tertiary'
+                    ? 'bg-purple-600 text-white' 
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700'
                 }`}
               >
-                Library
+                📁 Library
               </button>
               <button
                 onClick={() => setActiveTab('music')}
-                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
                   activeTab === 'music' 
-                    ? 'bg-primary-600 text-white' 
-                    : 'text-text-secondary hover:text-text-primary hover:bg-background-tertiary'
+                    ? 'bg-purple-600 text-white' 
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700'
                 }`}
               >
-                Music
+                🎵 Music
               </button>
             </div>
           </div>

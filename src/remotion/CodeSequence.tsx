@@ -315,18 +315,22 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
     }
 
     if (animationMode === 'line-by-line') {
-      const visible = lines
-        .slice(0, Math.min(linesToShow, lines.length))
+      const visibleLines = lines.slice(0, Math.min(linesToShow, lines.length));
+      const html = visibleLines
+        .map((line) => {
+          try {
+            const highlighted = Prism.highlight(
+              line,
+              Prism.languages[prismLanguage],
+              prismLanguage
+            );
+            return `<span class="code-line">${highlighted}</span>`;
+          } catch {
+            return `<span class="code-line">${encodeForHtml(line)}</span>`;
+          }
+        })
         .join('\n');
-      try {
-        return Prism.highlight(
-          visible,
-          Prism.languages[prismLanguage],
-          prismLanguage
-        );
-      } catch {
-        return encodeForHtml(visible);
-      }
+      return html;
     }
 
     if (animationMode === 'diff') {
@@ -353,7 +357,24 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
 
     // typing or none
     if (anim?.preset === 'typewriter' || animationMode === 'typing') {
-      if (charactersToShow >= totalCharacters) return highlightedCode;
+      if (charactersToShow >= totalCharacters) {
+        // Wrap each line for line numbers
+        const wrappedLines = lines
+          .map((line) => {
+            try {
+              const highlighted = Prism.highlight(
+                line,
+                Prism.languages[prismLanguage],
+                prismLanguage
+              );
+              return `<span class="code-line">${highlighted}</span>`;
+            } catch {
+              return `<span class="code-line">${encodeForHtml(line)}</span>`;
+            }
+          })
+          .join('\n');
+        return wrappedLines;
+      }
       const truncated = codeContent.substring(0, Math.max(0, charactersToShow));
       try {
         return Prism.highlight(
@@ -366,7 +387,22 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
       }
     }
 
-    return highlightedCode;
+    // Default case - wrap each line for line numbers
+    const wrappedLines = lines
+      .map((line) => {
+        try {
+          const highlighted = Prism.highlight(
+            line,
+            Prism.languages[prismLanguage],
+            prismLanguage
+          );
+          return `<span class="code-line">${highlighted}</span>`;
+        } catch {
+          return `<span class="code-line">${encodeForHtml(line)}</span>`;
+        }
+      })
+      .join('\n');
+    return wrappedLines;
   }, [
     animationMode,
     charactersToShow,
@@ -584,8 +620,8 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
                    code > .code-line { counter-increment: line; }
                    code > .code-line::before { content: counter(line); display: inline-block; width: 2.5em; margin-right: 1em; text-align: right; color: ${themeColors.comment}; }`
                 : `pre { counter-reset: line; }
-                   code span { counter-increment: line; }
-                   code span::before { content: counter(line); display: inline-block; width: 2.5em; margin-right: 1em; text-align: right; color: ${themeColors.comment}; }`
+                   code .code-line { counter-increment: line; }
+                   code .code-line::before { content: counter(line); display: inline-block; width: 2.5em; margin-right: 1em; text-align: right; color: ${themeColors.comment}; }`
               : '';
             
             const diffAnimationCss = diffAnimationResult.needsSpecialStyling ? `
