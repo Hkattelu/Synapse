@@ -16,10 +16,20 @@ export const LicenseGate: React.FC = () => {
   if (!needsGate) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="license-dialog-title"
+    >
       <div className="bg-white w-full max-w-md rounded-2xl shadow-xl border border-purple-200">
         <div className="p-5 border-b border-purple-100">
-          <h2 className="text-lg font-semibold text-gray-900">Enter License</h2>
+          <h2
+            id="license-dialog-title"
+            className="text-lg font-semibold text-gray-900"
+          >
+            Enter License
+          </h2>
           <p className="text-xs text-gray-600 mt-1">
             A valid license is required to use Synapse Studio. Your license is
             stored securely on this device.

@@ -27,46 +27,43 @@ export const UpdateBanner: React.FC = () => {
     };
   }, []);
 
-  const updateAvailable = useMemo(
-    () => status?.updateAvailable && status.latestVersion,
+  const showBanner = useMemo(
+    () => Boolean(status?.updateAvailable && status?.latestVersion),
     [status]
   );
 
-  if (!updateAvailable) return null;
+  if (!showBanner) return null;
+
+  const downloadUrl = status?.downloadUrl;
+  const href = downloadUrl || '/downloads';
+  const isExternal =
+    typeof downloadUrl === 'string' && /^https?:\/\//i.test(downloadUrl);
 
   return (
     <div className="w-full bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2 text-sm flex items-center justify-center gap-3">
       <span>
-        A new version {status!.latestVersion} is available (you have{' '}
-        {status!.currentVersion}).
+        A new version {status?.latestVersion} is available (you have{' '}
+        {status?.currentVersion}).
       </span>
-      {(() => {
-        const url = status!.downloadUrl;
-        const isExternal = typeof url === 'string' && /^https?:\/\//i.test(url);
-        const href = typeof url === 'string' ? url : '/downloads';
-        const anchorProps = isExternal
-          ? { target: '_blank' as const, rel: 'noopener noreferrer' as const }
-          : {};
-        return (
-          <a
-            className="px-3 py-1 rounded bg-amber-600 text-white hover:bg-amber-700"
-            href={href}
-            {...anchorProps}
-            onClick={(e) => {
-              if (isExternal && window.SynapseUpdates && url) {
-                e.preventDefault();
-                try {
-                  void window.SynapseUpdates.openDownload(url);
-                } catch {
-                  window.open(url, '_blank', 'noopener');
-                }
-              }
-            }}
-          >
-            Get Update
-          </a>
-        );
-      })()}
+      <a
+        className="px-3 py-1 rounded bg-amber-600 text-white hover:bg-amber-700"
+        href={href}
+        {...(isExternal
+          ? { target: '_blank', rel: 'noopener noreferrer' }
+          : {})}
+        onClick={(e) => {
+          if (isExternal && window.SynapseUpdates && downloadUrl) {
+            e.preventDefault();
+            try {
+              void window.SynapseUpdates.openDownload(downloadUrl);
+            } catch {
+              window.open(downloadUrl, '_blank', 'noopener');
+            }
+          }
+        }}
+      >
+        Get Update
+      </a>
       <button
         className="text-amber-900/80 underline-offset-2 hover:underline disabled:opacity-60"
         disabled={checking}
