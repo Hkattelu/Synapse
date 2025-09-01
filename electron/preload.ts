@@ -3,6 +3,12 @@
 
 import { contextBridge, ipcRenderer } from 'electron';
 import type { OpenDialogOptions, SaveDialogOptions } from 'electron';
+// Types for IPC payloads are declared in the web project's preload d.ts.
+// Import as types only so Electron build output remains unchanged.
+import type {
+  LicenseStatus as PreloadLicenseStatus,
+  UpdateStatus as PreloadUpdateStatus,
+} from '../src/types/preload';
 
 type ReadEncoding = string | null;
 
@@ -30,8 +36,18 @@ const SynapseLicense = Object.freeze({
   set: (license: string) => ipcRenderer.invoke('ipc:license:set', license),
   validateNow: () => ipcRenderer.invoke('ipc:license:validate'),
   clear: () => ipcRenderer.invoke('ipc:license:clear'),
-  onStatus: (handler: (status: unknown) => void) => {
-    const listener = (_e: unknown, payload: unknown) => handler(payload);
+  // Guard and type payloads crossing the IPC boundary.
+  onStatus: (handler: (status: PreloadLicenseStatus) => void) => {
+    const listener = (_e: unknown, payload: unknown) => {
+      if (
+        payload &&
+        typeof payload === 'object' &&
+        // minimal shape check to avoid forwarding arbitrary data
+        'state' in (payload as Record<string, unknown>)
+      ) {
+        handler(payload as PreloadLicenseStatus);
+      }
+    };
     ipcRenderer.on('license:status', listener);
     return () => ipcRenderer.removeListener('license:status', listener);
   },
@@ -42,8 +58,18 @@ const SynapseUpdates = Object.freeze({
   getLast: () => ipcRenderer.invoke('ipc:update:get-last'),
   openDownload: (url?: string) =>
     ipcRenderer.invoke('ipc:update:open-download', url),
-  onStatus: (handler: (status: unknown) => void) => {
-    const listener = (_e: unknown, payload: unknown) => handler(payload);
+  // Guard and type payloads crossing the IPC boundary.
+  onStatus: (handler: (status: PreloadUpdateStatus) => void) => {
+    const listener = (_e: unknown, payload: unknown) => {
+      if (
+        payload &&
+        typeof payload === 'object' &&
+        // minimal shape check: presence of updateAvailable boolean-like field
+        'updateAvailable' in (payload as Record<string, unknown>)
+      ) {
+        handler(payload as PreloadUpdateStatus);
+      }
+    };
     ipcRenderer.on('updates:status', listener);
     return () => ipcRenderer.removeListener('updates:status', listener);
   },

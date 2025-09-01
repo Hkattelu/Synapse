@@ -1,10 +1,4 @@
-export type LicenseState = 'valid' | 'invalid' | 'expired' | 'unknown';
-export type LicenseStatus = {
-  state: LicenseState;
-  message?: string;
-  expiresAt?: string;
-  user?: { email?: string; name?: string; plan?: string };
-};
+import type { LicenseStatus } from '../types/preload';
 
 export function mapLicenseResponse(input: unknown): LicenseStatus {
   try {
@@ -14,7 +8,7 @@ export function mapLicenseResponse(input: unknown): LicenseStatus {
       (obj.status as string | undefined) ||
       (obj.state as string | undefined) ||
       (lic && (lic.status as string | undefined));
-    const mapped: LicenseState =
+    const mapped: LicenseStatus['state'] =
       status === 'valid'
         ? 'valid'
         : status === 'invalid'
