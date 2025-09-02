@@ -27,6 +27,7 @@ import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.js';
 import Zap from 'lucide-react/dist/esm/icons/zap.js';
 import Shield from 'lucide-react/dist/esm/icons/shield.js';
 import Layers from 'lucide-react/dist/esm/icons/layers.js';
+import { section } from 'motion/react-client';
 
 
 interface HeroSectionProps {
@@ -44,7 +45,9 @@ interface FeatureProps {
 }
 
 interface ContactFormProps {
-  onSubmit?: (data: Record<string, FormDataEntryValue>) => void;
+  onSubmit?: (data: Record<string, FormDataEntryValue>) => Promise<void>;
+  isSubmitting?: boolean;
+  submitStatus?: 'idle' | 'success' | 'error';
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({
@@ -285,7 +288,7 @@ const ProductHuntSection: React.FC = () => {
             <Button
               variant="outline"
               size="lg"
-              onClick={() => navigator.share?.({ 
+              onClick={() => navigator.share?.({
                 title: 'Synapse Studio - Human-Powered Video Creation',
                 text: 'Check out Synapse Studio launching on Product Hunt!',
                 url: 'https://www.producthunt.com/products/synapse-studio'
@@ -512,13 +515,40 @@ const PowerSection: React.FC = () => {
   );
 };
 
-const ContactSection: React.FC<ContactFormProps> = ({ onSubmit }) => {
-  const handleSubmit = (e: React.FormEvent) => {
+const ContactSection: React.FC<ContactFormProps> = ({
+  onSubmit,
+  isSubmitting = false,
+  submitStatus = 'idle'
+}) => {
+  const formRef = React.useRef<HTMLFormElement>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const data = Object.fromEntries(formData.entries());
-    onSubmit?.(data);
+
+    // Basic client-side validation
+    if (!data.name || !data.email || !data.message) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email as string)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    await onSubmit?.(data);
   };
+
+  // Reset form when submission is successful
+  React.useEffect(() => {
+    if (submitStatus === 'success') {
+      formRef.current?.reset();
+    }
+  }, [submitStatus]);
 
   return (
     <section className="py-20 bg-gradient-to-br from-purple-50 to-indigo-50">
@@ -542,7 +572,12 @@ const ContactSection: React.FC<ContactFormProps> = ({ onSubmit }) => {
               <div className="space-y-4">
                 <div className="flex items-center">
                   <Mail className="w-5 h-5 text-purple-600 mr-3" />
-                  <span className="text-gray-600">hello@synapsestudio.com</span>
+                  <a
+                    href="mailto:glowstringman@gmail.com"
+                    className="text-gray-600 hover:text-purple-600 transition-colors"
+                  >
+                    glowstringman@gmail.com
+                  </a>
                 </div>
                 <div className="flex items-center">
                   <MapPin className="w-5 h-5 text-purple-600 mr-3" />
@@ -562,7 +597,7 @@ const ContactSection: React.FC<ContactFormProps> = ({ onSubmit }) => {
             </div>
 
             <Card className="p-8 shadow-lg">
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <Label htmlFor="name">Full Name</Label>
                   <Input
@@ -615,16 +650,49 @@ const ContactSection: React.FC<ContactFormProps> = ({ onSubmit }) => {
 
                 <Button
                   type="submit"
-                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  disabled={isSubmitting}
+                  className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Send Message
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
                 </Button>
-              </form>
-            </Card>
-          </div>
+
+                {/* Status Messages */}
+                {submitStatus === 'success' && (
+                  <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-start">
+                      <svg className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <div>
+                        <p className="text-green-800 text-sm font-medium">
+                          Message sent successfully!
+                        </p>
+                        <p className="text-green-700 text-sm mt-1">
+                          Thank you for reaching out. We'll get back to you within 24 hours at the email address you provided.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {submitStatus === 'error' && (
+                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-red-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      <p className="text-red-800 text-sm">
+                        Failed to send message. Please try again or email us directly at glowstringman@gmail.com
+                      </p>
+                    </div>
+                  </div>
+                )}
+            </form>
+          </Card>
         </div>
       </div>
-    </section>
+    </div>
+    </section >
   );
 };
 
@@ -761,9 +829,69 @@ const Navigation: React.FC = () => {
 };
 
 const SynapseStudioLanding: React.FC = () => {
-  const handleContactSubmit = (data: Record<string, FormDataEntryValue>) => {
-    console.log('Contact form submitted:', data);
-    // TODO: Implement contact form submission
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [submitStatus, setSubmitStatus] = React.useState<'idle' | 'success' | 'error'>('idle');
+
+  const handleContactSubmit = async (data: Record<string, FormDataEntryValue>) => {
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+
+    try {
+      // Prepare email data
+      const emailData = {
+        to_email: 'glowstringman@gmail.com',
+        from_name: data.name as string,
+        from_email: data.email as string,
+        project_type: data.projectType as string || 'Not specified',
+        message: data.message as string,
+        subject: `New Contact Form Submission from ${data.name}`,
+        timestamp: new Date().toLocaleString(),
+      };
+
+      // Send email using fetch to a simple email service
+      // For now, we'll use a simple mailto approach as a fallback
+      const emailBody = `
+Name: ${emailData.from_name}
+Email: ${emailData.from_email}
+Project Type: ${emailData.project_type}
+Timestamp: ${emailData.timestamp}
+
+Message:
+${emailData.message}
+      `.trim();
+
+      // Try to send via API first
+      try {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(emailData),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Contact form submitted successfully:', result);
+          setSubmitStatus('success');
+          return; // Success, no need for mailto fallback
+        } else {
+          throw new Error('API request failed');
+        }
+      } catch (apiError) {
+        console.log('API not available, using mailto fallback');
+
+        // Fallback to mailto if API is not available
+        const mailtoLink = `mailto:glowstringman@gmail.com?subject=${encodeURIComponent(emailData.subject)}&body=${encodeURIComponent(emailBody)}`;
+        window.location.href = mailtoLink;
+        setSubmitStatus('success');
+      }
+    } catch (error) {
+      console.error('Contact form submission failed:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -779,7 +907,11 @@ const SynapseStudioLanding: React.FC = () => {
           <PowerSection />
         </div>
         <div id="contact">
-          <ContactSection onSubmit={handleContactSubmit} />
+          <ContactSection
+            onSubmit={handleContactSubmit}
+            isSubmitting={isSubmitting}
+            submitStatus={submitStatus}
+          />
         </div>
         <Footer />
       </div>

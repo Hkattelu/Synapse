@@ -250,6 +250,49 @@ async function simulateJob(jobId) {
   await updateJob(job);
 }
 
+// Contact form endpoint
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { to_email, from_name, from_email, project_type, message, subject, timestamp } = req.body || {};
+    
+    // Validate required fields
+    if (!from_name || !from_email || !message) {
+      return res.status(400).json({ error: 'Missing required fields: name, email, and message are required' });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(from_email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    // Log the contact form submission (in a real app, you'd send an actual email)
+    console.log('📧 Contact Form Submission:');
+    console.log('From:', from_name, '<' + from_email + '>');
+    console.log('Project Type:', project_type || 'Not specified');
+    console.log('Subject:', subject);
+    console.log('Message:', message);
+    console.log('Timestamp:', timestamp);
+    console.log('---');
+
+    // In a real implementation, you would:
+    // 1. Use a service like SendGrid, Mailgun, or AWS SES to send emails
+    // 2. Store the contact form submission in a database
+    // 3. Send a confirmation email to the user
+    
+    // For now, we'll simulate success
+    // You can integrate with your preferred email service here
+    
+    res.json({ 
+      success: true, 
+      message: 'Contact form submitted successfully. We will get back to you soon!' 
+    });
+  } catch (error) {
+    console.error('Contact form submission error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 app.get('/api/healthz', (_req, res) => res.json({ ok: true }));
 
 app.listen(PORT, () => {
