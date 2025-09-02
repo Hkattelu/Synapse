@@ -1,31 +1,31 @@
 // Background management system
 
-import type { 
-  WallpaperAsset, 
-  WallpaperCollection, 
+import type {
+  WallpaperAsset,
+  WallpaperCollection,
   BackgroundPreview,
-  BackgroundManagerEvents 
+  BackgroundManagerEvents,
 } from './types';
 import type { BackgroundConfig, GradientConfig } from '../types';
 import { validateAnyColor } from '../validation/colorValidation';
-import { 
-  validateWallpaperAsset, 
-  validateImageFile, 
-  createFallbackBackground 
+import {
+  validateWallpaperAsset,
+  validateImageFile,
+  createFallbackBackground,
 } from '../validation/backgroundValidation';
-import { 
-  builtInCollections, 
-  getAllBuiltInWallpapers, 
+import {
+  builtInCollections,
+  getAllBuiltInWallpapers,
   getWallpaperById,
-  getWallpapersByCategory 
+  getWallpapersByCategory,
 } from './wallpapers';
-import { 
-  GradientBuilder, 
-  validateGradient, 
+import {
+  GradientBuilder,
+  validateGradient,
   generateGradientCSS,
   gradientPresets,
   getGradientPresetById,
-  getGradientPresetsByCategory
+  getGradientPresetsByCategory,
 } from './gradients';
 
 export class BackgroundManager {
@@ -40,7 +40,7 @@ export class BackgroundManager {
 
   // Event handling
   on<K extends keyof BackgroundManagerEvents>(
-    event: K, 
+    event: K,
     listener: BackgroundManagerEvents[K]
   ): void {
     this.eventListeners[event] = listener;
@@ -51,12 +51,13 @@ export class BackgroundManager {
   }
 
   private emit<K extends keyof BackgroundManagerEvents>(
-    event: K, 
+    event: K,
     ...args: Parameters<BackgroundManagerEvents[K]>
   ): void {
     const listener = this.eventListeners[event];
     if (listener) {
-      (listener as any)(...args);
+      // TypeScript cannot infer the spread tuple type for this index signature; use a wrapper function
+      (listener as (...a: unknown[]) => void)(...args);
     }
   }
 
@@ -65,9 +66,11 @@ export class BackgroundManager {
     return [...getAllBuiltInWallpapers(), ...this.customWallpapers];
   }
 
-  getWallpapersByCategory(category: WallpaperAsset['category']): WallpaperAsset[] {
+  getWallpapersByCategory(
+    category: WallpaperAsset['category']
+  ): WallpaperAsset[] {
     const builtIn = getWallpapersByCategory(category);
-    const custom = this.customWallpapers.filter(w => w.category === category);
+    const custom = this.customWallpapers.filter((w) => w.category === category);
     return [...builtIn, ...custom];
   }
 
@@ -77,7 +80,7 @@ export class BackgroundManager {
     if (builtIn) return builtIn;
 
     // Check custom wallpapers
-    return this.customWallpapers.find(w => w.id === id) || null;
+    return this.customWallpapers.find((w) => w.id === id) || null;
   }
 
   getAllCollections(): WallpaperCollection[] {
@@ -86,16 +89,21 @@ export class BackgroundManager {
 
   getCollectionById(id: string): WallpaperCollection | null {
     const allCollections = this.getAllCollections();
-    return allCollections.find(c => c.id === id) || null;
+    return allCollections.find((c) => c.id === id) || null;
   }
 
   // Custom wallpaper management
-  async addCustomWallpaper(file: File, category: WallpaperAsset['category']): Promise<WallpaperAsset> {
+  async addCustomWallpaper(
+    file: File,
+    category: WallpaperAsset['category']
+  ): Promise<WallpaperAsset> {
     try {
       // Validate the file first
       const fileValidation = this.validateImageFile(file);
       if (!fileValidation.isValid) {
-        const error = new Error(`Invalid image file: ${fileValidation.errors.join(', ')}`);
+        const error = new Error(
+          `Invalid image file: ${fileValidation.errors.join(', ')}`
+        );
         this.emit('wallpaperError', error, 'unknown');
         throw error;
       }
@@ -106,16 +114,16 @@ export class BackgroundManager {
 
       // Generate unique ID
       const id = `custom-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
+
       // Create object URL for the file
       const url = URL.createObjectURL(file);
-      
+
       // Get image dimensions
       const dimensions = await this.getImageDimensions(url);
-      
+
       // Generate thumbnail
       const thumbnail = await this.generateThumbnail(url, 200, 150);
-      
+
       const wallpaper: WallpaperAsset = {
         id,
         name: file.name.replace(/\.[^/.]+$/, ''), // Remove extension
@@ -126,7 +134,7 @@ export class BackgroundManager {
         format: this.getImageFormat(file.type),
         fileSize: file.size,
         tags: ['custom'],
-        license: 'Custom'
+        license: 'Custom',
       };
 
       // Validate the complete wallpaper asset
@@ -135,8 +143,10 @@ export class BackgroundManager {
         // Clean up object URLs
         URL.revokeObjectURL(url);
         URL.revokeObjectURL(thumbnail);
-        
-        const error = new Error(`Invalid wallpaper asset: ${assetValidation.errors.join(', ')}`);
+
+        const error = new Error(
+          `Invalid wallpaper asset: ${assetValidation.errors.join(', ')}`
+        );
         this.emit('wallpaperError', error, id);
         throw error;
       }
@@ -147,7 +157,7 @@ export class BackgroundManager {
 
       this.customWallpapers.push(wallpaper);
       this.emit('wallpaperLoaded', wallpaper);
-      
+
       return wallpaper;
     } catch (error) {
       this.emit('wallpaperError', error as Error, 'unknown');
@@ -156,7 +166,7 @@ export class BackgroundManager {
   }
 
   removeCustomWallpaper(id: string): boolean {
-    const index = this.customWallpapers.findIndex(w => w.id === id);
+    const index = this.customWallpapers.findIndex((w) => w.id === id);
     if (index === -1) return false;
 
     const wallpaper = this.customWallpapers[index];
@@ -174,8 +184,8 @@ export class BackgroundManager {
 
   // Background configuration helpers
   createWallpaperBackground(
-    wallpaperId: string, 
-    opacity: number = 1, 
+    wallpaperId: string,
+    opacity: number = 1,
     blendMode: 'normal' | 'multiply' | 'overlay' | 'soft-light' = 'normal'
   ): BackgroundConfig {
     return {
@@ -183,8 +193,8 @@ export class BackgroundManager {
       wallpaper: {
         assetId: wallpaperId,
         opacity,
-        blendMode
-      }
+        blendMode,
+      },
     };
   }
 
@@ -203,7 +213,7 @@ export class BackgroundManager {
 
     return {
       type: 'gradient',
-      gradient
+      gradient,
     };
   }
 
@@ -218,12 +228,14 @@ export class BackgroundManager {
 
     return {
       type: 'color',
-      color: validation.normalizedColor || color
+      color: validation.normalizedColor || color,
     };
   }
 
   // Gradient utilities
-  createGradientBuilder(initialConfig?: Partial<GradientConfig>): GradientBuilder {
+  createGradientBuilder(
+    initialConfig?: Partial<GradientConfig>
+  ): GradientBuilder {
     return new GradientBuilder(initialConfig);
   }
 
@@ -243,14 +255,18 @@ export class BackgroundManager {
     return getGradientPresetById(id);
   }
 
-  getGradientPresetsByCategory(category: 'warm' | 'cool' | 'neutral' | 'vibrant' | 'monochrome') {
+  getGradientPresetsByCategory(
+    category: 'warm' | 'cool' | 'neutral' | 'vibrant' | 'monochrome'
+  ) {
     return getGradientPresetsByCategory(category);
   }
 
   // Preview generation
-  async generateBackgroundPreview(config: BackgroundConfig): Promise<BackgroundPreview> {
+  async generateBackgroundPreview(
+    config: BackgroundConfig
+  ): Promise<BackgroundPreview> {
     const cacheKey = JSON.stringify(config);
-    
+
     // Check cache first
     if (this.previewCache.has(cacheKey)) {
       return this.previewCache.get(cacheKey)!;
@@ -279,7 +295,9 @@ export class BackgroundManager {
     return preview;
   }
 
-  private async generateWallpaperPreview(config: BackgroundConfig): Promise<BackgroundPreview> {
+  private async generateWallpaperPreview(
+    config: BackgroundConfig
+  ): Promise<BackgroundPreview> {
     if (!config.wallpaper) {
       throw new Error('Wallpaper config is required');
     }
@@ -294,11 +312,13 @@ export class BackgroundManager {
     return {
       type: 'wallpaper',
       previewUrl: wallpaper.thumbnail,
-      config
+      config,
     };
   }
 
-  private async generateGradientPreview(config: BackgroundConfig): Promise<BackgroundPreview> {
+  private async generateGradientPreview(
+    config: BackgroundConfig
+  ): Promise<BackgroundPreview> {
     if (!config.gradient) {
       throw new Error('Gradient config is required');
     }
@@ -308,7 +328,12 @@ export class BackgroundManager {
     canvas.height = 150;
     const ctx = canvas.getContext('2d')!;
 
-    const gradient = this.createCanvasGradient(ctx, config.gradient, canvas.width, canvas.height);
+    const gradient = this.createCanvasGradient(
+      ctx,
+      config.gradient,
+      canvas.width,
+      canvas.height
+    );
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -317,11 +342,13 @@ export class BackgroundManager {
     return {
       type: 'gradient',
       previewUrl,
-      config
+      config,
     };
   }
 
-  private async generateColorPreview(config: BackgroundConfig): Promise<BackgroundPreview> {
+  private async generateColorPreview(
+    config: BackgroundConfig
+  ): Promise<BackgroundPreview> {
     if (!config.color) {
       throw new Error('Color is required');
     }
@@ -339,12 +366,14 @@ export class BackgroundManager {
     return {
       type: 'color',
       previewUrl,
-      config
+      config,
     };
   }
 
   // Utility methods
-  private async getImageDimensions(url: string): Promise<{ width: number; height: number }> {
+  private async getImageDimensions(
+    url: string
+  ): Promise<{ width: number; height: number }> {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
@@ -355,7 +384,11 @@ export class BackgroundManager {
     });
   }
 
-  private async generateThumbnail(url: string, maxWidth: number, maxHeight: number): Promise<string> {
+  private async generateThumbnail(
+    url: string,
+    maxWidth: number,
+    maxHeight: number
+  ): Promise<string> {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
@@ -384,7 +417,9 @@ export class BackgroundManager {
     });
   }
 
-  private getImageFormat(mimeType: string): 'jpg' | 'png' | 'svg' | 'webp' {
+  private getImageFormat(
+    mimeType: string
+  ): 'jpg' | 'png' | 'svg' | 'webp' | 'gif' {
     switch (mimeType) {
       case 'image/jpeg':
         return 'jpg';
@@ -394,33 +429,42 @@ export class BackgroundManager {
         return 'svg';
       case 'image/webp':
         return 'webp';
+      case 'image/gif':
+        return 'gif';
       default:
         return 'jpg';
     }
   }
 
   private createCanvasGradient(
-    ctx: CanvasRenderingContext2D, 
-    config: GradientConfig, 
-    width: number, 
+    ctx: CanvasRenderingContext2D,
+    config: GradientConfig,
+    width: number,
     height: number
   ): CanvasGradient {
     let gradient: CanvasGradient;
 
     if (config.type === 'linear') {
-      const angle = (config.angle || 0) * Math.PI / 180;
-      const x1 = width / 2 - Math.cos(angle) * width / 2;
-      const y1 = height / 2 - Math.sin(angle) * height / 2;
-      const x2 = width / 2 + Math.cos(angle) * width / 2;
-      const y2 = height / 2 + Math.sin(angle) * height / 2;
-      
+      const angle = ((config.angle || 0) * Math.PI) / 180;
+      const x1 = width / 2 - (Math.cos(angle) * width) / 2;
+      const y1 = height / 2 - (Math.sin(angle) * height) / 2;
+      const x2 = width / 2 + (Math.cos(angle) * width) / 2;
+      const y2 = height / 2 + (Math.sin(angle) * height) / 2;
+
       gradient = ctx.createLinearGradient(x1, y1, x2, y2);
     } else {
       const centerX = (config.centerX || 0.5) * width;
       const centerY = (config.centerY || 0.5) * height;
       const radius = Math.max(width, height) / 2;
-      
-      gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+
+      gradient = ctx.createRadialGradient(
+        centerX,
+        centerY,
+        0,
+        centerX,
+        centerY,
+        radius
+      );
     }
 
     // Add color stops
@@ -441,14 +485,17 @@ export class BackgroundManager {
     }
   }
 
-
-
   validateWallpaperAsset(asset: WallpaperAsset) {
     try {
       return validateWallpaperAsset(asset);
     } catch (error) {
       console.error('Wallpaper asset validation error:', error);
-      return { isValid: false, errors: ['Validation module unavailable'], warnings: [], fileValidation: { format: false, size: false, dimensions: false } };
+      return {
+        isValid: false,
+        errors: ['Validation module unavailable'],
+        warnings: [],
+        fileValidation: { format: false, size: false, dimensions: false },
+      };
     }
   }
 
@@ -457,11 +504,17 @@ export class BackgroundManager {
       return validateImageFile(file);
     } catch (error) {
       console.error('Image file validation error:', error);
-      return { isValid: false, errors: ['Validation module unavailable'], warnings: [] };
+      return {
+        isValid: false,
+        errors: ['Validation module unavailable'],
+        warnings: [],
+      };
     }
   }
 
-  createFallbackBackground(originalConfig?: Partial<BackgroundConfig>): BackgroundConfig {
+  createFallbackBackground(
+    originalConfig?: Partial<BackgroundConfig>
+  ): BackgroundConfig {
     try {
       return createFallbackBackground(originalConfig);
     } catch (error) {
@@ -473,7 +526,7 @@ export class BackgroundManager {
   // Cleanup
   dispose(): void {
     // Clean up custom wallpaper object URLs
-    this.customWallpapers.forEach(wallpaper => {
+    this.customWallpapers.forEach((wallpaper) => {
       if (wallpaper.url.startsWith('blob:')) {
         URL.revokeObjectURL(wallpaper.url);
       }
