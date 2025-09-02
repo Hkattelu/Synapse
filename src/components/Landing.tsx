@@ -277,7 +277,7 @@ const ProductHuntSection: React.FC = () => {
             <Button
               size="lg"
               onClick={() => window.open('https://www.producthunt.com/products/synapse-studio', '_blank')}
-              className="bg-white text-orange-600 hover:bg-orange-50 px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+              className="!bg-white !text-orange-600 hover:!bg-orange-50 !border-0 px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
             >
               <Heart className="w-5 h-5 mr-2" />
               Support Us on Product Hunt
@@ -290,7 +290,7 @@ const ProductHuntSection: React.FC = () => {
                 text: 'Check out Synapse Studio launching on Product Hunt!',
                 url: 'https://www.producthunt.com/products/synapse-studio'
               }) || window.open('https://twitter.com/intent/tweet?text=Excited%20for%20@SynapseStudio%20launching%20on%20Product%20Hunt!%20%F0%9F%9A%80&url=https://www.producthunt.com/products/synapse-studio', '_blank')}
-              className="border-white text-white hover:bg-white/10 px-8 py-4 rounded-full font-semibold text-lg"
+              className="!border-white !text-white hover:!bg-white/20 !bg-transparent px-8 py-4 rounded-full font-semibold text-lg shadow-sm"
             >
               <Users className="w-5 h-5 mr-2" />
               Share with Friends

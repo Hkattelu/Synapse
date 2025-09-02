@@ -34,20 +34,18 @@ export function DashboardView() {
       <nav className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-3">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+            >
               <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <h1 className="text-xl font-bold text-gray-900">
                 Synapse Studio
               </h1>
-            </div>
-            <button
-              onClick={() => navigate('/')}
-              className="text-gray-600 hover:text-purple-600 transition-colors"
-            >
-              ← Back to Home
             </button>
+            <div></div>
           </div>
         </div>
       </nav>

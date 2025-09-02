@@ -12,8 +12,8 @@ import type {
   VideoCodec,
   AudioCodec,
 } from '../lib/types';
-import { 
-  formatFileSize, 
+import {
+  formatFileSize,
   formatDuration,
   isTransparencySupported,
   getTransparencyCompatibilityWarning,
@@ -104,8 +104,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               Export Video
             </h2>
             <p className="text-sm text-text-secondary mt-1">
-              Export "{project?.name ?? 'Test Project'}" as video file Export "
-              {project?.name ?? 'Test Project'}" as video file
+              Export "{project?.name ?? 'Test Project'}" as video
             </p>
           </div>
           {!isExporting && (
@@ -215,31 +214,31 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               <div className="flex justify-end gap-3 mt-6">
                 {(progress?.status === 'preparing' ||
                   progress?.status === 'rendering') && (
-                  <button
-                    onClick={handleCancelExport}
-                    className="px-4 py-2 text-text-secondary hover:text-text-primary border border-border-subtle rounded hover:bg-background-secondary transition-colors"
-                  >
-                    Cancel Export
-                  </button>
-                )}
+                    <button
+                      onClick={handleCancelExport}
+                      className="px-4 py-2 text-text-secondary hover:text-text-primary border border-border-subtle rounded hover:bg-background-secondary transition-colors"
+                    >
+                      Cancel Export
+                    </button>
+                  )}
 
                 {(progress?.status === 'completed' ||
                   progress?.status === 'failed' ||
                   progress?.status === 'cancelled') && (
-                  <button
-                    onClick={onClose}
-                    className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded transition-colors"
-                  >
-                    Close
-                  </button>
-                )}
+                    <button
+                      onClick={onClose}
+                      className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded transition-colors"
+                    >
+                      Close
+                    </button>
+                  )}
               </div>
             </div>
           ) : (
             // Export Settings View
             <div className="overflow-y-auto max-h-96">
-              {/* Auth/Membership gating */}
-              {!authenticated && (
+              {/* Auth/Membership gating - Hidden in development mode */}
+              {process.env.NODE_ENV !== 'development' && !authenticated && (
                 <div className="p-6 border-b border-border-subtle">
                   <div className="mb-2">
                     <h3 className="text-lg font-semibold text-text-primary">
@@ -252,7 +251,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   <AuthInlineForm />
                 </div>
               )}
-              {authenticated && !membership?.active && (
+              {process.env.NODE_ENV !== 'development' && authenticated && !membership?.active && (
                 <div className="p-6 border-b border-border-subtle">
                   <div className="mb-3">
                     <h3 className="text-lg font-semibold text-text-primary">
@@ -273,25 +272,36 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   </button>
                 </div>
               )}
+              {/* Development mode notice */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="p-6 border-b border-border-subtle">
+                  <div className="mb-2">
+                    <h3 className="text-lg font-semibold text-green-600">
+                      🚧 Development Mode
+                    </h3>
+                    <p className="text-sm text-text-secondary">
+                      Authentication is bypassed in development mode. You can export without signing in.
+                    </p>
+                  </div>
+                </div>
+              )}
               {/* Tabs */}
               <div className="flex border-b border-border-subtle">
                 <button
                   onClick={() => setActiveTab('presets')}
-                  className={`px-6 py-3 text-sm font-medium transition-colors ${
-                    activeTab === 'presets'
-                      ? 'text-primary-400 border-b-2 border-primary-400'
-                      : 'text-text-secondary hover:text-text-primary'
-                  }`}
+                  className={`px-6 py-3 text-sm font-medium transition-colors ${activeTab === 'presets'
+                    ? 'text-primary-400 border-b-2 border-primary-400'
+                    : 'text-text-secondary hover:text-text-primary'
+                    }`}
                 >
                   Presets
                 </button>
                 <button
                   onClick={() => setActiveTab('custom')}
-                  className={`px-6 py-3 text-sm font-medium transition-colors ${
-                    activeTab === 'custom'
-                      ? 'text-primary-400 border-b-2 border-primary-400'
-                      : 'text-text-secondary hover:text-primary-400'
-                  }`}
+                  className={`px-6 py-3 text-sm font-medium transition-colors ${activeTab === 'custom'
+                    ? 'text-primary-400 border-b-2 border-primary-400'
+                    : 'text-text-secondary hover:text-primary-400'
+                    }`}
                 >
                   Custom Settings
                 </button>
@@ -304,11 +314,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                     {presets.map((preset) => (
                       <div
                         key={preset.id}
-                        className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                          selectedPresetId === preset.id
-                            ? 'border-primary-400 bg-primary-900/20'
-                            : 'border-border-subtle hover:border-border-primary'
-                        }`}
+                        className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedPresetId === preset.id
+                          ? 'border-primary-400 bg-primary-900/20'
+                          : 'border-border-subtle hover:border-border-primary'
+                          }`}
                         onClick={() => handlePresetSelect(preset)}
                       >
                         <div className="flex items-start justify-between">
@@ -405,11 +414,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                                     });
                                   }
                                 }}
-                                className={`w-full p-2 border rounded text-sm transition-colors ${
-                                  isVertical
-                                    ? 'border-primary-400 bg-primary-900/20 text-text-primary'
-                                    : 'border-border-subtle bg-background-secondary text-text-primary'
-                                }`}
+                                className={`w-full p-2 border rounded text-sm transition-colors ${isVertical
+                                  ? 'border-primary-400 bg-primary-900/20 text-text-primary'
+                                  : 'border-border-subtle bg-background-secondary text-text-primary'
+                                  }`}
                                 title="Toggle between landscape (16:9) and vertical (9:16)"
                               >
                                 {isVertical
@@ -602,7 +610,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                       <h3 className="text-sm font-medium text-text-primary mb-3">
                         Transparency Settings
                       </h3>
-                      
+
                       {/* Transparency Toggle */}
                       <div className="mb-4">
                         <label className="flex items-center gap-2 cursor-pointer">
@@ -629,7 +637,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                       {(() => {
                         const warning = getTransparencyCompatibilityWarning(settings);
                         if (!warning) return null;
-                        
+
                         return (
                           <div className="mb-4 p-3 bg-yellow-900/20 border border-yellow-700 rounded">
                             <div className="flex items-start gap-2">
@@ -648,7 +656,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                           <div className="text-xs font-medium text-text-secondary mb-2">
                             Background Elements to Include:
                           </div>
-                          
+
                           <label className="flex items-center gap-2 cursor-pointer">
                             <input
                               type="checkbox"
@@ -664,7 +672,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                               Include wallpaper backgrounds
                             </span>
                           </label>
-                          
+
                           <label className="flex items-center gap-2 cursor-pointer">
                             <input
                               type="checkbox"
@@ -680,7 +688,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                               Include gradient backgrounds
                             </span>
                           </label>
-                          
+
                           <div className="mt-3 p-3 bg-blue-900/20 border border-blue-700 rounded">
                             <div className="flex items-start gap-2">
                               <svg className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -689,7 +697,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                               <div className="text-xs text-blue-200">
                                 <p className="font-medium mb-1">Transparency Preview</p>
                                 <div className="w-full h-8 bg-transparent border border-blue-400 rounded relative overflow-hidden">
-                                  <div 
+                                  <div
                                     className="absolute inset-0 opacity-20"
                                     style={{
                                       backgroundImage: `
@@ -744,7 +752,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               {(() => {
                 const validation = validateTransparencySettings(settings);
                 if (!validation.errors.length && !validation.warnings.length) return null;
-                
+
                 return (
                   <div className="space-y-2">
                     {validation.errors.map((error, index) => (
@@ -766,7 +774,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   </div>
                 );
               })()}
-              
+
               <div className="flex gap-3">
                 <button
                   onClick={onClose}
@@ -778,19 +786,21 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   onClick={handleStartExport}
                   disabled={
                     !canStartExport ||
-                    !authenticated ||
-                    !(membership?.active || trialsRemaining > 0) ||
+                    (process.env.NODE_ENV !== 'development' && !authenticated) ||
+                    (process.env.NODE_ENV !== 'development' && !(membership?.active || trialsRemaining > 0)) ||
                     !validateTransparencySettings(settings).isValid
                   }
                   className="px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-600 disabled:cursor-not-allowed text-white rounded transition-colors"
                 >
-                  {!authenticated
-                    ? 'Sign in to export'
-                    : membership?.active
-                      ? 'Start Export'
-                      : trialsRemaining > 0
-                        ? `Start Export (trial ${trialsUsed + 1}/${trialsLimit || 2})`
-                        : 'Unlock to export'}
+                  {(process.env.NODE_ENV === 'development')
+                    ? 'Start Export (Dev Mode)'
+                    : !authenticated
+                      ? 'Sign in to export'
+                      : membership?.active
+                        ? 'Start Export'
+                        : trialsRemaining > 0
+                          ? `Start Export (trial ${trialsUsed + 1}/${trialsLimit || 2})`
+                          : 'Unlock to export'}
                 </button>
               </div>
             </div>
