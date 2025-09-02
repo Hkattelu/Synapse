@@ -95,7 +95,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-background-primary border border-border-subtle rounded-lg max-w-2xl w-full mx-4 max-h-screen overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border-subtle">

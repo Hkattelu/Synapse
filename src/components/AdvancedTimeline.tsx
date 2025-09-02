@@ -598,7 +598,7 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
             >
               {/* Playhead Handle */}
               <div className="absolute -top-2 -left-2 w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-lg pointer-events-auto cursor-pointer">
-                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-black/75 backdrop-blur-sm text-white text-xs px-2 py-1 rounded whitespace-nowrap">
                   {Math.floor(playback.currentTime / 60)}:
                   {(playback.currentTime % 60).toFixed(1).padStart(4, '0')}
                 </div>
