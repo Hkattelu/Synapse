@@ -1,12 +1,16 @@
 import { Router } from 'express';
 import { startRender, getJob } from '../services/render.mjs';
 import path from 'node:path';
+import { validateRenderInput } from '../validation/validators.mjs';
 
 export const renderRouter = Router();
 
 renderRouter.post('/', async (req, res) => {
   try {
     const inputProps = req.body || {};
+    const { valid, errors } = validateRenderInput(inputProps);
+    if (!valid) return res.status(400).json({ error: errors.join('; ') });
+
     const { jobId } = await startRender({ inputProps });
     res.json({ jobId });
   } catch (e) {

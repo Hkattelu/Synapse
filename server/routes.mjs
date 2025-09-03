@@ -4,6 +4,7 @@ import { licenseRouter } from './routes/license.mjs';
 import { renderRouter } from './routes/render.mjs';
 import { aiRouter } from './routes/ai.mjs';
 import { emailRouter } from './routes/email.mjs';
+import { paymentsRouter } from './routes/payments.mjs';
 
 export const router = Router();
 
@@ -12,3 +13,4 @@ router.use('/license', licenseRouter);
 router.use('/render', renderRouter);
 router.use('/ai', aiRouter);
 router.use('/email', emailRouter);
+router.use('/payments', paymentsRouter);
