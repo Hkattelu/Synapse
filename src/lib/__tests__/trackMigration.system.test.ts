@@ -87,7 +87,11 @@ describe('Educational migration (system)', () => {
     expect(result.success).toBe(true);
     expect(result.migratedItems).toBe(3);
     // Items moved to their educational tracks (assert by identity instead of indices)
-    const eduIds = (proj.timeline as any).map((t: any) => t.educationalTrack).filter(Boolean).sort();
+    type WithEdu = { educationalTrack?: string };
+    const eduIds = (proj.timeline as WithEdu[])
+      .map((t) => t.educationalTrack)
+      .filter((x): x is string => Boolean(x))
+      .sort();
     expect(eduIds).toEqual(['code', 'narration', 'visual']);
 
     // Stats reflect distribution
