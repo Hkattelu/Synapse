@@ -22,6 +22,10 @@ import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { UIModeToggle } from './UIModeToggle';
 import { ModeAwareComponent, useFeatureVisibility } from './ModeAwareComponent';
 import { EducationalTimeline } from './EducationalTimeline';
+import { OnboardingDialog } from './educational/OnboardingDialog';
+import { HelpTipsOverlay } from './educational/HelpTipsOverlay';
+import { EducationalBestPractices } from './educational/EducationalBestPractices';
+import { InteractiveTutorial } from './educational/InteractiveTutorial';
 
 function StudioViewContent() {
   const { project } = useProject();
@@ -31,6 +35,17 @@ function StudioViewContent() {
   const [isRecorderDialogOpen, setIsRecorderDialogOpen] = useState(false);
   const [isShortcutsDialogOpen, setIsShortcutsDialogOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showTips, setShowTips] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+  
+  useEffect(() => {
+    try {
+      const flag = localStorage.getItem('seui_onboarded_v1');
+      if (!flag) setShowOnboarding(true);
+    } catch {}
+  }, []);
   
   // Get selected item for keyboard shortcuts
   const selectedItemId = project?.timeline.find(item => 
@@ -131,7 +146,30 @@ function StudioViewContent() {
 
           <div className="flex items-center space-x-4">
             {/* UI Mode Toggle */}
-            <UIModeToggle />
+            <div data-tutorial="mode-toggle">
+              <UIModeToggle />
+            </div>
+            
+            {/* Help Controls */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setShowTips((v) => !v)}
+                className="p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300"
+                title="Show contextual tips"
+                aria-pressed={showTips}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setShowGuide(true)}
+                className="px-3 py-2 rounded-lg bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300 text-sm"
+                title="Open best practices guide"
+              >
+                Guide
+              </button>
+            </div>
             
             {/* Panel Controls */}
             <div className="flex items-center space-x-2">
@@ -196,7 +234,7 @@ function StudioViewContent() {
         {/* Main Editor Area */}
         <main className="flex-1 flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-l-2xl overflow-hidden min-w-0">
           {/* Preview Area */}
-          <div className="flex-1 bg-black border-r border-gray-700/50 rounded-tl-2xl overflow-hidden">
+          <div className="flex-1 bg-black border-r border-gray-700/50 rounded-tl-2xl overflow-hidden" data-tutorial="preview-area">
             <Preview className="h-full w-full" />
           </div>
 
@@ -208,18 +246,22 @@ function StudioViewContent() {
             maxSize={500}
             className="border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900 flex-shrink-0 flex flex-col"
           >
-            <ContentAdditionToolbar />
+            <div data-tutorial="timeline-toolbar">
+              <ContentAdditionToolbar />
+            </div>
             
             {/* Mode-aware timeline rendering */}
             <ModeAwareComponent mode="simplified">
-              <EducationalTimeline 
-                className="flex-1" 
-                mode="simplified"
-                onModeChange={(mode) => {
-                  // Handle mode change if needed
-                  console.log('Timeline mode change:', mode);
-                }}
-              />
+              <div data-tutorial="educational-timeline">
+                <EducationalTimeline 
+                  className="flex-1" 
+                  mode="simplified"
+                  onModeChange={(mode) => {
+                    // Handle mode change if needed
+                    console.log('Timeline mode change:', mode);
+                  }}
+                />
+              </div>
             </ModeAwareComponent>
             
             <ModeAwareComponent mode="advanced">
@@ -252,7 +294,9 @@ function StudioViewContent() {
                   maxSize={800}
                   className={`${ui.inspectorVisible ? '' : 'h-full'} border-b border-purple-200/50 bg-gradient-to-b from-white to-purple-50/30`}
                 >
-                  <MediaBin />
+                  <div data-tutorial="media-bin">
+                    <MediaBin />
+                  </div>
                 </ResizablePanel>
               )}
 
@@ -285,6 +329,37 @@ function StudioViewContent() {
       <ShortcutsDialog
         isOpen={isShortcutsDialogOpen}
         onClose={() => setIsShortcutsDialogOpen(false)}
+      />
+
+      {/* Onboarding */}
+      <OnboardingDialog
+        isOpen={showOnboarding}
+        onClose={() => {
+          setShowOnboarding(false);
+          try { localStorage.setItem('seui_onboarded_v1', 'true'); } catch {}
+        }}
+        onStartTutorial={() => {
+          setShowOnboarding(false);
+          setShowTips(false);
+          setShowTutorial(true);
+          try { localStorage.setItem('seui_onboarded_v1', 'true'); } catch {}
+        }}
+        onOpenGuide={() => {
+          setShowGuide(true);
+        }}
+      />
+
+      {/* Contextual Tips */}
+      <HelpTipsOverlay active={showTips} onClose={() => setShowTips(false)} />
+
+      {/* Best Practices Guide */}
+      <EducationalBestPractices isOpen={showGuide} onClose={() => setShowGuide(false)} />
+
+      {/* Interactive Tutorial */}
+      <InteractiveTutorial
+        isActive={showTutorial}
+        onComplete={() => setShowTutorial(false)}
+        onClose={() => setShowTutorial(false)}
       />
     </div>
   );
