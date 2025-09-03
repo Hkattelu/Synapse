@@ -6,7 +6,7 @@ import { getApplicablePresets, getRecommendedPresetsFor } from '../remotion/anim
 import * as animationPresetsModule from '../lib/animationPresets';
 import { ThemePicker } from './ui/ThemePicker';
 import { VisualControlsTabs } from './ui/VisualControlsTabs';
-import { detectLanguageFromCode, getCodeLanguageDefaults } from '../lib/educationalTypes';
+import { detectLanguageFromCode, getCodeLanguageDefaults, getEducationalTrackByNumber } from '../lib/educationalTypes';
 import type {
   TimelineItem,
   ItemProperties,
@@ -84,9 +84,23 @@ export function Inspector({ className = '' }: InspectorProps) {
           <h3 className="font-semibold text-sm text-gray-900">
             Inspector
           </h3>
-          <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
-            {selectedItem.type.toUpperCase()}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+              {selectedItem.type.toUpperCase()}
+            </span>
+            {(() => {
+              const track = getEducationalTrackByNumber(selectedItem.track);
+              return track ? (
+                <span
+                  className="text-xs px-2 py-1 rounded text-white"
+                  title={`Educational Track: ${track.name}`}
+                  style={{ backgroundColor: track.color }}
+                >
+                  {track.name}
+                </span>
+              ) : null;
+            })()}
+          </div>
         </div>
       </div>
 
