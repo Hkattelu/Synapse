@@ -23,6 +23,16 @@ const defaultProjectSettings: ProjectSettings = {
   audioSampleRate: 48000,
 };
 
+// Load saved UI mode preference
+function getSavedUIMode(): 'simplified' | 'advanced' {
+  try {
+    const saved = localStorage.getItem('synapse-ui-mode');
+    return saved === 'advanced' ? 'advanced' : 'simplified';
+  } catch {
+    return 'simplified';
+  }
+}
+
 // Default UI state
 const defaultUIState: UIState = {
   currentView: 'dashboard',
@@ -51,6 +61,7 @@ const defaultUIState: UIState = {
   musicLibrary: {
     tracks: [],
   },
+  mode: getSavedUIMode(),
 };
 
 // Initial application state
@@ -533,6 +544,15 @@ function uiReducer(state: AppState, action: UIAction): AppState {
         },
       };
 
+    case 'SET_UI_MODE':
+      return {
+        ...state,
+        ui: {
+          ...state.ui,
+          mode: action.payload,
+        },
+      };
+
     case 'RESET_UI_STATE':
       return {
         ...state,
@@ -587,6 +607,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case 'TOGGLE_MEDIA_BIN':
     case 'UPDATE_PLAYBACK_STATE':
     case 'UPDATE_TIMELINE_VIEW':
+    case 'LOAD_MUSIC_LIBRARY':
+    case 'SET_UI_MODE':
     case 'RESET_UI_STATE':
       return uiReducer(state, action as UIAction);
 

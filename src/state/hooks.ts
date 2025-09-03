@@ -348,6 +348,13 @@ export function useUI() {
     [dispatch, state]
   );
 
+  const setUIMode = useCallback(
+    (mode: 'simplified' | 'advanced') => {
+      dispatch({ type: 'SET_UI_MODE', payload: mode });
+    },
+    [dispatch]
+  );
+
   const resetUIState = useCallback(() => {
     dispatch({ type: 'RESET_UI_STATE' });
   }, [dispatch]);
@@ -359,6 +366,7 @@ export function useUI() {
     toggleMediaBin,
     updatePlaybackState,
     updateTimelineView,
+    setUIMode,
     resetUIState,
   };
 }

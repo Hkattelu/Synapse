@@ -350,6 +350,8 @@ export interface UIState {
   musicLibrary: {
     tracks: MusicTrack[];
   };
+  // UI mode for simplified vs advanced interface
+  mode: 'simplified' | 'advanced';
 }
 
 // CC0/Public-domain music track metadata used by the Music Library

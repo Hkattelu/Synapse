@@ -56,6 +56,7 @@ export type UIAction =
   | { type: 'UPDATE_PLAYBACK_STATE'; payload: Partial<UIState['playback']> }
   | { type: 'UPDATE_TIMELINE_VIEW'; payload: Partial<UIState['timeline']> }
   | { type: 'LOAD_MUSIC_LIBRARY'; payload: MusicTrack[] }
+  | { type: 'SET_UI_MODE'; payload: 'simplified' | 'advanced' }
   | { type: 'RESET_UI_STATE' };
 
 export type SetLoadingAction = {

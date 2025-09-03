@@ -19,6 +19,9 @@ import { UndoButton } from './UndoButton';
 import { RedoButton } from './RedoButton';
 import { ShortcutsDialog } from './ShortcutsDialog';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { UIModeToggle } from './UIModeToggle';
+import { ModeAwareComponent, useFeatureVisibility } from './ModeAwareComponent';
+import { EducationalTimeline } from './EducationalTimeline';
 
 function StudioViewContent() {
   const { project } = useProject();
@@ -127,17 +130,22 @@ function StudioViewContent() {
           </div>
 
           <div className="flex items-center space-x-4">
+            {/* UI Mode Toggle */}
+            <UIModeToggle />
+            
             {/* Panel Controls */}
             <div className="flex items-center space-x-2">
-              {/* Undo/Redo Buttons */}
-              <UndoButton
-                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border text-purple-600 hover:bg-purple-50 hover:border-purple-300 disabled:border-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:bg-gray-50`}
-                title="Undo (Ctrl+Z)"
-              />
-              <RedoButton
-                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border text-purple-600 hover:bg-purple-50 hover:border-purple-300 disabled:border-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:bg-gray-50`}
-                title="Redo (Ctrl+Y / Shift+Ctrl+Z)"
-              />
+              {/* Undo/Redo Buttons - Show in both modes but more prominent in advanced */}
+              <ModeAwareComponent mode="both">
+                <UndoButton
+                  className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border text-purple-600 hover:bg-purple-50 hover:border-purple-300 disabled:border-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:bg-gray-50`}
+                  title="Undo (Ctrl+Z)"
+                />
+                <RedoButton
+                  className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border text-purple-600 hover:bg-purple-50 hover:border-purple-300 disabled:border-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:bg-gray-50`}
+                  title="Redo (Ctrl+Y / Shift+Ctrl+Z)"
+                />
+              </ModeAwareComponent>
               <button
                 onClick={toggleMediaBin}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
@@ -161,16 +169,18 @@ function StudioViewContent() {
                 <Settings className="w-4 h-4" />
               </button>
               
-              {/* Shortcuts Button */}
-              <button
-                onClick={() => setIsShortcutsDialogOpen(true)}
-                className="p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300"
-                title="Keyboard Shortcuts (?)"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </button>
+              {/* Shortcuts Button - Advanced mode only */}
+              <ModeAwareComponent mode="advanced">
+                <button
+                  onClick={() => setIsShortcutsDialogOpen(true)}
+                  className="p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300"
+                  title="Keyboard Shortcuts (?)"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+              </ModeAwareComponent>
             </div>
           </div>
         </div>
@@ -199,7 +209,22 @@ function StudioViewContent() {
             className="border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900 flex-shrink-0 flex flex-col"
           >
             <ContentAdditionToolbar />
-            <EnhancedTimelineView className="flex-1" />
+            
+            {/* Mode-aware timeline rendering */}
+            <ModeAwareComponent mode="simplified">
+              <EducationalTimeline 
+                className="flex-1" 
+                mode="simplified"
+                onModeChange={(mode) => {
+                  // Handle mode change if needed
+                  console.log('Timeline mode change:', mode);
+                }}
+              />
+            </ModeAwareComponent>
+            
+            <ModeAwareComponent mode="advanced">
+              <EnhancedTimelineView className="flex-1" />
+            </ModeAwareComponent>
           </ResizablePanel>
         </main>
 
