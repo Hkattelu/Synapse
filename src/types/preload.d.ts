@@ -22,7 +22,9 @@ export type SynapseFSApi = {
 export type LicenseStatus = {
   state: 'valid' | 'invalid' | 'expired' | 'unknown';
   message?: string;
-  lastChecked?: number;
+  // Timestamps per finalized integration contract (epoch ms)
+  lastCheckedAt?: number;
+  lastValidAt?: number;
   expiresAt?: string;
   user?: { email?: string; name?: string; plan?: string };
   licenseMasked?: string | null;
