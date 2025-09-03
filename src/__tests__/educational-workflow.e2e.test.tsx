@@ -3,10 +3,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { TestProviders } from '../test/TestProviders';
 import { patchNextFileInput } from '../test/fileInput';
+import type { Project } from '../lib/types';
 import { ContentAdditionToolbar } from '../components/ContentAdditionToolbar';
 import { useProject } from '../state/hooks';
 import { exportManager, getDefaultExportSettings } from '../lib/exportManager';
-import type { Project } from '../lib/types';
 
 // Mock Remotion heavy modules for export step
 vi.mock('@remotion/bundler', () => ({
@@ -15,7 +15,13 @@ vi.mock('@remotion/bundler', () => ({
 vi.mock('@remotion/renderer', () => ({
   renderMedia: vi.fn(async () => {}),
   getCompositions: vi.fn(async () => [
-    { id: 'MainComposition', width: 1920, height: 1080, fps: 30, durationInFrames: 900 },
+    {
+      id: 'MainComposition',
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      durationInFrames: 900,
+    },
   ]),
 }));
 
@@ -33,7 +39,9 @@ function StateProbe() {
     <div>
       <div data-testid="timeline-count">{project?.timeline.length ?? 0}</div>
       <div data-testid="media-count">{project?.mediaAssets.length ?? 0}</div>
-      <div data-testid="tracks">{(project?.timeline.map((t) => t.track).join(',') ?? '')}</div>
+      <div data-testid="tracks">
+        {project?.timeline.map((t) => t.track).join(',') ?? ''}
+      </div>
     </div>
   );
 }
@@ -53,14 +61,19 @@ describe('E2E: complete educational video creation workflow', () => {
     fireEvent.change(screen.getByPlaceholderText('Enter your code here...'), {
       target: { value: 'function greet(){ return "hi" }' },
     });
-    fireEvent.change(screen.getByPlaceholderText('Enter a descriptive title for your code'), {
-      target: { value: 'Greeting Fn' },
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText('Enter a descriptive title for your code'),
+      {
+        target: { value: 'Greeting Fn' },
+      }
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Add to Timeline' }));
 
     // 2) Add Video quickly to Visual via Quick Upload
     fireEvent.click(screen.getByRole('button', { name: /Add Video/i }));
-    const videoHandle = patchNextFileInput(new File(['fake'], 'screen.mov', { type: 'video/mp4' }));
+    const videoHandle = patchNextFileInput(
+      new File(['fake'], 'screen.mov', { type: 'video/mp4' })
+    );
     try {
       fireEvent.click(screen.getByText('Quick Upload'));
       videoHandle.input.dispatchEvent(new Event('change'));
@@ -70,7 +83,9 @@ describe('E2E: complete educational video creation workflow', () => {
 
     // 3) Add Audio via Assets workflow (Narration)
     fireEvent.click(screen.getByRole('button', { name: /Add Assets/i }));
-    const audioHandle = patchNextFileInput(new File(['beep'], 'voice.wav', { type: 'audio/wav' }));
+    const audioHandle = patchNextFileInput(
+      new File(['beep'], 'voice.wav', { type: 'audio/wav' })
+    );
     try {
       fireEvent.click(screen.getByText('Audio Files'));
       audioHandle.input.dispatchEvent(new Event('change'));
@@ -81,16 +96,22 @@ describe('E2E: complete educational video creation workflow', () => {
     }
 
     // Verify state updated: 3 timeline items and 3 media assets
-    await waitFor(() => expect(screen.getByTestId('timeline-count').textContent).toBe('3'));
+    await waitFor(() =>
+      expect(screen.getByTestId('timeline-count').textContent).toBe('3')
+    );
     expect(screen.getByTestId('media-count').textContent).toBe('3');
 
     // Start export using the current project
     // Access the latest project snapshot via probe text
     // We rely on exportManager API instead of UI for a quicker, deterministic run
-    const compositions = await import('@remotion/renderer');
-    const bundle = await import('@remotion/bundler');
-    vi.mocked(bundle.bundle as any)?.mockResolvedValue?.('/mock/bundle');
-    vi.mocked((compositions as any).renderMedia)?.mockResolvedValue?.({});
+    const compositions = (await import(
+      '@remotion/renderer'
+    )) as typeof import('@remotion/renderer');
+    const bundle = (await import(
+      '@remotion/bundler'
+    )) as typeof import('@remotion/bundler');
+    vi.mocked(bundle.bundle)?.mockResolvedValue?.('/mock/bundle');
+    vi.mocked(compositions.renderMedia)?.mockResolvedValue?.({});
 
     // Snapshot of current project from provider context is not directly accessible here,
     // but exportManager reads a provided Project object. We reconstruct a minimal snapshot by
@@ -116,10 +137,14 @@ describe('E2E: complete educational video creation workflow', () => {
         mediaAssets: [],
         timeline: [],
       };
-      return { ...base, ...(init ?? {}) };
+      return {
+        ...base,
+        ...init,
+        settings: { ...base.settings, ...(init?.settings ?? {}) },
+      };
     }
 
-    const projectLike: Project = makeProject({
+    const project: Project = makeProject({
       mediaAssets: [
         {
           id: 'm1',
@@ -183,8 +208,8 @@ describe('E2E: complete educational video creation workflow', () => {
       ],
     });
 
-    const settings = getDefaultExportSettings(projectLike);
-    await exportManager.startExport(projectLike, settings);
+    const settings = getDefaultExportSettings(project);
+    await exportManager.startExport(project, settings);
 
     // Expect renderer pipeline was invoked
     expect((await import('@remotion/bundler')).bundle).toHaveBeenCalled();
