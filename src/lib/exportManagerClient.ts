@@ -377,7 +377,7 @@ export class ClientExportManager {
             width: settings.width || project.settings.width,
             height: settings.height || project.settings.height,
             fps: project.settings.fps,
-            duration: project.settings.duration ?? Math.ceil((project.timeline?.reduce((max, item) => Math.max(max, (item.startTime || 0) + (item.duration || 0)), 0) || 0))),
+            duration: project.settings.duration ?? Math.ceil((project.timeline?.reduce((max, item) => Math.max(max, (item.startTime || 0) + (item.duration || 0)), 0) || 0)),
             backgroundColor: project.settings.backgroundColor || '#000000',
           },
           exportSettings: {

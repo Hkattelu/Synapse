@@ -433,8 +433,14 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
 
           {/* Controls stack (top-left) */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
+            {/* Educational track-specific controls */}
             {talkingHeads.length > 0 && (
-              <div className="flex items-center space-x-2 bg-neutral-900/70 backdrop-blur px-2 py-1 rounded text-white text-xs">
+              <div className="flex items-center space-x-2 bg-neutral-900/80 backdrop-blur-sm px-3 py-2 rounded-lg text-white text-xs border border-white/10">
+                <div className="flex items-center gap-1 text-red-400">
+                  <span>👤</span>
+                  <span className="font-medium">You Track</span>
+                </div>
+                <div className="w-px h-4 bg-white/20"></div>
                 <button
                   onClick={() => {
                     // Toggle hidden for all talking head items
@@ -447,10 +453,10 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
                       });
                     }
                   }}
-                  className="px-2 py-1 rounded hover:bg-neutral-800"
-                  title={bubbleHidden ? 'Show bubble' : 'Hide bubble'}
+                  className="px-2 py-1 rounded hover:bg-white/10 transition-colors"
+                  title={bubbleHidden ? 'Show personal video' : 'Hide personal video'}
                 >
-                  {bubbleHidden ? 'Show bubble' : 'Hide bubble'}
+                  {bubbleHidden ? '👁️ Show' : '🙈 Hide'}
                 </button>
                 <button
                   onClick={() => {
@@ -459,11 +465,30 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
                       updateTimelineItem(item.id, { muted: !bubbleMuted });
                     }
                   }}
-                  className="px-2 py-1 rounded hover:bg-neutral-800"
-                  title={bubbleMuted ? 'Unmute bubble' : 'Mute bubble'}
+                  className="px-2 py-1 rounded hover:bg-white/10 transition-colors"
+                  title={bubbleMuted ? 'Unmute personal video' : 'Mute personal video'}
                 >
-                  {bubbleMuted ? 'Unmute' : 'Mute'}
+                  {bubbleMuted ? '🔊 Unmute' : '🔇 Mute'}
                 </button>
+              </div>
+            )}
+            
+            {/* Educational track performance indicators */}
+            {activeItems.some(item => getEducationalTrackByNumber(item.track)?.name === 'Code') && (
+              <div className="bg-purple-900/80 backdrop-blur-sm px-2 py-1 rounded text-white text-xs border border-purple-400/30">
+                <div className="flex items-center gap-1">
+                  <span>💻</span>
+                  <span>Code Track Active</span>
+                </div>
+              </div>
+            )}
+            
+            {activeItems.some(item => getEducationalTrackByNumber(item.track)?.name === 'Narration') && (
+              <div className="bg-amber-900/80 backdrop-blur-sm px-2 py-1 rounded text-white text-xs border border-amber-400/30">
+                <div className="flex items-center gap-1">
+                  <span>🎤</span>
+                  <span>Narration Active</span>
+                </div>
               </div>
             )}
             {/* Overlay visibility toggle */}

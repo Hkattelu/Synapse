@@ -52,7 +52,6 @@ export const UpdateBanner: React.FC = () => {
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-<<<<<<< HEAD
           onClick={(e) => {
             if (window.SynapseUpdates && downloadUrl) {
               e.preventDefault();
