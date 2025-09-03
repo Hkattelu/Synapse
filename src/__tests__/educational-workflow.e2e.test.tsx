@@ -6,6 +6,7 @@ import { patchNextFileInput } from '../test/fileInput';
 import { ContentAdditionToolbar } from '../components/ContentAdditionToolbar';
 import { useProject } from '../state/hooks';
 import { exportManager, getDefaultExportSettings } from '../lib/exportManager';
+import type { Project } from '../lib/types';
 
 // Mock Remotion heavy modules for export step
 vi.mock('@remotion/bundler', () => ({
@@ -98,24 +99,89 @@ describe('E2E: complete educational video creation workflow', () => {
     // assembled from the provider would be overkill here. We assert that the export pipeline
     // is invoked when called with a typical project shape.
     // Create a small project matching counts and required fields
-    const projectLike = {
-      id: 'e2e',
-      name: 'E2E Educational',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      version: '1.0.0',
-      settings: { width: 1920, height: 1080, fps: 30, duration: 30, backgroundColor: '#000000' },
+    function makeProject(init?: Partial<Project>): Project {
+      const base: Project = {
+        id: 'e2e',
+        name: 'E2E Educational',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        version: '1.0.0',
+        settings: {
+          width: 1920,
+          height: 1080,
+          fps: 30,
+          duration: 30,
+          backgroundColor: '#000000',
+        },
+        mediaAssets: [],
+        timeline: [],
+      };
+      return { ...base, ...(init ?? {}) };
+    }
+
+    const projectLike: Project = makeProject({
       mediaAssets: [
-        { id: 'm1', name: 'Greeting Fn', type: 'code', url: '', metadata: { fileSize: 1, mimeType: 'text/plain' }, createdAt: new Date() },
-        { id: 'm2', name: 'screen.mov', type: 'video', url: '', metadata: { fileSize: 1, mimeType: 'video/mp4' }, createdAt: new Date() },
-        { id: 'm3', name: 'voice.wav', type: 'audio', url: '', metadata: { fileSize: 1, mimeType: 'audio/wav' }, createdAt: new Date() },
+        {
+          id: 'm1',
+          name: 'Greeting Fn',
+          type: 'code',
+          url: '',
+          metadata: { fileSize: 1, mimeType: 'text/plain' },
+          createdAt: new Date(),
+        },
+        {
+          id: 'm2',
+          name: 'screen.mov',
+          type: 'video',
+          url: '',
+          metadata: { fileSize: 1, mimeType: 'video/mp4' },
+          createdAt: new Date(),
+        },
+        {
+          id: 'm3',
+          name: 'voice.wav',
+          type: 'audio',
+          url: '',
+          metadata: { fileSize: 1, mimeType: 'audio/wav' },
+          createdAt: new Date(),
+        },
       ],
       timeline: [
-        { id: 't1', assetId: 'm1', startTime: 0, duration: 10, track: 0, type: 'code', properties: {}, animations: [], keyframes: [] },
-        { id: 't2', assetId: 'm2', startTime: 0, duration: 30, track: 1, type: 'video', properties: {}, animations: [], keyframes: [] },
-        { id: 't3', assetId: 'm3', startTime: 0, duration: 30, track: 2, type: 'audio', properties: {}, animations: [], keyframes: [] },
+        {
+          id: 't1',
+          assetId: 'm1',
+          startTime: 0,
+          duration: 10,
+          track: 0,
+          type: 'code',
+          properties: {},
+          animations: [],
+          keyframes: [],
+        },
+        {
+          id: 't2',
+          assetId: 'm2',
+          startTime: 0,
+          duration: 30,
+          track: 1,
+          type: 'video',
+          properties: {},
+          animations: [],
+          keyframes: [],
+        },
+        {
+          id: 't3',
+          assetId: 'm3',
+          startTime: 0,
+          duration: 30,
+          track: 2,
+          type: 'audio',
+          properties: {},
+          animations: [],
+          keyframes: [],
+        },
       ],
-    } as any;
+    });
 
     const settings = getDefaultExportSettings(projectLike);
     await exportManager.startExport(projectLike, settings);

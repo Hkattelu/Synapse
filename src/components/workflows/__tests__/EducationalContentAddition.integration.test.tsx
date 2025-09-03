@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CodeEditorWorkflow } from '../CodeEditorWorkflow';
 import { VideoWorkflow } from '../VideoWorkflow';
+import { patchNextFileInput } from '../../../test/fileInput';
 
 // Mocks must be defined before importing modules that consume them
 const mockAddTimelineItem = vi.fn();
@@ -98,25 +99,21 @@ describe('Educational content addition workflows (integration)', () => {
       target: { value: 'Presenter Intro' },
     });
 
-    // Intercept file picker and simulate a file selection
-    const inputEl = document.createElement('input');
-    const mockFile = new File(['fake'], 'video.mp4', { type: 'video/mp4' });
-    Object.defineProperty(inputEl, 'files', { value: [mockFile] });
+    // Intercept file picker and simulate a file selection using shared helper
+    const { input, restore } = patchNextFileInput(
+      new File(['fake'], 'video.mp4', { type: 'video/mp4' })
+    );
+    try {
+      fireEvent.click(screen.getByText('Upload Video File'));
 
-    const createElementSpy = vi
-      .spyOn(document, 'createElement')
-      .mockImplementation((tag: string) => (tag === 'input' ? (inputEl as any) : (document.createElement as any).orig(tag)));
-    // Preserve original for other tags
-    (document.createElement as any).orig = (document.createElement as any).orig || ((t: string) => HTMLDocument.prototype.createElement.call(document, t));
-
-    fireEvent.click(screen.getByText('Upload Video File'));
-
-    // Trigger the change event the workflow attaches
-    inputEl.dispatchEvent(new Event('change'));
+      // Trigger the change event the workflow attaches
+      input.dispatchEvent(new Event('change'));
 
     await waitFor(() => expect(onVideoAdded).toHaveBeenCalled());
-    expect(onClose).toHaveBeenCalled();
-    createElementSpy.mockRestore();
+      expect(onClose).toHaveBeenCalled();
+    } finally {
+      restore();
+    }
 
     // Asset and timeline item created
     expect(mockAddMediaAsset).toHaveBeenCalledWith(
