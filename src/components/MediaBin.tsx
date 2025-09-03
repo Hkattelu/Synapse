@@ -43,6 +43,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
   const [isUploading, setIsUploading] = useState(false);
   const { notify } = useNotifications();
   const [activeTab, setActiveTab] = useState<'media' | 'music'>('media');
+  const [educationalFilter, setEducationalFilter] = useState<'all' | 'code' | 'visual' | 'narration' | 'you'>('all');
 
   // Listen for upload files event from toolbar
   React.useEffect(() => {
@@ -493,7 +494,21 @@ export function MediaBin({ className = '' }: MediaBinProps) {
               </button>
             </div>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
+            {/* Educational content filter */}
+            {activeTab === 'media' && (
+              <select
+                value={educationalFilter}
+                onChange={(e) => setEducationalFilter(e.target.value as any)}
+                className="bg-gray-700 text-white text-xs border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-purple-500"
+              >
+                <option value="all">All Content</option>
+                <option value="code">💻 Code</option>
+                <option value="visual">🖥️ Visual</option>
+                <option value="narration">🎤 Narration</option>
+                <option value="you">👤 You</option>
+              </select>
+            )}
             <button
               onClick={openFileDialog}
               className="bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium py-2 px-4 rounded transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
@@ -587,7 +602,26 @@ export function MediaBin({ className = '' }: MediaBinProps) {
             onDrop={handleDrop}
           >
             <div className="grid grid-cols-2 gap-3">
-              {mediaAssets.map((asset) => (
+              {mediaAssets
+                .filter((asset) => {
+                  if (educationalFilter === 'all') return true;
+                  
+                  try {
+                    const suggestion = suggestTrackPlacement(asset);
+                    const trackName = suggestion.suggestedTrack.name.toLowerCase();
+                    
+                    if (educationalFilter === 'code') return trackName === 'code';
+                    if (educationalFilter === 'visual') return trackName === 'visual';
+                    if (educationalFilter === 'narration') return trackName === 'narration';
+                    if (educationalFilter === 'you') return trackName === 'you';
+                  } catch {
+                    // If suggestion fails, show in 'all' filter only
+                    return educationalFilter === 'all';
+                  }
+                  
+                  return false;
+                })
+                .map((asset) => (
                 <div
                   key={asset.id}
                   className="bg-background-tertiary rounded-lg overflow-hidden hover:bg-neutral-700 transition-colors cursor-pointer group border border-border-subtle hover:border-neutral-600"
@@ -745,22 +779,50 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                         {formatFileSize(asset.metadata.fileSize)}
                       </span>
                     </div>
-                    {/* Suggested educational track badge */}
+                    {/* Educational content categorization */}
                     {(() => {
                       try {
                         const suggestion = suggestTrackPlacement(asset);
                         const track = suggestion.suggestedTrack;
                         return (
-                          <div className="mt-1 text-[10px]">
+                          <div className="mt-1 flex items-center justify-between">
                             <span
-                              className="inline-block px-1.5 py-0.5 rounded text-white"
+                              className="inline-block px-1.5 py-0.5 rounded text-white text-[10px] font-medium"
                               title={`Suggested Track: ${track.name} (${Math.round(
                                 suggestion.confidence * 100
-                              )}% confidence)`}
+                              )}% confidence) - ${suggestion.reason}`}
                               style={{ backgroundColor: track.color }}
                             >
                               {track.name}
                             </span>
+                            {/* Educational content type indicator */}
+                            <div className="flex items-center gap-1">
+                              {asset.type === 'code' && (
+                                <span className="text-[9px] text-purple-600 bg-purple-100 px-1 py-0.5 rounded font-mono">
+                                  {asset.metadata.language?.toUpperCase() || 'CODE'}
+                                </span>
+                              )}
+                              {asset.type === 'video' && suggestion.suggestedTrack.name === 'You' && (
+                                <span className="text-[9px] text-red-600 bg-red-100 px-1 py-0.5 rounded">
+                                  PERSONAL
+                                </span>
+                              )}
+                              {asset.type === 'video' && suggestion.suggestedTrack.name === 'Visual' && (
+                                <span className="text-[9px] text-green-600 bg-green-100 px-1 py-0.5 rounded">
+                                  DEMO
+                                </span>
+                              )}
+                              {asset.type === 'audio' && (
+                                <span className="text-[9px] text-amber-600 bg-amber-100 px-1 py-0.5 rounded">
+                                  AUDIO
+                                </span>
+                              )}
+                              {asset.type === 'visual-asset' && (
+                                <span className="text-[9px] text-blue-600 bg-blue-100 px-1 py-0.5 rounded">
+                                  VISUAL
+                                </span>
+                              )}
+                            </div>
                           </div>
                         );
                       } catch {

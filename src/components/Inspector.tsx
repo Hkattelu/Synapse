@@ -91,14 +91,27 @@ export function Inspector({ className = '' }: InspectorProps) {
             {(() => {
               const track = getEducationalTrackByNumber(selectedItem.track);
               return track ? (
-                <span
-                  className="text-xs px-2 py-1 rounded text-white"
-                  title={`Educational Track: ${track.name}`}
-                  style={{ backgroundColor: track.color }}
-                >
-                  {track.name}
+                <div className="flex items-center gap-1">
+                  <span
+                    className="text-xs px-2 py-1 rounded text-white font-medium"
+                    title={`Educational Track: ${track.name} - ${track.allowedContentTypes.join(', ')} content`}
+                    style={{ backgroundColor: track.color }}
+                  >
+                    {track.name}
+                  </span>
+                  {/* Educational track icon */}
+                  <div className="text-xs text-gray-500" title={`Track ${track.trackNumber + 1}`}>
+                    {track.icon === 'code' && '💻'}
+                    {track.icon === 'monitor' && '🖥️'}
+                    {track.icon === 'mic' && '🎤'}
+                    {track.icon === 'user' && '👤'}
+                  </div>
+                </div>
+              ) : (
+                <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
+                  Track {selectedItem.track + 1}
                 </span>
-              ) : null;
+              );
             })()}
           </div>
         </div>
@@ -147,12 +160,87 @@ export function Inspector({ className = '' }: InspectorProps) {
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto min-h-0">
         {activeTab === 'properties' && (
-          <ClipProperties
-            item={selectedItem}
-            onUpdateProperties={(properties) =>
-              updateTimelineItem(selectedItem.id, { properties })
-            }
-          />
+          <>
+            {/* Educational Track Context */}
+            {(() => {
+              const track = getEducationalTrackByNumber(selectedItem.track);
+              if (track) {
+                return (
+                  <div className="p-4 border-b border-border-subtle bg-gradient-to-r from-purple-50 to-blue-50">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div 
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold"
+                        style={{ backgroundColor: track.color }}
+                      >
+                        {track.icon === 'code' && '💻'}
+                        {track.icon === 'monitor' && '🖥️'}
+                        {track.icon === 'mic' && '🎤'}
+                        {track.icon === 'user' && '👤'}
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{track.name} Track</h4>
+                        <p className="text-xs text-gray-600">
+                          Optimized for {track.allowedContentTypes.join(', ')} content
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Educational tips based on track */}
+                    <div className="text-xs text-gray-700 bg-white/70 p-2 rounded border">
+                      {track.name === 'Code' && (
+                        <div>
+                          <strong>💡 Code Track Tips:</strong>
+                          <ul className="mt-1 space-y-1 list-disc list-inside">
+                            <li>Use typing animation for step-by-step explanations</li>
+                            <li>Enable line numbers for better reference</li>
+                            <li>Choose appropriate themes for readability</li>
+                          </ul>
+                        </div>
+                      )}
+                      {track.name === 'Visual' && (
+                        <div>
+                          <strong>🖥️ Visual Track Tips:</strong>
+                          <ul className="mt-1 space-y-1 list-disc list-inside">
+                            <li>Perfect for screen recordings and demonstrations</li>
+                            <li>Use focus animations to highlight important areas</li>
+                            <li>Consider side-by-side layouts with code</li>
+                          </ul>
+                        </div>
+                      )}
+                      {track.name === 'Narration' && (
+                        <div>
+                          <strong>🎤 Narration Track Tips:</strong>
+                          <ul className="mt-1 space-y-1 list-disc list-inside">
+                            <li>Adjust volume levels for clear audio</li>
+                            <li>Use audio ducking for background music</li>
+                            <li>Sync timing with visual content</li>
+                          </ul>
+                        </div>
+                      )}
+                      {track.name === 'You' && (
+                        <div>
+                          <strong>👤 You Track Tips:</strong>
+                          <ul className="mt-1 space-y-1 list-disc list-inside">
+                            <li>Enable talking head mode for personal touch</li>
+                            <li>Position in corner to not obstruct content</li>
+                            <li>Consider background removal for cleaner look</li>
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+            
+            <ClipProperties
+              item={selectedItem}
+              onUpdateProperties={(properties) =>
+                updateTimelineItem(selectedItem.id, { properties })
+              }
+            />
+          </>
         )}
         
         {activeTab === 'animation' && hasAnimationPresets && (

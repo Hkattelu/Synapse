@@ -257,8 +257,11 @@ function StudioViewContent() {
                   className="flex-1" 
                   mode="simplified"
                   onModeChange={(mode) => {
-                    // Handle mode change if needed
-                    console.log('Timeline mode change:', mode);
+                    // Update UI mode when timeline mode changes
+                    if (mode === 'advanced') {
+                      // Switch to advanced mode globally
+                      window.dispatchEvent(new CustomEvent('switchToAdvancedMode'));
+                    }
                   }}
                 />
               </div>

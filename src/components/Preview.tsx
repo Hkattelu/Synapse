@@ -6,6 +6,8 @@ import { MainComposition } from '../remotion/MainComposition';
 import type { MainCompositionProps } from '../remotion/types';
 import type { TimelineItem } from '../lib/types';
 import { getEducationalTrackByNumber } from '../lib/educationalTypes';
+import Eye from 'lucide-react/dist/esm/icons/eye.js';
+import EyeOff from 'lucide-react/dist/esm/icons/eye-off.js';
 
 interface PreviewProps {
   className?: string;
@@ -45,6 +47,15 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   const playerRef = React.useRef<PlayerRef>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  // Persisted toggle for the educational tracks overlay
+  const [showEduOverlay, setShowEduOverlay] = useState<boolean>(() => {
+    try {
+      const val = localStorage.getItem('synapse-show-edu-overlay');
+      return val === null ? true : val === 'true';
+    } catch {
+      return true;
+    }
+  });
 
   // Determine which timeline items are active at the current time
   const activeItems = useMemo(
@@ -420,43 +431,60 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             )}
           </button>
 
-          {talkingHeads.length > 0 && (
-            <div className="absolute top-3 left-3 flex items-center space-x-2 bg-neutral-900/70 backdrop-blur px-2 py-1 rounded text-white text-xs">
-              <button
-                onClick={() => {
-                  // Toggle hidden for all talking head items
-                  for (const item of talkingHeads) {
-                    updateTimelineItem(item.id, {
-                      properties: {
-                        ...item.properties,
-                        talkingHeadHidden: !bubbleHidden,
-                      },
-                    });
-                  }
-                }}
-                className="px-2 py-1 rounded hover:bg-neutral-800"
-                title={bubbleHidden ? 'Show bubble' : 'Hide bubble'}
-              >
-                {bubbleHidden ? 'Show bubble' : 'Hide bubble'}
-              </button>
-              <button
-                onClick={() => {
-                  // Toggle mute for all talking head items
-                  for (const item of talkingHeads) {
-                    updateTimelineItem(item.id, { muted: !bubbleMuted });
-                  }
-                }}
-                className="px-2 py-1 rounded hover:bg-neutral-800"
-                title={bubbleMuted ? 'Unmute bubble' : 'Mute bubble'}
-              >
-                {bubbleMuted ? 'Unmute' : 'Mute'}
-              </button>
-            </div>
-          )}
+          {/* Controls stack (top-left) */}
+          <div className="absolute top-3 left-3 flex flex-col gap-2">
+            {talkingHeads.length > 0 && (
+              <div className="flex items-center space-x-2 bg-neutral-900/70 backdrop-blur px-2 py-1 rounded text-white text-xs">
+                <button
+                  onClick={() => {
+                    // Toggle hidden for all talking head items
+                    for (const item of talkingHeads) {
+                      updateTimelineItem(item.id, {
+                        properties: {
+                          ...item.properties,
+                          talkingHeadHidden: !bubbleHidden,
+                        },
+                      });
+                    }
+                  }}
+                  className="px-2 py-1 rounded hover:bg-neutral-800"
+                  title={bubbleHidden ? 'Show bubble' : 'Hide bubble'}
+                >
+                  {bubbleHidden ? 'Show bubble' : 'Hide bubble'}
+                </button>
+                <button
+                  onClick={() => {
+                    // Toggle mute for all talking head items
+                    for (const item of talkingHeads) {
+                      updateTimelineItem(item.id, { muted: !bubbleMuted });
+                    }
+                  }}
+                  className="px-2 py-1 rounded hover:bg-neutral-800"
+                  title={bubbleMuted ? 'Unmute bubble' : 'Mute bubble'}
+                >
+                  {bubbleMuted ? 'Unmute' : 'Mute'}
+                </button>
+              </div>
+            )}
+            {/* Overlay visibility toggle */}
+            <button
+              onClick={() => {
+                const next = !showEduOverlay;
+                setShowEduOverlay(next);
+                try { localStorage.setItem('synapse-show-edu-overlay', String(next)); } catch {}
+              }}
+              className="flex items-center gap-1 bg-neutral-900/70 backdrop-blur px-2 py-1 rounded text-white text-xs hover:bg-neutral-800/70"
+              title={showEduOverlay ? 'Hide Educational Tracks Overlay' : 'Show Educational Tracks Overlay'}
+              aria-pressed={showEduOverlay}
+            >
+              {showEduOverlay ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+              <span className="hidden sm:inline">Tracks Overlay</span>
+            </button>
+          </div>
 
           {/* Active educational tracks overlay */}
-          {activeItems.length > 0 && (
-            <div className="absolute top-3 left-3 mt-10 bg-neutral-900/70 backdrop-blur px-2 py-1 rounded text-white text-xs max-w-[60%]">
+          {showEduOverlay && activeItems.length > 0 && (
+            <div className="absolute top-3 left-3 mt-20 bg-neutral-900/70 backdrop-blur px-2 py-1 rounded text-white text-xs max-w-[60%]">
               <div className="font-medium mb-1 opacity-90">Now Playing</div>
               <div className="space-y-1">
                 {activeItems.map((item) => {
