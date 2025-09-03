@@ -7,3 +7,5 @@ export { Inspector } from './Inspector';
 export { Timeline } from './Timeline';
 export { Preview } from './Preview';
 export { TimelineToolbar } from './TimelineToolbar';
+// Educational components
+export { EducationalTimeline } from './EducationalTimeline';
