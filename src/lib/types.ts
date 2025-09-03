@@ -335,7 +335,7 @@ export interface TimelineViewState {
   showKeyframes: boolean;
   trackHeight: number;
   selectedKeyframes: string[];
-  timelineMode: 'standard' | 'advanced' | 'keyframe';
+  timelineMode: 'standard' | 'advanced' | 'keyframe' | 'simplified';
   verticalScrollPosition: number;
 }
 
@@ -350,6 +350,8 @@ export interface UIState {
   musicLibrary: {
     tracks: MusicTrack[];
   };
+  // UI mode for simplified vs advanced interface
+  mode: 'simplified' | 'advanced';
 }
 
 // CC0/Public-domain music track metadata used by the Music Library

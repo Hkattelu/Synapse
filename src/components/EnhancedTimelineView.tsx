@@ -1,13 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useTimeline, usePlayback } from '../state/hooks';
 import type {
-  TimelineItem,
   TimelineMarker,
   TimelineRegion,
 } from '../lib/types';
 import { AdvancedTimeline } from './AdvancedTimeline';
 import { KeyframePropertiesPanel } from './KeyframePropertiesPanel';
-import { TrackManager } from './TrackManager';
 import { TimelineMarkerManager } from './TimelineMarkerManager';
 
 interface EnhancedTimelineViewProps {
@@ -19,9 +17,9 @@ type PanelType = 'keyframes' | 'tracks' | 'markers' | null;
 export function EnhancedTimelineView({
   className = '',
 }: EnhancedTimelineViewProps) {
-  const { timeline, selectedItems, currentTime, setCurrentTime } =
+  const { timeline, selectedItems, setCurrentTime } =
     useTimeline();
-  const { playback, play, pause, togglePlayback, seek } = usePlayback();
+  const { playback, togglePlayback, seek } = usePlayback();
 
   const [activePanel, setActivePanel] = useState<PanelType>('keyframes');
   const [selectedKeyframes, setSelectedKeyframes] = useState<string[]>([]);
@@ -55,11 +53,6 @@ export function EnhancedTimelineView({
     [setCurrentTime, seek]
   );
 
-  // Handle keyframe selection changes
-  const handleKeyframeSelectionChange = useCallback((keyframes: string[]) => {
-    setSelectedKeyframes(keyframes);
-  }, []);
-
   // Panel width calculation
   const getPanelWidth = (panel: PanelType) => {
     switch (panel) {
@@ -79,17 +72,16 @@ export function EnhancedTimelineView({
       {/* Main Timeline Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Timeline Controls Header */}
-        <div className="bg-gray-900 border-b border-gray-700 px-3 py-2 flex items-center justify-between">
+        <div className="bg-gray-900 border-b border-gray-700 px-3 py-2 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center space-x-4">
             {/* Panel Toggle Buttons - Simplified and Consistent */}
             <div className="flex items-center space-x-1 bg-gray-800 rounded p-0.5">
               <button
                 onClick={() => togglePanel('keyframes')}
-                className={`px-3 py-1.5 text-xs rounded transition-colors ${
-                  activePanel === 'keyframes'
-                    ? 'bg-primary-600 text-white'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                }`}
+                className={`px-3 py-1.5 text-xs rounded transition-colors ${activePanel === 'keyframes'
+                  ? 'bg-primary-600 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                  }`}
                 title="Keyframe Properties"
               >
                 <svg
@@ -110,11 +102,10 @@ export function EnhancedTimelineView({
 
               <button
                 onClick={() => togglePanel('markers')}
-                className={`px-3 py-1.5 text-xs rounded transition-colors ${
-                  activePanel === 'markers'
-                    ? 'bg-primary-600 text-white'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                }`}
+                className={`px-3 py-1.5 text-xs rounded transition-colors ${activePanel === 'markers'
+                  ? 'bg-primary-600 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                  }`}
                 title="Timeline Markers"
               >
                 <svg
@@ -214,8 +205,8 @@ export function EnhancedTimelineView({
           </div>
         </div>
 
-        {/* Advanced Timeline */}
-        <div className="flex-1 min-h-0">
+        {/* Advanced Timeline - Fixed height to prevent movement */}
+        <div className="flex-1 min-h-0 h-80">
           <AdvancedTimeline className="h-full w-full" />
         </div>
       </div>

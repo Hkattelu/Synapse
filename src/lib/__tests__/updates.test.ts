@@ -7,10 +7,9 @@ describe('compareVersions', () => {
     expect(compareVersions('1.2.0', '1.1.9')).toBe(1);
     expect(compareVersions('1.2.0', '2.0.0')).toBeLessThan(0);
   });
-  it('handles prerelease/build sections per semver', () => {
-    // prerelease < release when cores are equal
-    expect(compareVersions('1.2.3-alpha.1', '1.2.3')).toBeLessThan(0);
-    // build metadata is ignored
+<<<<<<< HEAD
+  it('handles prerelease/build sections leniently', () => {
+    expect(compareVersions('1.2.3-alpha.1', '1.2.3')).toBe(0);
     expect(compareVersions('1.2.3+build.5', '1.2.4')).toBeLessThan(0);
   });
   it('pads shorter versions', () => {

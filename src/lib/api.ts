@@ -66,10 +66,21 @@ export const api = {
     password: string;
     name?: string;
   }): Promise<{ user: ApiUser; membership: ApiMembership }> {
-    return request('/api/auth/signup', {
-      method: 'POST',
-      body: JSON.stringify(input),
-    });
+    // Prefer existing endpoint; fallback to alternate path if not found
+    try {
+      return await request('/api/auth/signup', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      });
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 404) {
+        return request('/api/auth/register', {
+          method: 'POST',
+          body: JSON.stringify(input),
+        });
+      }
+      throw e;
+    }
   },
   async login(input: {
     email: string;
@@ -96,7 +107,7 @@ export const api = {
       body: JSON.stringify(input),
     });
   },
-  // Export jobs
+  // Export jobs (legacy endpoints)
   async createExportJob(
     jobSpec: any,
     init?: RequestInit
@@ -112,5 +123,38 @@ export const api = {
   },
   async cancelExportJob(id: string): Promise<any> {
     return request(`/api/export/jobs/${id}/cancel`, { method: 'POST' });
+  },
+  // New render API
+  async startRender(inputProps: any): Promise<{ jobId: string }> {
+    return request('/api/render', {
+      method: 'POST',
+      body: JSON.stringify(inputProps),
+    });
+  },
+  async getRenderStatus(id: string): Promise<{ status: string; output?: string; error?: string }> {
+    return request(`/api/render/${id}/status`);
+  },
+  renderDownloadUrl(id: string): string {
+    return `/api/render/${id}/download`;
+  },
+  // AI
+  async aiGenerateFromRepo(input: { repoUrl: string; branch?: string }): Promise<any> {
+    return request('/api/ai/generate-from-repo', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  },
+  // Contact
+  async submitContact(input: { name: string; email: string; message: string }): Promise<{ queued?: boolean; messageId?: string; simulated?: boolean; success?: boolean }> {
+    return request('/api/contact', {
+      method: 'POST',
+      body: JSON.stringify({
+        from_name: input.name,
+        from_email: input.email,
+        message: input.message,
+        subject: `Contact from ${input.name}`,
+        timestamp: new Date().toISOString(),
+      }),
+    });
   },
 };

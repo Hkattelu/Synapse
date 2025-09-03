@@ -38,7 +38,7 @@ export const UpdateBanner: React.FC = () => {
   const downloadUrl = status?.downloadUrl;
   const href = downloadUrl || '/downloads';
   const isExternal =
-    typeof downloadUrl === 'string' && /^https:\/\//i.test(downloadUrl);
+    typeof downloadUrl === 'string' && /^https?:\/\//i.test(downloadUrl);
 
   return (
     <div className="w-full bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2 text-sm flex items-center justify-center gap-3">
@@ -52,17 +52,15 @@ export const UpdateBanner: React.FC = () => {
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={async (e) => {
-            if (!window.SynapseUpdates || !downloadUrl) return;
-            e.preventDefault();
-            try {
-              await window.SynapseUpdates.openDownload(downloadUrl);
-            } catch {
-              // Intentionally no fallback to window.open to honor https-only + allowlist policy
-              // Optionally, a toast/inline error could be shown here in the future.
-              console.warn(
-                'Failed to open download via preload (blocked or invalid URL).'
-              );
+<<<<<<< HEAD
+          onClick={(e) => {
+            if (window.SynapseUpdates && downloadUrl) {
+              e.preventDefault();
+              try {
+                void window.SynapseUpdates.openDownload(downloadUrl);
+              } catch {
+                window.open(downloadUrl, '_blank', 'noopener');
+              }
             }
           }}
         >

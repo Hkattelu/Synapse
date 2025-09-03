@@ -66,8 +66,7 @@ type LicenseState = 'valid' | 'invalid' | 'expired' | 'unknown';
 type LicenseStatus = {
   state: LicenseState;
   message?: string;
-  lastCheckedAt?: number; // epoch ms
-  lastValidAt?: number; // epoch ms
+  lastChecked?: number; // epoch ms
   expiresAt?: string;
   user?: { email?: string; name?: string; plan?: string };
 };
@@ -181,21 +180,17 @@ function coerceLicenseStatus(input: unknown): LicenseStatus {
       message,
       expiresAt,
       user: u ? { email, name, plan } : undefined,
-      lastCheckedAt: Date.now(),
+      lastChecked: Date.now(),
     };
   } catch {
-    return { state: 'unknown', lastCheckedAt: Date.now() };
+    return { state: 'unknown', lastChecked: Date.now() };
   }
 }
 
 async function validateLicense(
   currentLicense: string | null
 ): Promise<LicenseStatus> {
-  const base: LicenseStatus = {
-    state: 'unknown',
-    lastCheckedAt: Date.now(),
-    lastValidAt: lastLicenseStatus?.lastValidAt,
-  };
+  const base: LicenseStatus = { state: 'unknown', lastChecked: Date.now() };
   if (!currentLicense) {
     const res: LicenseStatus = {
       ...base,
@@ -267,19 +262,14 @@ async function validateLicense(
     }
     const json = await res.json().catch(() => ({}));
     const mapped = coerceLicenseStatus(json);
-    // If the mapped state is valid, stamp lastValidAt; otherwise preserve prior lastValidAt
-    const withValidity: LicenseStatus =
-      mapped.state === 'valid'
-        ? { ...mapped, lastValidAt: Date.now() }
-        : { ...mapped, lastValidAt: lastLicenseStatus?.lastValidAt };
-    lastLicenseStatus = withValidity;
-    await persistLicenseStatus(withValidity);
-    broadcastToAll('license:status', withValidity);
+    lastLicenseStatus = mapped;
+    await persistLicenseStatus(mapped);
+    broadcastToAll('license:status', mapped);
     console.info(
       '[licenseCheck]',
       JSON.stringify({ event: 'licenseCheck', result: mapped.state })
     );
-    return withValidity;
+    return mapped;
   } catch (e: unknown) {
     const out: LicenseStatus = {
       ...base,
@@ -318,22 +308,8 @@ async function persistLicenseStatus(status: LicenseStatus) {
 async function loadLicenseStatusFromDisk(): Promise<LicenseStatus | null> {
   try {
     const raw = await fs.readFile(LICENSE_STATUS_JSON(), 'utf-8');
-    const parsed = JSON.parse(raw) as Record<string, unknown>;
-    if (parsed && typeof parsed === 'object') {
-      // Lightweight migration: map legacy lastChecked -> lastCheckedAt when needed
-      const lastCheckedAt =
-        (parsed.lastCheckedAt as number | undefined) ??
-        (parsed.lastChecked as number | undefined);
-      const migrated: LicenseStatus = {
-        state: (parsed.state as LicenseState) ?? 'unknown',
-        message: (parsed.message as string | undefined) ?? undefined,
-        lastCheckedAt,
-        lastValidAt: parsed.lastValidAt as number | undefined,
-        expiresAt: parsed.expiresAt as string | undefined,
-        user: (parsed.user as LicenseStatus['user']) ?? undefined,
-      };
-      return migrated;
-    }
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object') return parsed as LicenseStatus;
   } catch {
     // ignore
   }
@@ -749,7 +725,7 @@ ipcMain.handle('ipc:app:get-path', async () => {
 // IPC: License management
 ipcMain.handle('ipc:license:get-status', async () => {
   // Load from disk on first call if we don't have it in memory
-  if (!lastLicenseStatus?.lastCheckedAt) {
+  if (!lastLicenseStatus?.lastChecked) {
     const fromDisk = await loadLicenseStatusFromDisk();
     if (fromDisk) lastLicenseStatus = fromDisk;
   }
@@ -780,8 +756,7 @@ ipcMain.handle('ipc:license:clear', async () => {
   lastLicenseStatus = {
     state: 'invalid',
     message: 'No license present',
-    lastCheckedAt: Date.now(),
-    lastValidAt: lastLicenseStatus?.lastValidAt,
+    lastChecked: Date.now(),
   };
   broadcastToAll('license:status', lastLicenseStatus);
   return { ...lastLicenseStatus, licenseMasked: null };

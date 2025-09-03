@@ -19,7 +19,6 @@ interface DragState {
 const TRACK_HEIGHT = 60;
 const PIXELS_PER_SECOND = 100;
 const MIN_CLIP_DURATION = 0.1;
-const SNAP_THRESHOLD = 10; // pixels
 
 export function Timeline({ className = '' }: TimelineProps) {
   const {

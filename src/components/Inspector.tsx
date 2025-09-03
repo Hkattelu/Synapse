@@ -2,10 +2,11 @@ import React, { useState, useCallback } from 'react';
 import { useTimeline, useMediaAssets } from '../state/hooks';
 import { validateItemProperties } from '../lib/validation';
 import { PresetSelector } from './animation/PresetSelector';
-import { getApplicablePresets } from '../remotion/animations/presets';
+import { getApplicablePresets, getRecommendedPresetsFor } from '../remotion/animations/presets';
 import * as animationPresetsModule from '../lib/animationPresets';
 import { ThemePicker } from './ui/ThemePicker';
 import { VisualControlsTabs } from './ui/VisualControlsTabs';
+import { detectLanguageFromCode, getCodeLanguageDefaults } from '../lib/educationalTypes';
 import type {
   TimelineItem,
   ItemProperties,
@@ -77,71 +78,54 @@ export function Inspector({ className = '' }: InspectorProps) {
     <div
       className={`inspector bg-background-secondary flex flex-col h-full max-h-[calc(100vh-12rem)] ${className}`}
     >
-      {/* Header with clip info */}
-      <div className="p-4 border-b border-border-subtle flex-shrink-0">
-        <h3 className="font-semibold text-sm text-gray-900 uppercase tracking-wide">
-          Inspector
-        </h3>
-        <p className="text-xs text-gray-600 mt-1">
-          {selectedTimelineItems.length} item
-          {selectedTimelineItems.length !== 1 ? 's' : ''} selected
-        </p>
+      {/* Simplified Header */}
+      <div className="p-3 border-b border-border-subtle flex-shrink-0">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-sm text-gray-900">
+            Inspector
+          </h3>
+          <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+            {selectedItem.type.toUpperCase()}
+          </span>
+        </div>
       </div>
 
-      {/* Clip Metadata - Always visible */}
-      <ClipMetadata item={selectedItem} asset={selectedAsset} />
-
-      {/* Tab Navigation */}
+      {/* Simplified Tab Navigation */}
       <div className="border-b border-border-subtle bg-background-tertiary">
         <div className="flex">
           <button
             onClick={() => setActiveTab('properties')}
-            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+            className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
               activeTab === 'properties'
                 ? 'text-gray-900 bg-white border-b-2 border-purple-500'
                 : 'text-gray-700 hover:text-gray-900 hover:bg-white/50'
             }`}
           >
-            <div className="flex items-center justify-center space-x-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-              </svg>
-              <span>Properties</span>
-            </div>
+            Properties
           </button>
           
           {hasAnimationPresets && (
             <button
               onClick={() => setActiveTab('animation')}
-              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
                 activeTab === 'animation'
                   ? 'text-gray-900 bg-white border-b-2 border-purple-500'
                   : 'text-gray-700 hover:text-gray-900 hover:bg-white/50'
               }`}
             >
-              <div className="flex items-center justify-center space-x-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span>Animation</span>
-              </div>
+              Animation
             </button>
           )}
           
           <button
             onClick={() => setActiveTab('visual')}
-            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+            className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
               activeTab === 'visual'
                 ? 'text-gray-900 bg-white border-b-2 border-purple-500'
                 : 'text-gray-700 hover:text-gray-900 hover:bg-white/50'
             }`}
           >
-            <div className="flex items-center justify-center space-x-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
-              </svg>
-              <span>Visual</span>
-            </div>
+            Visual
           </button>
         </div>
       </div>
@@ -517,25 +501,50 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
         error={validationErrors.codeTextB}
         multiline
       />
-      <SelectInput
-        label="Language"
-        value={localProperties.language ?? 'javascript'}
-        onChange={(value) => updateProperty('language', value)}
-        options={[
-          { value: 'javascript', label: 'JavaScript' },
-          { value: 'typescript', label: 'TypeScript' },
-          { value: 'tsx', label: 'TSX' },
-          { value: 'jsx', label: 'JSX' },
-          { value: 'python', label: 'Python' },
-          { value: 'java', label: 'Java' },
-          { value: 'cpp', label: 'C++' },
-          { value: 'html', label: 'HTML' },
-          { value: 'css', label: 'CSS' },
-          { value: 'json', label: 'JSON' },
-          { value: 'glsl', label: 'GLSL' },
-          { value: 'gdscript', label: 'GDScript' },
-        ]}
-      />
+      <div className="space-y-2">
+        <SelectInput
+          label="Language"
+          value={localProperties.language ?? 'javascript'}
+          onChange={(value) => updateProperty('language', value)}
+          options={[
+            { value: 'javascript', label: 'JavaScript' },
+            { value: 'typescript', label: 'TypeScript' },
+            { value: 'tsx', label: 'TSX' },
+            { value: 'jsx', label: 'JSX' },
+            { value: 'python', label: 'Python' },
+            { value: 'java', label: 'Java' },
+            { value: 'cpp', label: 'C++' },
+            { value: 'html', label: 'HTML' },
+            { value: 'css', label: 'CSS' },
+            { value: 'json', label: 'JSON' },
+            { value: 'glsl', label: 'GLSL' },
+            { value: 'gdscript', label: 'GDScript' },
+          ]}
+        />
+        
+        {/* Language Detection Button */}
+        <button
+          onClick={() => {
+            const codeText = localProperties.codeText || localProperties.text || '';
+            if (codeText.trim()) {
+              const detection = detectLanguageFromCode(codeText);
+              if (detection.confidence > 20) {
+                updateProperty('language', detection.language);
+                // Apply language-specific defaults
+                const defaults = getCodeLanguageDefaults(detection.language);
+                Object.entries(defaults).forEach(([key, value]) => {
+                  if (value !== undefined) {
+                    updateProperty(key as keyof ItemProperties, value);
+                  }
+                });
+              }
+            }
+          }}
+          className="w-full px-3 py-2 text-sm bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors"
+        >
+          🔍 Auto-Detect Language & Apply Defaults
+        </button>
+      </div>
       <ThemePicker
         value={localProperties.theme ?? 'vscode-dark-plus'}
         onChange={(value) => updateProperty('theme', value)}
@@ -559,27 +568,67 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
         step={1}
         suffix="px"
       />
-      <SelectInput
-        label="Animation Mode"
-        value={localProperties.animationMode ?? 'typing'}
-        onChange={(value) => updateProperty('animationMode', value as any)}
-        options={[
-          { value: 'typing', label: 'Typing' },
-          { value: 'line-by-line', label: 'Line by Line' },
-          { value: 'diff', label: 'Diff Highlight' },
-          { value: 'none', label: 'None' },
-        ]}
-      />
-      <NumberInput
-        label="Typing Speed"
-        value={localProperties.typingSpeedCps ?? 30}
-        onChange={(value) => updateProperty('typingSpeedCps', value)}
-        error={validationErrors.typingSpeedCps}
-        min={1}
-        max={120}
-        step={1}
-        suffix="cps"
-      />
+      <div className="space-y-2">
+        <SelectInput
+          label="Animation Mode"
+          value={localProperties.animationMode ?? 'typing'}
+          onChange={(value) => updateProperty('animationMode', value as any)}
+          options={[
+            { value: 'typing', label: 'Typing (Educational)' },
+            { value: 'line-by-line', label: 'Line by Line (Step-by-step)' },
+            { value: 'diff', label: 'Diff Highlight (Changes)' },
+            { value: 'none', label: 'None (Instant)' },
+          ]}
+        />
+        
+        {/* Educational Animation Tips */}
+        <div className="text-xs text-text-secondary bg-background-tertiary p-2 rounded">
+          {(() => {
+            const mode = localProperties.animationMode ?? 'typing';
+            const tips: Record<string, string> = {
+              'typing': '💡 Perfect for beginners - shows code being written character by character',
+              'line-by-line': '📝 Great for step-by-step explanations - reveals one line at a time',
+              'diff': '🔄 Ideal for showing code changes and refactoring',
+              'none': '⚡ Best for quick demonstrations or when code is already familiar',
+            };
+            return tips[mode] || '';
+          })()}
+        </div>
+      </div>
+      <div className="space-y-2">
+        <NumberInput
+          label="Typing Speed"
+          value={localProperties.typingSpeedCps ?? 30}
+          onChange={(value) => updateProperty('typingSpeedCps', value)}
+          error={validationErrors.typingSpeedCps}
+          min={1}
+          max={120}
+          step={1}
+          suffix="cps"
+        />
+        
+        {/* Educational Speed Presets */}
+        <div className="flex gap-1">
+          <button
+            onClick={() => updateProperty('typingSpeedCps', 12)}
+            className="flex-1 px-2 py-1 text-xs bg-green-100 text-green-800 rounded hover:bg-green-200 transition-colors"
+          >
+            Beginner (12)
+          </button>
+          <button
+            onClick={() => updateProperty('typingSpeedCps', 20)}
+            className="flex-1 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors"
+          >
+            Medium (20)
+          </button>
+          <button
+            onClick={() => updateProperty('typingSpeedCps', 35)}
+            className="flex-1 px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition-colors"
+          >
+            Advanced (35)
+          </button>
+        </div>
+      </div>
       <NumberInput
         label="Line Reveal Interval"
         value={localProperties.lineRevealIntervalMs ?? 350}

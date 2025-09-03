@@ -366,14 +366,50 @@ export class ClientExportManager {
         jobId: this.currentJob.id,
       };
 
-      // Create export job on server (enforces auth + gating)
-      const { id: serverJobId } = await api.createExportJob(exportPayload, {
-        signal: this.abortController?.signal,
-      });
+      // Prefer new render API if available; fallback to legacy export jobs
+      let serverJobId: string | null = null;
+      let useRenderApi = false;
+      try {
+        const inputProps = {
+          timeline: project.timeline,
+          mediaAssets: project.mediaAssets,
+          settings: {
+            width: settings.width || project.settings.width,
+            height: settings.height || project.settings.height,
+            fps: project.settings.fps,
+            duration: project.settings.duration ?? Math.ceil((project.timeline?.reduce((max, item) => Math.max(max, (item.startTime || 0) + (item.duration || 0)), 0) || 0))),
+            backgroundColor: project.settings.backgroundColor || '#000000',
+          },
+          exportSettings: {
+            format: settings.format,
+            codec: settings.codec,
+            quality: settings.quality,
+            audioCodec: settings.audioCodec,
+            transparentBackground: !!settings.transparentBackground,
+            includeWallpaper: settings.includeWallpaper !== false,
+            includeGradient: settings.includeGradient !== false,
+          },
+        };
+        const { jobId } = await api.startRender(inputProps);
+        serverJobId = jobId;
+        useRenderApi = true;
+      } catch (e) {
+        if (e instanceof ApiError && (e.status === 404 || e.status === 405)) {
+          // Fallback to legacy endpoint
+          const { id } = await api.createExportJob(exportPayload, {
+            signal: this.abortController?.signal,
+          });
+          serverJobId = id;
+          useRenderApi = false;
+        } else {
+          throw e;
+        }
+      }
+
       this.updateProgress({ status: 'preparing', progress: 10 });
 
       // Poll server job for progress until completion
-      await this.pollServerJob(serverJobId);
+      await this.pollServerJob(serverJobId!, useRenderApi);
 
       console.log(`Export completed: ${outputFilename}`);
       return this.currentJob.outputPath as string;
@@ -420,7 +456,7 @@ export class ClientExportManager {
     }
   }
 
-  private async pollServerJob(serverJobId: string): Promise<void> {
+  private async pollServerJob(serverJobId: string, useRenderApi: boolean): Promise<void> {
     if (!this.currentJob) return;
     const start = Date.now();
     const maxDurationMs = 5 * 60_000; // 5 minutes
@@ -443,12 +479,14 @@ export class ClientExportManager {
         throw new Error('Export polling timed out');
       }
 
-      const job = await api.getExportJob(serverJobId, {
-        signal: this.abortController?.signal,
-      });
+      const job = useRenderApi
+        ? await api.getRenderStatus(serverJobId)
+        : await api.getExportJob(serverJobId, {
+            signal: this.abortController?.signal,
+          });
 
       const status = job.status as ExportProgress['status'];
-      const progress = Number(job.progress ?? 0);
+      const progress = Number((job as any).progress ?? (status === 'completed' ? 100 : status === 'rendering' ? 50 : 0));
       this.updateProgress({
         status,
         progress,
@@ -461,8 +499,9 @@ export class ClientExportManager {
       });
 
       if (status === 'completed') {
-        this.currentJob!.outputPath =
-          job.outputPath || `./exports/${job.outputFilename}`;
+        this.currentJob!.outputPath = useRenderApi
+          ? api.renderDownloadUrl(serverJobId)
+          : job.outputPath || `./exports/${job.outputFilename}`;
         this.currentJob!.completedAt = new Date();
         this.updateProgress({
           status: 'completed',
