@@ -240,6 +240,28 @@ body {
   color: transparent;
 }
 
+/* ===== LINE CLAMP UTILITIES ===== */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
 /* ===== SCROLLBAR STYLES ===== */
 ::-webkit-scrollbar {
   width: 8px;
@@ -259,4 +281,69 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--synapse-overlay1);
+}
+
+/* ===== EDUCATIONAL CONTENT ADDITION BUTTONS ===== */
+.content-addition-button {
+  min-height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.content-addition-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.content-addition-button:hover::before {
+  left: 100%;
+}
+
+.content-addition-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.content-addition-button:active {
+  transform: translateY(-1px);
+}
+
+/* Educational track indicators */
+.educational-track-indicator {
+  background: linear-gradient(135deg, var(--track-color), var(--track-color-light));
+  padding: 12px 16px;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.track-icon {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.track-name {
+  font-weight: 600;
+  color: white;
+  font-size: 14px;
 }

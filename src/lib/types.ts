@@ -335,7 +335,7 @@ export interface TimelineViewState {
   showKeyframes: boolean;
   trackHeight: number;
   selectedKeyframes: string[];
-  timelineMode: 'standard' | 'advanced' | 'keyframe';
+  timelineMode: 'standard' | 'advanced' | 'keyframe' | 'simplified';
   verticalScrollPosition: number;
 }
 

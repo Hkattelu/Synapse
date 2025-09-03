@@ -108,6 +108,67 @@ export const PRESET_REGISTRY: Applicable[] = [
   },
 ];
 
+// Educational code animation presets for enhanced learning experience
+export const EDUCATIONAL_CODE_PRESETS: Applicable[] = [
+  {
+    id: 'typewriter',
+    title: 'Educational Typewriter (Slow)',
+    supports: { timelineTypes: ['code'], assetTypes: ['code'] },
+    makeDefault: () => ({ preset: 'typewriter', speedCps: 12 }),
+  },
+  {
+    id: 'typewriter',
+    title: 'Educational Typewriter (Medium)',
+    supports: { timelineTypes: ['code'], assetTypes: ['code'] },
+    makeDefault: () => ({ preset: 'typewriter', speedCps: 20 }),
+  },
+  {
+    id: 'typewriter',
+    title: 'Educational Typewriter (Fast)',
+    supports: { timelineTypes: ['code'], assetTypes: ['code'] },
+    makeDefault: () => ({ preset: 'typewriter', speedCps: 35 }),
+  },
+  {
+    id: 'lineFocus',
+    title: 'Single Line Focus',
+    supports: { timelineTypes: ['code'], assetTypes: ['code'] },
+    makeDefault: () => ({
+      preset: 'lineFocus',
+      activeLines: '1',
+      focusOpacity: 0.3,
+    }),
+  },
+  {
+    id: 'lineFocus',
+    title: 'Block Focus',
+    supports: { timelineTypes: ['code'], assetTypes: ['code'] },
+    makeDefault: () => ({
+      preset: 'lineFocus',
+      activeLines: '1-5',
+      focusOpacity: 0.2,
+    }),
+  },
+];
+
+// Get educational presets for Code track
+export function getEducationalCodePresets(): Applicable[] {
+  return EDUCATIONAL_CODE_PRESETS;
+}
+
+// Get recommended presets based on educational purpose
+export function getRecommendedPresetsFor(purpose: 'beginner' | 'intermediate' | 'advanced' | 'debugging' | 'refactoring'): Applicable[] {
+  const recommendations: Record<string, string[]> = {
+    beginner: ['typewriter', 'lineFocus'],
+    intermediate: ['typewriter', 'lineFocus', 'diffHighlight'],
+    advanced: ['typewriter', 'diffSlide', 'diffFade'],
+    debugging: ['lineFocus', 'diffHighlight'],
+    refactoring: ['diffHighlight', 'diffSlide', 'typewriterDiff'],
+  };
+
+  const recommendedIds = recommendations[purpose] || [];
+  return PRESET_REGISTRY.filter(preset => recommendedIds.includes(preset.id));
+}
+
 export function getApplicablePresets(
   timelineType: TimelineItemType,
   assetType: MediaAsset['type'] | undefined

@@ -10,7 +10,7 @@ import { ExportDialog } from './ExportDialog';
 import { RecorderDialog } from './RecorderDialog';
 import { ExportProvider } from '../state/exportContext';
 import { ResizablePanel } from './ResizablePanel';
-import { TimelineToolbar } from './TimelineToolbar';
+import { ContentAdditionToolbar } from './ContentAdditionToolbar';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left.js';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
 import Settings from 'lucide-react/dist/esm/icons/settings.js';
@@ -198,7 +198,7 @@ function StudioViewContent() {
             maxSize={500}
             className="border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900 flex-shrink-0 flex flex-col"
           >
-            <TimelineToolbar />
+            <ContentAdditionToolbar />
             <EnhancedTimelineView className="flex-1" />
           </ResizablePanel>
         </main>

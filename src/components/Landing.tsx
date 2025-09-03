@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { api, ApiError } from '../lib/api';
 import {
   Select,
   SelectContent,
@@ -836,59 +837,31 @@ const SynapseStudioLanding: React.FC = () => {
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
+    const name = (data.name as string) || '';
+    const email = (data.email as string) || '';
+    const message = (data.message as string) || '';
+    const projectType = ((data.projectType as string) || 'Not specified');
+
+    const subject = `New Contact Form Submission from ${name}`;
+    const timestamp = new Date().toLocaleString();
+
+    const emailBody = `Name: ${name}\nEmail: ${email}\nProject Type: ${projectType}\nTimestamp: ${timestamp}\n\nMessage:\n${message}`;
+
     try {
-      // Prepare email data
-      const emailData = {
-        to_email: 'glowstringman@gmail.com',
-        from_name: data.name as string,
-        from_email: data.email as string,
-        project_type: data.projectType as string || 'Not specified',
-        message: data.message as string,
-        subject: `New Contact Form Submission from ${data.name}`,
-        timestamp: new Date().toLocaleString(),
-      };
-
-      // Send email using fetch to a simple email service
-      // For now, we'll use a simple mailto approach as a fallback
-      const emailBody = `
-Name: ${emailData.from_name}
-Email: ${emailData.from_email}
-Project Type: ${emailData.project_type}
-Timestamp: ${emailData.timestamp}
-
-Message:
-${emailData.message}
-      `.trim();
-
-      // Try to send via API first
+      await api.submitContact({ name, email, message });
+      setSubmitStatus('success');
+      return;
+    } catch (err) {
+      console.warn('Contact API failed, falling back to mailto...', err);
+      // Fallback to mailto if API is not available or errors out
+      const mailtoLink = `mailto:glowstringman@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
       try {
-        const response = await fetch('/api/contact', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(emailData),
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          console.log('Contact form submitted successfully:', result);
-          setSubmitStatus('success');
-          return; // Success, no need for mailto fallback
-        } else {
-          throw new Error('API request failed');
-        }
-      } catch (apiError) {
-        console.log('API not available, using mailto fallback');
-
-        // Fallback to mailto if API is not available
-        const mailtoLink = `mailto:glowstringman@gmail.com?subject=${encodeURIComponent(emailData.subject)}&body=${encodeURIComponent(emailBody)}`;
         window.location.href = mailtoLink;
         setSubmitStatus('success');
+      } catch (fallbackErr) {
+        console.error('Mailto fallback failed:', fallbackErr);
+        setSubmitStatus('error');
       }
-    } catch (error) {
-      console.error('Contact form submission failed:', error);
-      setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
     }

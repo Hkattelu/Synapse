@@ -79,8 +79,8 @@ export function EnhancedTimelineView({
               <button
                 onClick={() => togglePanel('keyframes')}
                 className={`px-3 py-1.5 text-xs rounded transition-colors ${activePanel === 'keyframes'
-                    ? 'bg-primary-600 text-white'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                  ? 'bg-primary-600 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
                   }`}
                 title="Keyframe Properties"
               >
@@ -103,8 +103,8 @@ export function EnhancedTimelineView({
               <button
                 onClick={() => togglePanel('markers')}
                 className={`px-3 py-1.5 text-xs rounded transition-colors ${activePanel === 'markers'
-                    ? 'bg-primary-600 text-white'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                  ? 'bg-primary-600 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
                   }`}
                 title="Timeline Markers"
               >
