@@ -410,6 +410,7 @@ export function EducationalTimeline({
                 }
               `}
               title={`Switch to ${currentMode === 'simplified' ? 'Advanced' : 'Simplified'} Mode`}
+              data-help-id="timeline-mode-toggle"
             >
               {currentMode === 'simplified' ? (
                 <>
@@ -460,6 +461,7 @@ export function EducationalTimeline({
                 ? 'bg-primary-600 text-white shadow-glow'
                 : 'bg-neutral-700 text-text-secondary hover:bg-neutral-600'
             }`}
+            data-help-id="snap-toggle"
           >
             Snap
           </button>
