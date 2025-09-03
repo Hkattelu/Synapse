@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { TestProviders } from '../test/TestProviders';
+import { patchNextFileInput } from '../test/fileInput';
 import { ContentAdditionToolbar } from '../components/ContentAdditionToolbar';
 import { useProject } from '../state/hooks';
 import { exportManager, getDefaultExportSettings } from '../lib/exportManager';
@@ -58,31 +59,25 @@ describe('E2E: complete educational video creation workflow', () => {
 
     // 2) Add Video quickly to Visual via Quick Upload
     fireEvent.click(screen.getByRole('button', { name: /Add Video/i }));
-    const inputEl = document.createElement('input');
-    const mockFile = new File(['fake'], 'screen.mov', { type: 'video/mp4' });
-    Object.defineProperty(inputEl, 'files', { value: [mockFile] });
-    const createElementSpy = vi
-      .spyOn(document, 'createElement')
-      .mockImplementation((tag: string) => (tag === 'input' ? (inputEl as any) : (document.createElement as any).orig(tag)));
-    (document.createElement as any).orig = (document.createElement as any).orig || ((t: string) => HTMLDocument.prototype.createElement.call(document, t));
-
-    fireEvent.click(screen.getByText('Quick Upload'));
-    inputEl.dispatchEvent(new Event('change'));
-    createElementSpy.mockRestore();
+    const videoHandle = patchNextFileInput(new File(['fake'], 'screen.mov', { type: 'video/mp4' }));
+    try {
+      fireEvent.click(screen.getByText('Quick Upload'));
+      videoHandle.input.dispatchEvent(new Event('change'));
+    } finally {
+      videoHandle.restore();
+    }
 
     // 3) Add Audio via Assets workflow (Narration)
     fireEvent.click(screen.getByRole('button', { name: /Add Assets/i }));
-    const audioInput = document.createElement('input');
-    const audio = new File(['beep'], 'voice.wav', { type: 'audio/wav' });
-    Object.defineProperty(audioInput, 'files', { value: [audio] });
-    const createElementSpy2 = vi
-      .spyOn(document, 'createElement')
-      .mockImplementation((tag: string) => (tag === 'input' ? (audioInput as any) : (document.createElement as any).orig(tag)));
-    fireEvent.click(screen.getByText('Audio Files'));
-    audioInput.dispatchEvent(new Event('change'));
-    // Confirm and add
-    fireEvent.click(screen.getByRole('button', { name: 'Add to Timeline' }));
-    createElementSpy2.mockRestore();
+    const audioHandle = patchNextFileInput(new File(['beep'], 'voice.wav', { type: 'audio/wav' }));
+    try {
+      fireEvent.click(screen.getByText('Audio Files'));
+      audioHandle.input.dispatchEvent(new Event('change'));
+      // Confirm and add
+      fireEvent.click(screen.getByRole('button', { name: 'Add to Timeline' }));
+    } finally {
+      audioHandle.restore();
+    }
 
     // Verify state updated: 3 timeline items and 3 media assets
     await waitFor(() => expect(screen.getByTestId('timeline-count').textContent).toBe('3'));
