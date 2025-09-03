@@ -6,6 +6,8 @@ import { validateMediaAsset } from '../lib/validation';
 import { AudioWaveform } from './Waveform';
 import { MusicLibrary } from './MusicLibrary';
 import type { MediaAsset, MediaAssetType, VisualAssetType } from '../lib/types';
+import { suggestTrackPlacement } from '../lib/educationalPlacement';
+import { EDUCATIONAL_TRACKS } from '../lib/educationalTypes';
 
 interface MediaBinProps {
   className?: string;
@@ -743,6 +745,28 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                         {formatFileSize(asset.metadata.fileSize)}
                       </span>
                     </div>
+                    {/* Suggested educational track badge */}
+                    {(() => {
+                      try {
+                        const suggestion = suggestTrackPlacement(asset);
+                        const track = suggestion.suggestedTrack;
+                        return (
+                          <div className="mt-1 text-[10px]">
+                            <span
+                              className="inline-block px-1.5 py-0.5 rounded text-white"
+                              title={`Suggested Track: ${track.name} (${Math.round(
+                                suggestion.confidence * 100
+                              )}% confidence)`}
+                              style={{ backgroundColor: track.color }}
+                            >
+                              {track.name}
+                            </span>
+                          </div>
+                        );
+                      } catch {
+                        return null;
+                      }
+                    })()}
                   </div>
                 </div>
               ))}

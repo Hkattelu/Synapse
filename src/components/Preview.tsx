@@ -5,6 +5,7 @@ import * as Hooks from '../state/hooks';
 import { MainComposition } from '../remotion/MainComposition';
 import type { MainCompositionProps } from '../remotion/types';
 import type { TimelineItem } from '../lib/types';
+import { getEducationalTrackByNumber } from '../lib/educationalTypes';
 
 interface PreviewProps {
   className?: string;
@@ -44,6 +45,15 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   const playerRef = React.useRef<PlayerRef>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Determine which timeline items are active at the current time
+  const activeItems = useMemo(
+    () =>
+      timeline.filter(
+        (i) => playback.currentTime >= i.startTime && playback.currentTime < i.startTime + i.duration
+      ),
+    [timeline, playback.currentTime]
+  );
 
   // Find any talking head items to enable viewer controls
   const talkingHeads = useMemo(
@@ -441,6 +451,33 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               >
                 {bubbleMuted ? 'Unmute' : 'Mute'}
               </button>
+            </div>
+          )}
+
+          {/* Active educational tracks overlay */}
+          {activeItems.length > 0 && (
+            <div className="absolute top-3 left-3 mt-10 bg-neutral-900/70 backdrop-blur px-2 py-1 rounded text-white text-xs max-w-[60%]">
+              <div className="font-medium mb-1 opacity-90">Now Playing</div>
+              <div className="space-y-1">
+                {activeItems.map((item) => {
+                  const track = getEducationalTrackByNumber(item.track);
+                  const asset = project?.mediaAssets.find((a) => a.id === item.assetId);
+                  return (
+                    <div key={item.id} className="flex items-center gap-2">
+                      {track ? (
+                        <span
+                          className="inline-block w-2 h-2 rounded-full"
+                          style={{ backgroundColor: track.color }}
+                          title={track.name}
+                        />
+                      ) : null}
+                      <span className="opacity-90">{track?.name ?? `Track ${item.track + 1}`}</span>
+                      <span className="opacity-70">•</span>
+                      <span className="truncate opacity-90">{asset?.name ?? item.type}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
