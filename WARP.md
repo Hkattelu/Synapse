@@ -7,6 +7,7 @@ Repository: Synapse Studio (React + Vite + TypeScript + Tailwind + Vitest) with 
 Common commands (PowerShell-friendly)
 - Install deps: npm install
 - Dev server (web): npm run dev
+- Backend server (API): npm run server
 - Build (web): npm run build
 - Preview production build: npm run preview
 - Lint: npm run lint
@@ -38,34 +39,34 @@ High-level architecture
   - remotion/: Programmatic video compositions and sequences using Remotion (@remotion/*). Contains compositions (MainComposition, TitleSequence, VideoSequence, CodeSequence), helpers, and preset animations.
   - hooks/: Custom React hooks including keyboard shortcuts and state accessors.
   - test/: TestProviders and setup.ts for test environment wiring.
+- Backend (server/)
+  - index.mjs: Express app entry (CORS, cookies, JSON body, routes, /api/health).
+  - routes/: modular routers for auth, license, render, ai, email.
+  - services/: auth (bcrypt + JWT, in-memory store), licensing (stub), render (Remotion bundling and render jobs), ai (repo heuristics), email (SMTP via nodemailer or log fallback).
+  - utils/: jwt helpers.
+  - docs/server/README.md: onboarding and API reference.
 - Build and tooling
   - Vite (vite.config.ts):
-    - Plugins: @vitejs/plugin-react, vite-plugin-prismjs (syntax highlighting).
-    - Alias: '@' -> '/src'.
-    - assetsInclude: ['**/*.node'] when needed.
-    - Define: global -> globalThis to satisfy packages expecting Node globals.
+    - Plugins: @vitejs/plugin-react, vite-plugin-prismjs.
+    - Alias: '@' -> '/src'. Define: global -> globalThis.
     - Rollup external: excludes Node built-ins from the browser bundle.
-    - Dev proxy: '/api' -> http://localhost:8787 (run any backend separately if used).
+    - Dev proxy: '/api' -> http://localhost:8787 (backend).
   - TypeScript: Project references (tsconfig.json) and separate Electron TS project (tsconfig.electron.json).
-  - ESLint flat config (eslint.config.js): Recommended JS/TS + react-hooks rules, Prettier enforced as errors, React Refresh rule.
-  - Tailwind + PostCSS: Tailwind configured with CSS-variable-driven design tokens; PostCSS loads @tailwindcss/postcss and autoprefixer.
-  - Testing: Vitest with jsdom and Testing Library. Test configuration lives under vite.config.ts -> test, with setupFiles at src/test/setup.ts.
+  - ESLint flat config (eslint.config.js): TS + React hooks + Prettier.
+  - Tailwind + PostCSS: CSS variables for design system; @tailwindcss/postcss + autoprefixer.
+  - Testing: Vitest (jsdom) + Testing Library; setup at src/test/setup.ts.
 - Electron desktop shell (optional)
-  - Overview: Electron wraps the existing web UI for desktop capabilities (filesystem dialogs, local file read/write) while keeping renderer sandboxed.
-  - Main process (electron/main.ts): App lifecycle, BrowserWindow, IPC handlers.
-  - Preload (electron/preload.ts): contextBridge.exposeInMainWorld('SynapseFS', ...); frozen API; IPC invoke to main.
-  - Renderer: The same Vite/React app without Node integration; only accesses native features via window.SynapseFS.
-  - Security posture: contextIsolation=true, nodeIntegration=false, sandbox=true; deny in-window http/https navigation; open external links in system browser.
-  - Packaging: electron-builder (electron/packaging/electron-builder.yml) packages compiled Electron outputs (electron/dist) and web build (dist) into release/.
-  - Dev and overrides: npm run desktop:dev uses Vite dev server (defaults to http://localhost:5173). Optional env vars: SYNAPSE_ELECTRON_DEV_URL and SYNAPSE_ELECTRON_DIST_DIR.
+  - Overview: Electron wraps the web UI; native filesystem via preload (window.SynapseFS).
+  - Hardened: contextIsolation=true, nodeIntegration=false, sandbox=true; external links open in system browser.
+  - Packaging: electron-builder (electron/packaging/electron-builder.yml); outputs to release/.
 
 What to know from README and docs
-- Tech stack highlights: React 19, Vite, Tailwind CSS, Remotion, ESLint + Prettier.
-- Electron outline in docs/electron/outline.md documents the hardened security model, IPC allow-list, and filesystem API surface exposed as window.SynapseFS.
+- Tech stack highlights: React 19, Vite, Tailwind CSS, Remotion, ESLint + Prettier, optional Electron shell.
+- docs/electron/outline.md covers desktop architecture, IPC, and security.
 
 Conventions and tips specific to this repo
 - Use the Vitest arguments passthrough after -- to target single files or test names.
 - Keep to the alias import style (import ... from '@/lib/...').
-- If working on Electron, build the electron TS once before launching: npm run electron:build (npx cross-env is used automatically by desktop:dev).
-- The dev server proxies /api to http://localhost:8787. If an API is needed, run it separately on that port or adjust the Vite proxy in vite.config.ts.
+- If working on Electron, build the electron TS once before launching: npm run electron:build.
+- Dev flow: run both npm run dev (frontend) and npm run server (backend). Vite proxies /api to the backend on port 8787.
 
