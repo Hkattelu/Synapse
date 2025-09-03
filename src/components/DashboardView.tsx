@@ -22,6 +22,7 @@ export function DashboardView() {
   const [branch, setBranch] = useState('main');
   const [repoLoading, setRepoLoading] = useState(false);
   const [repoError, setRepoError] = useState<string | null>(null);
+  const [openAfterGen, setOpenAfterGen] = useState(true);
 
   const handleCreateProject = () => {
     if (projectName.trim()) {
@@ -150,9 +151,11 @@ export function DashboardView() {
       const proposal = await api.aiGenerateFromRepo({ repoUrl, branch: branch || 'main' });
       const projectName = proposal?.projectName || `Repo Video - ${new URL(repoUrl).pathname.split('/').slice(-1)[0]}`;
       const project: Project = buildProjectFromProposal(projectName, proposal);
-      // Import into state and go to studio
+      // Import into state
       importProject(project);
-      navigate('/studio');
+      if (openAfterGen) {
+        navigate('/studio');
+      }
       setShowRepoModal(false);
       setRepoUrl('');
       setBranch('main');
@@ -261,11 +264,15 @@ export function DashboardView() {
 
                 <button
                   onClick={() => setShowRepoModal(true)}
+                  title="Generate a starter video project from a Git repository. We clone shallowly and extract a handful of representative files to create an editable timeline."
                   className="bg-white border border-purple-200 hover:border-purple-300 text-purple-700 font-medium px-6 py-3 rounded-lg transition-colors flex items-center space-x-2"
                 >
                   <GitBranch className="w-5 h-5" />
                   <span>New from Repo</span>
                 </button>
+                <p className="text-sm text-gray-500 max-w-2xl">
+                  Tip: We clone the repo (depth 1), scan for code and docs, and propose a short timeline (titles and code segments). You can edit everything afterward.
+                </p>
               </div>
             )}
           </div>
@@ -340,6 +347,9 @@ export function DashboardView() {
             </div>
 
             <div className="space-y-4">
+              <div className="text-sm text-gray-600">
+                Generate a starter project from a public Git repository. We don’t execute code; we only read files to assemble an initial timeline you can refine.
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Repository URL</label>
                 <input
@@ -365,21 +375,33 @@ export function DashboardView() {
                 <div className="text-sm text-red-600">{repoError}</div>
               )}
 
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  onClick={() => setShowRepoModal(false)}
-                  disabled={repoLoading}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleNewFromRepo}
-                  disabled={repoLoading || !repoUrl}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg disabled:opacity-50"
-                >
-                  {repoLoading ? 'Generating…' : 'Generate'}
-                </button>
+              <div className="flex items-center justify-between pt-2">
+                <label className="inline-flex items-center text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    className="mr-2"
+                    checked={openAfterGen}
+                    onChange={(e) => setOpenAfterGen(e.target.checked)}
+                  />
+                  Open Studio after generation
+                </label>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowRepoModal(false)}
+                    disabled={repoLoading}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleNewFromRepo}
+                    disabled={repoLoading || !repoUrl}
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg disabled:opacity-50"
+                  >
+                    {repoLoading ? 'Generating…' : 'Generate'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

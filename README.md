@@ -29,10 +29,13 @@ src/
 # Install dependencies
 npm install
 
-# Start development server
+# Start development server (frontend)
 npm run dev
 
-# Build for production
+# Start backend API (Express on http://localhost:8787)
+npm run server
+
+# Build for production (frontend)
 npm run build
 
 # Run linting
@@ -47,6 +50,51 @@ npm run format
 # Type checking
 npm run type-check
 ```
+
+### Backend API quickstart
+- Dev server: http://localhost:8787
+- Health: GET /api/health
+- Auth: POST /api/auth/signup, /api/auth/login, /api/auth/logout, GET /api/auth/session
+- Licensing: POST /api/license/activate, GET /api/license/status
+- Rendering: POST /api/render (start job), GET /api/render/:id/status, GET /api/render/:id/download
+- AI Repo generator: POST /api/ai/generate-from-repo { repoUrl, branch? }
+- Contact: POST /api/contact { name, email, message }
+
+Environment (optional for dev)
+- JWT_SECRET, CORS_ORIGIN (defaults include http://localhost:5173)
+- SMTP_* and EMAIL_* to enable outbound emails; otherwise server logs contact messages.
+
+### New Project from Repo (AI-assisted)
+- In Projects (Dashboard), click “New from Repo”. Enter a public Git repository URL and optional branch.
+- We clone shallowly (depth 1), scan for representative files (code/docs), and propose a short timeline (titles and code segments) you can fully edit afterward.
+- Toggle “Open Studio after generation” if you want to immediately edit the new project.
+
+### Staging deployment (server)
+A Docker Compose setup is included for staging the backend API.
+
+- Files (in the repository root on the server branch):
+  - Dockerfile
+  - docker-compose.staging.yml
+  - .env.staging.example
+  - docs/server/STAGING.md
+
+Quick start (PowerShell)
+```powershell
+# In repo root (staging host)
+# Copy env template and fill values
+cp .env.staging.example .env.staging
+
+# Bring up API on :8787
+docker compose -f docker-compose.staging.yml --env-file .env.staging up -d --build
+
+# Health check
+Invoke-RestMethod http://localhost:8787/api/health
+```
+
+Notes
+- Rendered artifacts are persisted in a named volume mounted at /app/server/output.
+- Configure CORS_ORIGIN in .env.staging to the frontend origin (e.g., http://localhost:5173 or your staging host).
+- SMTP variables are optional; without them, the server logs contact payloads and returns success.
 
 ## Desktop (Electron)
 
