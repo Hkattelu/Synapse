@@ -13,10 +13,14 @@ export function patchNextFileInput(file: File): {
 } {
   const input = document.createElement('input');
   input.type = 'file';
-  // Define files as a read-only property
+  // Define files as a read-only FileList using DataTransfer for compatibility
   Object.defineProperty(input, 'files', {
-    value: [file],
     configurable: true,
+    get: () => {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      return dt.files;
+    },
   });
 
   const origCreate = HTMLDocument.prototype.createElement;
