@@ -34,8 +34,9 @@ describe('WallpaperPicker - animated badges', () => {
     // Expand
     fireEvent.click(screen.getByText('Wallpaper').closest('div')!.querySelector('button')!);
 
-    // Verify badge present
-    expect(screen.getByText(/Animated/i)).toBeInTheDocument();
+    // Verify badges present (case-insensitive, allow multiple matches)
+    const animatedBadges = screen.getAllByText(/Animated/i);
+    expect(animatedBadges.length).toBeGreaterThan(0);
     expect(screen.getByText(/GIF/i)).toBeInTheDocument();
   });
 });

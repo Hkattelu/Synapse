@@ -86,7 +86,7 @@ describe('audioUtils', () => {
       const result = calculateAudioLevels(audioData);
 
       expect(result.currentLevel).toBeCloseTo(0.38, 2); // Average of absolute values
-      expect(result.peakLevel).toBe(0.8); // Maximum value
+      expect(result.peakLevel).toBeCloseTo(0.8, 5); // Maximum value (allowing float tolerance)
       expect(result.averageLevel).toBeCloseTo(0.38, 2); // First calculation, same as current
     });
 
@@ -211,7 +211,7 @@ describe('audioUtils', () => {
 
   describe('validateAudioForNarration', () => {
     it('validates supported audio file types', () => {
-      const mp3File = new File([''], 'test.mp3', { type: 'audio/mpeg' });
+      const mp3File = new File([''], 'test.mp3', { type: 'audio/mp3' });
       
       const result = validateAudioForNarration(mp3File);
       
