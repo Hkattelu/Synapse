@@ -11,10 +11,12 @@ import { HistoryProvider } from './state/history';
 import Landing from './components/Landing';
 import DownloadsPage from './components/DownloadsPage';
 import './App.css';
+import './styles/responsive-educational.css';
 import { useProjectStore } from './state/projectStore';
 import { LicenseProvider } from './state/license';
 import { UpdateBanner } from './components/UpdateBanner';
 import { LicenseGate } from './components/LicenseGate';
+import { PerformanceMonitor } from './components/PerformanceMonitor';
 
 function GlobalShortcutsAndBridge() {
   // Global shortcuts only; no store subscription needed here
@@ -98,6 +100,7 @@ function App() {
                 </Router>
                 <LoadingOverlay />
                 <LicenseGate />
+                <PerformanceMonitor />
               </HistoryProvider>
             </ErrorBoundary>
           </NotificationsProvider>

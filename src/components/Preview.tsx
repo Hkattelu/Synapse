@@ -393,6 +393,10 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             loop={false}
             showVolumeControls={false}
             clickToPlay={false}
+            onTimeUpdate={(frame: number) => {
+              const seconds = frame / compositionProps.settings.fps;
+              seek(seconds);
+            }}
           />
           {/* Fullscreen Button */}
           <button
@@ -849,6 +853,10 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               loop={false}
               showVolumeControls={false}
               clickToPlay={false}
+              onTimeUpdate={(frame: number) => {
+                const seconds = frame / compositionProps.settings.fps;
+                seek(seconds);
+              }}
             />
 
             {/* Fullscreen Exit Button */}

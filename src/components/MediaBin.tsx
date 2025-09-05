@@ -516,6 +516,15 @@ export function MediaBin({ className = '' }: MediaBinProps) {
             >
               {isUploading ? 'Uploading...' : '+ Add Media'}
             </button>
+            {activeTab === 'media' && (
+              <button
+                onClick={createCodeClip}
+                className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium py-2 px-4 rounded transition-colors shadow-sm"
+                title="Create a new code clip"
+              >
+                Add Code
+              </button>
+            )}
           </div>
         </div>
 

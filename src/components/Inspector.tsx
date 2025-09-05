@@ -161,6 +161,9 @@ export function Inspector({ className = '' }: InspectorProps) {
       <div className="flex-1 overflow-y-auto min-h-0">
         {activeTab === 'properties' && (
           <>
+            {/* Clip metadata */}
+            <ClipMetadata item={selectedItem} asset={selectedAsset} />
+
             {/* Educational Track Context */}
             {(() => {
               const track = getEducationalTrackByNumber(selectedItem.track);

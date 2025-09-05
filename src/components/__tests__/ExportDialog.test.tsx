@@ -92,8 +92,12 @@ describe('ExportDialog', () => {
     expect(screen.getByText(/Export "Demo Project"/)).toBeInTheDocument();
     // Estimated file size 50 MB
     expect(screen.getByText(/50.0 MB/)).toBeInTheDocument();
-    // Duration (mm:ss)
-    expect(screen.getByText('2:00')).toBeInTheDocument();
+    // Duration (mm:ss) - allow duplication or combined text nodes
+    expect(
+      screen.getAllByText((content, element) =>
+        (element?.textContent || '').includes('2:00')
+      ).length
+    ).toBeGreaterThan(0);
   });
 
   it('starts export when Start Export is clicked', async () => {

@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { ProjectManager } from '../ProjectManager';
+import { MemoryRouter } from 'react-router-dom';
 
 const mockProjects = [
   {
@@ -38,7 +39,11 @@ vi.mock('../../state/hooks', () => ({
 
 describe('ProjectManager (basic)', () => {
   it('renders project card and triggers open on button click', () => {
-    render(<ProjectManager />);
+    render(
+      <MemoryRouter>
+        <ProjectManager />
+      </MemoryRouter>
+    );
 
     expect(screen.getByText('Your Projects')).toBeInTheDocument();
     expect(screen.getByText('Alpha')).toBeInTheDocument();

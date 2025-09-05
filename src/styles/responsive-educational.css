@@ -1,0 +1,415 @@
+/* Responsive Educational Interface Styles */
+
+/* Base responsive breakpoints */
+@media (max-width: 767px) {
+  /* Mobile styles */
+  .educational-timeline {
+    font-size: 12px;
+  }
+
+  .educational-timeline-header {
+    padding: 8px 12px;
+    height: 48px !important;
+  }
+
+  .educational-track-header {
+    padding: 4px 8px;
+    height: 40px !important;
+  }
+
+  .educational-track-header .track-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .educational-track-header .track-name {
+    font-size: 12px;
+  }
+
+  .content-addition-button {
+    min-height: 48px;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .timeline-item {
+    min-width: 30px;
+  }
+
+  .timeline-item .resize-handle {
+    width: 8px;
+  }
+
+  /* Mobile timeline optimizations */
+  .mobile-timeline .educational-track {
+    border-radius: 8px;
+    margin: 4px;
+  }
+
+  .mobile-timeline .track-navigation {
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+  }
+
+  .mobile-timeline .track-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-timeline .track-indicator.active {
+    width: 16px;
+    border-radius: 4px;
+  }
+
+  /* Touch-friendly interactions */
+  .mobile-timeline .timeline-item {
+    min-height: 44px; /* iOS touch target minimum */
+    touch-action: pan-x;
+  }
+
+  .mobile-timeline .timeline-controls button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Tablet styles */
+  .educational-timeline {
+    font-size: 13px;
+  }
+
+  .educational-timeline-header {
+    padding: 12px 16px;
+    height: 56px !important;
+  }
+
+  .educational-track-header {
+    padding: 8px 12px;
+    height: 48px !important;
+  }
+
+  .content-addition-button {
+    min-height: 56px;
+    padding: 16px 20px;
+    font-size: 15px;
+  }
+
+  .timeline-item {
+    min-width: 25px;
+  }
+
+  /* Tablet-specific optimizations */
+  .tablet-timeline .educational-tracks {
+    gap: 2px;
+  }
+
+  .tablet-timeline .track-header-compact {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .tablet-timeline .zoom-controls {
+    scale: 0.9;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* Desktop styles */
+  .educational-timeline {
+    font-size: 14px;
+  }
+
+  .educational-timeline-header {
+    padding: 16px 24px;
+    height: 64px !important;
+  }
+
+  .educational-track-header {
+    padding: 12px 16px;
+    height: 48px !important;
+  }
+
+  .content-addition-button {
+    min-height: 60px;
+    padding: 18px 24px;
+    font-size: 16px;
+  }
+
+  .timeline-item {
+    min-width: 20px;
+  }
+
+  /* Desktop-specific features */
+  .desktop-timeline .advanced-controls {
+    display: block;
+  }
+
+  .desktop-timeline .timeline-minimap {
+    display: block;
+  }
+
+  .desktop-timeline .performance-monitor {
+    display: block;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .educational-track-header {
+    border-width: 0.5px;
+  }
+
+  .timeline-item {
+    border-width: 1px;
+  }
+
+  .timeline-grid-lines {
+    border-width: 0.5px;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .educational-timeline *,
+  .educational-timeline *::before,
+  .educational-timeline *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .timeline-item {
+    transform: none !important;
+  }
+
+  .content-addition-button:hover {
+    transform: none !important;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  .educational-timeline {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #404040;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --text-tertiary: #999999;
+    --border-subtle: #404040;
+  }
+
+  .educational-track-header {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .timeline-item {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Light mode optimizations */
+@media (prefers-color-scheme: light) {
+  .educational-timeline {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --bg-tertiary: #e5e5e5;
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --text-tertiary: #666666;
+    --border-subtle: #e5e5e5;
+  }
+
+  .educational-track-header {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .timeline-item {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* Performance optimizations */
+.educational-timeline {
+  /* Enable hardware acceleration */
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+.timeline-item {
+  /* Optimize for animations */
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.educational-track {
+  /* Optimize scrolling */
+  contain: layout style paint;
+}
+
+/* Virtualization styles */
+.virtualized-timeline-items {
+  /* Optimize for large lists */
+  contain: strict;
+  overflow: hidden;
+}
+
+.virtualized-timeline-items .timeline-item {
+  /* Optimize individual items */
+  contain: layout style;
+}
+
+/* Loading states */
+.educational-track.loading {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: no-preference) {
+  .timeline-item:focus {
+    outline: 2px solid #007acc;
+    outline-offset: 2px;
+    animation: focus-pulse 2s infinite;
+  }
+
+  @keyframes focus-pulse {
+    0%, 100% { outline-color: #007acc; }
+    50% { outline-color: #0099ff; }
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .educational-track-header {
+    border: 2px solid currentColor;
+  }
+
+  .timeline-item {
+    border: 2px solid currentColor;
+  }
+
+  .content-addition-button {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Print styles */
+@media print {
+  .educational-timeline {
+    background: white !important;
+    color: black !important;
+  }
+
+  .educational-track-header {
+    background: white !important;
+    color: black !important;
+    border: 1px solid black !important;
+  }
+
+  .timeline-item {
+    background: white !important;
+    border: 1px solid black !important;
+  }
+
+  .content-addition-button,
+  .timeline-controls,
+  .performance-monitor {
+    display: none !important;
+  }
+}
+
+/* Container queries for component-level responsiveness */
+@container (max-width: 600px) {
+  .educational-timeline-header {
+    flex-direction: column;
+    gap: 8px;
+    height: auto !important;
+    padding: 12px;
+  }
+
+  .timeline-controls {
+    justify-content: center;
+  }
+}
+
+@container (max-width: 400px) {
+  .content-addition-button span {
+    display: none;
+  }
+
+  .content-addition-button {
+    width: 48px;
+    height: 48px;
+    padding: 12px;
+    border-radius: 50%;
+  }
+}
+
+/* Smooth scrolling for timeline navigation */
+.educational-timeline-content {
+  scroll-behavior: smooth;
+}
+
+/* Optimize for touch devices */
+@media (pointer: coarse) {
+  .timeline-item {
+    min-height: 44px;
+  }
+
+  .timeline-controls button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .educational-track-header {
+    min-height: 44px;
+  }
+}
+
+/* Optimize for precise pointing devices */
+@media (pointer: fine) {
+  .timeline-item .resize-handle {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .timeline-item:hover .resize-handle {
+    opacity: 1;
+  }
+}
+
+/* Landscape orientation optimizations */
+@media (orientation: landscape) and (max-height: 500px) {
+  .educational-timeline-header {
+    height: 40px !important;
+    padding: 8px 16px;
+  }
+
+  .educational-track-header {
+    height: 32px !important;
+    padding: 4px 8px;
+  }
+
+  .content-addition-button {
+    min-height: 36px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}

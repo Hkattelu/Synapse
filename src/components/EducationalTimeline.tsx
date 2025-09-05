@@ -2,6 +2,12 @@ import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useTimeline, useMediaAssets, useUI } from '../state/hooks';
 import { EducationalTrack } from './EducationalTrack';
 import { suggestTrackPlacement, validateTrackPlacement } from '../lib/educationalPlacement';
+import { 
+  useThrottledScroll, 
+  useResizeObserver, 
+  useResponsiveBreakpoint,
+  TimelineCalculations 
+} from '../lib/performanceOptimizations';
 import type { TimelineItem, MediaAsset } from '../lib/types';
 import type { EducationalTrack as EducationalTrackType, UIMode, PlacementSuggestion } from '../lib/educationalTypes';
 import { EDUCATIONAL_TRACKS, getEducationalTrackByNumber } from '../lib/educationalTypes';
@@ -53,10 +59,12 @@ export function EducationalTimeline({
 
   const { getMediaAssetById } = useMediaAssets();
   const { ui, updateTimelineView } = useUI();
+  const breakpoint = useResponsiveBreakpoint();
 
   const timelineRef = useRef<HTMLDivElement>(null);
   const [currentMode, setCurrentMode] = useState<'simplified' | 'advanced'>(mode);
   const [placementWarnings, setPlacementWarnings] = useState<PlacementWarning[]>([]);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
     dragType: null,
@@ -67,23 +75,49 @@ export function EducationalTimeline({
     startTrack: 0,
   });
 
-  // Calculate timeline dimensions
-  const maxDuration = Math.max(timelineDuration, 60); // Minimum 60 seconds
-  const timelineWidth = maxDuration * PIXELS_PER_SECOND * ui.timeline.zoom;
-  const timelineHeight = EDUCATIONAL_TRACKS.length * TRACK_HEIGHT;
+  // Resize observer for container dimensions
+  const containerRef = useResizeObserver(
+    useCallback((entry) => {
+      setContainerSize({
+        width: entry.contentRect.width,
+        height: entry.contentRect.height,
+      });
+    }, [])
+  );
 
-  // Convert time to pixels
+  // Calculate timeline dimensions with responsive adjustments
+  const maxDuration = Math.max(timelineDuration, 60); // Minimum 60 seconds
+  const responsiveTrackHeight = breakpoint === 'mobile' ? 60 : breakpoint === 'tablet' ? 70 : TRACK_HEIGHT;
+  const timelineWidth = TimelineCalculations.getTimeToPixels(
+    maxDuration, 
+    PIXELS_PER_SECOND, 
+    ui.timeline.zoom,
+    'timeline-width'
+  );
+  const timelineHeight = EDUCATIONAL_TRACKS.length * responsiveTrackHeight;
+
+  // Convert time to pixels with caching
   const timeToPixels = useCallback(
     (time: number) => {
-      return time * PIXELS_PER_SECOND * ui.timeline.zoom;
+      return TimelineCalculations.getTimeToPixels(
+        time, 
+        PIXELS_PER_SECOND, 
+        ui.timeline.zoom,
+        `timeline-${time}`
+      );
     },
     [ui.timeline.zoom]
   );
 
-  // Convert pixels to time
+  // Convert pixels to time with caching
   const pixelsToTime = useCallback(
     (pixels: number) => {
-      return pixels / (PIXELS_PER_SECOND * ui.timeline.zoom);
+      return TimelineCalculations.getPixelsToTime(
+        pixels, 
+        PIXELS_PER_SECOND, 
+        ui.timeline.zoom,
+        `timeline-${pixels}`
+      );
     },
     [ui.timeline.zoom]
   );
@@ -138,8 +172,8 @@ export function EducationalTimeline({
         // Dropped on specific educational track
         finalTrack = targetTrack;
       } else {
-        // Calculate track from Y position
-        const trackIndex = Math.floor(y / TRACK_HEIGHT);
+        // Calculate track from Y position with responsive track height
+        const trackIndex = Math.floor(y / responsiveTrackHeight);
         finalTrack = EDUCATIONAL_TRACKS[Math.max(0, Math.min(trackIndex, EDUCATIONAL_TRACKS.length - 1))];
       }
 
@@ -277,8 +311,8 @@ export function EducationalTimeline({
           Math.max(0, dragState.startTime + deltaTime)
         );
         
-        // Calculate new track based on educational tracks
-        const trackIndex = Math.floor(currentY / TRACK_HEIGHT);
+        // Calculate new track based on educational tracks with responsive height
+        const trackIndex = Math.floor(currentY / responsiveTrackHeight);
         const newTrack = Math.max(0, Math.min(trackIndex, EDUCATIONAL_TRACKS.length - 1));
 
         moveTimelineItem(dragState.itemId, newStartTime, newTrack);
@@ -343,13 +377,12 @@ export function EducationalTimeline({
     [ui.timeline.zoom, updateTimelineView]
   );
 
-  // Handle scroll
-  const handleScroll = useCallback(
-    (e: React.UIEvent<HTMLDivElement>) => {
-      const scrollLeft = e.currentTarget.scrollLeft;
+  // Handle scroll with throttling for performance
+  const handleScroll = useThrottledScroll(
+    useCallback((scrollLeft: number, scrollTop: number) => {
       updateTimelineView({ scrollPosition: scrollLeft });
-    },
-    [updateTimelineView]
+    }, [updateTimelineView]),
+    16 // ~60fps
   );
 
   // Dismiss placement warning
@@ -478,12 +511,15 @@ export function EducationalTimeline({
         onScroll={handleScroll}
       >
         <div
-          ref={timelineRef}
+          ref={(el) => {
+            timelineRef.current = el;
+            containerRef.current = el;
+          }}
           className="educational-timeline-canvas relative"
           style={{
             width: `${timelineWidth}px`,
             height: `${timelineHeight}px`,
-            minHeight: `${EDUCATIONAL_TRACKS.length * TRACK_HEIGHT}px`,
+            minHeight: `${EDUCATIONAL_TRACKS.length * responsiveTrackHeight}px`,
           }}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -512,20 +548,26 @@ export function EducationalTimeline({
               key={track.id}
               className="absolute left-0 right-0"
               style={{
-                top: `${index * TRACK_HEIGHT}px`,
-                height: `${TRACK_HEIGHT}px`,
+                top: `${index * responsiveTrackHeight}px`,
+                height: `${responsiveTrackHeight}px`,
               }}
             >
               <EducationalTrack
                 track={track}
                 items={timeline}
                 isActive={false}
-                trackHeight={TRACK_HEIGHT}
+                trackHeight={responsiveTrackHeight}
                 timeToPixels={timeToPixels}
                 onItemDrop={(item) => handleSmartDrop(new DragEvent('drop') as any, track)}
                 onItemMouseDown={handleClipMouseDown}
                 selectedItems={selectedItems}
                 dragState={dragState}
+                // Performance optimization props
+                containerWidth={containerSize.width}
+                pixelsPerSecond={PIXELS_PER_SECOND}
+                zoom={ui.timeline.zoom}
+                scrollLeft={ui.timeline.scrollPosition}
+                useVirtualization={breakpoint === 'desktop' && timeline.length > 20}
               />
             </div>
           ))}

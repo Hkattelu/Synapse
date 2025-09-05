@@ -17,13 +17,23 @@ export function patchNextFileInput(file: File): {
   Object.defineProperty(input, 'files', {
     configurable: true,
     get: () => {
-      const dt = new DataTransfer();
-      dt.items.add(file);
-      return dt.files;
+      // JSDOM may not provide DataTransfer; fall back to a minimal FileList-like object
+      const DT: any = (globalThis as any).DataTransfer;
+      if (typeof DT === 'function') {
+        const dt = new DT();
+        dt.items.add(file);
+        return dt.files as FileList;
+      }
+      const fallback: any = {
+        0: file,
+        length: 1,
+        item: (i: number) => (i === 0 ? file : null),
+      };
+      return fallback as FileList;
     },
   });
 
-  const origCreate = HTMLDocument.prototype.createElement;
+  const origCreate = document.createElement.bind(document);
   let used = false;
   const spy = vi
     .spyOn(document, 'createElement')
@@ -39,6 +49,16 @@ export function patchNextFileInput(file: File): {
         >;
       }
     );
+
+  // Minimal URL.createObjectURL polyfill for JSDOM
+  if (typeof (globalThis as any).URL !== 'undefined') {
+    if (typeof (globalThis as any).URL.createObjectURL !== 'function') {
+      (globalThis as any).URL.createObjectURL = () => 'blob:mock-url';
+    }
+    if (typeof (globalThis as any).URL.revokeObjectURL !== 'function') {
+      (globalThis as any).URL.revokeObjectURL = () => {};
+    }
+  }
 
   return {
     input,

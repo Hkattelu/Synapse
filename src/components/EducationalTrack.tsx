@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useMemo } from 'react';
 import { useMediaAssets } from '../state/hooks';
 import type { TimelineItem, MediaAsset } from '../lib/types';
 import type { EducationalTrack } from '../lib/educationalTypes';
@@ -6,6 +6,8 @@ import { CodeSyntaxPreview, LanguageIndicator, AnimationModeIndicator } from './
 import { VisualTrackClip } from './VisualTrackEnhancements';
 import { CompactWaveform } from './WaveformVisualization';
 import { StaticLevelMeter } from './AudioLevelMeter';
+import { VirtualizedTimelineItems } from './VirtualizedTimelineItems';
+import { useIntersectionObserver, useResponsiveBreakpoint } from '../lib/performanceOptimizations';
 import Code from 'lucide-react/dist/esm/icons/code.js';
 import Monitor from 'lucide-react/dist/esm/icons/monitor.js';
 import Mic from 'lucide-react/dist/esm/icons/mic.js';
@@ -26,6 +28,12 @@ interface EducationalTrackProps {
     isDragging: boolean;
     itemId: string | null;
   };
+  // Performance optimization props
+  containerWidth?: number;
+  pixelsPerSecond?: number;
+  zoom?: number;
+  scrollLeft?: number;
+  useVirtualization?: boolean;
 }
 
 const TRACK_ICONS = {
@@ -46,11 +54,47 @@ export function EducationalTrack({
   onItemUpdate,
   selectedItems,
   dragState,
+  containerWidth = 1000,
+  pixelsPerSecond = 100,
+  zoom = 1,
+  scrollLeft = 0,
+  useVirtualization = true,
 }: EducationalTrackProps) {
   const { getMediaAssetById } = useMediaAssets();
   const trackRef = useRef<HTMLDivElement>(null);
+  const breakpoint = useResponsiveBreakpoint();
+  
+  // Intersection observer for lazy loading
+  const [trackElementRef, isTrackVisible] = useIntersectionObserver({
+    threshold: 0.1,
+    rootMargin: '100px',
+  });
 
   const IconComponent = TRACK_ICONS[track.icon as keyof typeof TRACK_ICONS] || Code;
+
+  // Create assets map for performance
+  const assetsMap = useMemo(() => {
+    const map = new Map<string, MediaAsset>();
+    items.forEach(item => {
+      const asset = getMediaAssetById(item.assetId);
+      if (asset) {
+        map.set(item.assetId, asset);
+      }
+    });
+    return map;
+  }, [items, getMediaAssetById]);
+
+  // Responsive track height based on breakpoint
+  const responsiveTrackHeight = useMemo(() => {
+    switch (breakpoint) {
+      case 'mobile':
+        return Math.max(60, trackHeight * 0.75);
+      case 'tablet':
+        return Math.max(70, trackHeight * 0.9);
+      default:
+        return trackHeight;
+    }
+  }, [breakpoint, trackHeight]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -66,65 +110,77 @@ export function EducationalTrack({
     e.dataTransfer.dropEffect = 'copy';
   }, []);
 
+  // Don't render track content until visible (lazy loading)
+  if (!isTrackVisible) {
+    return (
+      <div
+        ref={trackElementRef}
+        className="educational-track relative border-b border-border-subtle"
+        style={{ height: `${responsiveTrackHeight}px` }}
+      >
+        <EducationalTrackHeader 
+          track={track} 
+          IconComponent={IconComponent} 
+          height={responsiveTrackHeight}
+          breakpoint={breakpoint}
+        />
+        <div className="absolute inset-0 top-12 flex items-center justify-center">
+          <div className="text-xs text-gray-500 animate-pulse">Loading track content...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
-      ref={trackRef}
+      ref={(el) => {
+        trackRef.current = el;
+        trackElementRef.current = el;
+      }}
       className="educational-track relative border-b border-border-subtle"
-      style={{ height: `${trackHeight}px` }}
+      style={{ height: `${responsiveTrackHeight}px` }}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
     >
       {/* Track Header */}
-      <EducationalTrackHeader track={track} IconComponent={IconComponent} />
+      <EducationalTrackHeader 
+        track={track} 
+        IconComponent={IconComponent} 
+        height={responsiveTrackHeight}
+        breakpoint={breakpoint}
+      />
       
       {/* Track Content Area */}
       <div className="absolute inset-0 top-12">
-        {/* Track Items */}
-        {items
-          .filter(item => item.track === track.trackNumber)
-          .map((item) => {
-            const asset = getMediaAssetById(item.assetId);
-            const isSelected = selectedItems.includes(item.id);
-            const isDragging = dragState.isDragging && dragState.itemId === item.id;
-
-            // Use enhanced Visual track clip for Visual track
-            if (track.id === 'visual') {
-              return (
-                <VisualTrackClip
-                  key={item.id}
-                  item={item}
-                  asset={asset}
-                  track={track}
-                  isSelected={isSelected}
-                  style={{
-                    left: `${timeToPixels(item.startTime)}px`,
-                    width: `${timeToPixels(item.duration)}px`,
-                    height: `${trackHeight - 16}px`, // Leave space for track header
-                    top: '4px',
-                  }}
-                  onItemUpdate={onItemUpdate || (() => {})}
-                />
-              );
-            }
-
-            return (
-              <EducationalTimelineClip
-                key={item.id}
-                item={item}
-                asset={asset}
-                track={track}
-                isSelected={isSelected}
-                isDragging={isDragging}
-                style={{
-                  left: `${timeToPixels(item.startTime)}px`,
-                  width: `${timeToPixels(item.duration)}px`,
-                  height: `${trackHeight - 16}px`, // Leave space for track header
-                  top: '4px',
-                }}
-                onMouseDown={(e) => onItemMouseDown(e, item)}
-              />
-            );
-          })}
+        {useVirtualization && containerWidth > 0 ? (
+          // Use virtualized rendering for better performance
+          <VirtualizedTimelineItems
+            track={track}
+            items={items}
+            assets={assetsMap}
+            containerWidth={containerWidth}
+            trackHeight={responsiveTrackHeight}
+            pixelsPerSecond={pixelsPerSecond}
+            zoom={zoom}
+            scrollLeft={scrollLeft}
+            selectedItems={selectedItems}
+            onItemMouseDown={onItemMouseDown}
+            onItemUpdate={onItemUpdate}
+          />
+        ) : (
+          // Fallback to traditional rendering
+          <TraditionalTrackItems
+            track={track}
+            items={items}
+            assetsMap={assetsMap}
+            trackHeight={responsiveTrackHeight}
+            timeToPixels={timeToPixels}
+            selectedItems={selectedItems}
+            dragState={dragState}
+            onItemMouseDown={onItemMouseDown}
+            onItemUpdate={onItemUpdate}
+          />
+        )}
       </div>
     </div>
   );
@@ -133,21 +189,31 @@ export function EducationalTrack({
 interface EducationalTrackHeaderProps {
   track: EducationalTrack;
   IconComponent: React.ComponentType<{ className?: string }>;
+  height: number;
+  breakpoint: 'mobile' | 'tablet' | 'desktop';
 }
 
-function EducationalTrackHeader({ track, IconComponent }: EducationalTrackHeaderProps) {
+function EducationalTrackHeader({ track, IconComponent, height, breakpoint }: EducationalTrackHeaderProps) {
+  const headerHeight = breakpoint === 'mobile' ? 10 : 12;
+  const iconSize = breakpoint === 'mobile' ? 'w-4 h-4' : 'w-5 h-5';
+  const textSize = breakpoint === 'mobile' ? 'text-xs' : 'text-sm';
+  const padding = breakpoint === 'mobile' ? 'px-2' : 'px-4';
+
   return (
     <div
-      className="educational-track-header absolute top-0 left-0 right-0 h-12 px-4 flex items-center gap-2 z-10 border-b border-border-subtle"
+      className={`educational-track-header absolute top-0 left-0 right-0 ${padding} flex items-center gap-2 z-10 border-b border-border-subtle`}
       style={{
+        height: `${headerHeight * 4}px`,
         background: `linear-gradient(135deg, ${track.color}, ${track.color}CC)`,
       }}
     >
-      <IconComponent className="w-5 h-5 text-white" />
-      <span className="font-semibold text-white text-sm">{track.name}</span>
-      <div className="ml-auto text-xs text-white text-opacity-75">
-        Track {track.trackNumber + 1}
-      </div>
+      <IconComponent className={`${iconSize} text-white`} />
+      <span className={`font-semibold text-white ${textSize}`}>{track.name}</span>
+      {breakpoint !== 'mobile' && (
+        <div className="ml-auto text-xs text-white text-opacity-75">
+          Track {track.trackNumber + 1}
+        </div>
+      )}
     </div>
   );
 }
@@ -388,5 +454,78 @@ function DefaultClipPreview({ item, asset }: { item: TimelineItem; asset: MediaA
         {item.type}
       </div>
     </div>
+  );
+}
+
+// Traditional track items rendering (fallback)
+function TraditionalTrackItems({
+  track,
+  items,
+  assetsMap,
+  trackHeight,
+  timeToPixels,
+  selectedItems,
+  dragState,
+  onItemMouseDown,
+  onItemUpdate,
+}: {
+  track: EducationalTrack;
+  items: TimelineItem[];
+  assetsMap: Map<string, MediaAsset>;
+  trackHeight: number;
+  timeToPixels: (time: number) => number;
+  selectedItems: string[];
+  dragState: { isDragging: boolean; itemId: string | null };
+  onItemMouseDown: (e: React.MouseEvent, item: TimelineItem) => void;
+  onItemUpdate?: (item: TimelineItem) => void;
+}) {
+  return (
+    <>
+      {items
+        .filter(item => item.track === track.trackNumber)
+        .map((item) => {
+          const asset = assetsMap.get(item.assetId);
+          const isSelected = selectedItems.includes(item.id);
+          const isDragging = dragState.isDragging && dragState.itemId === item.id;
+
+          // Use enhanced Visual track clip for Visual track
+          if (track.id === 'visual') {
+            return (
+              <VisualTrackClip
+                key={item.id}
+                item={item}
+                asset={asset}
+                track={track}
+                isSelected={isSelected}
+                style={{
+                  left: `${timeToPixels(item.startTime)}px`,
+                  width: `${timeToPixels(item.duration)}px`,
+                  height: `${trackHeight - 16}px`, // Leave space for track header
+                  top: '4px',
+                }}
+                onItemUpdate={onItemUpdate || (() => {})}
+              />
+            );
+          }
+
+          return (
+            <EducationalTimelineClip
+              key={item.id}
+              item={item}
+              asset={asset}
+              track={track}
+              isSelected={isSelected}
+              isDragging={isDragging}
+              style={{
+                left: `${timeToPixels(item.startTime)}px`,
+                width: `${timeToPixels(item.duration)}px`,
+                height: `${trackHeight - 16}px`, // Leave space for track header
+                top: '4px',
+              }}
+              onMouseDown={(e) => onItemMouseDown(e, item)}
+            />
+          );
+        })}
+    </>
   );
 }

@@ -86,8 +86,13 @@ describe('EducationalTrack', () => {
 
     render(<EducationalTrack {...props} />);
     
-    expect(screen.getByText('javascript')).toBeInTheDocument();
-    expect(screen.getByText('console.log("Hello World");...')).toBeInTheDocument();
+    expect(screen.getByText(/javascript/i)).toBeInTheDocument();
+    // Code preview is tokenized; check textContent contains the expected snippet
+    expect(
+      screen.getAllByText((content, element) =>
+        element?.textContent?.includes('console.log("Hello World")') ?? false
+      ).length
+    ).toBeGreaterThan(0);
   });
 
   it('renders visual track with correct styling', () => {
