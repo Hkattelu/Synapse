@@ -7,12 +7,16 @@ import type {
   ExportQuality,
 } from './types';
 import { api, ApiError } from './api';
-import { 
+import {
   validateExportSettings as validateFull,
   getFormatRecommendations,
   isTransparencySupported as isSupported,
   getTransparencyCompatibilityWarning as getWarning,
-  validateTransparencySettings as validateTransparencyFull
+  validateTransparencySettings as validateTransparencyFull,
+} from './validation/exportValidation';
+import type {
+  ExportValidationResult,
+  ExportCompatibilityIssue,
 } from './validation/exportValidation';
 
 // Export presets for common use cases
@@ -320,19 +324,58 @@ export class ClientExportManager {
       console.warn('Export warnings:', validation.warnings);
     }
 
-    if ((validation as any).recommendations && (validation as any).recommendations.length > 0) {
-      console.info('Export recommendations:', (validation as any).recommendations);
+    // Recommendations (only when present and array)
+    const hasRecommendations = (
+      v: unknown
+    ): v is { recommendations: unknown[] } =>
+      typeof v === 'object' &&
+      v !== null &&
+      'recommendations' in (v as Record<string, unknown>) &&
+      Array.isArray((v as { recommendations?: unknown }).recommendations);
+
+    if (
+      hasRecommendations(validation) &&
+      validation.recommendations.length > 0
+    ) {
+      console.info('Export recommendations:', validation.recommendations);
     }
 
-    // Log compatibility issues
-    if ((validation as any).compatibilityIssues && (validation as any).compatibilityIssues.length > 0) {
-      const errors = (validation as any).compatibilityIssues.filter((issue: any) => issue.severity === 'error');
-      const warnings = (validation as any).compatibilityIssues.filter((issue: any) => issue.severity === 'warning');
-      
+    // Log compatibility issues (guard + type predicate for severity)
+    const hasCompatibilityIssues = (
+      v: unknown
+    ): v is { compatibilityIssues: unknown[] } =>
+      typeof v === 'object' &&
+      v !== null &&
+      'compatibilityIssues' in (v as Record<string, unknown>) &&
+      Array.isArray(
+        (v as { compatibilityIssues?: unknown }).compatibilityIssues
+      );
+
+    if (
+      hasCompatibilityIssues(validation) &&
+      validation.compatibilityIssues.length > 0
+    ) {
+      const issuesWithSeverity = (
+        validation.compatibilityIssues as unknown[]
+      ).filter(
+        (i): i is ExportCompatibilityIssue =>
+          typeof i === 'object' &&
+          i !== null &&
+          'severity' in (i as Record<string, unknown>) &&
+          typeof (i as { severity?: unknown }).severity === 'string'
+      );
+
+      const errors = issuesWithSeverity.filter(
+        (issue) => issue.severity === 'error'
+      );
+      const warnings = issuesWithSeverity.filter(
+        (issue) => issue.severity === 'warning'
+      );
+
       if (errors.length > 0) {
         console.error('Export compatibility errors:', errors);
       }
-      
+
       if (warnings.length > 0) {
         console.warn('Export compatibility warnings:', warnings);
       }
@@ -377,7 +420,15 @@ export class ClientExportManager {
             width: settings.width || project.settings.width,
             height: settings.height || project.settings.height,
             fps: project.settings.fps,
-            duration: project.settings.duration ?? Math.ceil((project.timeline?.reduce((max, item) => Math.max(max, (item.startTime || 0) + (item.duration || 0)), 0) || 0)),
+            duration:
+              project.settings.duration ??
+              Math.ceil(
+                project.timeline?.reduce(
+                  (max, item) =>
+                    Math.max(max, (item.startTime || 0) + (item.duration || 0)),
+                  0
+                ) || 0
+              ),
             backgroundColor: project.settings.backgroundColor || '#000000',
           },
           exportSettings: {
@@ -456,7 +507,10 @@ export class ClientExportManager {
     }
   }
 
-  private async pollServerJob(serverJobId: string, useRenderApi: boolean): Promise<void> {
+  private async pollServerJob(
+    serverJobId: string,
+    useRenderApi: boolean
+  ): Promise<void> {
     if (!this.currentJob) return;
     const start = Date.now();
     const maxDurationMs = 5 * 60_000; // 5 minutes
@@ -486,7 +540,10 @@ export class ClientExportManager {
           });
 
       const status = job.status as ExportProgress['status'];
-      const progress = Number((job as any).progress ?? (status === 'completed' ? 100 : status === 'rendering' ? 50 : 0));
+      const progress = Number(
+        (job as any).progress ??
+          (status === 'completed' ? 100 : status === 'rendering' ? 50 : 0)
+      );
       this.updateProgress({
         status,
         progress,
@@ -640,7 +697,10 @@ export const getExportRecommendations = (requirements: {
 };
 
 // Transparency format validation (enhanced)
-export const isTransparencySupported = (format: string, codec?: string): boolean => {
+export const isTransparencySupported = (
+  format: string,
+  codec?: string
+): boolean => {
   try {
     return isSupported(format as any);
   } catch (error) {
@@ -651,17 +711,20 @@ export const isTransparencySupported = (format: string, codec?: string): boolean
 };
 
 // Basic transparency support check (fallback)
-const isTransparencySupportedBasic = (format: string, codec?: string): boolean => {
+const isTransparencySupportedBasic = (
+  format: string,
+  codec?: string
+): boolean => {
   // MOV with H.264/H.265 supports alpha channel
   if (format === 'mov' && (!codec || codec === 'h264' || codec === 'h265')) {
     return true;
   }
-  
+
   // WebM with VP8/VP9 supports alpha channel
   if (format === 'webm' && (!codec || codec === 'vp8' || codec === 'vp9')) {
     return true;
   }
-  
+
   return false;
 };
 
@@ -684,25 +747,26 @@ const getTransparencyCompatibilityWarningBasic = (
   if (!settings.transparentBackground) {
     return null;
   }
-  
+
   if (!isTransparencySupportedBasic(settings.format, settings.codec)) {
     return `Transparent backgrounds are not supported with ${settings.format.toUpperCase()} + ${settings.codec.toUpperCase()}. Consider using MOV + H.264 or WebM + VP9.`;
   }
-  
+
   return null;
 };
 
-export const getRecommendedTransparencySettings = (): Partial<ExportSettings> => {
-  return {
-    format: 'mov',
-    codec: 'h264',
-    quality: 'high',
-    audioCodec: 'aac',
-    transparentBackground: true,
-    includeWallpaper: false,
-    includeGradient: false,
+export const getRecommendedTransparencySettings =
+  (): Partial<ExportSettings> => {
+    return {
+      format: 'mov',
+      codec: 'h264',
+      quality: 'high',
+      audioCodec: 'aac',
+      transparentBackground: true,
+      includeWallpaper: false,
+      includeGradient: false,
+    };
   };
-};
 
 // Validate export settings for transparency compatibility (enhanced)
 export const validateTransparencySettings = (
@@ -723,7 +787,7 @@ const validateTransparencySettingsBasic = (
 ): { isValid: boolean; warnings: string[]; errors: string[] } => {
   const warnings: string[] = [];
   const errors: string[] = [];
-  
+
   if (settings.transparentBackground) {
     // Check format/codec compatibility
     if (!isTransparencySupportedBasic(settings.format, settings.codec)) {
@@ -731,14 +795,14 @@ const validateTransparencySettingsBasic = (
         `Transparent backgrounds require MOV + H.264/H.265 or WebM + VP8/VP9. Current: ${settings.format.toUpperCase()} + ${settings.codec.toUpperCase()}`
       );
     }
-    
+
     // Warn about background inclusion settings
     if (settings.includeWallpaper && settings.includeGradient) {
       warnings.push(
         'Both wallpaper and gradient backgrounds are enabled. This may reduce the transparency effect.'
       );
     }
-    
+
     // Warn about quality settings for transparency
     if (settings.quality === 'low') {
       warnings.push(
@@ -746,7 +810,7 @@ const validateTransparencySettingsBasic = (
       );
     }
   }
-  
+
   return {
     isValid: errors.length === 0,
     warnings,
