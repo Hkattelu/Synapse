@@ -275,30 +275,9 @@ export function Timeline({ className = '' }: TimelineProps) {
   }, [ui.timeline.scrollPosition, pixelsToTime, maxDuration]);
   const handleScrubStart = useCallback((e: React.MouseEvent) => {
     setIsScrubbing(true);
-    const el = timelineRef.current as HTMLDivElement | null;
-
-    const computeFromEl = (clientX: number) => {
-      if (!el) return 0;
-      const rect = el.getBoundingClientRect();
-      const x = Math.max(0, clientX - rect.left + ui.timeline.scrollPosition);
-      return Math.max(0, Math.min(maxDuration, pixelsToTime(x)));
-    };
-
-    const t = computeFromEl(e.clientX);
+    const t = computeTimeFromClientX(e.clientX);
     seek(t);
-
-    const onMove = (ev: MouseEvent) => {
-      const tt = computeFromEl(ev.clientX);
-      seek(tt);
-    };
-    const onUp = () => {
-      setIsScrubbing(false);
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  }, [ui.timeline.scrollPosition, pixelsToTime, maxDuration, seek]);
+  }, [computeTimeFromClientX, seek]);
   const handleScrubMove = useCallback((e: MouseEvent) => {
     if (!isScrubbing) return;
     const t = computeTimeFromClientX(e.clientX);
@@ -307,6 +286,7 @@ export function Timeline({ className = '' }: TimelineProps) {
   const handleScrubEnd = useCallback(() => setIsScrubbing(false), []);
 
   useEffect(() => {
+    if (!isScrubbing) return;
     const onMove = (e: MouseEvent) => handleScrubMove(e);
     const onUp = () => handleScrubEnd();
     document.addEventListener('mousemove', onMove);
@@ -315,7 +295,7 @@ export function Timeline({ className = '' }: TimelineProps) {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
     };
-  }, [handleScrubMove, handleScrubEnd]);
+  }, [isScrubbing, handleScrubMove, handleScrubEnd]);
 
   // Add global mouse event listeners
   useEffect(() => {

@@ -236,7 +236,7 @@ function EducationalTimelineClip({
         {getClipContent()}
         
         {/* Duration indicator */}
-        <div className="text-white mt-0.5 text-[10px]">
+        <div className="text-text-secondary text-opacity-75 mt-0.5 text-[10px]">
           {Math.round(item.duration * 10) / 10}s
         </div>
       </div>

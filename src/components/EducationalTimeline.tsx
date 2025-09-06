@@ -545,30 +545,9 @@ export function EducationalTimeline({
   const handleScrubStart = useCallback((e: React.MouseEvent) => {
     // Ignore scrubbing if a clip drag initiated (propagation is stopped in clip handler)
     setIsScrubbing(true);
-    const el = timelineRef.current as HTMLDivElement | null;
-
-    const computeFromEl = (clientX: number) => {
-      if (!el) return 0;
-      const rect = el.getBoundingClientRect();
-      const xContent = Math.max(0, clientX - rect.left + ui.timeline.scrollPosition - HEADER_COL_WIDTH);
-      return Math.max(0, Math.min(maxDuration, pixelsToTime(xContent)));
-    };
-
-    const t = computeFromEl(e.clientX);
+    const t = computeTimeFromClientX(e.clientX);
     seek(t);
-
-    const onMove = (ev: MouseEvent) => {
-      const tt = computeFromEl(ev.clientX);
-      seek(tt);
-    };
-    const onUp = () => {
-      setIsScrubbing(false);
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  }, [ui.timeline.scrollPosition, pixelsToTime, maxDuration, seek]);
+  }, [computeTimeFromClientX, seek]);
 
   const handleScrubMove = useCallback((e: MouseEvent) => {
     if (!isScrubbing) return;
@@ -702,9 +681,15 @@ export function EducationalTimeline({
 
       {/* Timeline Content (grid with sticky left headers) */}
       <div
-        ref={timelineRef}
+        ref={(el) => {
+          scrollRef.current = el as HTMLDivElement;
+          containerRef.current = el as HTMLDivElement;
+        }}
         className="educational-timeline-content overflow-auto flex-1"
-        onScroll={handleScroll}
+        onScroll={(e) => {
+          const target = e.currentTarget;
+          handleScroll(target.scrollLeft, target.scrollTop);
+        }}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onClick={handleTimelineClick}
