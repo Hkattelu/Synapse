@@ -371,7 +371,6 @@ export class ClientExportManager {
       const warnings = issuesWithSeverity.filter(
         (issue) => issue.severity === 'warning'
       );
-
       if (errors.length > 0) {
         console.error('Export compatibility errors:', errors);
       }
