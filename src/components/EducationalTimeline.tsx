@@ -705,7 +705,7 @@ export function EducationalTimeline({
             minHeight: `${totalTimelineHeight}px`,
           }}
         >
-          {/* Grid Lines overlay (right content column only) */
+          {/* Grid Lines overlay (right content column only) */}
           {ui.timeline.snapToGrid && (
             <div
               className="pointer-events-none absolute top-0 bottom-0"

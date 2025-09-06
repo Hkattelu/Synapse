@@ -21,7 +21,7 @@ function formatTime(seconds: number, fps: number = 30): string {
 }
 
 export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
-  const { project } = useProject();
+  const { project, updateProject } = useProject();
   const { playback, play, pause, seek, setVolume, toggleMute } = usePlayback();
   // Some tests partially mock the hooks module without providing useTimeline.
   // Tolerate that by falling back to a no-op implementation when missing,
@@ -84,6 +84,53 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
       talkingHeads.length > 0 && talkingHeads.every((i) => i.muted === true),
     [talkingHeads]
   );
+
+  // Local state for editable dimensions
+  const [dimWidth, setDimWidth] = useState<number>(() => project?.settings.width || 1920);
+  const [dimHeight, setDimHeight] = useState<number>(() => project?.settings.height || 1080);
+
+  useEffect(() => {
+    if (project?.settings) {
+      setDimWidth(project.settings.width);
+      setDimHeight(project.settings.height);
+    }
+  }, [project?.settings?.width, project?.settings?.height]);
+
+  const applyDimensions = useCallback((w: number, h: number) => {
+    if (!project) return;
+    const width = Math.max(256, Math.min(3840, Math.floor(w)));
+    const height = Math.max(256, Math.min(3840, Math.floor(h)));
+    setDimWidth(width);
+    setDimHeight(height);
+    updateProject({ settings: { ...project.settings, width, height } });
+  }, [project, updateProject]);
+
+  const applyAspectPreset = useCallback((preset: '16:9' | '9:16' | '1:1' | '720p' | '1080p' | 'vertical-720' | 'vertical-1080') => {
+    if (!project) return;
+    const fps = project.settings.fps;
+    switch (preset) {
+      case '16:9':
+      case '1080p':
+        applyDimensions(1920, 1080);
+        break;
+      case '720p':
+        applyDimensions(1280, 720);
+        break;
+      case '9:16':
+      case 'vertical-1080':
+        applyDimensions(1080, 1920);
+        break;
+      case 'vertical-720':
+        applyDimensions(720, 1280);
+        break;
+      case '1:1':
+        applyDimensions(1080, 1080);
+        break;
+      default:
+        applyDimensions(project.settings.width, project.settings.height);
+        break;
+    }
+  }, [project, applyDimensions]);
 
   // Prepare composition props from project state
   const compositionProps: MainCompositionProps = useMemo(() => {
@@ -682,6 +729,54 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
 
           {/* Right controls */}
           <div className="flex items-center space-x-2">
+            {/* Dimensions controls */}
+            <div className="flex items-center space-x-2 mr-3">
+              <select
+                onChange={(e) => applyAspectPreset(e.target.value as any)}
+                className="text-xs bg-background-tertiary text-text-secondary border border-border-subtle rounded px-2 py-1 hover:text-text-primary"
+                title="Aspect Preset"
+                value={(() => {
+                  const w = project?.settings.width || dimWidth;
+                  const h = project?.settings.height || dimHeight;
+                  if (w === 1920 && h === 1080) return '16:9';
+                  if (w === 1280 && h === 720) return '720p';
+                  if (w === 1080 && h === 1920) return '9:16';
+                  if (w === 720 && h === 1280) return 'vertical-720';
+                  if (w === 1080 && h === 1080) return '1:1';
+                  return '';
+                })()}
+              >
+                <option value="">Aspect</option>
+                <option value="16:9">16:9 (1920×1080)</option>
+                <option value="720p">16:9 (1280×720)</option>
+                <option value="1:1">1:1 (1080×1080)</option>
+                <option value="9:16">9:16 (1080×1920)</option>
+                <option value="vertical-720">9:16 (720×1280)</option>
+              </select>
+              <div className="flex items-center space-x-1 text-xs text-text-secondary">
+                <input
+                  type="number"
+                  min={256}
+                  max={3840}
+                  value={dimWidth}
+                  onChange={(e) => setDimWidth(Number(e.target.value) || 0)}
+                  onBlur={() => applyDimensions(dimWidth, dimHeight)}
+                  className="w-20 bg-background-tertiary text-text-primary border border-border-subtle rounded px-2 py-1"
+                  title="Width"
+                />
+                <span>×</span>
+                <input
+                  type="number"
+                  min={256}
+                  max={3840}
+                  value={dimHeight}
+                  onChange={(e) => setDimHeight(Number(e.target.value) || 0)}
+                  onBlur={() => applyDimensions(dimWidth, dimHeight)}
+                  className="w-20 bg-background-tertiary text-text-primary border border-border-subtle rounded px-2 py-1"
+                  title="Height"
+                />
+              </div>
+            </div>
             {/* Record button */}
             <button
               onClick={() =>
