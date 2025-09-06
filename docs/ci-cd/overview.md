@@ -21,7 +21,7 @@ Triggers:
 
 Artifacts:
 - Web: `dist/` build as an artifact (optional if deploying directly)
-- API: container image pushed to a registry (e.g., `gcr.io/<project>/synapse-api:<sha>`)
+- API: container image pushed to Artifact Registry (e.g., `us-central1-docker.pkg.dev/<project>/<repo>/synapse-api:<sha>`). Prefer promoting by image digest for immutability.
 
 ## Continuous Delivery (CD)
 
