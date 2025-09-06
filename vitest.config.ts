@@ -1,4 +1,5 @@
-import { defineConfig, mergeConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config';
+import { mergeConfig } from 'vite';
 import viteConfig from './vite.config';
 
 // Vitest configuration: keep app build config in vite.config.ts and
