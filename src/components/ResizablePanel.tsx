@@ -75,8 +75,7 @@ export function ResizablePanel({
         }
       } catch {}
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [storageKey, onSizeChange]);
 
   useEffect(() => {
     if (isResizing) {
