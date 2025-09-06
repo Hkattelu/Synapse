@@ -3,8 +3,14 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ErrorBoundary } from '../ErrorBoundary';
 
-// Silence the expected console.error noise from React error boundary
-vi.spyOn(console, 'error').mockImplementation(() => {});
+// Silence expected React ErrorBoundary logs for this suite only
+beforeAll(() => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  vi.restoreAllMocks();
+});
 
 function AlwaysBoom() {
   throw new Error('boom');
