@@ -37,6 +37,7 @@ API (Express):
 - [ ] `JWT_SECRET` — REQUIRED. Value: `TODO`
 - [ ] `CORS_ORIGIN` — REQUIRED. Value(s): `TODO`
 - [ ] `REMOTION_COMPOSITION_ID` — Value: `TODO` (default `MainComposition`)
+- [ ] `REMOTION_ENTRY` — Absolute path to Remotion root entry. Value: `TODO`
 - [ ] `RENDER_CONCURRENCY` — Value: `1` (recommended for MVP)
 - [ ] `RENDER_OUTPUT_DIR` — Value: `TODO` (ensure persistence strategy decided)
 - [ ] SMTP/Email (optional): `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`, `EMAIL_TO`
