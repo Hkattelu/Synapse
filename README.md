@@ -133,3 +133,14 @@ This project addresses the following key requirements:
 ### Backgrounds & Themes
 
 See docs/BACKGROUNDS.md for details on code themes, wallpapers (including subtle animated GIFs), and the Reduce Motion toggle.
+
+## Production launch documentation
+
+The following docs describe how to take the app live (hosting, auth, CI/CD) and how we’ll collect feedback from first clients:
+
+- [docs/production/overview.md](docs/production/overview.md) — High‑level launch plan and environment inventory
+- [docs/production/hosting.md](docs/production/hosting.md) — Hosting options and configuration checklists
+- [docs/production/auth.md](docs/production/auth.md) — Authentication options and required configuration
+- [docs/ci-cd/overview.md](docs/ci-cd/overview.md) — CI/CD stages, triggers, and promotion model
+- [docs/feedback/continuous-feedback.md](docs/feedback/continuous-feedback.md) — Feedback intake, triage, and close‑the‑loop
+- [docs/owner-actions-and-gaps.md](docs/owner-actions-and-gaps.md) — Owner checklist and open questions
