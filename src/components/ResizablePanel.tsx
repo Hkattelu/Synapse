@@ -8,6 +8,8 @@ interface ResizablePanelProps {
   maxSize?: number;
   className?: string;
   resizerClassName?: string;
+  storageKey?: string; // persist size in localStorage
+  onSizeChange?: (size: number) => void;
 }
 
 export function ResizablePanel({
@@ -18,10 +20,13 @@ export function ResizablePanel({
   maxSize = 600,
   className = '',
   resizerClassName = '',
+  storageKey,
+  onSizeChange,
 }: ResizablePanelProps) {
   const [size, setSize] = useState(initialSize);
   const [isResizing, setIsResizing] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const sizeRef = useRef<number>(initialSize);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -43,12 +48,34 @@ export function ResizablePanel({
 
       newSize = Math.max(minSize, Math.min(maxSize, newSize));
       setSize(newSize);
+      sizeRef.current = newSize;
+      onSizeChange?.(newSize);
     },
-    [isResizing, direction, minSize, maxSize]
+    [isResizing, direction, minSize, maxSize, onSizeChange]
   );
 
   const handleMouseUp = useCallback(() => {
     setIsResizing(false);
+    if (storageKey) {
+      try {
+        localStorage.setItem(storageKey, String(sizeRef.current));
+      } catch {}
+    }
+  }, [storageKey]);
+
+  // Load persisted size on mount
+  useEffect(() => {
+    if (storageKey) {
+      try {
+        const saved = parseInt(localStorage.getItem(storageKey) || '', 10);
+        if (!Number.isNaN(saved)) {
+          setSize(saved);
+          sizeRef.current = saved;
+          onSizeChange?.(saved);
+        }
+      } catch {}
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

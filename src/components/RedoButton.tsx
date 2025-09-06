@@ -1,5 +1,5 @@
 import React from 'react';
-import Redo2 from 'lucide-react/dist/esm/icons/redo-2.js';
+import { Redo2 } from 'lucide-react';
 import { useProjectTemporal } from '../state/projectStore';
 
 type Props = React.ButtonHTMLAttributes<HTMLButtonElement>;

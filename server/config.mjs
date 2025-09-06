@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { fileURLToPath } from 'node:url';
 
 const number = (v, fallback) => {
   const n = Number(v);
@@ -25,9 +26,15 @@ export const config = {
     to: process.env.EMAIL_TO,
   },
   render: {
-    outputDir: process.env.RENDER_OUTPUT_DIR || new URL('./output', import.meta.url).pathname,
-    compositionId: process.env.REMOTION_COMPOSITION_ID || 'MainComposition',
-    entryPoint: process.env.REMOTION_ENTRY || new URL('../src/remotion/index.ts', import.meta.url).pathname,
+    // Ensure Windows paths are correctly resolved from file URLs
+    outputDir:
+      process.env.RENDER_OUTPUT_DIR ||
+      fileURLToPath(new URL('./output', import.meta.url)),
+    compositionId:
+      process.env.REMOTION_COMPOSITION_ID || 'MainComposition',
+    entryPoint:
+      process.env.REMOTION_ENTRY ||
+      fileURLToPath(new URL('../src/remotion/index.ts', import.meta.url)),
     concurrency: number(process.env.RENDER_CONCURRENCY, 1),
   },
 };

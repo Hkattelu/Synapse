@@ -1,5 +1,5 @@
-import React, { useCallback, useRef, useState, useEffect } from 'react';
-import { useTimeline, useMediaAssets, useUI } from '../state/hooks';
+import React, { useCallback, useRef, useState, useEffect, useMemo } from 'react';
+import { useTimeline, useMediaAssets, useUI, usePlayback } from '../state/hooks';
 import { EducationalTrack } from './EducationalTrack';
 import { suggestTrackPlacement, validateTrackPlacement } from '../lib/educationalPlacement';
 import { 
@@ -11,9 +11,9 @@ import {
 import type { TimelineItem, MediaAsset } from '../lib/types';
 import type { EducationalTrack as EducationalTrackType, UIMode, PlacementSuggestion } from '../lib/educationalTypes';
 import { EDUCATIONAL_TRACKS, getEducationalTrackByNumber } from '../lib/educationalTypes';
-import Settings from 'lucide-react/dist/esm/icons/settings.js';
-import Eye from 'lucide-react/dist/esm/icons/eye.js';
-import EyeOff from 'lucide-react/dist/esm/icons/eye-off.js';
+import { Settings, Eye, EyeOff } from 'lucide-react';
+import { ContentAdditionToolbar } from './ContentAdditionToolbar';
+import { FLAGS } from '../lib/flags';
 
 interface EducationalTimelineProps {
   className?: string;
@@ -37,7 +37,10 @@ interface PlacementWarning {
   show: boolean;
 }
 
-const TRACK_HEIGHT = 80; // Increased for educational track headers
+const TRACK_HEIGHT = 80; // Base track height (header moved to left column)
+const MIN_NONEMPTY_TRACK_HEIGHT = 56; // Minimum height to keep clips usable
+const MIN_EMPTY_TRACK_HEIGHT = 28; // Collapsed height for empty tracks
+const HEADER_COL_WIDTH = 200; // Left sticky header column width (px)
 const PIXELS_PER_SECOND = 100;
 const MIN_CLIP_DURATION = 0.1;
 
@@ -60,8 +63,10 @@ export function EducationalTimeline({
   const { getMediaAssetById } = useMediaAssets();
   const { ui, updateTimelineView } = useUI();
   const breakpoint = useResponsiveBreakpoint();
+  const { playback, seek } = usePlayback();
 
   const timelineRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null); // right scrollable area
   const [currentMode, setCurrentMode] = useState<'simplified' | 'advanced'>(mode);
   const [placementWarnings, setPlacementWarnings] = useState<PlacementWarning[]>([]);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
@@ -75,7 +80,7 @@ export function EducationalTimeline({
     startTrack: 0,
   });
 
-  // Resize observer for container dimensions
+  // Resize observer for container dimensions (observe the scroll container)
   const containerRef = useResizeObserver(
     useCallback((entry) => {
       setContainerSize({
@@ -87,14 +92,61 @@ export function EducationalTimeline({
 
   // Calculate timeline dimensions with responsive adjustments
   const maxDuration = Math.max(timelineDuration, 60); // Minimum 60 seconds
-  const responsiveTrackHeight = breakpoint === 'mobile' ? 60 : breakpoint === 'tablet' ? 70 : TRACK_HEIGHT;
+  // Determine which tracks are non-empty
+  const nonEmptyTrackIds = useMemo(() => {
+    const set = new Set<number>();
+    timeline.forEach((t) => set.add(t.track));
+    return new Set(Array.from(set));
+  }, [timeline]);
+
+  // Compute responsive per-track height to try to fit all non-empty tracks
+  const baseTrackHeight = breakpoint === 'mobile' ? 56 : breakpoint === 'tablet' ? 64 : TRACK_HEIGHT;
+
+  const { perTrackHeight, totalTimelineHeight } = useMemo(() => {
+    const emptyCount = EDUCATIONAL_TRACKS.filter(t => !nonEmptyTrackIds.has(t.trackNumber)).length;
+    const nonEmptyCount = EDUCATIONAL_TRACKS.length - emptyCount;
+
+    if (containerSize.height <= 0 || nonEmptyCount <= 0) {
+      // Fallback
+      const h = baseTrackHeight;
+      return {
+        perTrackHeight: EDUCATIONAL_TRACKS.map((t) => ({ id: t.id, height: nonEmptyTrackIds.has(t.trackNumber) ? h : Math.max(MIN_EMPTY_TRACK_HEIGHT, Math.round(h * 0.5)) })),
+        totalTimelineHeight: EDUCATIONAL_TRACKS.length * h,
+      };
+    }
+
+    const reservedForEmpty = emptyCount * MIN_EMPTY_TRACK_HEIGHT;
+
+    // Preferred height for non-empty tracks
+    const desiredHeight = baseTrackHeight;
+    const totalIfDesired = nonEmptyCount * desiredHeight + reservedForEmpty;
+
+    let chosenHeight: number;
+    if (totalIfDesired <= containerSize.height) {
+      // Plenty of space: use desired height (no vertical scroll)
+      chosenHeight = desiredHeight;
+    } else {
+      // Try to fit; if too many tracks, this may still overflow and enable vertical scrolling
+      const availableForNonEmpty = Math.max(0, containerSize.height - reservedForEmpty);
+      const fitted = Math.floor(availableForNonEmpty / Math.max(1, nonEmptyCount));
+      chosenHeight = Math.max(MIN_NONEMPTY_TRACK_HEIGHT, fitted);
+    }
+
+    const per = EDUCATIONAL_TRACKS.map((t) => ({
+      id: t.id,
+      height: nonEmptyTrackIds.has(t.trackNumber) ? chosenHeight : MIN_EMPTY_TRACK_HEIGHT,
+    }));
+
+    const total = per.reduce((sum, r) => sum + r.height, 0);
+    return { perTrackHeight: per, totalTimelineHeight: total };
+  }, [EDUCATIONAL_TRACKS, nonEmptyTrackIds, containerSize.height, baseTrackHeight]);
+
   const timelineWidth = TimelineCalculations.getTimeToPixels(
     maxDuration, 
     PIXELS_PER_SECOND, 
     ui.timeline.zoom,
     'timeline-width'
   );
-  const timelineHeight = EDUCATIONAL_TRACKS.length * responsiveTrackHeight;
 
   // Convert time to pixels with caching
   const timeToPixels = useCallback(
@@ -146,6 +198,47 @@ export function EducationalTimeline({
     [onModeChange, updateTimelineView]
   );
 
+  // Utility: prevent overlap by adjusting start/duration to nearest free slot
+  const resolveNoOverlap = useCallback((
+    trackNumber: number,
+    start: number,
+    duration: number,
+    excludeItemId?: string
+  ): { start: number; duration: number } => {
+    const items = timeline
+      .filter((i) => i.track === trackNumber && i.id !== excludeItemId)
+      .sort((a, b) => a.startTime - b.startTime);
+
+    let proposedStart = Math.max(0, start);
+    let proposedEnd = proposedStart + duration;
+
+    // Push to the right until no overlap
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      const itEnd = it.startTime + it.duration;
+      const overlaps = !(proposedEnd <= it.startTime || proposedStart >= itEnd);
+      if (overlaps) {
+        proposedStart = itEnd;
+        proposedEnd = proposedStart + duration;
+      }
+    }
+
+    // Clamp to next neighbor if needed (shrink to fit)
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      if (proposedStart < it.startTime) {
+        const nextStart = it.startTime;
+        if (proposedEnd > nextStart) {
+          proposedEnd = nextStart;
+          duration = Math.max(MIN_CLIP_DURATION, proposedEnd - proposedStart);
+        }
+        break;
+      }
+    }
+
+    return { start: proposedStart, duration: Math.max(MIN_CLIP_DURATION, duration) };
+  }, [timeline]);
+
   // Smart content placement with suggestions
   const handleSmartDrop = useCallback(
     (e: React.DragEvent, targetTrack?: EducationalTrackType) => {
@@ -160,10 +253,11 @@ export function EducationalTimeline({
       const rect = timelineRef.current?.getBoundingClientRect();
       if (!rect) return;
 
-      const x = e.clientX - rect.left + ui.timeline.scrollPosition;
+      const xRaw = e.clientX - rect.left + ui.timeline.scrollPosition;
+      const x = Math.max(0, xRaw - HEADER_COL_WIDTH);
       const y = e.clientY - rect.top;
 
-      const startTime = snapToGrid(pixelsToTime(x));
+      let startTime = snapToGrid(pixelsToTime(x));
       
       // Determine target track
       let finalTrack: EducationalTrackType;
@@ -172,8 +266,14 @@ export function EducationalTimeline({
         // Dropped on specific educational track
         finalTrack = targetTrack;
       } else {
-        // Calculate track from Y position with responsive track height
-        const trackIndex = Math.floor(y / responsiveTrackHeight);
+        // Calculate track from Y position using per-track dynamic heights
+        let acc = 0;
+        let trackIndex = 0;
+        for (let i = 0; i < perTrackHeight.length; i++) {
+          acc += perTrackHeight[i].height;
+          if (y < acc) { trackIndex = i; break; }
+          if (i === perTrackHeight.length - 1) trackIndex = i;
+        }
         finalTrack = EDUCATIONAL_TRACKS[Math.max(0, Math.min(trackIndex, EDUCATIONAL_TRACKS.length - 1))];
       }
 
@@ -187,11 +287,14 @@ export function EducationalTimeline({
       // Validate placement
       const validation = validateTrackPlacement(asset, finalTrack);
 
+      // Adjust to avoid overlap on this track
+      const adjusted = resolveNoOverlap(finalTrack.trackNumber, Math.max(0, startTime), asset.duration || 5);
+
       // Create timeline item
       const newItem: Omit<TimelineItem, 'id'> = {
         assetId: asset.id,
-        startTime: Math.max(0, startTime),
-        duration: asset.duration || 5,
+        startTime: adjusted.start,
+        duration: adjusted.duration,
         track: finalTrack.trackNumber,
         type: asset.type === 'image' ? 'video' : asset.type,
         properties: {
@@ -256,13 +359,13 @@ export function EducationalTimeline({
       const rect = timelineRef.current?.getBoundingClientRect();
       if (!rect) return;
 
-      const x = e.clientX - rect.left + ui.timeline.scrollPosition;
+      const xContent = Math.max(0, e.clientX - rect.left + ui.timeline.scrollPosition - HEADER_COL_WIDTH);
       const clipX = timeToPixels(item.startTime);
       const clipWidth = timeToPixels(item.duration);
 
       // Determine drag type based on mouse position
       let dragType: 'move' | 'resize-left' | 'resize-right' = 'move';
-      const relativeX = x - clipX;
+      const relativeX = xContent - clipX;
 
       if (relativeX < 10) {
         dragType = 'resize-left';
@@ -274,7 +377,7 @@ export function EducationalTimeline({
         isDragging: true,
         dragType,
         itemId: item.id,
-        startX: x,
+        startX: xContent,
         startTime: item.startTime,
         startDuration: item.duration,
         startTrack: item.track,
@@ -301,37 +404,72 @@ export function EducationalTimeline({
       const rect = timelineRef.current?.getBoundingClientRect();
       if (!rect) return;
 
-      const currentX = e.clientX - rect.left + ui.timeline.scrollPosition;
+      const currentX = Math.max(0, e.clientX - rect.left + ui.timeline.scrollPosition - HEADER_COL_WIDTH);
       const currentY = e.clientY - rect.top;
       const deltaX = currentX - dragState.startX;
       const deltaTime = pixelsToTime(deltaX);
 
       if (dragState.dragType === 'move') {
-        const newStartTime = snapToGrid(
+        let newStartTime = snapToGrid(
           Math.max(0, dragState.startTime + deltaTime)
         );
         
-        // Calculate new track based on educational tracks with responsive height
-        const trackIndex = Math.floor(currentY / responsiveTrackHeight);
+        // Calculate new track based on dynamic per-track heights
+        let acc = 0;
+        let trackIndex = 0;
+        for (let i = 0; i < perTrackHeight.length; i++) {
+          acc += perTrackHeight[i].height;
+          if (currentY < acc) { trackIndex = i; break; }
+          if (i === perTrackHeight.length - 1) trackIndex = i;
+        }
         const newTrack = Math.max(0, Math.min(trackIndex, EDUCATIONAL_TRACKS.length - 1));
 
-        moveTimelineItem(dragState.itemId, newStartTime, newTrack);
+        // Enforce no overlap on target track using current item duration
+        const thisItem = timeline.find((t) => t.id === dragState.itemId);
+        const dur = thisItem ? thisItem.duration : 1;
+        const adjustedMove = resolveNoOverlap(newTrack, newStartTime, dur, dragState.itemId || undefined);
+        moveTimelineItem(dragState.itemId, adjustedMove.start, newTrack);
       } else if (dragState.dragType === 'resize-left') {
-        const newStartTime = snapToGrid(
+        let newStartTime = snapToGrid(
           Math.max(0, dragState.startTime + deltaTime)
         );
-        const newDuration = Math.max(
+        let newDuration = Math.max(
           MIN_CLIP_DURATION,
           dragState.startDuration - deltaTime
         );
 
+        // Clamp against previous neighbor to avoid overlap
+        const itemsSameTrack = timeline
+          .filter((i) => i.track === dragState.startTrack && i.id !== dragState.itemId)
+          .sort((a, b) => a.startTime - b.startTime);
+        const prev = itemsSameTrack.filter((i) => i.startTime <= dragState.startTime).pop();
+        if (prev) {
+          const prevEnd = prev.startTime + prev.duration;
+          if (newStartTime < prevEnd) {
+            const deltaBlock = prevEnd - newStartTime;
+            newStartTime = prevEnd;
+            newDuration = Math.max(MIN_CLIP_DURATION, newDuration - deltaBlock);
+          }
+        }
+
         moveTimelineItem(dragState.itemId, newStartTime, dragState.startTrack);
         resizeTimelineItem(dragState.itemId, newDuration);
       } else if (dragState.dragType === 'resize-right') {
-        const newDuration = Math.max(
+        let newDuration = Math.max(
           MIN_CLIP_DURATION,
           dragState.startDuration + deltaTime
         );
+
+        // Clamp against next neighbor to avoid overlap
+        const itemsSameTrack = timeline
+          .filter((i) => i.track === dragState.startTrack && i.id !== dragState.itemId)
+          .sort((a, b) => a.startTime - b.startTime);
+        const next = itemsSameTrack.find((i) => i.startTime >= dragState.startTime);
+        if (next) {
+          const maxEnd = next.startTime;
+          const maxDuration = Math.max(MIN_CLIP_DURATION, maxEnd - dragState.startTime);
+          if (newDuration > maxDuration) newDuration = maxDuration;
+        }
         resizeTimelineItem(dragState.itemId, newDuration);
       }
     },
@@ -377,9 +515,10 @@ export function EducationalTimeline({
     [ui.timeline.zoom, updateTimelineView]
   );
 
+
   // Handle scroll with throttling for performance
   const handleScroll = useThrottledScroll(
-    useCallback((scrollLeft: number, scrollTop: number) => {
+    useCallback((scrollLeft: number, _scrollTop: number) => {
       updateTimelineView({ scrollPosition: scrollLeft });
     }, [updateTimelineView]),
     16 // ~60fps
@@ -392,6 +531,34 @@ export function EducationalTimeline({
     );
   }, []);
 
+  // Playhead scrubbing state
+  const [isScrubbing, setIsScrubbing] = useState(false);
+
+  // Helper to compute time from mouse X within the scrollable grid
+  const computeTimeFromClientX = useCallback((clientX: number) => {
+    const rect = timelineRef.current?.getBoundingClientRect();
+    if (!rect) return 0;
+    const xContent = Math.max(0, clientX - rect.left + ui.timeline.scrollPosition - HEADER_COL_WIDTH);
+    return Math.max(0, Math.min(maxDuration, pixelsToTime(xContent)));
+  }, [ui.timeline.scrollPosition, pixelsToTime, maxDuration]);
+
+  const handleScrubStart = useCallback((e: React.MouseEvent) => {
+    // Ignore scrubbing if a clip drag initiated (propagation is stopped in clip handler)
+    setIsScrubbing(true);
+    const t = computeTimeFromClientX(e.clientX);
+    seek(t);
+  }, [computeTimeFromClientX, seek]);
+
+  const handleScrubMove = useCallback((e: MouseEvent) => {
+    if (!isScrubbing) return;
+    const t = computeTimeFromClientX(e.clientX);
+    seek(t);
+  }, [isScrubbing, computeTimeFromClientX, seek]);
+
+  const handleScrubEnd = useCallback(() => {
+    setIsScrubbing(false);
+  }, []);
+
   // Apply suggested placement
   const applySuggestedPlacement = useCallback((itemId: string, suggestion: PlacementSuggestion) => {
     const item = timeline.find(t => t.id === itemId);
@@ -401,26 +568,26 @@ export function EducationalTimeline({
     }
   }, [timeline, moveTimelineItem, dismissPlacementWarning]);
 
-  // Add global mouse event listeners
+  // Add global mouse event listeners for dragging and scrubbing
   useEffect(() => {
-    if (dragState.isDragging) {
-      const handleGlobalMouseMove = (e: MouseEvent) => {
-        handleMouseMove(e as any);
-      };
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (dragState.isDragging) handleMouseMove(e as any);
+      if (isScrubbing) handleScrubMove(e);
+    };
 
-      const handleGlobalMouseUp = () => {
-        handleMouseUp();
-      };
+    const handleGlobalMouseUp = () => {
+      if (dragState.isDragging) handleMouseUp();
+      if (isScrubbing) handleScrubEnd();
+    };
 
-      document.addEventListener('mousemove', handleGlobalMouseMove);
-      document.addEventListener('mouseup', handleGlobalMouseUp);
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
 
-      return () => {
-        document.removeEventListener('mousemove', handleGlobalMouseMove);
-        document.removeEventListener('mouseup', handleGlobalMouseUp);
-      };
-    }
-  }, [dragState.isDragging, handleMouseMove, handleMouseUp]);
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [dragState.isDragging, isScrubbing, handleMouseMove, handleMouseUp, handleScrubMove, handleScrubEnd]);
 
   return (
     <div
@@ -431,33 +598,35 @@ export function EducationalTimeline({
         <div className="flex items-center space-x-4">
           <span className="text-sm font-medium text-text-primary">Educational Timeline</span>
           
-          {/* Mode Toggle */}
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => handleModeChange(currentMode === 'simplified' ? 'advanced' : 'simplified')}
-              className={`
-                flex items-center space-x-2 px-3 py-1.5 text-xs rounded-md transition-all
-                ${currentMode === 'simplified' 
-                  ? 'bg-primary-600 text-white shadow-glow' 
-                  : 'bg-neutral-700 text-text-secondary hover:bg-neutral-600'
-                }
-              `}
-              title={`Switch to ${currentMode === 'simplified' ? 'Advanced' : 'Simplified'} Mode`}
-              data-help-id="timeline-mode-toggle"
-            >
-              {currentMode === 'simplified' ? (
-                <>
-                  <Eye className="w-3 h-3" />
-                  <span>Simplified</span>
-                </>
-              ) : (
-                <>
-                  <Settings className="w-3 h-3" />
-                  <span>Advanced</span>
-                </>
-              )}
-            </button>
-          </div>
+          {/* Mode Toggle (behind ADVANCED_UI flag) */}
+          {FLAGS.ADVANCED_UI && (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handleModeChange(currentMode === 'simplified' ? 'advanced' : 'simplified')}
+                className={`
+                  flex items-center space-x-2 px-3 py-1.5 text-xs rounded-md transition-all
+                  ${currentMode === 'simplified' 
+                    ? 'bg-primary-600 text-white shadow-glow' 
+                    : 'bg-neutral-700 text-text-secondary hover:bg-neutral-600'
+                  }
+                `}
+                title={`Switch to ${currentMode === 'simplified' ? 'Advanced' : 'Simplified'} Mode`}
+                data-help-id="timeline-mode-toggle"
+              >
+                {currentMode === 'simplified' ? (
+                  <>
+                    <Eye className="w-3 h-3" />
+                    <span>Simplified</span>
+                  </>
+                ) : (
+                  <>
+                    <Settings className="w-3 h-3" />
+                    <span>Advanced</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
 
           {/* Timeline Controls */}
           <div className="flex items-center space-x-2">
@@ -498,6 +667,11 @@ export function EducationalTimeline({
           >
             Snap
           </button>
+
+          {/* Inline quick-add actions */}
+          <div className="ml-4 flex items-center">
+            <ContentAdditionToolbar variant="inline" />
+          </div>
         </div>
 
         <div className="text-xs text-text-tertiary">
@@ -505,72 +679,105 @@ export function EducationalTimeline({
         </div>
       </div>
 
-      {/* Timeline Content */}
+      {/* Timeline Content (grid with sticky left headers) */}
       <div
+        ref={(el) => {
+          scrollRef.current = el as HTMLDivElement;
+          containerRef.current = el as HTMLDivElement;
+        }}
         className="educational-timeline-content overflow-auto flex-1"
-        onScroll={handleScroll}
+        onScroll={(e) => {
+          const target = e.currentTarget;
+          handleScroll(target.scrollLeft, target.scrollTop);
+        }}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onClick={handleTimelineClick}
+        onMouseDown={handleScrubStart}
       >
         <div
-          ref={(el) => {
-            timelineRef.current = el;
-            containerRef.current = el;
-          }}
-          className="educational-timeline-canvas relative"
+          ref={timelineRef}
+          className="educational-timeline-grid relative grid"
           style={{
-            width: `${timelineWidth}px`,
-            height: `${timelineHeight}px`,
-            minHeight: `${EDUCATIONAL_TRACKS.length * responsiveTrackHeight}px`,
+            gridTemplateColumns: `${HEADER_COL_WIDTH}px 1fr`,
+            width: `${HEADER_COL_WIDTH + timelineWidth}px`,
+            height: `${totalTimelineHeight}px`,
+            minHeight: `${totalTimelineHeight}px`,
           }}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onClick={handleTimelineClick}
         >
-          {/* Grid Lines */}
+          {/* Grid Lines overlay (right content column only) */}
           {ui.timeline.snapToGrid && (
-            <div className="absolute inset-0 pointer-events-none">
-              {Array.from({
-                length: Math.ceil(maxDuration / ui.timeline.gridSize),
-              }).map((_, i) => (
+            <div
+              className="pointer-events-none absolute top-0 bottom-0"
+              style={{ left: `${HEADER_COL_WIDTH}px`, right: 0 }}
+            >
+              {Array.from({ length: Math.ceil(maxDuration / ui.timeline.gridSize) }).map((_, i) => (
                 <div
                   key={i}
                   className="absolute top-0 bottom-0 border-l border-border-subtle opacity-30"
-                  style={{
-                    left: `${timeToPixels(i * ui.timeline.gridSize)}px`,
-                  }}
+                  style={{ left: `${timeToPixels(i * ui.timeline.gridSize)}px` }}
                 />
               ))}
             </div>
           )}
 
-          {/* Educational Tracks */}
-          {EDUCATIONAL_TRACKS.map((track, index) => (
-            <div
-              key={track.id}
-              className="absolute left-0 right-0"
-              style={{
-                top: `${index * responsiveTrackHeight}px`,
-                height: `${responsiveTrackHeight}px`,
-              }}
-            >
-              <EducationalTrack
-                track={track}
-                items={timeline}
-                isActive={false}
-                trackHeight={responsiveTrackHeight}
-                timeToPixels={timeToPixels}
-                onItemDrop={(item) => handleSmartDrop(new DragEvent('drop') as any, track)}
-                onItemMouseDown={handleClipMouseDown}
-                selectedItems={selectedItems}
-                dragState={dragState}
-                // Performance optimization props
-                containerWidth={containerSize.width}
-                pixelsPerSecond={PIXELS_PER_SECOND}
-                zoom={ui.timeline.zoom}
-                scrollLeft={ui.timeline.scrollPosition}
-                useVirtualization={breakpoint === 'desktop' && timeline.length > 20}
-              />
-            </div>
-          ))}
+          {/* Playhead overlay */}
+          <div
+            className="pointer-events-none absolute top-0 bottom-0 z-30"
+            style={{ left: `${HEADER_COL_WIDTH + timeToPixels(playback.currentTime)}px` }}
+          >
+            <div style={{ position: 'absolute', top: 0, bottom: 0, width: 2, backgroundColor: 'var(--synapse-playhead)' }} />
+            <div style={{ position: 'absolute', top: -6, left: -5, width: 10, height: 10, backgroundColor: 'var(--synapse-playhead)', borderRadius: 2 }} />
+          </div>
+
+          {/* Rows: Header cell + Content cell per track */}
+          {EDUCATIONAL_TRACKS.map((track) => {
+            const row = perTrackHeight.find((r) => r.id === track.id)!;
+            const rowStyle: React.CSSProperties = { height: `${row.height}px` };
+            return (
+              <React.Fragment key={track.id}>
+                {/* Left sticky header cell */}
+                <div
+                  className="sticky left-0 z-20 bg-background-tertiary border-b border-border-subtle flex items-center gap-2 px-3"
+                  style={{ ...rowStyle, width: `${HEADER_COL_WIDTH}px` }}
+                >
+                  {/* Compact header content */}
+                  <div
+                    className="w-6 h-6 rounded-md flex items-center justify-center text-white text-xs font-semibold"
+                    style={{ backgroundColor: track.color }}
+                    title={`Track ${track.trackNumber + 1}`}
+                  >
+                    {track.name[0]}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-medium text-text-primary truncate">{track.name}</div>
+                    <div className="text-[10px] text-text-tertiary">Track {track.trackNumber + 1}</div>
+                  </div>
+                </div>
+
+                {/* Right content cell */}
+                <div className="relative border-b border-border-subtle" style={rowStyle}>
+                  <EducationalTrack
+                    track={track}
+                    items={timeline}
+                    isActive={false}
+                    trackHeight={row.height}
+                    timeToPixels={timeToPixels}
+                    onItemDrop={(item) => handleSmartDrop(new DragEvent('drop') as any, track)}
+                    onItemMouseDown={handleClipMouseDown}
+                    selectedItems={selectedItems}
+                    dragState={dragState}
+                    // Performance optimization props
+                    containerWidth={containerSize.width}
+                    pixelsPerSecond={PIXELS_PER_SECOND}
+                    zoom={ui.timeline.zoom}
+                    scrollLeft={ui.timeline.scrollPosition}
+                    useVirtualization={breakpoint === 'desktop' && timeline.length > 20}
+                  />
+                </div>
+              </React.Fragment>
+            );
+          })}
         </div>
       </div>
 

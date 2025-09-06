@@ -7,19 +7,21 @@ import {
   uploadProjectFile,
   downloadProjectFile,
 } from '../lib/projectManager';
-import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical.js';
-import Download from 'lucide-react/dist/esm/icons/download.js';
-import Upload from 'lucide-react/dist/esm/icons/upload.js';
-import Copy from 'lucide-react/dist/esm/icons/copy.js';
-import Trash2 from 'lucide-react/dist/esm/icons/trash-2.js';
-import Edit3 from 'lucide-react/dist/esm/icons/edit-3.js';
-import FileText from 'lucide-react/dist/esm/icons/file-text.js';
-import Calendar from 'lucide-react/dist/esm/icons/calendar.js';
-import Video from 'lucide-react/dist/esm/icons/video.js';
-import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle.js';
-import Check from 'lucide-react/dist/esm/icons/check.js';
-import X from 'lucide-react/dist/esm/icons/x.js';
-import ExternalLink from 'lucide-react/dist/esm/icons/external-link.js';
+import { 
+  MoreVertical, 
+  Download, 
+  Upload, 
+  Copy, 
+  Trash2, 
+  Edit3, 
+  FileText, 
+  Calendar, 
+  Video, 
+  AlertTriangle, 
+  Check, 
+  X, 
+  ExternalLink 
+} from 'lucide-react';
 
 interface ProjectCardProps {
   project: any; // StoredProject type

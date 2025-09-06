@@ -1,7 +1,7 @@
-/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import prismjsPlugin from 'vite-plugin-prismjs';
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -75,10 +75,4 @@ export default defineConfig({
     },
   },
   assetsInclude: ['**/*.node'],
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-    exclude: ['**/.worktrees/**'],
-  },
 });

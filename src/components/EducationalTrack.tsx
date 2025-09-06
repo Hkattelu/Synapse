@@ -8,11 +8,7 @@ import { CompactWaveform } from './WaveformVisualization';
 import { StaticLevelMeter } from './AudioLevelMeter';
 import { VirtualizedTimelineItems } from './VirtualizedTimelineItems';
 import { useIntersectionObserver, useResponsiveBreakpoint } from '../lib/performanceOptimizations';
-import Code from 'lucide-react/dist/esm/icons/code.js';
-import Monitor from 'lucide-react/dist/esm/icons/monitor.js';
-import Mic from 'lucide-react/dist/esm/icons/mic.js';
-import User from 'lucide-react/dist/esm/icons/user.js';
-import Volume2 from 'lucide-react/dist/esm/icons/volume-2.js';
+import { Code, Monitor, Mic, User, Volume2 } from 'lucide-react';
 
 interface EducationalTrackProps {
   track: EducationalTrack;
@@ -115,16 +111,10 @@ export function EducationalTrack({
     return (
       <div
         ref={trackElementRef}
-        className="educational-track relative border-b border-border-subtle"
+        className="educational-track relative"
         style={{ height: `${responsiveTrackHeight}px` }}
       >
-        <EducationalTrackHeader 
-          track={track} 
-          IconComponent={IconComponent} 
-          height={responsiveTrackHeight}
-          breakpoint={breakpoint}
-        />
-        <div className="absolute inset-0 top-12 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-xs text-gray-500 animate-pulse">Loading track content...</div>
         </div>
       </div>
@@ -137,21 +127,13 @@ export function EducationalTrack({
         trackRef.current = el;
         trackElementRef.current = el;
       }}
-      className="educational-track relative border-b border-border-subtle"
+      className="educational-track relative"
       style={{ height: `${responsiveTrackHeight}px` }}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
     >
-      {/* Track Header */}
-      <EducationalTrackHeader 
-        track={track} 
-        IconComponent={IconComponent} 
-        height={responsiveTrackHeight}
-        breakpoint={breakpoint}
-      />
-      
-      {/* Track Content Area */}
-      <div className="absolute inset-0 top-12">
+      {/* Track Content Area (full-row height; header moved to left column) */}
+      <div className="absolute inset-0">
         {useVirtualization && containerWidth > 0 ? (
           // Use virtualized rendering for better performance
           <VirtualizedTimelineItems
@@ -194,28 +176,8 @@ interface EducationalTrackHeaderProps {
 }
 
 function EducationalTrackHeader({ track, IconComponent, height, breakpoint }: EducationalTrackHeaderProps) {
-  const headerHeight = breakpoint === 'mobile' ? 10 : 12;
-  const iconSize = breakpoint === 'mobile' ? 'w-4 h-4' : 'w-5 h-5';
-  const textSize = breakpoint === 'mobile' ? 'text-xs' : 'text-sm';
-  const padding = breakpoint === 'mobile' ? 'px-2' : 'px-4';
-
-  return (
-    <div
-      className={`educational-track-header absolute top-0 left-0 right-0 ${padding} flex items-center gap-2 z-10 border-b border-border-subtle`}
-      style={{
-        height: `${headerHeight * 4}px`,
-        background: `linear-gradient(135deg, ${track.color}, ${track.color}CC)`,
-      }}
-    >
-      <IconComponent className={`${iconSize} text-white`} />
-      <span className={`font-semibold text-white ${textSize}`}>{track.name}</span>
-      {breakpoint !== 'mobile' && (
-        <div className="ml-auto text-xs text-white text-opacity-75">
-          Track {track.trackNumber + 1}
-        </div>
-      )}
-    </div>
-  );
+  // Deprecated: header is now rendered in the left sticky column by EducationalTimeline
+  return null;
 }
 
 interface EducationalTimelineClipProps {
@@ -272,11 +234,11 @@ function EducationalTimelineClip({
       <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize bg-text-primary bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
 
       {/* Clip Content */}
-      <div className="p-2 h-full flex flex-col justify-between text-xs overflow-hidden">
+      <div className="p-1.5 h-full flex flex-col justify-between text-[11px] overflow-hidden">
         {getClipContent()}
         
         {/* Duration indicator */}
-        <div className="text-text-secondary text-opacity-75 mt-1">
+        <div className="text-text-secondary text-opacity-75 mt-0.5 text-[10px]">
           {Math.round(item.duration * 10) / 10}s
         </div>
       </div>
@@ -292,15 +254,15 @@ function CodeClipPreview({ item, asset }: { item: TimelineItem; asset: MediaAsse
   
   return (
     <div className="flex-1 overflow-hidden">
-      <div className="font-medium text-text-primary truncate flex items-center gap-1 mb-1">
+      <div className="font-medium text-text-primary truncate flex items-center gap-1 mb-0.5 text-[11px]">
         <Code className="w-3 h-3" />
         {asset?.name || 'Code Block'}
       </div>
       
-      <div className="flex items-center gap-1 mb-1">
-        <LanguageIndicator language={language} className="text-xs" />
+      <div className="flex items-center gap-1 mb-0.5">
+        <LanguageIndicator language={language} className="text-[10px]" />
         {animationMode !== 'none' && (
-          <AnimationModeIndicator mode={animationMode} className="text-xs" />
+          <AnimationModeIndicator mode={animationMode} className="text-[10px]" />
         )}
       </div>
       
@@ -309,7 +271,7 @@ function CodeClipPreview({ item, asset }: { item: TimelineItem; asset: MediaAsse
           item={item} 
           maxLines={2} 
           showLanguage={false}
-          className="text-xs"
+          className="text-[10px]"
         />
       )}
       
@@ -325,11 +287,11 @@ function CodeClipPreview({ item, asset }: { item: TimelineItem; asset: MediaAsse
 function VisualClipPreview({ item, asset }: { item: TimelineItem; asset: MediaAsset | undefined }) {
   return (
     <div className="flex-1 overflow-hidden">
-      <div className="font-medium text-text-primary truncate flex items-center gap-1">
+      <div className="font-medium text-text-primary truncate flex items-center gap-1 text-[11px]">
         <Monitor className="w-3 h-3" />
         {asset?.name || 'Visual Content'}
       </div>
-      <div className="text-xs text-text-secondary mt-1">
+      <div className="text-[10px] text-text-secondary mt-0.5">
         {asset?.type === 'video' ? 'Video' : 'Image'}
         {asset?.metadata.width && asset?.metadata.height && (
           <span className="ml-1">
@@ -354,7 +316,7 @@ function NarrationClipPreview({ item, asset }: { item: TimelineItem; asset: Medi
   
   return (
     <div className="flex-1 overflow-hidden">
-      <div className="font-medium text-text-primary truncate flex items-center gap-1">
+      <div className="font-medium text-text-primary truncate flex items-center gap-1 text-[11px]">
         <Mic className="w-3 h-3" />
         {asset?.name || 'Audio Track'}
         {hasAudioDucking && (
@@ -362,7 +324,7 @@ function NarrationClipPreview({ item, asset }: { item: TimelineItem; asset: Medi
         )}
       </div>
       
-      <div className="text-xs text-text-secondary mt-1 flex items-center gap-2">
+      <div className="text-[10px] text-text-secondary mt-0.5 flex items-center gap-2">
         <span>Audio • {Math.round(volume * 100)}% vol</span>
         {syncPointsCount > 0 && (
           <span className="text-accent-blue">• {syncPointsCount} sync points</span>
@@ -519,7 +481,7 @@ function TraditionalTrackItems({
               style={{
                 left: `${timeToPixels(item.startTime)}px`,
                 width: `${timeToPixels(item.duration)}px`,
-                height: `${trackHeight - 16}px`, // Leave space for track header
+                height: `${trackHeight - 8}px`,
                 top: '4px',
               }}
               onMouseDown={(e) => onItemMouseDown(e, item)}

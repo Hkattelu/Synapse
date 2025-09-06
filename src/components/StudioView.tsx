@@ -10,11 +10,7 @@ import { ExportDialog } from './ExportDialog';
 import { RecorderDialog } from './RecorderDialog';
 import { ExportProvider } from '../state/exportContext';
 import { ResizablePanel } from './ResizablePanel';
-import { ContentAdditionToolbar } from './ContentAdditionToolbar';
-import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left.js';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
-import Settings from 'lucide-react/dist/esm/icons/settings.js';
-import Archive from 'lucide-react/dist/esm/icons/archive.js';
+import { ArrowLeft, Sparkles, Settings, Archive, PanelRight } from 'lucide-react';
 import { UndoButton } from './UndoButton';
 import { RedoButton } from './RedoButton';
 import { ShortcutsDialog } from './ShortcutsDialog';
@@ -26,6 +22,7 @@ import { OnboardingDialog } from './educational/OnboardingDialog';
 import { HelpTipsOverlay } from './educational/HelpTipsOverlay';
 import { EducationalBestPractices } from './educational/EducationalBestPractices';
 import { InteractiveTutorial } from './educational/InteractiveTutorial';
+import { FLAGS } from '../lib/flags';
 
 function StudioViewContent() {
   const { project } = useProject();
@@ -40,6 +37,16 @@ function StudioViewContent() {
   const [showGuide, setShowGuide] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   
+  const isRightPanelOpen = ui.mediaBinVisible || ui.inspectorVisible;
+  const [rightPanelWidth, setRightPanelWidth] = useState<number>(() => {
+    try {
+      const saved = parseInt(localStorage.getItem('ui:rightPanelWidth') || '', 10);
+      return Number.isNaN(saved) ? 320 : saved;
+    } catch {
+      return 320;
+    }
+  });
+
   useEffect(() => {
     try {
       const flag = localStorage.getItem('seui_onboarded_v1');
@@ -145,12 +152,14 @@ function StudioViewContent() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* UI Mode Toggle */}
-            <div data-tutorial="mode-toggle">
-              <UIModeToggle />
-            </div>
+            {/* UI Mode Toggle (gated) */}
+            {FLAGS.ADVANCED_UI && (
+              <div data-tutorial="mode-toggle">
+                <UIModeToggle />
+              </div>
+            )}
             
-            {/* Help Controls */}
+            {/* Help Controls + Settings */}
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setShowTips((v) => !v)}
@@ -169,6 +178,8 @@ function StudioViewContent() {
               >
                 Guide
               </button>
+              {/* Settings gear */}
+              <HeaderSettingsMenu />
             </div>
             
             {/* Panel Controls */}
@@ -185,7 +196,13 @@ function StudioViewContent() {
                 />
               </ModeAwareComponent>
               <button
-                onClick={toggleMediaBin}
+                onClick={() => {
+                  // Open Media Bin; ensure Inspector is closed to avoid overlap
+                  if (!ui.mediaBinVisible && ui.inspectorVisible) {
+                    toggleInspector();
+                  }
+                  toggleMediaBin();
+                }}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
                   ui.mediaBinVisible
                     ? 'bg-purple-600 text-white shadow-lg'
@@ -196,7 +213,13 @@ function StudioViewContent() {
                 <Archive className="w-4 h-4" />
               </button>
               <button
-                onClick={toggleInspector}
+                onClick={() => {
+                  // Open Inspector; ensure Media Bin is closed to avoid overlap
+                  if (!ui.inspectorVisible && ui.mediaBinVisible) {
+                    toggleMediaBin();
+                  }
+                  toggleInspector();
+                }}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
                   ui.inspectorVisible
                     ? 'bg-purple-600 text-white shadow-lg'
@@ -204,7 +227,7 @@ function StudioViewContent() {
                 }`}
                 title="Toggle Properties Panel"
               >
-                <Settings className="w-4 h-4" />
+                <PanelRight className="w-4 h-4" />
               </button>
               
               {/* Shortcuts Button - Advanced mode only */}
@@ -246,10 +269,6 @@ function StudioViewContent() {
             maxSize={500}
             className="border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900 flex-shrink-0 flex flex-col"
           >
-            <div data-tutorial="timeline-toolbar">
-              <ContentAdditionToolbar />
-            </div>
-            
             {/* Mode-aware timeline rendering */}
             <ModeAwareComponent mode="simplified">
               <div data-tutorial="educational-timeline">
@@ -267,53 +286,60 @@ function StudioViewContent() {
               </div>
             </ModeAwareComponent>
             
-            <ModeAwareComponent mode="advanced">
-              <EnhancedTimelineView className="flex-1" />
-            </ModeAwareComponent>
+            {/** Advanced timeline gated by feature flag */}
+            {FLAGS.ADVANCED_UI ? (
+              <ModeAwareComponent mode="advanced">
+                <EnhancedTimelineView className="flex-1" />
+              </ModeAwareComponent>
+            ) : null}
           </ResizablePanel>
         </main>
 
         {/* Right Panels */}
-        {(ui.mediaBinVisible || ui.inspectorVisible) && (
+        <div
+          className="right-panels-container relative transition-all duration-200 ease-in-out overflow-hidden"
+          style={{ width: isRightPanelOpen ? rightPanelWidth : 0, pointerEvents: isRightPanelOpen ? 'auto' as const : 'none' as const }}
+          aria-hidden={!isRightPanelOpen}
+        >
           <ResizablePanel
             direction="horizontal"
-            initialSize={320}
+            initialSize={rightPanelWidth}
             minSize={250}
             maxSize={600}
-            className="flex flex-col bg-white/95 backdrop-blur-sm border-l border-purple-200 rounded-r-2xl overflow-hidden shadow-inner"
+            storageKey="ui:rightPanelWidth"
+            onSizeChange={(s) => setRightPanelWidth(s)}
+            className="flex flex-col bg-white/95 backdrop-blur-sm border-l border-purple-200 rounded-r-2xl overflow-hidden shadow-inner h-full"
           >
             <motion.div
               initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4 }}
+              animate={{ opacity: isRightPanelOpen ? 1 : 0, x: isRightPanelOpen ? 0 : 20 }}
+              transition={{ duration: 0.2 }}
               className="h-full flex flex-col"
             >
               {/* Media Bin */}
-              {ui.mediaBinVisible && (
+              {/* Right panel content: show one at a time to avoid overlap */}
+              {ui.mediaBinVisible && !ui.inspectorVisible ? (
                 <ResizablePanel
                   direction="vertical"
-                  initialSize={ui.inspectorVisible ? 300 : 600}
+                  initialSize={600}
                   minSize={200}
                   maxSize={800}
-                  className={`${ui.inspectorVisible ? '' : 'h-full'} border-b border-purple-200/50 bg-gradient-to-b from-white to-purple-50/30`}
+                  className={`h-full border-b border-purple-200/50 bg-gradient-to-b from-white to-purple-50/30`}
                 >
                   <div data-tutorial="media-bin">
                     <MediaBin />
                   </div>
                 </ResizablePanel>
-              )}
+              ) : null}
 
-              {/* Inspector Panel */}
-              {ui.inspectorVisible && (
-                <div
-                  className={`${ui.mediaBinVisible ? 'flex-1' : 'h-full'} bg-gradient-to-b from-purple-50/30 to-white`}
-                >
+              {ui.inspectorVisible && !ui.mediaBinVisible ? (
+                <div className={`h-full bg-gradient-to-b from-purple-50/30 to-white`}>
                   <Inspector />
                 </div>
-              )}
+              ) : null}
             </motion.div>
           </ResizablePanel>
-        )}
+        </div>
       </motion.div>
 
       {/* Export Dialog */}
@@ -369,7 +395,66 @@ function StudioViewContent() {
 }
 
 // Wrapper component with ExportProvider
+function HeaderSettingsMenu() {
+  const [open, setOpen] = React.useState(false);
+  const btnRef = React.useRef<HTMLButtonElement>(null);
+  React.useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      if (btnRef.current && !btnRef.current.parentElement?.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, []);
+
+  const toggleTheme = () => {
+    try {
+      const root = document.documentElement;
+      const current = root.getAttribute('data-theme');
+      const next = current === 'light' ? null : 'light';
+      if (next) root.setAttribute('data-theme', next);
+      else root.removeAttribute('data-theme');
+      localStorage.setItem('ui:theme', next || 'dark');
+    } catch {}
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        ref={btnRef}
+        onClick={() => setOpen((v) => !v)}
+        className="p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300"
+        title="Settings"
+      >
+        <Settings className="w-4 h-4" />
+      </button>
+      {open && (
+        <div className="absolute right-0 mt-2 w-40 bg-white border border-purple-200 rounded shadow-lg z-50">
+          <button
+            className="w-full text-left px-3 py-2 text-sm hover:bg-purple-50"
+            onClick={toggleTheme}
+          >
+            Toggle light/dark mode
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function StudioView() {
+  // Initialize theme from localStorage on first mount
+  React.useEffect(() => {
+    try {
+      const saved = localStorage.getItem('ui:theme');
+      const root = document.documentElement;
+      if (saved === 'light') root.setAttribute('data-theme', 'light');
+      else root.removeAttribute('data-theme');
+    } catch {}
+  }, []);
+
   return (
     <ExportProvider>
       <StudioViewContent />

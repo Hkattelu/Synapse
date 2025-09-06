@@ -10,6 +10,27 @@ A web-based video creation tool for content creators to stitch video clips, inte
 - **Remotion** for programmatic video generation
 - **ESLint + Prettier** for code quality
 
+## Quick Start (PowerShell)
+
+1. Prerequisites: Node.js 20+, npm (Windows/PowerShell recommended)
+2. Install dependencies
+   ```powershell
+   npm install
+   ```
+3. Start backend API (Terminal A)
+   ```powershell
+   npm run server
+   ```
+4. Start frontend (Terminal B)
+   ```powershell
+   npm run dev
+   ```
+5. Open http://localhost:5173 and sign up/sign in
+6. Optional: API health check
+   ```powershell
+   Invoke-RestMethod http://localhost:8787/api/health
+   ```
+
 ## Project Structure
 
 ```
@@ -25,7 +46,7 @@ src/
 
 ## Development
 
-```bash
+```powershell
 # Install dependencies
 npm install
 
@@ -133,6 +154,17 @@ This project addresses the following key requirements:
 ### Backgrounds & Themes
 
 See docs/BACKGROUNDS.md for details on code themes, wallpapers (including subtle animated GIFs), and the Reduce Motion toggle.
+
+## Testing & Pre‑launch QA
+
+- Follow the step‑by‑step manual test plan in docs/TESTING.md to verify:
+  - Auth and membership gating for exports
+  - Timeline editing (media, code clips, audio) and preview
+  - Backgrounds and Reduce Motion behavior
+  - Export pipeline end‑to‑end (server job → download)
+  - AI “New from Repo” generation flow
+  - Optional: Electron desktop basics and staging deployment
+- For launch process details and checklist, see docs/PRODUCT_HUNT_LAUNCH.md.
 
 ## Production launch documentation
 

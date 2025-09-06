@@ -33,6 +33,102 @@ const SUPPORTED_FILE_TYPES = {
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
+// Small add menu button component
+function AddMediaMenu({
+  onUpload,
+  onCreateCode,
+  onCreateVisual,
+}: {
+  onUpload: () => void;
+  onCreateCode: () => void;
+  onCreateVisual: (type: VisualAssetType) => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const [visualOpen, setVisualOpen] = React.useState(false);
+  const btnRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      if (btnRef.current && !btnRef.current.parentElement?.contains(e.target as Node)) {
+        setOpen(false);
+        setVisualOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, []);
+
+  return (
+    <div className="relative">
+      <button
+        ref={btnRef}
+        onClick={() => setOpen((v) => !v)}
+        className="bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium py-2 px-2 rounded transition-colors shadow-sm"
+        title="Add"
+      >
+        +
+      </button>
+      {open && (
+        <div className="absolute right-0 mt-2 w-44 bg-background-tertiary border border-border-subtle rounded shadow-lg z-50">
+          <button
+            className="w-full text-left px-3 py-2 text-xs hover:bg-background-secondary"
+            onClick={() => {
+              onUpload();
+              setOpen(false);
+            }}
+          >
+            Upload media
+          </button>
+          <button
+            className="w-full text-left px-3 py-2 text-xs hover:bg-background-secondary"
+            onClick={() => {
+              onCreateCode();
+              setOpen(false);
+            }}
+          >
+            New code clip
+          </button>
+          <div className="relative">
+            <button
+              className="w-full text-left px-3 py-2 text-xs hover:bg-background-secondary"
+              onClick={() => setVisualOpen((v) => !v)}
+            >
+              New visual asset ▸
+            </button>
+            {visualOpen && (
+              <div className="absolute left-full top-0 ml-1 w-44 bg-background-tertiary border border-border-subtle rounded shadow-lg">
+                {(['arrow','box','finger-pointer','circle','line'] as VisualAssetType[]).map((t) => (
+                  <button
+                    key={t}
+                    className="w-full text-left px-3 py-2 text-xs hover:bg-background-secondary capitalize"
+                    onClick={() => {
+                      onCreateVisual(t);
+                      setOpen(false);
+                      setVisualOpen(false);
+                    }}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <button
+            className="w-full text-left px-3 py-2 text-xs hover:bg-background-secondary"
+            onClick={() => {
+              // Fire global event handled by StudioView to open recorder dialog
+              try { window.dispatchEvent(new CustomEvent('openRecorderDialog')); } catch {}
+              setOpen(false);
+            }}
+          >
+            Record audio
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function MediaBin({ className = '' }: MediaBinProps) {
   const { mediaAssets, addMediaAsset, removeMediaAsset } = useMediaAssets();
 
@@ -42,8 +138,26 @@ export function MediaBin({ className = '' }: MediaBinProps) {
   const [uploadErrors, setUploadErrors] = useState<FileUploadError[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const { notify } = useNotifications();
-  const [activeTab, setActiveTab] = useState<'media' | 'music'>('media');
-  const [educationalFilter, setEducationalFilter] = useState<'all' | 'code' | 'visual' | 'narration' | 'you'>('all');
+  // Single dropdown category: Code, Visual, Audio, You (music+narration collapsed into Audio)
+  const [educationalFilter, setEducationalFilter] = useState<'code' | 'visual' | 'audio' | 'you'>('visual');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Category counts for dropdown labels
+  const categoryCounts = React.useMemo(() => {
+    const count = { visual: 0, code: 0, audio: 0, you: 0 } as Record<'visual'|'code'|'audio'|'you', number>;
+    try {
+      for (const a of mediaAssets) {
+        if (a.type === 'audio') { count.audio++; continue; }
+        const s = suggestTrackPlacement(a);
+        const name = s.suggestedTrack.name.toLowerCase();
+        if (name === 'visual') count.visual++;
+        else if (name === 'code') count.code++;
+        else if (name === 'you') count.you++;
+        else if (name === 'narration') count.audio++; // collapse narration into audio
+      }
+    } catch {}
+    return count;
+  }, [mediaAssets]);
 
   // Listen for upload files event from toolbar
   React.useEffect(() => {
@@ -465,66 +579,35 @@ export function MediaBin({ className = '' }: MediaBinProps) {
       className={`flex flex-col h-full bg-background-secondary ${className}`}
     >
       {/* Header */}
-      <div className="p-4 border-b border-border-subtle bg-background-tertiary">
+      <div className="p-3 border-b border-border-subtle bg-background-tertiary">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <h3 className="font-semibold text-sm text-text-primary">
-              Media Library
-            </h3>
-            <div className="flex bg-gray-800 rounded-lg overflow-hidden border border-gray-600">
-              <button
-                onClick={() => setActiveTab('media')}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
-                  activeTab === 'media' 
-                    ? 'bg-purple-600 text-white' 
-                    : 'text-gray-300 hover:text-white hover:bg-gray-700'
-                }`}
-              >
-                📁 Library
-              </button>
-              <button
-                onClick={() => setActiveTab('music')}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
-                  activeTab === 'music' 
-                    ? 'bg-purple-600 text-white' 
-                    : 'text-gray-300 hover:text-white hover:bg-gray-700'
-                }`}
-              >
-                🎵 Music
-              </button>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            {/* Educational content filter */}
-            {activeTab === 'media' && (
-              <select
-                value={educationalFilter}
-                onChange={(e) => setEducationalFilter(e.target.value as any)}
-                className="bg-gray-700 text-white text-xs border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-purple-500"
-              >
-                <option value="all">All Content</option>
-                <option value="code">💻 Code</option>
-                <option value="visual">🖥️ Visual</option>
-                <option value="narration">🎤 Narration</option>
-                <option value="you">👤 You</option>
-              </select>
-            )}
-            <button
-              onClick={openFileDialog}
-              className="bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium py-2 px-4 rounded transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isUploading}
+          <div className="flex items-center gap-3">
+            <h3 className="font-semibold text-sm text-text-primary">Media</h3>
+            {/* Category dropdown: Code, Visual, Audio, You with counts */}
+            <select
+              value={educationalFilter}
+              onChange={(e) => setEducationalFilter(e.target.value as any)}
+              className="bg-background-secondary text-text-primary text-xs border border-border-subtle rounded px-2 py-1 focus:outline-none focus:border-primary-500"
+              title="Content Type"
             >
-              {isUploading ? 'Uploading...' : '+ Add Media'}
-            </button>
-            {activeTab === 'media' && (
-              <button
-                onClick={createCodeClip}
-                className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium py-2 px-4 rounded transition-colors shadow-sm"
-                title="Create a new code clip"
-              >
-                Add Code
-              </button>
-            )}
+              <option value="visual">Visual ({categoryCounts.visual})</option>
+              <option value="code">Code ({categoryCounts.code})</option>
+              <option value="audio">Audio ({categoryCounts.audio})</option>
+              <option value="you">You ({categoryCounts.you})</option>
+            </select>
+
+            {/* Search */}
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search media..."
+              className="bg-background-secondary text-text-primary text-xs border border-border-subtle rounded px-2 py-1 focus:outline-none focus:border-primary-500 w-40"
+            />
+          </div>
+
+          {/* Add button with compact menu */}
+          <div className="relative">
+            <AddMediaMenu onUpload={openFileDialog} onCreateCode={createCodeClip} onCreateVisual={createVisualAsset} />
           </div>
         </div>
 
@@ -559,8 +642,8 @@ export function MediaBin({ className = '' }: MediaBinProps) {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        {activeTab === 'music' ? (
-          <MusicLibrary />
+        {educationalFilter === 'audio' ? (
+          <MusicLibrary searchQuery={searchQuery} />
         ) : mediaAssets.length === 0 ? (
           /* Empty state with drag and drop */
           <div
@@ -603,7 +686,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
         ) : (
           /* Media assets grid */
           <div
-            className={`p-4 transition-colors ${
+            className={`p-3 transition-colors ${
               isDragOver ? 'bg-primary-500/10' : ''
             }`}
             onDragOver={handleDragOver}
@@ -613,27 +696,24 @@ export function MediaBin({ className = '' }: MediaBinProps) {
             <div className="grid grid-cols-2 gap-3">
               {mediaAssets
                 .filter((asset) => {
-                  if (educationalFilter === 'all') return true;
-                  
                   try {
                     const suggestion = suggestTrackPlacement(asset);
                     const trackName = suggestion.suggestedTrack.name.toLowerCase();
-                    
-                    if (educationalFilter === 'code') return trackName === 'code';
-                    if (educationalFilter === 'visual') return trackName === 'visual';
-                    if (educationalFilter === 'narration') return trackName === 'narration';
-                    if (educationalFilter === 'you') return trackName === 'you';
+                    // 'audio' category should not show here, handled by MusicLibrary
+                    if (educationalFilter === 'audio') return false;
+                    if (trackName !== educationalFilter) return false;
+                    const q = searchQuery.trim().toLowerCase();
+                    if (!q) return true;
+                    const codeLang = (asset.metadata?.language || '').toString().toLowerCase();
+                    return asset.name.toLowerCase().includes(q) || codeLang.includes(q);
                   } catch {
-                    // If suggestion fails, show in 'all' filter only
-                    return educationalFilter === 'all';
+                    return false;
                   }
-                  
-                  return false;
                 })
                 .map((asset) => (
                 <div
                   key={asset.id}
-                  className="bg-background-tertiary rounded-lg overflow-hidden hover:bg-neutral-700 transition-colors cursor-pointer group border border-border-subtle hover:border-neutral-600"
+                  className="bg-background-tertiary rounded-lg overflow-hidden hover:bg-background-secondary transition-colors cursor-pointer group border border-border-subtle hover:border-neutral-600"
                   draggable
                   onDragStart={(e) => handleDragStart(e, asset)}
                   onDoubleClick={() => handleDoubleClick(asset)}

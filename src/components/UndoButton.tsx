@@ -1,5 +1,5 @@
 import React from 'react';
-import Undo2 from 'lucide-react/dist/esm/icons/undo-2.js';
+import { Undo2 } from 'lucide-react';
 import { useProjectTemporal } from '../state/projectStore';
 
 type Props = React.ButtonHTMLAttributes<HTMLButtonElement>;
