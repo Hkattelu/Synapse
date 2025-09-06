@@ -174,7 +174,7 @@ const VirtualizedTimelineItem = memo(function VirtualizedTimelineItem({
     width: `${width}px`,
     height: `${height}px`,
     top: '4px',
-    backgroundColor: `${track.color}22`,
+    backgroundColor: track.color,
     borderColor: isSelected ? '#F59E0B' : track.color,
   }), [left, width, height, track.color, isSelected]);
 
@@ -205,7 +205,7 @@ const VirtualizedTimelineItem = memo(function VirtualizedTimelineItem({
         />
         
         {/* Duration indicator */}
-        <div className="text-text-secondary text-opacity-75 mt-1 text-xs">
+        <div className="text-white mt-1 text-xs">
           {Math.round(item.duration * 10) / 10}s
         </div>
       </div>

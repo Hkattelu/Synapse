@@ -318,7 +318,7 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
   const deleteSelectedKeyframes = useCallback(() => {
     selectedKeyframes.forEach((keyframeId) => {
       const item = timeline.find((item) =>
-        item.keyframes.some((k) => k.id === keyframeId)
+        (item.keyframes ?? []).some((k) => k.id === keyframeId)
       );
       if (!item) return;
 
@@ -385,12 +385,12 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
 
   return (
     <div
-      className={`advanced-timeline bg-gray-800 border-t border-gray-700 flex flex-col ${className}`}
+      className={`advanced-timeline bg-background-secondary border-t border-border-subtle flex flex-col ${className}`}
     >
       {/* Advanced Timeline Header */}
-      <div className="timeline-header bg-gray-900 border-b border-gray-700 p-2 flex items-center justify-between">
+      <div className="timeline-header bg-background-tertiary border-b border-border-subtle p-2 flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-400">Advanced Timeline</span>
+          <span className="text-sm text-text-secondary">Advanced Timeline</span>
 
           {/* Timeline Mode Toggle */}
           <div className="flex items-center space-x-2">
@@ -398,9 +398,9 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
               onClick={() => setShowKeyframes(!showKeyframes)}
               className={`px-2 py-1 text-xs rounded ${
                 showKeyframes
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-700 text-gray-300'
-              } hover:bg-purple-700 transition-colors`}
+                  ? 'bg-synapse-primary text-synapse-text-inverse'
+                  : 'bg-synapse-surface-hover text-synapse-text-secondary'
+              } hover:bg-synapse-primary-hover transition-colors`}
               title="Toggle Keyframe View"
             >
               Keyframes
@@ -415,7 +415,7 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
                   zoom: Math.max(0.1, ui.timeline.zoom - 0.2),
                 })
               }
-              className="p-1 text-gray-400 hover:text-white transition-colors"
+              className="p-1 text-text-secondary hover:text-text-primary transition-colors"
               title="Zoom Out"
             >
               <svg
@@ -432,7 +432,7 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
                 />
               </svg>
             </button>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-text-tertiary">
               {Math.round(ui.timeline.zoom * 100)}%
             </span>
             <button
@@ -441,7 +441,7 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
                   zoom: Math.min(5, ui.timeline.zoom + 0.2),
                 })
               }
-              className="p-1 text-gray-400 hover:text-white transition-colors"
+              className="p-1 text-text-secondary hover:text-text-primary transition-colors"
               title="Zoom In"
             >
               <svg
@@ -467,9 +467,9 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
             }
             className={`px-2 py-1 text-xs rounded ${
               ui.timeline.snapToGrid
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-700 text-gray-300'
-            } hover:bg-blue-700 transition-colors`}
+                ? 'bg-synapse-primary text-synapse-text-inverse'
+                : 'bg-synapse-surface-hover text-synapse-text-secondary'
+            } hover:bg-synapse-primary-hover transition-colors`}
           >
             Snap
           </button>
@@ -478,7 +478,7 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
           {selectedItems.length === 1 && (
             <button
               onClick={() => generateKeyframesFromPresets(selectedItems[0])}
-              className="px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition-colors"
+              className="px-2 py-1 text-xs rounded bg-synapse-success text-synapse-text-inverse hover:opacity-90 transition-colors"
               title="Generate keyframes from animation presets"
             >
               Auto-Animate
@@ -487,11 +487,11 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
         </div>
 
         <div className="flex items-center space-x-4">
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-text-tertiary">
             Duration: {Math.round(timelineDuration * 10) / 10}s
           </div>
-          {selectedKeyframes.length > 0 && (
-            <div className="text-xs text-gray-400">
+              {selectedKeyframes.length > 0 && (
+        <div className="text-text-primary">
               {selectedKeyframes.length} keyframe
               {selectedKeyframes.length > 1 ? 's' : ''} selected
             </div>
@@ -509,17 +509,17 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
       >
         {/* Time Ruler */}
         <div
-          className="sticky top-0 z-40 bg-gray-800 border-b border-gray-700"
+          className="sticky top-0 z-40 bg-background-secondary border-b border-border-subtle"
           style={{ width: `${timelineWidth}px`, height: '32px' }}
         >
           {Array.from({ length: Math.ceil(maxDuration) + 1 }).map((_, i) => (
             <div
               key={i}
-              className="absolute top-0 bottom-0 flex flex-col justify-between text-xs text-gray-200 font-medium"
+              className="absolute top-0 bottom-0 flex flex-col justify-between text-xs text-text-secondary font-medium"
               style={{ left: `${timeToPixels(i)}px` }}
             >
-              <div className="border-l border-gray-600 h-full" />
-              <div className="absolute bottom-2 -left-4 w-8 text-center bg-gray-800 px-1 rounded">
+              <div className="border-l border-border-subtle h-full" />
+              <div className="absolute bottom-2 -left-4 w-8 text-center bg-background-secondary px-1 rounded">
                 {Math.floor(i / 60)}:{(i % 60).toString().padStart(2, '0')}
               </div>
             </div>
@@ -563,7 +563,7 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
               }).map((_, i) => (
                 <div
                   key={i}
-                  className="absolute top-0 bottom-0 border-l border-gray-700 opacity-30"
+                  className="absolute top-0 bottom-0 border-l border-border-subtle opacity-30"
                   style={{
                     left: `${timeToPixels(i * ui.timeline.gridSize)}px`,
                   }}
@@ -576,13 +576,13 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
           {Array.from({ length: maxTrack + 1 }).map((_, trackIndex) => (
             <div
               key={trackIndex}
-              className="absolute left-0 right-0 border-b border-gray-700 opacity-50"
+              className="absolute left-0 right-0 border-b border-border-subtle opacity-50"
               style={{
                 top: `${trackIndex * TRACK_HEIGHT}px`,
                 height: `${TRACK_HEIGHT}px`,
               }}
             >
-              <div className="absolute left-2 top-2 text-xs text-gray-200 font-medium bg-gray-800/80 px-2 py-1 rounded">
+              <div className="absolute left-2 top-2 text-xs text-text-secondary font-medium bg-background-secondary/80 px-2 py-1 rounded">
                 Track {trackIndex + 1}
               </div>
             </div>
@@ -591,14 +591,16 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
           {/* Playhead - Hidden when fullscreen is active */}
           {!isFullscreen && (
             <div
-              className="absolute top-0 bottom-0 w-0.5 bg-red-500 pointer-events-none z-50"
+              className="absolute top-0 bottom-0 w-0.5 pointer-events-none z-50"
               style={{
                 left: `${timeToPixels(playback.currentTime)}px`,
+                backgroundColor: 'var(--synapse-playhead)'
               }}
             >
               {/* Playhead Handle */}
-              <div className="absolute -top-2 -left-2 w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-lg pointer-events-auto cursor-pointer">
-                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-black/75 backdrop-blur-sm text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+              <div className="absolute -top-2 -left-2 w-4 h-4 rounded-full border-2 shadow-lg pointer-events-auto cursor-pointer"
+                   style={{ backgroundColor: 'var(--synapse-playhead)', borderColor: 'var(--synapse-background)' }}>
+                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-background-tertiary/90 text-text-primary text-xs px-2 py-1 rounded whitespace-nowrap">
                   {Math.floor(playback.currentTime / 60)}:
                   {(playback.currentTime % 60).toFixed(1).padStart(4, '0')}
                 </div>
@@ -674,15 +676,15 @@ function AdvancedTimelineClip({
   const getClipColor = (type: string) => {
     switch (type) {
       case 'video':
-        return 'bg-blue-600';
+        return 'bg-synapse-clip-video';
       case 'audio':
-        return 'bg-green-600';
+        return 'bg-synapse-clip-audio';
       case 'code':
-        return 'bg-purple-600';
+        return 'bg-synapse-clip-code';
       case 'title':
-        return 'bg-orange-600';
+        return 'bg-synapse-clip-text';
       default:
-        return 'bg-gray-600';
+        return 'bg-synapse-surface-active';
     }
   };
 
@@ -691,26 +693,26 @@ function AdvancedTimelineClip({
       className={`
         absolute rounded cursor-move select-none border-2 transition-all
         ${getClipColor(item.type)}
-        ${isSelected ? 'border-yellow-400 shadow-lg' : 'border-transparent'}
-        hover:border-gray-300
+        ${isSelected ? 'border-synapse-warning shadow-synapse-sm' : 'border-transparent'}
+        hover:border-synapse-border-hover
       `}
       style={style}
       onClick={onItemSelect}
     >
       {/* Resize Handles */}
-      <div className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize bg-white bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
-      <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize bg-white bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
+      <div className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize bg-synapse-text-primary bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
+      <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize bg-synapse-text-primary bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
 
       {/* Clip Content */}
-      <div className="p-2 h-full flex flex-col justify-between text-white text-xs overflow-hidden">
+      <div className="p-2 h-full flex flex-col justify-between text-synapse-text-inverse text-xs overflow-hidden">
         <div className="font-medium truncate">
           {asset?.name || 'Unknown Asset'}
         </div>
-        <div className="text-white text-opacity-75">
+        <div className="opacity-75">
           {Math.round(item.duration * 10) / 10}s
-          {item.keyframes.length > 0 && (
+          {(item.keyframes?.length ?? 0) > 0 && (
             <span className="ml-2 text-yellow-400">
-              ●{item.keyframes.length}
+              ●{item.keyframes?.length ?? 0}
             </span>
           )}
         </div>
@@ -719,13 +721,13 @@ function AdvancedTimelineClip({
       {/* Keyframes */}
       {showKeyframes &&
         isSelected &&
-        item.keyframes.map((keyframe) => (
+        (item.keyframes ?? []).map((keyframe) => (
           <div
             key={keyframe.id}
             className={`
             absolute w-2 h-2 rounded-full cursor-pointer transition-all
-            ${selectedKeyframes.includes(keyframe.id) ? 'bg-yellow-400 scale-125' : 'bg-white'}
-            hover:scale-110 shadow-md border border-gray-800
+            ${selectedKeyframes.includes(keyframe.id) ? 'bg-synapse-warning scale-125' : 'bg-synapse-text-primary'}
+            hover:scale-110 shadow-md border border-synapse-surface
           `}
             style={{
               left: `${timeToPixels(keyframe.time)}px`,

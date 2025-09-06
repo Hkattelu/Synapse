@@ -34,16 +34,16 @@ export function Inspector({ className = '' }: InspectorProps) {
         className={`inspector bg-background-secondary flex flex-col h-full max-h-[calc(100vh-12rem)] ${className}`}
       >
         <div className="p-4 border-b border-border-subtle flex-shrink-0">
-          <h3 className="font-semibold text-sm text-gray-900 uppercase tracking-wide">
+          <h3 className="font-semibold text-sm text-text-primary uppercase tracking-wide">
             Inspector
           </h3>
         </div>
         <div className="flex-1 p-4 min-h-0">
-          <div className="h-full flex items-center justify-center text-gray-600">
+          <div className="h-full flex items-center justify-center text-text-secondary">
             <div className="text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg mx-auto mb-3 flex items-center justify-center">
+              <div className="w-12 h-12 bg-background-tertiary rounded-lg mx-auto mb-3 flex items-center justify-center">
                 <svg
-                  className="w-6 h-6 text-gray-500"
+                  className="w-6 h-6 text-text-tertiary"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -62,8 +62,8 @@ export function Inspector({ className = '' }: InspectorProps) {
                   />
                 </svg>
               </div>
-              <p className="font-medium text-gray-900">No Selection</p>
-              <p className="text-sm text-gray-600">Select a clip to edit properties</p>
+              <p className="font-medium text-text-primary">No Selection</p>
+              <p className="text-sm text-text-secondary">Select a clip to edit properties</p>
             </div>
           </div>
         </div>
@@ -81,11 +81,11 @@ export function Inspector({ className = '' }: InspectorProps) {
       {/* Simplified Header */}
       <div className="p-3 border-b border-border-subtle flex-shrink-0">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sm text-gray-900">
+          <h3 className="font-semibold text-sm text-text-primary">
             Inspector
           </h3>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+            <span className="text-xs text-text-secondary bg-background-tertiary px-2 py-1 rounded">
               {selectedItem.type.toUpperCase()}
             </span>
             {(() => {
@@ -93,14 +93,14 @@ export function Inspector({ className = '' }: InspectorProps) {
               return track ? (
                 <div className="flex items-center gap-1">
                   <span
-                    className="text-xs px-2 py-1 rounded text-white font-medium"
+                    className="text-xs px-2 py-1 rounded text-synapse-text-inverse font-medium"
                     title={`Educational Track: ${track.name} - ${track.allowedContentTypes.join(', ')} content`}
                     style={{ backgroundColor: track.color }}
                   >
                     {track.name}
                   </span>
                   {/* Educational track icon */}
-                  <div className="text-xs text-gray-500" title={`Track ${track.trackNumber + 1}`}>
+                  <div className="text-xs text-text-tertiary" title={`Track ${track.trackNumber + 1}`}>
                     {track.icon === 'code' && '💻'}
                     {track.icon === 'monitor' && '🖥️'}
                     {track.icon === 'mic' && '🎤'}
@@ -108,7 +108,7 @@ export function Inspector({ className = '' }: InspectorProps) {
                   </div>
                 </div>
               ) : (
-                <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
+                <span className="text-xs text-text-tertiary bg-background-tertiary px-2 py-1 rounded">
                   Track {selectedItem.track + 1}
                 </span>
               );
@@ -124,8 +124,8 @@ export function Inspector({ className = '' }: InspectorProps) {
             onClick={() => setActiveTab('properties')}
             className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
               activeTab === 'properties'
-                ? 'text-gray-900 bg-white border-b-2 border-purple-500'
-                : 'text-gray-700 hover:text-gray-900 hover:bg-white/50'
+                ? 'text-text-primary bg-synapse-surface border-b-2 border-synapse-primary'
+                : 'text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover'
             }`}
           >
             Properties
@@ -136,8 +136,8 @@ export function Inspector({ className = '' }: InspectorProps) {
               onClick={() => setActiveTab('animation')}
               className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
                 activeTab === 'animation'
-                  ? 'text-gray-900 bg-white border-b-2 border-purple-500'
-                  : 'text-gray-700 hover:text-gray-900 hover:bg-white/50'
+                  ? 'text-text-primary bg-synapse-surface border-b-2 border-synapse-primary'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover'
               }`}
             >
               Animation
@@ -148,8 +148,8 @@ export function Inspector({ className = '' }: InspectorProps) {
             onClick={() => setActiveTab('visual')}
             className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
               activeTab === 'visual'
-                ? 'text-gray-900 bg-white border-b-2 border-purple-500'
-                : 'text-gray-700 hover:text-gray-900 hover:bg-white/50'
+                ? 'text-text-primary bg-synapse-surface border-b-2 border-synapse-primary'
+                : 'text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover'
             }`}
           >
             Visual
@@ -169,10 +169,10 @@ export function Inspector({ className = '' }: InspectorProps) {
               const track = getEducationalTrackByNumber(selectedItem.track);
               if (track) {
                 return (
-                  <div className="p-4 border-b border-border-subtle bg-gradient-to-r from-purple-50 to-blue-50">
+                  <div className="p-4 border-b border-border-subtle bg-background-tertiary">
                     <div className="flex items-center gap-3 mb-2">
                       <div 
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-synapse-text-inverse text-sm font-bold"
                         style={{ backgroundColor: track.color }}
                       >
                         {track.icon === 'code' && '💻'}
@@ -181,15 +181,15 @@ export function Inspector({ className = '' }: InspectorProps) {
                         {track.icon === 'user' && '👤'}
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-900">{track.name} Track</h4>
-                        <p className="text-xs text-gray-600">
+                        <h4 className="font-semibold text-text-primary">{track.name} Track</h4>
+                        <p className="text-xs text-text-secondary">
                           Optimized for {track.allowedContentTypes.join(', ')} content
                         </p>
                       </div>
                     </div>
                     
                     {/* Educational tips based on track */}
-                    <div className="text-xs text-gray-700 bg-white/70 p-2 rounded border">
+                    <div className="text-xs text-text-secondary bg-background-secondary/70 p-2 rounded border border-border-subtle">
                       {track.name === 'Code' && (
                         <div>
                           <strong>💡 Code Track Tips:</strong>
@@ -394,16 +394,16 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
 
   return (
     <div className="p-4 border-b border-border-subtle">
-      <h4 className="font-medium text-gray-900 mb-3">Clip Information</h4>
+      <h4 className="font-medium text-text-primary mb-3">Clip Information</h4>
 
       <div className="space-y-3">
         <div className="flex items-center space-x-2">
-          <div className="text-gray-600">{getTypeIcon(item.type)}</div>
+          <div className="text-text-secondary">{getTypeIcon(item.type)}</div>
           <div>
-            <p className="text-sm font-medium text-gray-900">
+            <p className="text-sm font-medium text-text-primary">
               {asset?.name || 'Unknown Asset'}
             </p>
-            <p className="text-xs text-gray-600 capitalize">
+            <p className="text-xs text-text-secondary capitalize">
               {item.type} clip
             </p>
           </div>
@@ -411,24 +411,24 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
 
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <p className="text-gray-700 font-medium">Duration</p>
-            <p className="text-gray-900 font-mono">
+            <p className="text-text-secondary font-medium">Duration</p>
+            <p className="text-text-primary font-mono">
               {formatDuration(item.duration)}
             </p>
           </div>
           <div>
-            <p className="text-gray-700 font-medium">Start Time</p>
-            <p className="text-gray-900 font-mono">
+            <p className="text-text-secondary font-medium">Start Time</p>
+            <p className="text-text-primary font-mono">
               {formatDuration(item.startTime)}
             </p>
           </div>
           <div>
-            <p className="text-gray-700 font-medium">Track</p>
-            <p className="text-gray-900">Track {item.track + 1}</p>
+            <p className="text-text-secondary font-medium">Track</p>
+            <p className="text-text-primary">Track {item.track + 1}</p>
           </div>
           <div>
-            <p className="text-gray-700 font-medium">End Time</p>
-            <p className="text-gray-900 font-mono">
+            <p className="text-text-secondary font-medium">End Time</p>
+            <p className="text-text-primary font-mono">
               {formatDuration(item.startTime + item.duration)}
             </p>
           </div>
@@ -436,8 +436,8 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
 
         {asset && (
           <div className="pt-2 border-t border-border-subtle">
-            <p className="text-xs text-gray-700 font-medium mb-2">Source File</p>
-            <div className="text-xs text-gray-600">
+            <p className="text-xs text-text-secondary font-medium mb-2">Source File</p>
+            <div className="text-xs text-text-secondary">
               <p>
                 Size: {(asset.metadata.fileSize / 1024 / 1024).toFixed(1)} MB
               </p>
@@ -645,7 +645,7 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
               }
             }
           }}
-          className="w-full px-3 py-2 text-sm bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors"
+          className="w-full px-3 py-2 text-sm bg-synapse-primary text-synapse-text-inverse rounded hover:bg-synapse-primary-hover transition-colors"
         >
           🔍 Auto-Detect Language & Apply Defaults
         </button>
@@ -716,19 +716,19 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
         <div className="flex gap-1">
           <button
             onClick={() => updateProperty('typingSpeedCps', 12)}
-            className="flex-1 px-2 py-1 text-xs bg-green-100 text-green-800 rounded hover:bg-green-200 transition-colors"
+            className="flex-1 px-2 py-1 text-xs bg-synapse-success/20 text-synapse-success rounded hover:opacity-80 transition-colors"
           >
             Beginner (12)
           </button>
           <button
             onClick={() => updateProperty('typingSpeedCps', 20)}
-            className="flex-1 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors"
+            className="flex-1 px-2 py-1 text-xs bg-synapse-info/20 text-synapse-info rounded hover:opacity-80 transition-colors"
           >
             Medium (20)
           </button>
           <button
             onClick={() => updateProperty('typingSpeedCps', 35)}
-            className="flex-1 px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition-colors"
+            className="flex-1 px-2 py-1 text-xs bg-synapse-clip-code/20 text-synapse-clip-code rounded hover:opacity-80 transition-colors"
           >
             Advanced (35)
           </button>
@@ -796,7 +796,7 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
       <div>
         <label
           htmlFor={inputId}
-          className="block text-sm font-medium text-gray-800 mb-1"
+          className="block text-sm font-medium text-text-secondary mb-1"
         >
           {label}
         </label>
@@ -806,7 +806,7 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
           onChange={handleChange}
           onPaste={handlePaste}
           rows={8}
-          className={`w-full bg-white border rounded px-3 py-2 text-gray-900 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 ${error ? 'border-red-500' : 'border-gray-300'}`}
+          className={`w-full bg-synapse-surface border rounded px-3 py-2 text-synapse-text-primary text-sm focus:outline-none focus:border-synapse-border-focus focus:ring-1 focus:ring-synapse-border-focus ${error ? 'border-synapse-error' : 'border-synapse-border'}`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}
           style={{ fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace' }}
@@ -814,7 +814,7 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
         {error && (
           <p
             id={`${inputId}-error`}
-            className="text-status-error text-xs mt-1"
+            className="text-synapse-error text-xs mt-1"
             role="alert"
           >
             {error}
@@ -1244,14 +1244,14 @@ function AnimationSettings({
     const preset = availablePresets.find((p) => p.id === selectedPreset);
     if (!preset) return;
 
-    const newAnimations = [...item.animations, preset];
+    const newAnimations = [...(item.animations ?? []), preset];
     onUpdateAnimations(newAnimations);
     setSelectedPreset('');
   }, [selectedPreset, item.animations, onUpdateAnimations, availablePresets]);
 
   const removeAnimation = useCallback(
     (index: number) => {
-      const newAnimations = item.animations.filter((_, i) => i !== index);
+      const newAnimations = (item.animations ?? []).filter((_, i) => i !== index);
       onUpdateAnimations(newAnimations);
     },
     [item.animations, onUpdateAnimations]
@@ -1262,13 +1262,13 @@ function AnimationSettings({
       <h4 className="font-medium text-text-primary mb-3">Animations</h4>
 
       {/* Current Animations */}
-      {item.animations.length > 0 && (
+      {(item.animations?.length ?? 0) > 0 && (
         <div className="mb-4">
           <h5 className="text-sm font-medium text-text-secondary mb-2">
             Applied Animations
           </h5>
           <div className="space-y-2">
-            {item.animations.map((animation, index) => (
+            {(item.animations ?? []).map((animation, index) => (
               <div
                 key={index}
                 className="flex items-center justify-between bg-background-tertiary rounded p-2 border border-border-subtle"
@@ -1325,8 +1325,8 @@ function AnimationSettings({
                   }}
                   className={`flex-1 px-2 py-1 text-xs font-medium rounded capitalize transition-colors ${
                     selectedType === type
-                      ? 'bg-primary-600 text-white shadow-glow'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-neutral-700'
+                      ? 'bg-synapse-primary text-synapse-text-inverse shadow-synapse-sm'
+                      : 'text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover'
                   }`}
                 >
                   {type}
@@ -1341,7 +1341,7 @@ function AnimationSettings({
           <select
             value={selectedPreset}
             onChange={(e) => setSelectedPreset(e.target.value)}
-            className="flex-1 bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
+            className="flex-1 bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-synapse-border-focus"
           >
             <option value="">Select {selectedType} animation...</option>
             {availablePresets.map((preset) => (
@@ -1353,7 +1353,7 @@ function AnimationSettings({
           <button
             onClick={addAnimation}
             disabled={!selectedPreset}
-            className="bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 text-white px-3 py-2 rounded text-sm transition-colors shadow-glow"
+            className="bg-synapse-primary hover:bg-synapse-primary-hover disabled:bg-synapse-surface-active disabled:cursor-not-allowed disabled:opacity-50 text-synapse-text-inverse px-3 py-2 rounded text-sm transition-colors shadow-synapse-sm"
           >
             Add
           </button>
@@ -1417,7 +1417,7 @@ function NumberInput({
     <div>
       <label
         htmlFor={inputId}
-        className="block text-sm font-medium text-gray-800 mb-1"
+        className="block text-sm font-medium text-text-secondary mb-1"
       >
         {label}
       </label>
@@ -1431,14 +1431,14 @@ function NumberInput({
           min={min}
           max={max}
           step={step}
-          className={`w-full bg-white border rounded px-3 py-2 text-gray-900 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 ${
-            error ? 'border-red-500' : 'border-gray-300'
+          className={`w-full bg-synapse-surface border rounded px-3 py-2 text-synapse-text-primary text-sm focus:outline-none focus:border-synapse-border-focus focus:ring-1 focus:ring-synapse-border-focus ${
+            error ? 'border-synapse-error' : 'border-synapse-border'
           }`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}
         />
         {suffix && (
-          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 text-sm">
+          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary text-sm">
             {suffix}
           </span>
         )}
@@ -1483,7 +1483,7 @@ function TextInput({
     <div>
       <label
         htmlFor={inputId}
-        className="block text-sm font-medium text-gray-800 mb-1"
+        className="block text-sm font-medium text-text-secondary mb-1"
       >
         {label}
       </label>
@@ -1493,8 +1493,8 @@ function TextInput({
           value={value}
           onChange={handleChange}
           rows={label === 'Code Content' ? 8 : 3}
-          className={`w-full bg-white border rounded px-3 py-2 text-gray-900 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 ${
-            error ? 'border-red-500' : 'border-gray-300'
+          className={`w-full bg-synapse-surface border rounded px-3 py-2 text-synapse-text-primary text-sm focus:outline-none focus:border-synapse-border-focus focus:ring-1 focus:ring-synapse-border-focus ${
+            error ? 'border-synapse-error' : 'border-synapse-border'
           }`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}
@@ -1510,8 +1510,8 @@ function TextInput({
           type="text"
           value={value}
           onChange={handleChange}
-          className={`w-full bg-white border rounded px-3 py-2 text-gray-900 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 ${
-            error ? 'border-red-500' : 'border-gray-300'
+          className={`w-full bg-synapse-surface border rounded px-3 py-2 text-synapse-text-primary text-sm focus:outline-none focus:border-synapse-border-focus focus:ring-1 focus:ring-synapse-border-focus ${
+            error ? 'border-synapse-error' : 'border-synapse-border'
           }`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}
@@ -1551,7 +1551,7 @@ function SelectInput({
     <div>
       <label
         htmlFor={inputId}
-        className="block text-sm font-medium text-gray-800 mb-1"
+        className="block text-sm font-medium text-text-secondary mb-1"
       >
         {label}
       </label>
@@ -1559,8 +1559,8 @@ function SelectInput({
         id={inputId}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`w-full bg-white border rounded px-3 py-2 text-gray-900 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 ${
-          error ? 'border-red-500' : 'border-gray-300'
+        className={`w-full bg-synapse-surface border rounded px-3 py-2 text-synapse-text-primary text-sm focus:outline-none focus:border-synapse-border-focus focus:ring-1 focus:ring-synapse-border-focus ${
+          error ? 'border-synapse-error' : 'border-synapse-border'
         }`}
         aria-invalid={error ? 'true' : 'false'}
         aria-describedby={error ? `${inputId}-error` : undefined}
@@ -1624,7 +1624,7 @@ function ColorInput({ label, value, onChange, error }: ColorInputProps) {
     <div>
       <label
         htmlFor={inputId}
-        className="block text-sm font-medium text-gray-800 mb-1"
+        className="block text-sm font-medium text-text-secondary mb-1"
       >
         {label}
       </label>
@@ -1634,7 +1634,7 @@ function ColorInput({ label, value, onChange, error }: ColorInputProps) {
           type="color"
           value={localValue.startsWith('#') ? localValue : '#ffffff'}
           onChange={handleColorChange}
-          className="w-12 h-10 bg-white border border-gray-300 rounded cursor-pointer"
+          className="w-12 h-10 bg-synapse-surface border border-synapse-border rounded cursor-pointer"
           aria-label={`${label} color picker`}
         />
         <input
@@ -1643,8 +1643,8 @@ function ColorInput({ label, value, onChange, error }: ColorInputProps) {
           value={localValue}
           onChange={handleTextChange}
           placeholder="#ffffff"
-          className={`flex-1 bg-white border rounded px-3 py-2 text-gray-900 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 ${
-            error ? 'border-red-500' : 'border-gray-300'
+          className={`flex-1 bg-synapse-surface border rounded px-3 py-2 text-synapse-text-primary text-sm focus:outline-none focus:border-synapse-border-focus focus:ring-1 focus:ring-synapse-border-focus ${
+            error ? 'border-synapse-error' : 'border-synapse-border'
           }`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : undefined}

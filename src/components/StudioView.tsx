@@ -9,6 +9,7 @@ import { Inspector } from './Inspector';
 import { ExportDialog } from './ExportDialog';
 import { RecorderDialog } from './RecorderDialog';
 import { ExportProvider } from '../state/exportContext';
+import { StudioLoader } from './ui/StudioLoader';
 import { ResizablePanel } from './ResizablePanel';
 import { ArrowLeft, Sparkles, Settings, Archive, PanelRight } from 'lucide-react';
 import { UndoButton } from './UndoButton';
@@ -117,33 +118,55 @@ function StudioViewContent() {
     );
   }
 
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [showLoader, setShowLoader] = useState(true);
+
+  // Simulate staged loading until the main editor mounts
+  useEffect(() => {
+    let p = 0;
+    const tick = () => {
+      p = Math.min(90, p + Math.random() * 8 + 4);
+      setLoadingProgress(p);
+    };
+    const id = setInterval(tick, 180);
+    // When content mounts, complete and hide
+    const done = setTimeout(() => {
+      setLoadingProgress(100);
+      setTimeout(() => setShowLoader(false), 250);
+    }, 1200);
+    return () => {
+      clearInterval(id);
+      clearTimeout(done);
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-purple-50 flex flex-col">
+    <div className="min-h-screen bg-synapse-background flex flex-col">
       {/* Elegant Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-white/90 backdrop-blur-sm border-b border-purple-200 px-6 py-4 shadow-sm"
+        className="bg-synapse-surface/90 backdrop-blur-sm border-b border-synapse-border px-6 py-4 shadow-synapse-sm"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate('/projects')}
-              className="text-gray-500 hover:text-purple-600 p-2 rounded-full hover:bg-purple-100 transition-all duration-200 hover:scale-105"
+              className="text-text-secondary hover:text-synapse-primary p-2 rounded-full hover:bg-synapse-primary/10 transition-all duration-200 hover:scale-105"
               title="Back to Projects"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Sparkles className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 bg-synapse-primary rounded-xl flex items-center justify-center shadow-synapse-md">
+                <Sparkles className="w-5 h-5 text-synapse-text-inverse" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">
+                <h1 className="text-xl font-bold text-text-primary">
                   {project.name}
                 </h1>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-text-secondary">
                   {project.timeline.length} clips • {project.mediaAssets.length}{' '}
                   assets
                 </p>
@@ -163,7 +186,7 @@ function StudioViewContent() {
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setShowTips((v) => !v)}
-                className="p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300"
+                className="p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-synapse-surface border border-synapse-border text-synapse-primary hover:bg-synapse-primary/10 hover:border-synapse-border-hover"
                 title="Show contextual tips"
                 aria-pressed={showTips}
               >
@@ -205,8 +228,8 @@ function StudioViewContent() {
                 }}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
                   ui.mediaBinVisible
-                    ? 'bg-purple-600 text-white shadow-lg'
-                    : 'bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300'
+                    ? 'bg-synapse-primary text-synapse-text-inverse shadow-synapse-md'
+                    : 'bg-synapse-surface border border-synapse-border text-synapse-primary hover:bg-synapse-primary/10 hover:border-synapse-border-hover'
                 }`}
                 title="Toggle Media Bin"
               >
@@ -222,8 +245,8 @@ function StudioViewContent() {
                 }}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
                   ui.inspectorVisible
-                    ? 'bg-purple-600 text-white shadow-lg'
-                    : 'bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300'
+                    ? 'bg-synapse-primary text-synapse-text-inverse shadow-synapse-md'
+                    : 'bg-synapse-surface border border-synapse-border text-synapse-primary hover:bg-synapse-primary/10 hover:border-synapse-border-hover'
                 }`}
                 title="Toggle Properties Panel"
               >
@@ -252,12 +275,12 @@ function StudioViewContent() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="flex-1 flex overflow-hidden bg-white/50 backdrop-blur-sm m-4 rounded-2xl border border-purple-200/50 shadow-xl"
+        className="flex-1 flex overflow-hidden bg-synapse-surface/40 backdrop-blur-sm m-4 rounded-2xl border border-synapse-border shadow-synapse-lg"
       >
         {/* Main Editor Area */}
-        <main className="flex-1 flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-l-2xl overflow-hidden min-w-0">
+        <main className="flex-1 flex flex-col bg-synapse-crust rounded-l-2xl overflow-hidden min-w-0">
           {/* Preview Area */}
-          <div className="flex-1 bg-black border-r border-gray-700/50 rounded-tl-2xl overflow-hidden" data-tutorial="preview-area">
+          <div className="flex-1 bg-synapse-crust border-r border-synapse-surface2 rounded-tl-2xl overflow-hidden" data-tutorial="preview-area">
             <Preview className="h-full w-full" />
           </div>
 
@@ -267,7 +290,7 @@ function StudioViewContent() {
             initialSize={300}
             minSize={250}
             maxSize={500}
-            className="border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900 flex-shrink-0 flex flex-col"
+            className="border-r border-synapse-surface2 bg-synapse-mantle flex-shrink-0 flex flex-col"
           >
             {/* Mode-aware timeline rendering */}
             <ModeAwareComponent mode="simplified">
@@ -308,7 +331,7 @@ function StudioViewContent() {
             maxSize={600}
             storageKey="ui:rightPanelWidth"
             onSizeChange={(s) => setRightPanelWidth(s)}
-            className="flex flex-col bg-white/95 backdrop-blur-sm border-l border-purple-200 rounded-r-2xl overflow-hidden shadow-inner h-full"
+            className="flex flex-col bg-synapse-surface/95 backdrop-blur-sm border-l border-synapse-border rounded-r-2xl overflow-hidden shadow-inner h-full"
           >
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -324,7 +347,7 @@ function StudioViewContent() {
                   initialSize={600}
                   minSize={200}
                   maxSize={800}
-                  className={`h-full border-b border-purple-200/50 bg-gradient-to-b from-white to-purple-50/30`}
+                  className={`h-full border-b border-synapse-border bg-synapse-surface`}
                 >
                   <div data-tutorial="media-bin">
                     <MediaBin />
@@ -333,7 +356,7 @@ function StudioViewContent() {
               ) : null}
 
               {ui.inspectorVisible && !ui.mediaBinVisible ? (
-                <div className={`h-full bg-gradient-to-b from-purple-50/30 to-white`}>
+                <div className={`h-full bg-synapse-surface`}>
                   <Inspector />
                 </div>
               ) : null}
@@ -341,6 +364,8 @@ function StudioViewContent() {
           </ResizablePanel>
         </div>
       </motion.div>
+
+      {showLoader && <StudioLoader progress={loadingProgress} />}
 
       {/* Export Dialog */}
       <ExportDialog

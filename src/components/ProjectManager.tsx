@@ -62,13 +62,13 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="relative bg-white/80 backdrop-blur-sm border border-purple-200 rounded-xl p-6 hover:shadow-lg transition-all duration-200 group"
+      className="relative bg-synapse-surface/80 backdrop-blur-sm border border-border-subtle rounded-xl p-6 hover:shadow-synapse-md transition-all duration-200 group"
     >
       {/* Project Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3 flex-1 min-w-0">
-          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-            <FileText className="w-6 h-6 text-purple-600" />
+          <div className="w-12 h-12 bg-synapse-primary/10 rounded-lg flex items-center justify-center group-hover:bg-synapse-primary/20 transition-colors">
+            <FileText className="w-6 h-6 text-synapse-primary" />
           </div>
           <div className="flex-1 min-w-0">
             {showRename ? (
@@ -85,7 +85,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
                     }
                   }}
                   onBlur={handleRename}
-                  className="flex-1 px-2 py-1 border border-purple-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="flex-1 px-2 py-1 border border-border-subtle rounded text-sm focus:outline-none focus:ring-2 focus:ring-synapse-border-focus"
                   autoFocus
                 />
                 <button
@@ -99,17 +99,17 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
                     setShowRename(false);
                     setNewName(project.project.name);
                   }}
-                  className="p-1 text-gray-500 hover:text-gray-600"
+                  className="p-1 text-text-secondary hover:text-text-primary"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
             ) : (
               <>
-                <h3 className="font-semibold text-gray-900 truncate group-hover:text-purple-900 transition-colors">
+                <h3 className="font-semibold text-text-primary truncate group-hover:text-synapse-primary transition-colors">
                   {project.project.name}
                 </h3>
-                <p className="text-sm text-gray-500 truncate">
+                <p className="text-sm text-text-secondary truncate">
                   v{project.project.version}
                 </p>
               </>
@@ -121,7 +121,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+            className="p-2 text-text-secondary hover:text-text-primary transition-colors rounded-full hover:bg-synapse-surface-hover"
           >
             <MoreVertical className="w-4 h-4" />
           </button>
@@ -133,7 +133,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
                 initial={{ opacity: 0, scale: 0.95, y: -5 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -5 }}
-                className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50"
+                className="absolute right-0 top-full mt-2 w-48 bg-synapse-surface rounded-lg shadow-synapse-lg border border-border-subtle py-2 z-50"
                 onBlur={() => setShowMenu(false)}
               >
                 <button
@@ -141,7 +141,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
                     onOpen(project.project.id);
                     setShowMenu(false);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                  className="w-full px-4 py-2 text-left text-sm text-text-primary hover:bg-synapse-surface-hover flex items-center space-x-2"
                 >
                   <ExternalLink className="w-4 h-4" />
                   <span>Open Project</span>
@@ -152,7 +152,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
                     setShowRename(true);
                     setShowMenu(false);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                  className="w-full px-4 py-2 text-left text-sm text-text-primary hover:bg-synapse-surface-hover flex items-center space-x-2"
                 >
                   <Edit3 className="w-4 h-4" />
                   <span>Rename</span>
@@ -163,7 +163,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
                     onDuplicate(project.project.id);
                     setShowMenu(false);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                  className="w-full px-4 py-2 text-left text-sm text-text-primary hover:bg-synapse-surface-hover flex items-center space-x-2"
                 >
                   <Copy className="w-4 h-4" />
                   <span>Duplicate</span>
@@ -174,20 +174,20 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
                     onExport(project.project.id);
                     setShowMenu(false);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                  className="w-full px-4 py-2 text-left text-sm text-text-primary hover:bg-synapse-surface-hover flex items-center space-x-2"
                 >
                   <Download className="w-4 h-4" />
                   <span>Export</span>
                 </button>
 
-                <hr className="my-2" />
+                <hr className="my-2 border-border-subtle" />
 
                 <button
                   onClick={() => {
                     setShowDeleteConfirm(true);
                     setShowMenu(false);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm text-red-700 hover:bg-red-50 flex items-center space-x-2"
+                  className="w-full px-4 py-2 text-left text-sm text-status-error hover:bg-status-error/10 flex items-center space-x-2"
                 >
                   <Trash2 className="w-4 h-4" />
                   <span>Delete</span>
@@ -200,11 +200,11 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
 
       {/* Project Stats */}
       <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="flex items-center text-sm text-gray-600">
+        <div className="flex items-center text-sm text-text-secondary">
           <Video className="w-4 h-4 mr-2" />
           {projectStats.totalClips} clips
         </div>
-        <div className="flex items-center text-sm text-gray-600">
+        <div className="flex items-center text-sm text-text-secondary">
           <Calendar className="w-4 h-4 mr-2" />
           {project.lastOpened.toLocaleDateString()}
         </div>
@@ -212,13 +212,13 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
 
       {/* Duration Bar */}
       <div className="space-y-2">
-        <div className="flex justify-between items-center text-xs text-gray-500">
+        <div className="flex justify-between items-center text-xs text-text-secondary">
           <span>Duration</span>
           <span>{projectStats.totalDuration}s</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-synapse-surface-active rounded-full h-2">
           <div
-            className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+            className="bg-synapse-primary h-2 rounded-full transition-all duration-300"
             style={{
               width: `${Math.min((projectStats.totalDuration / 60) * 100, 100)}%`,
             }}
@@ -229,7 +229,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
       {/* Open Button */}
       <button
         onClick={() => onOpen(project.project.id)}
-        className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition-colors font-medium"
+        className="w-full mt-4 bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse py-2 px-4 rounded-lg transition-colors font-medium"
       >
         Open Project
       </button>
@@ -249,23 +249,23 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-xl p-6 max-w-md w-full"
+              className="bg-synapse-surface rounded-xl p-6 max-w-md w-full"
             >
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                <div className="w-12 h-12 bg-status-error/10 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-status-error" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">
+                  <h3 className="font-semibold text-text-primary">
                     Delete Project
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-text-secondary">
                     This action cannot be undone
                   </p>
                 </div>
               </div>
 
-              <p className="text-gray-700 mb-6">
+              <p className="text-text-secondary mb-6">
                 Are you sure you want to delete "{project.project.name}"? This
                 will permanently remove the project and all its data.
               </p>
@@ -273,7 +273,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
               <div className="flex space-x-3">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-4 py-2 border border-border-subtle rounded-lg text-text-primary hover:bg-synapse-surface-hover transition-colors"
                 >
                   Cancel
                 </button>
@@ -282,7 +282,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
                     onDelete(project.project.id);
                     setShowDeleteConfirm(false);
                   }}
-                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2 bg-status-error hover:bg-status-error/80 text-synapse-text-inverse rounded-lg transition-colors"
                 >
                   Delete
                 </button>
@@ -354,17 +354,17 @@ export function ProjectManager() {
   if (!projects || projects.length === 0) {
     return (
       <div className="text-center py-12">
-        <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+        <FileText className="w-16 h-16 text-text-tertiary mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-text-primary mb-2">
           No projects yet
         </h3>
-        <p className="text-gray-500 mb-6">
+        <p className="text-text-secondary mb-6">
           Create your first project to get started
         </p>
         <button
           onClick={handleImportProject}
           disabled={isImporting}
-          className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors space-x-2 disabled:opacity-50"
+          className="inline-flex items-center px-4 py-2 bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse rounded-lg transition-colors space-x-2 disabled:opacity-50"
         >
           <Upload className="w-4 h-4" />
           <span>{isImporting ? 'Importing...' : 'Import Project'}</span>
@@ -377,11 +377,11 @@ export function ProjectManager() {
     <div className="space-y-6">
       {/* Header with Import Button */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Your Projects</h2>
+        <h2 className="text-2xl font-bold text-text-primary">Your Projects</h2>
         <button
           onClick={handleImportProject}
           disabled={isImporting}
-          className="inline-flex items-center px-4 py-2 bg-white border border-purple-200 hover:border-purple-300 text-purple-700 rounded-lg transition-colors space-x-2 disabled:opacity-50"
+          className="inline-flex items-center px-4 py-2 bg-synapse-surface border border-border-subtle hover:border-synapse-border-hover text-synapse-primary rounded-lg transition-colors space-x-2 disabled:opacity-50"
         >
           <Upload className="w-4 h-4" />
           <span>{isImporting ? 'Importing...' : 'Import Project'}</span>
@@ -406,24 +406,24 @@ export function ProjectManager() {
       </motion.div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-gray-200">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-border-subtle">
         <div className="text-center">
-          <div className="text-2xl font-bold text-purple-600">
+          <div className="text-2xl font-bold text-synapse-primary">
             {projects.length}
           </div>
-          <div className="text-sm text-gray-500">Total Projects</div>
+          <div className="text-sm text-text-secondary">Total Projects</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-purple-600">
+          <div className="text-2xl font-bold text-synapse-primary">
             {projects.reduce((sum, p) => sum + p.project.timeline.length, 0)}
           </div>
-          <div className="text-sm text-gray-500">Total Clips</div>
+          <div className="text-sm text-text-secondary">Total Clips</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-purple-600">
+          <div className="text-2xl font-bold text-synapse-primary">
             {projects.reduce((sum, p) => sum + p.project.mediaAssets.length, 0)}
           </div>
-          <div className="text-sm text-gray-500">Total Assets</div>
+          <div className="text-sm text-text-secondary">Total Assets</div>
         </div>
       </div>
     </div>

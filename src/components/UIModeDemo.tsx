@@ -91,7 +91,9 @@ export function UIModeDemo() {
             <div className="text-gray-500 text-sm italic">
               Switch to simplified mode to see educational features
             </div>
-          } />
+          }>
+            <div />
+          </ModeAwareComponent>
         </div>
 
         {/* Advanced Mode Features */}
@@ -137,7 +139,9 @@ export function UIModeDemo() {
             <div className="text-gray-500 text-sm italic">
               Switch to advanced mode to see professional tools
             </div>
-          } />
+          }>
+            <div />
+          </ModeAwareComponent>
         </div>
       </div>
 

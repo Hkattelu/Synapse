@@ -72,15 +72,15 @@ export function EnhancedTimelineView({
       {/* Main Timeline Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Timeline Controls Header */}
-        <div className="bg-gray-900 border-b border-gray-700 px-3 py-2 flex items-center justify-between flex-shrink-0">
+        <div className="bg-background-tertiary border-b border-border-subtle px-3 py-2 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center space-x-4">
             {/* Panel Toggle Buttons - Simplified and Consistent */}
-            <div className="flex items-center space-x-1 bg-gray-800 rounded p-0.5">
+            <div className="flex items-center space-x-1 bg-synapse-surface rounded p-0.5">
               <button
                 onClick={() => togglePanel('keyframes')}
                 className={`px-3 py-1.5 text-xs rounded transition-colors ${activePanel === 'keyframes'
-                  ? 'bg-primary-600 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                  ? 'bg-synapse-primary text-synapse-text-inverse'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover'
                   }`}
                 title="Keyframe Properties"
               >
@@ -103,8 +103,8 @@ export function EnhancedTimelineView({
               <button
                 onClick={() => togglePanel('markers')}
                 className={`px-3 py-1.5 text-xs rounded transition-colors ${activePanel === 'markers'
-                  ? 'bg-primary-600 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                  ? 'bg-synapse-primary text-synapse-text-inverse'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover'
                   }`}
                 title="Timeline Markers"
               >
@@ -132,10 +132,10 @@ export function EnhancedTimelineView({
             </div>
 
             {/* Playback Controls */}
-            <div className="flex items-center space-x-1 bg-gray-800 rounded p-0.5">
+            <div className="flex items-center space-x-1 bg-synapse-surface rounded p-0.5">
               <button
                 onClick={togglePlayback}
-                className="p-2.5 text-white hover:bg-gray-700 rounded transition-colors"
+                className="p-2.5 text-text-primary hover:bg-synapse-surface-hover rounded transition-colors"
                 title={playback.isPlaying ? 'Pause' : 'Play'}
               >
                 {playback.isPlaying ? (
@@ -166,7 +166,7 @@ export function EnhancedTimelineView({
                   setCurrentTime(0);
                   seek(0);
                 }}
-                className="p-2.5 text-white hover:bg-gray-700 rounded transition-colors"
+                className="p-2.5 text-text-primary hover:bg-synapse-surface-hover rounded transition-colors"
                 title="Go to Start"
               >
                 <svg
@@ -180,7 +180,7 @@ export function EnhancedTimelineView({
                 </svg>
               </button>
 
-              <div className="text-xs text-gray-400 min-w-[70px] text-center px-2 py-1">
+              <div className="text-xs text-text-secondary min-w-[70px] text-center px-2 py-1">
                 {Math.floor(playback.currentTime / 60)}:
                 {(playback.currentTime % 60).toFixed(1).padStart(4, '0')}
               </div>
@@ -188,7 +188,7 @@ export function EnhancedTimelineView({
           </div>
 
           {/* Timeline Status */}
-          <div className="flex items-center space-x-3 text-xs text-gray-400">
+          <div className="flex items-center space-x-3 text-xs text-text-secondary">
             {selectedItems.length > 0 && (
               <span>
                 {selectedItems.length} item{selectedItems.length > 1 ? 's' : ''}{' '}
@@ -201,7 +201,6 @@ export function EnhancedTimelineView({
                 {selectedKeyframes.length > 1 ? 's' : ''} selected
               </span>
             )}
-            <span>Timeline Mode: Advanced</span>
           </div>
         </div>
 
@@ -214,7 +213,7 @@ export function EnhancedTimelineView({
       {/* Right Sidebar - Properties/Markers Panel */}
       {activePanel && (
         <div
-          className={`${getPanelWidth(activePanel)} flex-shrink-0 transition-all duration-200 border-l border-gray-700`}
+          className={`${getPanelWidth(activePanel)} flex-shrink-0 transition-all duration-200 border-l border-border-subtle`}
         >
           {activePanel === 'keyframes' && (
             <KeyframePropertiesPanel

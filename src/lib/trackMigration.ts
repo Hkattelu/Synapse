@@ -64,7 +64,7 @@ function analyzeTimelineItemForTrack(
   const suggestion = suggestTrackPlacement(asset, {
     existingItems: [],
     currentTime: item.startTime,
-    selectedTrack: null
+    selectedTrack: undefined
   });
 
   return {
@@ -513,7 +513,13 @@ export function getMigrationStatistics(project: Project): {
 } {
   const conflicts = detectMigrationConflicts(project.timeline, project.mediaAssets);
   const itemsByTrack: Record<string, number> = {};
-  const itemsByType: Record<TimelineItemType, number> = {};
+  const itemsByType: Record<TimelineItemType, number> = {
+    video: 0,
+    code: 0,
+    title: 0,
+    audio: 0,
+    'visual-asset': 0,
+  };
   let totalConfidence = 0;
 
   // Initialize counters

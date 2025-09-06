@@ -166,7 +166,6 @@ See docs/BACKGROUNDS.md for details on code themes, wallpapers (including subtle
   - Optional: Electron desktop basics and staging deployment
 - For launch process details and checklist, see docs/PRODUCT_HUNT_LAUNCH.md.
 
-
 For new engineers, start with Quick Start above, then run through docs/TESTING.md to validate your environment.
 ## Production launch documentation
 

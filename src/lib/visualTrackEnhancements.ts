@@ -494,7 +494,7 @@ export function generateThumbnailUrl(
 export function getScreenRecordingIndicators(
   analysis: ScreenRecordingAnalysis
 ): Array<{ type: string; label: string; confidence: number }> {
-  const indicators = [];
+  const indicators: Array<{ type: string; label: string; confidence: number }> = [];
   
   if (analysis.isScreenRecording) {
     indicators.push({

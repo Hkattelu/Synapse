@@ -34,6 +34,8 @@ export function EducationalAnimationPresetsDemo() {
       fontSize: 16,
       showLineNumbers: true,
     },
+    animations: [],
+    keyframes: []
   };
 
   const trackTypes: EducationalTrackName[] = ['Code', 'Visual', 'Narration', 'You'];

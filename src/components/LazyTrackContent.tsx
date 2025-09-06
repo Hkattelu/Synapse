@@ -63,7 +63,7 @@ export const LazyTrackContent = memo(function LazyTrackContent({
   // Don't render content until visible
   if (!isVisible) {
     return (
-      <div ref={ref} className={className}>
+      <div ref={ref as unknown as React.Ref<HTMLDivElement>} className={className}>
         <ContentSkeleton track={track} />
       </div>
     );
@@ -71,14 +71,14 @@ export const LazyTrackContent = memo(function LazyTrackContent({
 
   if (!previewData) {
     return (
-      <div ref={ref} className={className}>
+      <div ref={ref as unknown as React.Ref<HTMLDivElement>} className={className}>
         <div className="text-xs text-gray-400 italic">No content available</div>
       </div>
     );
   }
 
   return (
-    <div ref={ref} className={className}>
+    <div ref={ref as unknown as React.Ref<HTMLDivElement>} className={className}>
       <Suspense fallback={<ContentSkeleton track={track} />}>
         <TrackContentRenderer
           track={track}

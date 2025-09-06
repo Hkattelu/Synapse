@@ -474,7 +474,11 @@ export function generatePersonalVideoTransitions(
     easing: string;
   };
 }> {
-  const transitions = [];
+  const transitions: Array<{
+    fromItem: string;
+    toItem: string;
+    transition: { type: 'crossfade' | 'slide' | 'zoom' | 'flip'; duration: number; easing: string };
+  }> = [];
   
   for (let i = 0; i < items.length - 1; i++) {
     const currentItem = items[i];

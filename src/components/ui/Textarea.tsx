@@ -9,7 +9,7 @@ export const Textarea: React.FC<TextareaProps> = ({
 }) => {
   return (
     <textarea
-      className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical ${className}`}
+      className={`w-full px-3 py-2 rounded-md border border-synapse-border bg-synapse-surface text-synapse-text-primary placeholder-synapse-text-muted shadow-synapse-sm focus:outline-none focus:ring-2 focus:ring-synapse-border-focus focus:ring-offset-2 focus:ring-offset-synapse-background resize-vertical ${className}`}
       {...props}
     />
   );

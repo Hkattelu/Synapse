@@ -17,7 +17,7 @@ interface VisualControlsTabsProps {
   className?: string;
 }
 
-type TabId = 'animations' | 'themes' | 'backgrounds';
+type TabId = 'animations' | 'themes' | 'backgrounds' | 'talking-head';
 
 interface TabConfig {
   id: TabId;
@@ -70,28 +70,50 @@ export function VisualControlsTabs({
   }, []);
 
   // Tab configuration
-  const tabs: TabConfig[] = [
-    {
-      id: 'animations',
-      label: 'Animations',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      ),
-      badge: getActiveSettingsCount('animations')
-    },
-    {
-      id: 'themes',
-      label: 'Themes',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM7 3H5a2 2 0 00-2 2v12a4 4 0 004 4h2a2 2 0 002-2V5a2 2 0 00-2-2z" />
-        </svg>
-      ),
-      badge: getActiveSettingsCount('themes')
-    },
-    {
+  // Build tabs dynamically based on item type
+  const tabs: TabConfig[] = (() => {
+    const list: TabConfig[] = [];
+
+    if (item.type === 'code') {
+      list.push(
+        {
+          id: 'animations',
+          label: 'Animations',
+          icon: (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          ),
+          badge: getActiveSettingsCount('animations')
+        },
+        {
+          id: 'themes',
+          label: 'Themes',
+          icon: (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM7 3H5a2 2 0 00-2 2v12a4 4 0 004 4h2a2 2 0 002-2V5a2 2 0 00-2-2z" />
+            </svg>
+          ),
+          badge: getActiveSettingsCount('themes')
+        }
+      );
+    }
+
+    if (item.type === 'video') {
+      list.push({
+        id: 'talking-head',
+        label: 'Talking Head',
+        icon: (
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A4 4 0 016 17h12a4 4 0 01.879.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        ),
+        badge: item.properties.talkingHeadEnabled ? 1 : 0,
+      });
+    }
+
+    // Backgrounds are relevant for all items that render a panel
+    list.push({
       id: 'backgrounds',
       label: 'Backgrounds',
       icon: (
@@ -100,8 +122,10 @@ export function VisualControlsTabs({
         </svg>
       ),
       badge: getActiveSettingsCount('backgrounds')
-    }
-  ];
+    });
+
+    return list;
+  })();
 
   // Handle background config change
   const handleBackgroundChange = useCallback((config: BackgroundConfig | null) => {
@@ -207,6 +231,97 @@ export function VisualControlsTabs({
             {children}
           </div>
         )}
+      </div>
+    );
+  };
+
+  // Render talking head controls (for video items)
+  const renderTalkingHeadControls = () => {
+    if (item.type !== 'video') return null;
+    const props = item.properties;
+    const corner = props.talkingHeadCorner || 'bottom-right';
+    const shape = props.talkingHeadShape || 'circle';
+    const size = props.talkingHeadSize || 'sm';
+
+    const CornerButton: React.FC<{ id: typeof corner; label: string }> = ({ id, label }) => (
+      <button
+        onClick={() => onUpdateProperties({ talkingHeadCorner: id })}
+        className={`px-2 py-1 rounded text-xs border ${corner === id ? 'bg-primary-600 text-white border-primary-600' : 'bg-background-tertiary text-text-primary border-border-subtle hover:bg-background-secondary'}`}
+      >
+        {label}
+      </button>
+    );
+
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-text-secondary">Enable Talking Head</label>
+            <input
+              type="checkbox"
+              checked={Boolean(props.talkingHeadEnabled)}
+              onChange={(e) => onUpdateProperties({ talkingHeadEnabled: e.target.checked })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="text-sm font-medium text-text-secondary">Corner Presets</div>
+            <div className="grid grid-cols-2 gap-2">
+              <CornerButton id="top-left" label="Top Left" />
+              <CornerButton id="top-right" label="Top Right" />
+              <CornerButton id="bottom-left" label="Bottom Left" />
+              <CornerButton id="bottom-right" label="Bottom Right" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-text-secondary">Shape</label>
+            <select
+              value={shape}
+              onChange={(e) => onUpdateProperties({ talkingHeadShape: e.target.value as any })}
+              className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
+            >
+              <option value="circle">Circle</option>
+              <option value="rounded">Rounded</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-text-secondary">Size</label>
+            <select
+              value={size}
+              onChange={(e) => onUpdateProperties({ talkingHeadSize: e.target.value as any })}
+              className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
+            >
+              <option value="sm">Small</option>
+              <option value="md">Medium</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-text-secondary">Quick Presets</label>
+            <div className="grid grid-cols-4 gap-2">
+              {(['top-left','top-right','bottom-left','bottom-right'] as const).map((c) => (
+                <button
+                  key={c}
+                  onClick={() => onUpdateProperties({ talkingHeadEnabled: true, talkingHeadCorner: c })}
+                  className={`h-16 rounded border relative ${corner === c ? 'border-primary-600' : 'border-border-subtle hover:border-border-primary'}`}
+                  title={`Move to ${c.replace('-', ' ')}`}
+                >
+                  <div className="absolute inset-1 border border-dashed border-border-subtle rounded pointer-events-none" />
+                  <div className={`absolute w-6 h-6 bg-white/80 rounded-full border border-white/70 shadow ${
+                    c.includes('top') ? 'top-1' : 'bottom-1'
+                  } ${c.includes('left') ? 'left-1' : 'right-1'}`} />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Live Preview */}
+        <div className="min-h-[300px]">
+          <PreviewPanel item={item} previewType="animation" className="h-full" />
+        </div>
       </div>
     );
   };
@@ -508,8 +623,9 @@ export function VisualControlsTabs({
 
       {/* Tab Content */}
       <div className="tab-content mb-4">
-        {activeTab === 'animations' && renderAnimationControls()}
-        {activeTab === 'themes' && renderThemeControls()}
+        {activeTab === 'talking-head' && renderTalkingHeadControls()}
+        {activeTab === 'animations' && item.type === 'code' && renderAnimationControls()}
+        {activeTab === 'themes' && item.type === 'code' && renderThemeControls()}
         {activeTab === 'backgrounds' && renderBackgroundControls()}
       </div>
 

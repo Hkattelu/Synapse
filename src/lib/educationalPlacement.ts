@@ -2,22 +2,23 @@
 // Analyzes MediaAsset properties and suggests appropriate track placement
 
 import type { MediaAsset, TimelineItem, TimelineItemType } from './types';
-import type { 
-  EducationalTrack, 
+import type {
+  EducationalTrack,
   PlacementSuggestion,
-  EducationalTrackName 
+  EducationalTrackName,
 } from './educationalTypes';
-import { 
-  EDUCATIONAL_TRACKS, 
-  getEducationalTrackById, 
+import {
+  EDUCATIONAL_TRACKS,
+  getEducationalTrackById,
   getEducationalTrackByName,
   getEducationalTrackByNumber,
-  isContentTypeAllowed 
+  isContentTypeAllowed,
 } from './educationalTypes';
 
 // Content type mapping with confidence scoring
 interface ContentTypeMapping {
-  contentType: TimelineItemType;
+  // Allow 'image' here for documentation/mapping purposes; logic normalizes to an effective timeline type.
+  contentType: TimelineItemType | 'image';
   primaryTrack: EducationalTrackName;
   confidence: number;
   alternatives: Array<{
@@ -42,136 +43,163 @@ const CONTENT_TYPE_MAPPINGS: ContentTypeMapping[] = [
     primaryTrack: 'Code',
     confidence: 0.95,
     alternatives: [
-      { track: 'Visual', confidence: 0.3, reason: 'Code can be displayed as visual content' }
-    ]
+      {
+        track: 'Visual',
+        confidence: 0.3,
+        reason: 'Code can be displayed as visual content',
+      },
+    ],
   },
   {
     contentType: 'audio',
     primaryTrack: 'Narration',
     confidence: 0.9,
-    alternatives: []
+    alternatives: [],
   },
   {
     contentType: 'video',
     primaryTrack: 'Visual',
     confidence: 0.7,
     alternatives: [
-      { track: 'You', confidence: 0.8, reason: 'Personal video content works better on You track' }
-    ]
+      {
+        track: 'You',
+        confidence: 0.8,
+        reason: 'Personal video content works better on You track',
+      },
+    ],
   },
+  // Images map to video timeline items in editor
   {
     contentType: 'image',
     primaryTrack: 'Visual',
     confidence: 0.7,
-    alternatives: []
+    alternatives: [],
   },
   {
     contentType: 'visual-asset',
     primaryTrack: 'Visual',
     confidence: 0.85,
-    alternatives: []
+    alternatives: [],
   },
   {
     contentType: 'title',
     primaryTrack: 'Visual',
     confidence: 0.8,
-    alternatives: []
-  }
+    alternatives: [],
+  },
 ];
 
 // Advanced content analysis patterns for more intelligent suggestions
 const CONTENT_ANALYSIS_PATTERNS: ContentAnalysisPattern[] = [
   // Screen recording detection
   {
-    pattern: (asset: MediaAsset) => 
-      asset.type === 'video' && 
-      asset.name.toLowerCase().includes('screen') ||
+    pattern: (asset: MediaAsset) =>
+      (asset.type === 'video' && asset.name.toLowerCase().includes('screen')) ||
       asset.name.toLowerCase().includes('recording') ||
       asset.name.toLowerCase().includes('demo'),
     trackPreference: 'Visual',
     confidence: 0.9,
-    reason: 'Screen recording content is best suited for Visual track'
+    reason: 'Screen recording content is best suited for Visual track',
   },
-  
+
   // Talking head video detection
   {
-    pattern: (asset: MediaAsset) => 
-      asset.type === 'video' && (
-        asset.name.toLowerCase().includes('talking') ||
+    pattern: (asset: MediaAsset) =>
+      asset.type === 'video' &&
+      (asset.name.toLowerCase().includes('talking') ||
         asset.name.toLowerCase().includes('head') ||
         asset.name.toLowerCase().includes('presenter') ||
         asset.name.toLowerCase().includes('webcam') ||
-        asset.name.toLowerCase().includes('camera')
-      ),
+        asset.name.toLowerCase().includes('camera')),
     trackPreference: 'You',
     confidence: 0.95,
-    reason: 'Personal video content should be placed on You track'
+    reason: 'Personal video content should be placed on You track',
   },
 
   // Code file detection by extension
   {
     pattern: (asset: MediaAsset) => {
-      const codeExtensions = ['.js', '.ts', '.py', '.java', '.cpp', '.c', '.html', '.css', '.jsx', '.tsx', '.vue', '.php', '.rb', '.go', '.rs', '.swift', '.kt'];
-      return asset.type === 'code' || codeExtensions.some(ext => asset.name.toLowerCase().endsWith(ext));
+      const codeExtensions = [
+        '.js',
+        '.ts',
+        '.py',
+        '.java',
+        '.cpp',
+        '.c',
+        '.html',
+        '.css',
+        '.jsx',
+        '.tsx',
+        '.vue',
+        '.php',
+        '.rb',
+        '.go',
+        '.rs',
+        '.swift',
+        '.kt',
+      ];
+      return (
+        asset.type === 'code' ||
+        codeExtensions.some((ext) => asset.name.toLowerCase().endsWith(ext))
+      );
     },
     trackPreference: 'Code',
     confidence: 0.95,
-    reason: 'Code files should be placed on Code track for syntax highlighting'
+    reason: 'Code files should be placed on Code track for syntax highlighting',
   },
 
   // Audio content detection
   {
-    pattern: (asset: MediaAsset) => 
-      asset.type === 'audio' || 
+    pattern: (asset: MediaAsset) =>
+      asset.type === 'audio' ||
       asset.metadata.mimeType?.startsWith('audio/') ||
-      ['.mp3', '.wav', '.ogg', '.m4a', '.aac'].some(ext => asset.name.toLowerCase().endsWith(ext)),
+      ['.mp3', '.wav', '.ogg', '.m4a', '.aac'].some((ext) =>
+        asset.name.toLowerCase().endsWith(ext)
+      ),
     trackPreference: 'Narration',
     confidence: 0.9,
-    reason: 'Audio content belongs on Narration track'
+    reason: 'Audio content belongs on Narration track',
   },
 
   // Voiceover detection
   {
-    pattern: (asset: MediaAsset) => 
-      asset.type === 'audio' && (
-        asset.name.toLowerCase().includes('voice') ||
+    pattern: (asset: MediaAsset) =>
+      asset.type === 'audio' &&
+      (asset.name.toLowerCase().includes('voice') ||
         asset.name.toLowerCase().includes('narration') ||
         asset.name.toLowerCase().includes('commentary') ||
-        asset.name.toLowerCase().includes('explanation')
-      ),
+        asset.name.toLowerCase().includes('explanation')),
     trackPreference: 'Narration',
     confidence: 0.95,
-    reason: 'Voiceover content is perfect for Narration track'
+    reason: 'Voiceover content is perfect for Narration track',
   },
 
   // Background music detection
   {
-    pattern: (asset: MediaAsset) => 
-      asset.type === 'audio' && (
-        asset.name.toLowerCase().includes('music') ||
+    pattern: (asset: MediaAsset) =>
+      asset.type === 'audio' &&
+      (asset.name.toLowerCase().includes('music') ||
         asset.name.toLowerCase().includes('background') ||
         asset.name.toLowerCase().includes('bgm') ||
-        asset.name.toLowerCase().includes('ambient')
-      ),
+        asset.name.toLowerCase().includes('ambient')),
     trackPreference: 'Narration',
     confidence: 0.8,
-    reason: 'Background music should be managed on Narration track'
+    reason: 'Background music should be managed on Narration track',
   },
 
   // Educational diagram/visual aid detection
   {
-    pattern: (asset: MediaAsset) => 
-      (asset.type === 'image' || asset.type === 'visual-asset') && (
-        asset.name.toLowerCase().includes('diagram') ||
+    pattern: (asset: MediaAsset) =>
+      (asset.type === 'image' || asset.type === 'visual-asset') &&
+      (asset.name.toLowerCase().includes('diagram') ||
         asset.name.toLowerCase().includes('chart') ||
         asset.name.toLowerCase().includes('graph') ||
         asset.name.toLowerCase().includes('illustration') ||
-        asset.name.toLowerCase().includes('visual')
-      ),
+        asset.name.toLowerCase().includes('visual')),
     trackPreference: 'Visual',
     confidence: 0.9,
-    reason: 'Educational diagrams and visual aids belong on Visual track'
-  }
+    reason: 'Educational diagrams and visual aids belong on Visual track',
+  },
 ];
 
 /**
@@ -189,8 +217,10 @@ export function suggestTrackPlacement(
   }
 ): PlacementSuggestion {
   // Start with base content type mapping
-  const baseMapping = CONTENT_TYPE_MAPPINGS.find(mapping => 
-    mapping.contentType === asset.type
+  const effectiveType: TimelineItemType =
+    asset.type === 'image' ? 'video' : (asset.type as TimelineItemType);
+  const baseMapping = CONTENT_TYPE_MAPPINGS.find(
+    (mapping) => mapping.contentType === effectiveType
   );
 
   if (!baseMapping) {
@@ -200,7 +230,9 @@ export function suggestTrackPlacement(
       suggestedTrack: fallbackTrack,
       confidence: 0.5,
       reason: 'Unknown content type, defaulting to Visual track',
-      alternatives: EDUCATIONAL_TRACKS.filter(track => track.id !== fallbackTrack.id)
+      alternatives: EDUCATIONAL_TRACKS.filter(
+        (track) => track.id !== fallbackTrack.id
+      ),
     };
   }
 
@@ -208,20 +240,21 @@ export function suggestTrackPlacement(
   let bestSuggestion = {
     track: baseMapping.primaryTrack,
     confidence: baseMapping.confidence,
-    reason: `${asset.type} content typically belongs on ${baseMapping.primaryTrack} track`
+    reason: `${asset.type} content typically belongs on ${baseMapping.primaryTrack} track`,
   };
 
   // Check each analysis pattern
   for (const pattern of CONTENT_ANALYSIS_PATTERNS) {
-    const matches = typeof pattern.pattern === 'function' 
-      ? pattern.pattern(asset)
-      : pattern.pattern.test(asset.name);
+    const matches =
+      typeof pattern.pattern === 'function'
+        ? pattern.pattern(asset)
+        : pattern.pattern.test(asset.name);
 
     if (matches && pattern.confidence > bestSuggestion.confidence) {
       bestSuggestion = {
         track: pattern.trackPreference,
         confidence: pattern.confidence,
-        reason: pattern.reason
+        reason: pattern.reason,
       };
     }
   }
@@ -232,15 +265,19 @@ export function suggestTrackPlacement(
   }
 
   const suggestedTrack = getEducationalTrackByName(bestSuggestion.track)!;
-  
+
   // Build alternatives list
-  const alternatives = buildAlternativesList(asset, suggestedTrack, baseMapping);
+  const alternatives = buildAlternativesList(
+    asset,
+    suggestedTrack,
+    baseMapping
+  );
 
   return {
     suggestedTrack,
     confidence: bestSuggestion.confidence,
     reason: bestSuggestion.reason,
-    alternatives
+    alternatives,
   };
 }
 
@@ -249,7 +286,11 @@ export function suggestTrackPlacement(
  */
 function applyContextualAdjustments(
   asset: MediaAsset,
-  suggestion: { track: EducationalTrackName; confidence: number; reason: string },
+  suggestion: {
+    track: EducationalTrackName;
+    confidence: number;
+    reason: string;
+  },
   context: {
     existingItems?: TimelineItem[];
     currentTime?: number;
@@ -257,14 +298,24 @@ function applyContextualAdjustments(
   }
 ): { track: EducationalTrackName; confidence: number; reason: string } {
   let adjustedSuggestion = { ...suggestion };
+  const effectiveType: TimelineItemType =
+    asset.type === 'image' ? 'video' : (asset.type as TimelineItemType);
 
   // If user has a track selected and it's compatible, boost confidence
   if (context.selectedTrack !== undefined) {
-    const selectedEducationalTrack = getEducationalTrackByNumber(context.selectedTrack);
-    if (selectedEducationalTrack && isContentTypeAllowed(selectedEducationalTrack, asset.type)) {
+    const selectedEducationalTrack = getEducationalTrackByNumber(
+      context.selectedTrack
+    );
+    if (
+      selectedEducationalTrack &&
+      isContentTypeAllowed(selectedEducationalTrack, effectiveType)
+    ) {
       // Boost confidence for user's selected track if it's compatible
       if (selectedEducationalTrack.name === suggestion.track) {
-        adjustedSuggestion.confidence = Math.min(0.98, adjustedSuggestion.confidence + 0.1);
+        adjustedSuggestion.confidence = Math.min(
+          0.98,
+          adjustedSuggestion.confidence + 0.1
+        );
         adjustedSuggestion.reason += ' (matches selected track)';
       }
     }
@@ -273,29 +324,41 @@ function applyContextualAdjustments(
   // Analyze existing content for pattern detection
   if (context.existingItems && context.existingItems.length > 0) {
     const recentItems = context.existingItems
-      .filter(item => context.currentTime ? 
-        Math.abs(item.startTime - context.currentTime) < 30 : true)
+      .filter((item) =>
+        context.currentTime
+          ? Math.abs(item.startTime - context.currentTime) < 30
+          : true
+      )
       .slice(-3); // Look at last 3 items
 
     // If there's a pattern of similar content types, maintain consistency
-    const trackUsagePattern = recentItems.reduce((acc, item) => {
-      const track = getEducationalTrackByNumber(item.track);
-      if (track) {
-        acc[track.name] = (acc[track.name] || 0) + 1;
-      }
-      return acc;
-    }, {} as Record<EducationalTrackName, number>);
+    const trackUsagePattern = recentItems.reduce(
+      (acc, item) => {
+        const track = getEducationalTrackByNumber(item.track);
+        if (track) {
+          acc[track.name] = (acc[track.name] || 0) + 1;
+        }
+        return acc;
+      },
+      {} as Record<EducationalTrackName, number>
+    );
 
-    const mostUsedTrack = Object.entries(trackUsagePattern)
-      .sort(([,a], [,b]) => b - a)[0];
+    const mostUsedTrack = Object.entries(trackUsagePattern).sort(
+      ([, a], [, b]) => b - a
+    )[0];
 
     if (mostUsedTrack && mostUsedTrack[1] >= 2) {
       const [trackName, count] = mostUsedTrack;
-      const track = getEducationalTrackByName(trackName as EducationalTrackName);
-      
-      if (track && isContentTypeAllowed(track, asset.type)) {
+      const track = getEducationalTrackByName(
+        trackName as EducationalTrackName
+      );
+
+      if (track && isContentTypeAllowed(track, effectiveType)) {
         adjustedSuggestion.track = trackName as EducationalTrackName;
-        adjustedSuggestion.confidence = Math.min(0.9, adjustedSuggestion.confidence + 0.15);
+        adjustedSuggestion.confidence = Math.min(
+          0.9,
+          adjustedSuggestion.confidence + 0.15
+        );
         adjustedSuggestion.reason = `Maintaining consistency with recent ${trackName} track usage`;
       }
     }
@@ -313,6 +376,8 @@ function buildAlternativesList(
   baseMapping: ContentTypeMapping
 ): EducationalTrack[] {
   const alternatives: EducationalTrack[] = [];
+  const effectiveType: TimelineItemType =
+    asset.type === 'image' ? 'video' : (asset.type as TimelineItemType);
 
   // Add base mapping alternatives
   for (const alt of baseMapping.alternatives) {
@@ -324,9 +389,11 @@ function buildAlternativesList(
 
   // Add any other compatible tracks not already included
   for (const track of EDUCATIONAL_TRACKS) {
-    if (track.id !== suggestedTrack.id && 
-        !alternatives.find(alt => alt.id === track.id) &&
-        isContentTypeAllowed(track, asset.type)) {
+    if (
+      track.id !== suggestedTrack.id &&
+      !alternatives.find((alt) => alt.id === track.id) &&
+      isContentTypeAllowed(track, effectiveType)
+    ) {
       alternatives.push(track);
     }
   }
@@ -342,11 +409,16 @@ function buildAlternativesList(
 /**
  * Calculates a compatibility score between an asset and a track
  */
-function getTrackCompatibilityScore(asset: MediaAsset, track: EducationalTrack): number {
+function getTrackCompatibilityScore(
+  asset: MediaAsset,
+  track: EducationalTrack
+): number {
   let score = 0;
+  const effectiveType: TimelineItemType =
+    asset.type === 'image' ? 'video' : (asset.type as TimelineItemType);
 
   // Base compatibility from allowed content types
-  if (isContentTypeAllowed(track, asset.type)) {
+  if (isContentTypeAllowed(track, effectiveType)) {
     score += 0.5;
   }
 
@@ -369,17 +441,20 @@ function getTrackCompatibilityScore(asset: MediaAsset, track: EducationalTrack):
       if (asset.type === 'audio') {
         score += 0.4;
       }
-      if (asset.name.toLowerCase().includes('voice') || 
-          asset.name.toLowerCase().includes('narration')) {
+      if (
+        asset.name.toLowerCase().includes('voice') ||
+        asset.name.toLowerCase().includes('narration')
+      ) {
         score += 0.2;
       }
       break;
     case 'You':
-      if (asset.type === 'video' && (
-          asset.name.toLowerCase().includes('talking') ||
+      if (
+        asset.type === 'video' &&
+        (asset.name.toLowerCase().includes('talking') ||
           asset.name.toLowerCase().includes('presenter') ||
-          asset.name.toLowerCase().includes('webcam')
-      )) {
+          asset.name.toLowerCase().includes('webcam'))
+      ) {
         score += 0.4;
       }
       break;
@@ -408,7 +483,9 @@ export function validateTrackPlacement(
   let isValid = true;
 
   // Check if content type is allowed on the target track
-  if (!isContentTypeAllowed(targetTrack, asset.type)) {
+  const effectiveType: TimelineItemType =
+    asset.type === 'image' ? 'video' : (asset.type as TimelineItemType);
+  if (!isContentTypeAllowed(targetTrack, effectiveType)) {
     isValid = false;
     conflicts.push(
       `${asset.type} content is not typically placed on ${targetTrack.name} track`
@@ -417,7 +494,7 @@ export function validateTrackPlacement(
 
   // Get the optimal suggestion for comparison
   const optimalSuggestion = suggestTrackPlacement(asset);
-  
+
   // Warn if placing on a suboptimal track
   if (targetTrack.id !== optimalSuggestion.suggestedTrack.id) {
     warnings.push(
@@ -427,18 +504,22 @@ export function validateTrackPlacement(
 
   // Check for specific content type warnings
   if (asset.type === 'video' && targetTrack.name === 'Code') {
-    warnings.push('Video content on Code track may not display syntax highlighting properly');
+    warnings.push(
+      'Video content on Code track may not display syntax highlighting properly'
+    );
   }
 
   if (asset.type === 'audio' && targetTrack.name !== 'Narration') {
-    warnings.push('Audio content works best on Narration track for proper mixing and controls');
+    warnings.push(
+      'Audio content works best on Narration track for proper mixing and controls'
+    );
   }
 
   return {
     isValid,
     warnings,
     conflicts,
-    suggestion: isValid ? undefined : optimalSuggestion
+    suggestion: isValid ? undefined : optimalSuggestion,
   };
 }
 
@@ -456,7 +537,7 @@ export function suggestBatchTrackPlacement(
     selectedTrack?: number;
   }
 ): PlacementSuggestion[] {
-  return assets.map(asset => suggestTrackPlacement(asset, context));
+  return assets.map((asset) => suggestTrackPlacement(asset, context));
 }
 
 /**
@@ -470,25 +551,28 @@ export function getTrackUsageStatistics(items: TimelineItem[]): {
   totalItems: number;
 } {
   const trackUsage: Record<EducationalTrackName, number> = {
-    'Code': 0,
-    'Visual': 0,
-    'Narration': 0,
-    'You': 0
+    Code: 0,
+    Visual: 0,
+    Narration: 0,
+    You: 0,
   };
 
-  const contentTypeDistribution: Record<string, Record<EducationalTrackName, number>> = {};
-  
+  const contentTypeDistribution: Record<
+    string,
+    Record<EducationalTrackName, number>
+  > = {};
+
   for (const item of items) {
     const track = getEducationalTrackByNumber(item.track);
     if (track) {
       trackUsage[track.name]++;
-      
+
       if (!contentTypeDistribution[item.type]) {
         contentTypeDistribution[item.type] = {
-          'Code': 0,
-          'Visual': 0,
-          'Narration': 0,
-          'You': 0
+          Code: 0,
+          Visual: 0,
+          Narration: 0,
+          You: 0,
         };
       }
       contentTypeDistribution[item.type][track.name]++;
@@ -498,6 +582,6 @@ export function getTrackUsageStatistics(items: TimelineItem[]): {
   return {
     trackUsage,
     contentTypeDistribution,
-    totalItems: items.length
+    totalItems: items.length,
   };
 }

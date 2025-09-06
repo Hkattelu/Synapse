@@ -190,23 +190,23 @@ export function TimelineMarkerManager({
 
   return (
     <div
-      className={`timeline-marker-manager bg-gray-900 border-l border-gray-700 ${className}`}
+      className={`timeline-marker-manager bg-background-tertiary border-l border-border-subtle ${className}`}
     >
       {/* Header */}
-      <div className="p-4 border-b border-gray-700">
-        <h3 className="text-lg font-semibold text-white">Timeline Markers</h3>
-        <div className="text-sm text-gray-400">
+      <div className="p-4 border-b border-border-subtle">
+        <h3 className="text-lg font-semibold text-text-primary">Timeline Markers</h3>
+        <div className="text-sm text-text-secondary">
           {markers.length} markers • {regions.length} regions
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">
         {/* Markers Section */}
-        <div className="p-4 border-b border-gray-700">
+        <div className="p-4 border-b border-border-subtle">
           <div className="flex items-center justify-between mb-3">
             <button
               onClick={() => toggleSection('markers')}
-              className="flex items-center text-left text-sm font-medium text-white hover:text-gray-300"
+              className="flex items-center text-left text-sm font-medium text-text-primary hover:text-text-secondary"
             >
               <svg
                 className={`w-4 h-4 mr-2 transition-transform ${
@@ -228,7 +228,7 @@ export function TimelineMarkerManager({
 
             <button
               onClick={() => setShowAddMarker(!showAddMarker)}
-              className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+              className="px-2 py-1 bg-synapse-primary text-synapse-text-inverse text-xs rounded hover:bg-synapse-primary-hover transition-colors"
               title="Add Marker"
             >
               <svg
@@ -249,23 +249,23 @@ export function TimelineMarkerManager({
 
           {/* Add Marker Form */}
           {showAddMarker && (
-            <div className="mb-4 p-3 bg-gray-800 rounded">
+            <div className="mb-4 p-3 bg-background-tertiary rounded">
               <input
                 type="text"
                 placeholder="Marker name..."
                 value={newMarkerName}
                 onChange={(e) => setNewMarkerName(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && createMarker()}
-                className="w-full px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-white mb-2"
+                className="w-full px-2 py-1 text-sm bg-background-secondary border border-border-subtle rounded text-text-primary mb-2"
                 autoFocus
               />
-              <div className="text-xs text-gray-400 mb-2">
+              <div className="text-xs text-text-secondary mb-2">
                 Will be created at current time: {formatTime(currentTime)}
               </div>
               <div className="flex space-x-2">
                 <button
                   onClick={createMarker}
-                  className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                  className="px-3 py-1 bg-synapse-success text-synapse-text-inverse text-xs rounded hover:opacity-90 transition-colors"
                 >
                   Create
                 </button>
@@ -274,7 +274,7 @@ export function TimelineMarkerManager({
                     setShowAddMarker(false);
                     setNewMarkerName('');
                   }}
-                  className="px-3 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                  className="px-3 py-1 bg-synapse-surface-hover text-synapse-text-secondary text-xs rounded hover:bg-synapse-surface-active transition-colors"
                 >
                   Cancel
                 </button>
@@ -298,7 +298,7 @@ export function TimelineMarkerManager({
               ))}
 
               {markers.length === 0 && (
-                <div className="text-center text-gray-500 py-4">
+                <div className="text-center text-text-secondary py-4">
                   <p>No markers yet</p>
                   <p className="text-xs">
                     Add markers to mark important timeline positions
@@ -314,7 +314,7 @@ export function TimelineMarkerManager({
           <div className="flex items-center justify-between mb-3">
             <button
               onClick={() => toggleSection('regions')}
-              className="flex items-center text-left text-sm font-medium text-white hover:text-gray-300"
+              className="flex items-center text-left text-sm font-medium text-text-primary hover:text-text-secondary"
             >
               <svg
                 className={`w-4 h-4 mr-2 transition-transform ${
@@ -336,7 +336,7 @@ export function TimelineMarkerManager({
 
             <button
               onClick={() => setShowAddRegion(!showAddRegion)}
-              className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+              className="px-2 py-1 bg-synapse-success text-synapse-text-inverse text-xs rounded hover:opacity-90 transition-colors"
               title="Add Region"
             >
               <svg
@@ -357,18 +357,18 @@ export function TimelineMarkerManager({
 
           {/* Add Region Form */}
           {showAddRegion && (
-            <div className="mb-4 p-3 bg-gray-800 rounded">
+            <div className="mb-4 p-3 bg-background-tertiary rounded">
               <input
                 type="text"
                 placeholder="Region name..."
                 value={newRegionName}
                 onChange={(e) => setNewRegionName(e.target.value)}
-                className="w-full px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-white mb-2"
+                    className="w-full px-2 py-1 text-sm bg-background-secondary border border-border-subtle rounded text-text-primary mb-2"
               />
 
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">
+                  <label className="block text-xs text-text-secondary mb-1">
                     Start Time
                   </label>
                   <input
@@ -380,11 +380,11 @@ export function TimelineMarkerManager({
                     onChange={(e) =>
                       setNewRegionStart(parseFloat(e.target.value))
                     }
-                    className="w-full px-2 py-1 text-xs bg-gray-700 border border-gray-600 rounded text-white"
+                    className="w-full px-2 py-1 text-xs bg-background-secondary border border-border-subtle rounded text-text-primary"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">
+                  <label className="block text-xs text-text-secondary mb-1">
                     End Time
                   </label>
                   <input
@@ -396,7 +396,7 @@ export function TimelineMarkerManager({
                     onChange={(e) =>
                       setNewRegionEnd(parseFloat(e.target.value))
                     }
-                    className="w-full px-2 py-1 text-xs bg-gray-700 border border-gray-600 rounded text-white"
+                    className="w-full px-2 py-1 text-xs bg-background-secondary border border-border-subtle rounded text-text-primary"
                   />
                 </div>
               </div>
@@ -404,7 +404,7 @@ export function TimelineMarkerManager({
               <div className="flex space-x-2">
                 <button
                   onClick={createRegion}
-                  className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                  className="px-3 py-1 bg-synapse-success text-synapse-text-inverse text-xs rounded hover:opacity-90 transition-colors"
                 >
                   Create
                 </button>
@@ -415,7 +415,7 @@ export function TimelineMarkerManager({
                     setNewRegionStart(0);
                     setNewRegionEnd(5);
                   }}
-                  className="px-3 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
+                  className="px-3 py-1 bg-synapse-surface-hover text-synapse-text-secondary text-xs rounded hover:bg-synapse-surface-active transition-colors"
                 >
                   Cancel
                 </button>
@@ -443,7 +443,7 @@ export function TimelineMarkerManager({
               ))}
 
               {regions.length === 0 && (
-                <div className="text-center text-gray-500 py-4">
+                <div className="text-center text-text-secondary py-4">
                   <p>No regions yet</p>
                   <p className="text-xs">
                     Add regions to mark sections of your timeline
@@ -494,7 +494,7 @@ function MarkerItem({
   return (
     <div
       className={`p-2 rounded border transition-all ${
-        isActive ? 'bg-blue-900 border-blue-600' : 'bg-gray-800 border-gray-700'
+        isActive ? 'bg-background-secondary border-synapse-primary' : 'bg-background-tertiary border-border-subtle'
       }`}
     >
       <div className="flex items-center justify-between">
@@ -514,19 +514,19 @@ function MarkerItem({
                 if (e.key === 'Escape') handleCancel();
               }}
               onBlur={handleSave}
-              className="flex-1 px-1 py-0 text-sm bg-gray-700 border border-gray-600 rounded text-white"
+              className="flex-1 px-1 py-0 text-sm bg-background-secondary border border-border-subtle rounded text-text-primary"
               autoFocus
             />
           ) : (
             <span
-              className="text-sm text-white cursor-pointer flex-1"
+              className="text-sm text-text-primary cursor-pointer flex-1"
               onClick={() => setIsEditing(true)}
             >
               {marker.name}
             </span>
           )}
 
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-text-secondary">
             {formatTime(marker.time)}
           </span>
         </div>
@@ -534,7 +534,7 @@ function MarkerItem({
         <div className="flex space-x-1">
           <button
             onClick={onJump}
-            className="p-1 text-gray-400 hover:text-blue-400 transition-colors"
+            className="p-1 text-text-secondary hover:text-synapse-primary transition-colors"
             title="Jump to Marker"
           >
             <svg
@@ -554,7 +554,7 @@ function MarkerItem({
 
           <button
             onClick={onDelete}
-            className="p-1 text-red-400 hover:text-red-300 transition-colors"
+            className="p-1 text-synapse-error hover:opacity-80 transition-colors"
             title="Delete Marker"
           >
             <svg
@@ -627,8 +627,8 @@ function RegionItem({
     <div
       className={`p-2 rounded border transition-all ${
         isActive
-          ? 'bg-green-900 border-green-600'
-          : 'bg-gray-800 border-gray-700'
+          ? 'bg-background-secondary border-synapse-success'
+          : 'bg-background-tertiary border-border-subtle'
       }`}
     >
       <div className="flex items-center justify-between mb-1">
@@ -647,11 +647,11 @@ function RegionItem({
                 if (e.key === 'Enter') handleSave();
                 if (e.key === 'Escape') handleCancel();
               }}
-              className="flex-1 px-1 py-0 text-sm bg-gray-700 border border-gray-600 rounded text-white"
+              className="flex-1 px-1 py-0 text-sm bg-background-secondary border border-border-subtle rounded text-text-primary"
             />
           ) : (
             <span
-              className="text-sm text-white cursor-pointer flex-1"
+              className="text-sm text-text-primary cursor-pointer flex-1"
               onClick={() => setIsEditing(true)}
             >
               {region.name}
@@ -662,7 +662,7 @@ function RegionItem({
         <div className="flex space-x-1">
           <button
             onClick={onJump}
-            className="p-1 text-gray-400 hover:text-green-400 transition-colors"
+            className="p-1 text-text-secondary hover:text-synapse-success transition-colors"
             title="Jump to Region"
           >
             <svg
@@ -682,7 +682,7 @@ function RegionItem({
 
           <button
             onClick={onDelete}
-            className="p-1 text-red-400 hover:text-red-300 transition-colors"
+            className="p-1 text-synapse-error hover:opacity-80 transition-colors"
             title="Delete Region"
           >
             <svg
@@ -705,7 +705,7 @@ function RegionItem({
       {isEditing ? (
         <div className="grid grid-cols-2 gap-2 mt-2">
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Start</label>
+            <label className="block text-xs text-text-secondary mb-1">Start</label>
             <input
               type="number"
               min="0"
@@ -713,11 +713,11 @@ function RegionItem({
               step="0.1"
               value={editStart}
               onChange={(e) => setEditStart(parseFloat(e.target.value))}
-              className="w-full px-2 py-1 text-xs bg-gray-700 border border-gray-600 rounded text-white"
+              className="w-full px-2 py-1 text-xs bg-background-secondary border border-border-subtle rounded text-text-primary"
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-400 mb-1">End</label>
+            <label className="block text-xs text-text-secondary mb-1">End</label>
             <input
               type="number"
               min="0"
@@ -725,12 +725,12 @@ function RegionItem({
               step="0.1"
               value={editEnd}
               onChange={(e) => setEditEnd(parseFloat(e.target.value))}
-              className="w-full px-2 py-1 text-xs bg-gray-700 border border-gray-600 rounded text-white"
+              className="w-full px-2 py-1 text-xs bg-background-secondary border border-border-subtle rounded text-text-primary"
             />
           </div>
         </div>
       ) : (
-        <div className="text-xs text-gray-400">
+        <div className="text-xs text-text-secondary">
           {formatTime(region.startTime)} - {formatTime(region.endTime)}
           <span className="ml-2">
             ({formatTime(region.endTime - region.startTime)} duration)

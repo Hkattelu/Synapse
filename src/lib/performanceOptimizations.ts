@@ -2,12 +2,12 @@ import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import type { TimelineItem, MediaAsset } from './types';
 import type { EducationalTrack } from './educationalTypes';
 
-// Intersection Observer hook for lazy loading
-export function useIntersectionObserver(
+// Intersection Observer hook for lazy loading (generic element type)
+export function useIntersectionObserver<T extends HTMLElement = HTMLElement>(
   options: IntersectionObserverInit = {}
-): [React.RefObject<HTMLElement>, boolean] {
+): [React.MutableRefObject<T | null>, boolean] {
   const [isIntersecting, setIsIntersecting] = useState(false);
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<T>(null);
 
   useEffect(() => {
     const element = ref.current;

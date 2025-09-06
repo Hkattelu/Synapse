@@ -63,7 +63,7 @@ function AddMediaMenu({
       <button
         ref={btnRef}
         onClick={() => setOpen((v) => !v)}
-        className="bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium py-2 px-2 rounded transition-colors shadow-sm"
+        className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse text-xs font-medium py-2 px-2 rounded transition-colors shadow-synapse-sm"
         title="Add"
       >
         +
@@ -587,7 +587,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
             <select
               value={educationalFilter}
               onChange={(e) => setEducationalFilter(e.target.value as any)}
-              className="bg-background-secondary text-text-primary text-xs border border-border-subtle rounded px-2 py-1 focus:outline-none focus:border-primary-500"
+              className="bg-background-secondary text-text-primary text-xs border border-border-subtle rounded px-2 py-1 focus:outline-none focus:border-synapse-border-focus"
               title="Content Type"
             >
               <option value="visual">Visual ({categoryCounts.visual})</option>
@@ -601,7 +601,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search media..."
-              className="bg-background-secondary text-text-primary text-xs border border-border-subtle rounded px-2 py-1 focus:outline-none focus:border-primary-500 w-40"
+              className="bg-background-secondary text-text-primary text-xs border border-border-subtle rounded px-2 py-1 focus:outline-none focus:border-synapse-border-focus w-40"
             />
           </div>
 
@@ -649,8 +649,8 @@ export function MediaBin({ className = '' }: MediaBinProps) {
           <div
             className={`h-full flex items-center justify-center border-2 border-dashed transition-colors ${
               isDragOver
-                ? 'border-primary-500 bg-primary-500/10'
-                : 'border-border-subtle hover:border-neutral-500'
+                ? 'border-synapse-primary bg-synapse-primary/10'
+                : 'border-border-subtle hover:border-synapse-border-hover'
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -687,7 +687,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
           /* Media assets grid */
           <div
             className={`p-3 transition-colors ${
-              isDragOver ? 'bg-primary-500/10' : ''
+              isDragOver ? 'bg-synapse-primary/10' : ''
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -699,8 +699,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                   try {
                     const suggestion = suggestTrackPlacement(asset);
                     const trackName = suggestion.suggestedTrack.name.toLowerCase();
-                    // 'audio' category should not show here, handled by MusicLibrary
-                    if (educationalFilter === 'audio') return false;
+                    // 'audio' category handled separately by MusicLibrary
                     if (trackName !== educationalFilter) return false;
                     const q = searchQuery.trim().toLowerCase();
                     if (!q) return true;
@@ -713,7 +712,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                 .map((asset) => (
                 <div
                   key={asset.id}
-                  className="bg-background-tertiary rounded-lg overflow-hidden hover:bg-background-secondary transition-colors cursor-pointer group border border-border-subtle hover:border-neutral-600"
+                  className="bg-background-tertiary rounded-lg overflow-hidden hover:bg-background-secondary transition-colors cursor-pointer group border border-border-subtle hover:border-synapse-border-hover"
                   draggable
                   onDragStart={(e) => handleDragStart(e, asset)}
                   onDoubleClick={() => handleDoubleClick(asset)}
@@ -833,7 +832,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                           URL.revokeObjectURL(asset.url);
                         }
                       }}
-                      className="absolute top-1 right-1 bg-status-error hover:bg-status-error/80 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-1 right-1 bg-synapse-error hover:opacity-90 text-synapse-text-inverse rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       title="Remove asset"
                     >
                       <svg
@@ -876,7 +875,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                         return (
                           <div className="mt-1 flex items-center justify-between">
                             <span
-                              className="inline-block px-1.5 py-0.5 rounded text-white text-[10px] font-medium"
+                              className="inline-block px-1.5 py-0.5 rounded text-synapse-text-inverse text-[10px] font-medium"
                               title={`Suggested Track: ${track.name} (${Math.round(
                                 suggestion.confidence * 100
                               )}% confidence) - ${suggestion.reason}`}
@@ -887,27 +886,27 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                             {/* Educational content type indicator */}
                             <div className="flex items-center gap-1">
                               {asset.type === 'code' && (
-                                <span className="text-[9px] text-purple-600 bg-purple-100 px-1 py-0.5 rounded font-mono">
+                                <span className="text-[9px] text-synapse-clip-code bg-synapse-clip-code/20 px-1 py-0.5 rounded font-mono">
                                   {asset.metadata.language?.toUpperCase() || 'CODE'}
                                 </span>
                               )}
                               {asset.type === 'video' && suggestion.suggestedTrack.name === 'You' && (
-                                <span className="text-[9px] text-red-600 bg-red-100 px-1 py-0.5 rounded">
+                                <span className="text-[9px] text-synapse-error bg-synapse-error/20 px-1 py-0.5 rounded">
                                   PERSONAL
                                 </span>
                               )}
                               {asset.type === 'video' && suggestion.suggestedTrack.name === 'Visual' && (
-                                <span className="text-[9px] text-green-600 bg-green-100 px-1 py-0.5 rounded">
+                                <span className="text-[9px] text-synapse-success bg-synapse-success/20 px-1 py-0.5 rounded">
                                   DEMO
                                 </span>
                               )}
                               {asset.type === 'audio' && (
-                                <span className="text-[9px] text-amber-600 bg-amber-100 px-1 py-0.5 rounded">
+                                <span className="text-[9px] text-synapse-warning bg-synapse-warning/20 px-1 py-0.5 rounded">
                                   AUDIO
                                 </span>
                               )}
                               {asset.type === 'visual-asset' && (
-                                <span className="text-[9px] text-blue-600 bg-blue-100 px-1 py-0.5 rounded">
+                                <span className="text-[9px] text-synapse-info bg-synapse-info/20 px-1 py-0.5 rounded">
                                   VISUAL
                                 </span>
                               )}

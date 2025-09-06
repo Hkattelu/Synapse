@@ -304,14 +304,14 @@ export function EducationalTimeline({
         keyframes: [],
       };
 
-      const addedItem = addTimelineItem(newItem);
+      const addedItemId = addTimelineItem(newItem) as unknown as string;
 
       // Show placement warning if needed
       if (!validation.isValid || validation.warnings.length > 0) {
         setPlacementWarnings(prev => [
-          ...prev.filter(w => w.itemId !== addedItem.id),
+          ...prev.filter(w => w.itemId !== addedItemId),
           {
-            itemId: addedItem.id,
+            itemId: addedItemId,
             suggestion,
             show: true,
           }
@@ -320,7 +320,7 @@ export function EducationalTimeline({
         // Auto-hide warning after 5 seconds
         setTimeout(() => {
           setPlacementWarnings(prev => 
-            prev.map(w => w.itemId === addedItem.id ? { ...w, show: false } : w)
+            prev.map(w => w.itemId === addedItemId ? { ...w, show: false } : w)
           );
         }, 5000);
       }
