@@ -1,6 +1,12 @@
 // Keyframe animation system utilities
 
-import type { Keyframe, ItemProperties, TimelineItem, GradientConfig } from './types';
+import type {
+  Keyframe,
+  ItemProperties,
+  TimelineItem,
+  GradientConfig,
+  AnimationPreset,
+} from './types';
 import { generateId } from './utils';
 
 // Easing functions for keyframe interpolation
@@ -206,14 +212,22 @@ export class KeyframeManager {
 
   // Auto-generate keyframes from animation presets
   static generateKeyframesFromPresets(item: TimelineItem): TimelineItem {
-    const animations = item.animations ?? [];
-    if (animations.length === 0) {
+    // Prefer the new single-preset field `animation`; when it is present,
+    // ignore the legacy `animations` array. Fall back to the legacy list
+    // only when the new field is absent to maintain backward compatibility.
+    const presets = item.animation ? [item.animation] : item.animations ?? [];
+
+    if (presets.length === 0) {
       return item;
     }
 
     const generatedKeyframes: Keyframe[] = [];
 
-    animations.forEach((animation) => {
+    presets.forEach((animation) => {
+      // Only handle legacy-style presets that declare a `type` of
+      // 'entrance' | 'exit' | 'emphasis'. Ignore other preset shapes.
+      if (!this.isLegacyAnimationPreset(animation)) return;
+
       // Convert animation preset to keyframes based on type
       switch (animation.type) {
         case 'entrance':
@@ -322,6 +336,21 @@ export class KeyframeManager {
   }
 
   // Private helper methods
+
+  // Narrow unknown preset shapes to the legacy preset used by keyframe generation
+  private static isLegacyAnimationPreset(x: unknown): x is AnimationPreset {
+    if (!x || typeof x !== 'object') return false;
+    const obj = x as Record<string, unknown>;
+    const type = obj.type;
+    const duration = obj.duration;
+    const params = obj.parameters;
+    const hasType =
+      typeof type === 'string' &&
+      (type === 'entrance' || type === 'exit' || type === 'emphasis');
+    const hasDuration = typeof duration === 'number';
+    const hasParams = typeof params === 'object' && params !== null;
+    return hasType && hasDuration && hasParams;
+  }
 
   private static hasOverlappingProperties(
     props1: Partial<ItemProperties>,
