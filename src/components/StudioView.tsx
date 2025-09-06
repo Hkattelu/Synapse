@@ -10,7 +10,7 @@ import { ExportDialog } from './ExportDialog';
 import { RecorderDialog } from './RecorderDialog';
 import { ExportProvider } from '../state/exportContext';
 import { ResizablePanel } from './ResizablePanel';
-import { ArrowLeft, Sparkles, Settings, Archive } from 'lucide-react';
+import { ArrowLeft, Sparkles, Settings, Archive, PanelRight } from 'lucide-react';
 import { UndoButton } from './UndoButton';
 import { RedoButton } from './RedoButton';
 import { ShortcutsDialog } from './ShortcutsDialog';
@@ -159,7 +159,7 @@ function StudioViewContent() {
               </div>
             )}
             
-            {/* Help Controls */}
+            {/* Help Controls + Settings */}
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setShowTips((v) => !v)}
@@ -178,6 +178,8 @@ function StudioViewContent() {
               >
                 Guide
               </button>
+              {/* Settings gear */}
+              <HeaderSettingsMenu />
             </div>
             
             {/* Panel Controls */}
@@ -225,7 +227,7 @@ function StudioViewContent() {
                 }`}
                 title="Toggle Properties Panel"
               >
-                <Settings className="w-4 h-4" />
+                <PanelRight className="w-4 h-4" />
               </button>
               
               {/* Shortcuts Button - Advanced mode only */}
@@ -393,7 +395,66 @@ function StudioViewContent() {
 }
 
 // Wrapper component with ExportProvider
+function HeaderSettingsMenu() {
+  const [open, setOpen] = React.useState(false);
+  const btnRef = React.useRef<HTMLButtonElement>(null);
+  React.useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      if (btnRef.current && !btnRef.current.parentElement?.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, []);
+
+  const toggleTheme = () => {
+    try {
+      const root = document.documentElement;
+      const current = root.getAttribute('data-theme');
+      const next = current === 'light' ? null : 'light';
+      if (next) root.setAttribute('data-theme', next);
+      else root.removeAttribute('data-theme');
+      localStorage.setItem('ui:theme', next || 'dark');
+    } catch {}
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        ref={btnRef}
+        onClick={() => setOpen((v) => !v)}
+        className="p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300"
+        title="Settings"
+      >
+        <Settings className="w-4 h-4" />
+      </button>
+      {open && (
+        <div className="absolute right-0 mt-2 w-40 bg-white border border-purple-200 rounded shadow-lg z-50">
+          <button
+            className="w-full text-left px-3 py-2 text-sm hover:bg-purple-50"
+            onClick={toggleTheme}
+          >
+            Toggle light/dark mode
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function StudioView() {
+  // Initialize theme from localStorage on first mount
+  React.useEffect(() => {
+    try {
+      const saved = localStorage.getItem('ui:theme');
+      const root = document.documentElement;
+      if (saved === 'light') root.setAttribute('data-theme', 'light');
+      else root.removeAttribute('data-theme');
+    } catch {}
+  }, []);
+
   return (
     <ExportProvider>
       <StudioViewContent />

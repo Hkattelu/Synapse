@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
-import { useTimeline, useMediaAssets, useUI } from '../state/hooks';
+import { useTimeline, useMediaAssets, useUI, usePlayback } from '../state/hooks';
 import type { TimelineItem, MediaAsset } from '../lib/types';
 
 interface TimelineProps {
@@ -34,6 +34,7 @@ export function Timeline({ className = '' }: TimelineProps) {
 
   const { getMediaAssetById } = useMediaAssets();
   const { ui, updateTimelineView } = useUI();
+  const { playback, seek } = usePlayback();
 
   const timelineRef = useRef<HTMLDivElement>(null);
   const [dragState, setDragState] = useState<DragState>({
@@ -264,6 +265,37 @@ export function Timeline({ className = '' }: TimelineProps) {
     [updateTimelineView]
   );
 
+  // Scrubbing
+  const [isScrubbing, setIsScrubbing] = useState(false);
+  const computeTimeFromClientX = useCallback((clientX: number) => {
+    const rect = timelineRef.current?.getBoundingClientRect();
+    if (!rect) return 0;
+    const x = Math.max(0, clientX - rect.left + ui.timeline.scrollPosition);
+    return Math.max(0, Math.min(maxDuration, pixelsToTime(x)));
+  }, [ui.timeline.scrollPosition, pixelsToTime, maxDuration]);
+  const handleScrubStart = useCallback((e: React.MouseEvent) => {
+    setIsScrubbing(true);
+    const t = computeTimeFromClientX(e.clientX);
+    seek(t);
+  }, [computeTimeFromClientX, seek]);
+  const handleScrubMove = useCallback((e: MouseEvent) => {
+    if (!isScrubbing) return;
+    const t = computeTimeFromClientX(e.clientX);
+    seek(t);
+  }, [isScrubbing, computeTimeFromClientX, seek]);
+  const handleScrubEnd = useCallback(() => setIsScrubbing(false), []);
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => handleScrubMove(e);
+    const onUp = () => handleScrubEnd();
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    return () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+  }, [handleScrubMove, handleScrubEnd]);
+
   // Add global mouse event listeners
   useEffect(() => {
     if (dragState.isDragging) {
@@ -358,6 +390,7 @@ export function Timeline({ className = '' }: TimelineProps) {
       <div
         className="timeline-content overflow-auto flex-1"
         onScroll={handleScroll}
+        onMouseDown={handleScrubStart}
       >
         <div
           ref={timelineRef}
@@ -387,6 +420,15 @@ export function Timeline({ className = '' }: TimelineProps) {
               ))}
             </div>
           )}
+
+          {/* Playhead */}
+          <div
+            className="pointer-events-none absolute top-0 bottom-0 z-30"
+            style={{ left: `${timeToPixels(playback.currentTime)}px` }}
+          >
+            <div style={{ position: 'absolute', top: 0, bottom: 0, width: 2, backgroundColor: 'var(--synapse-playhead)' }} />
+            <div style={{ position: 'absolute', top: -6, left: -5, width: 10, height: 10, backgroundColor: 'var(--synapse-playhead)', borderRadius: 2 }} />
+          </div>
 
           {/* Track Lines */}
           {Array.from({ length: maxTrack + 1 }).map((_, trackIndex) => (

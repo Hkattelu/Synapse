@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState, useEffect, useMemo } from 'react';
-import { useTimeline, useMediaAssets, useUI } from '../state/hooks';
+import { useTimeline, useMediaAssets, useUI, usePlayback } from '../state/hooks';
 import { EducationalTrack } from './EducationalTrack';
 import { suggestTrackPlacement, validateTrackPlacement } from '../lib/educationalPlacement';
 import { 
@@ -63,6 +63,7 @@ export function EducationalTimeline({
   const { getMediaAssetById } = useMediaAssets();
   const { ui, updateTimelineView } = useUI();
   const breakpoint = useResponsiveBreakpoint();
+  const { playback, seek } = usePlayback();
 
   const timelineRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null); // right scrollable area
@@ -514,6 +515,7 @@ export function EducationalTimeline({
     [ui.timeline.zoom, updateTimelineView]
   );
 
+
   // Handle scroll with throttling for performance
   const handleScroll = useThrottledScroll(
     useCallback((scrollLeft: number, _scrollTop: number) => {
@@ -529,6 +531,34 @@ export function EducationalTimeline({
     );
   }, []);
 
+  // Playhead scrubbing state
+  const [isScrubbing, setIsScrubbing] = useState(false);
+
+  // Helper to compute time from mouse X within the scrollable grid
+  const computeTimeFromClientX = useCallback((clientX: number) => {
+    const rect = timelineRef.current?.getBoundingClientRect();
+    if (!rect) return 0;
+    const xContent = Math.max(0, clientX - rect.left + ui.timeline.scrollPosition - HEADER_COL_WIDTH);
+    return Math.max(0, Math.min(maxDuration, pixelsToTime(xContent)));
+  }, [ui.timeline.scrollPosition, pixelsToTime, maxDuration]);
+
+  const handleScrubStart = useCallback((e: React.MouseEvent) => {
+    // Ignore scrubbing if a clip drag initiated (propagation is stopped in clip handler)
+    setIsScrubbing(true);
+    const t = computeTimeFromClientX(e.clientX);
+    seek(t);
+  }, [computeTimeFromClientX, seek]);
+
+  const handleScrubMove = useCallback((e: MouseEvent) => {
+    if (!isScrubbing) return;
+    const t = computeTimeFromClientX(e.clientX);
+    seek(t);
+  }, [isScrubbing, computeTimeFromClientX, seek]);
+
+  const handleScrubEnd = useCallback(() => {
+    setIsScrubbing(false);
+  }, []);
+
   // Apply suggested placement
   const applySuggestedPlacement = useCallback((itemId: string, suggestion: PlacementSuggestion) => {
     const item = timeline.find(t => t.id === itemId);
@@ -538,26 +568,26 @@ export function EducationalTimeline({
     }
   }, [timeline, moveTimelineItem, dismissPlacementWarning]);
 
-  // Add global mouse event listeners
+  // Add global mouse event listeners for dragging and scrubbing
   useEffect(() => {
-    if (dragState.isDragging) {
-      const handleGlobalMouseMove = (e: MouseEvent) => {
-        handleMouseMove(e as any);
-      };
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (dragState.isDragging) handleMouseMove(e as any);
+      if (isScrubbing) handleScrubMove(e);
+    };
 
-      const handleGlobalMouseUp = () => {
-        handleMouseUp();
-      };
+    const handleGlobalMouseUp = () => {
+      if (dragState.isDragging) handleMouseUp();
+      if (isScrubbing) handleScrubEnd();
+    };
 
-      document.addEventListener('mousemove', handleGlobalMouseMove);
-      document.addEventListener('mouseup', handleGlobalMouseUp);
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
 
-      return () => {
-        document.removeEventListener('mousemove', handleGlobalMouseMove);
-        document.removeEventListener('mouseup', handleGlobalMouseUp);
-      };
-    }
-  }, [dragState.isDragging, handleMouseMove, handleMouseUp]);
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [dragState.isDragging, isScrubbing, handleMouseMove, handleMouseUp, handleScrubMove, handleScrubEnd]);
 
   return (
     <div
@@ -663,6 +693,7 @@ export function EducationalTimeline({
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onClick={handleTimelineClick}
+        onMouseDown={handleScrubStart}
       >
         <div
           ref={timelineRef}
@@ -674,7 +705,7 @@ export function EducationalTimeline({
             minHeight: `${totalTimelineHeight}px`,
           }}
         >
-          {/* Grid Lines overlay (right content column only) */}
+          {/* Grid Lines overlay (right content column only) */
           {ui.timeline.snapToGrid && (
             <div
               className="pointer-events-none absolute top-0 bottom-0"
@@ -689,6 +720,15 @@ export function EducationalTimeline({
               ))}
             </div>
           )}
+
+          {/* Playhead overlay */}
+          <div
+            className="pointer-events-none absolute top-0 bottom-0 z-30"
+            style={{ left: `${HEADER_COL_WIDTH + timeToPixels(playback.currentTime)}px` }}
+          >
+            <div style={{ position: 'absolute', top: 0, bottom: 0, width: 2, backgroundColor: 'var(--synapse-playhead)' }} />
+            <div style={{ position: 'absolute', top: -6, left: -5, width: 10, height: 10, backgroundColor: 'var(--synapse-playhead)', borderRadius: 2 }} />
+          </div>
 
           {/* Rows: Header cell + Content cell per track */}
           {EDUCATIONAL_TRACKS.map((track) => {

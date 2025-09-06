@@ -50,8 +50,9 @@
   --synapse-primary-active: var(--synapse-sky);
 
   /* Interface Colors */
-  --synapse-background: var(--synapse-base);
-  --synapse-background-alt: var(--synapse-mantle);
+  /* Darken backgrounds slightly for higher contrast */
+  --synapse-background: var(--synapse-mantle); /* was var(--synapse-base) */
+  --synapse-background-alt: var(--synapse-crust); /* was var(--synapse-mantle) */
   --synapse-surface: var(--synapse-surface0);
   --synapse-surface-hover: var(--synapse-surface1);
   --synapse-surface-active: var(--synapse-surface2);
@@ -63,8 +64,9 @@
 
   /* Text Colors */
   --synapse-text-primary: var(--synapse-text);
-  --synapse-text-secondary: var(--synapse-subtext1);
-  --synapse-text-muted: var(--synapse-subtext0);
+  /* Increase contrast of secondary and muted text on dark backgrounds */
+  --synapse-text-secondary: #c8d0f0; /* was var(--synapse-subtext1) */
+  --synapse-text-muted: #b4bce0; /* was var(--synapse-subtext0) */
   --synapse-text-inverse: var(--synapse-crust);
 
   /* Status Colors */
@@ -112,8 +114,37 @@
 /* ===== FUTURE LIGHT MODE SUPPORT ===== */
 /* This structure allows easy addition of light mode later */
 [data-theme='light'] {
-  /* Light mode variables would go here */
-  /* For now, we'll keep the Macchiato theme as default */
+  /* Light mode palette (based loosely on Catppuccin Latte) */
+  --synapse-text: #4c4f69;
+  --synapse-subtext1: #5c5f77;
+  --synapse-subtext0: #6c6f85;
+  --synapse-overlay2: #7c7f93;
+  --synapse-overlay1: #8c8fa1;
+  --synapse-overlay0: #9ca0b0;
+  --synapse-surface2: #acb0be;
+  --synapse-surface1: #bcc0cc;
+  --synapse-surface0: #ccd0da;
+  --synapse-base: #eff1f5;
+  --synapse-mantle: #e6e9ef;
+  --synapse-crust: #dce0e8;
+
+  --synapse-primary: #1e66f5;
+  --synapse-primary-hover: #2094f3;
+  --synapse-primary-active: #20a0f3;
+
+  --synapse-background: var(--synapse-base);
+  --synapse-background-alt: var(--synapse-mantle);
+  --synapse-surface: var(--synapse-surface0);
+  --synapse-surface-hover: var(--synapse-surface1);
+  --synapse-surface-active: var(--synapse-surface2);
+
+  --synapse-border: var(--synapse-overlay0);
+  --synapse-border-hover: var(--synapse-overlay1);
+  --synapse-border-focus: var(--synapse-primary);
+
+  --synapse-text-primary: var(--synapse-text);
+  --synapse-text-secondary: var(--synapse-subtext1);
+  --synapse-text-muted: var(--synapse-subtext0);
 }
 
 /* ===== BASE STYLES ===== */
@@ -210,6 +241,15 @@ body {
 }
 
 /* ===== UTILITY CLASSES ===== */
+/* Map semantic utility classes used across components to CSS variables */
+.bg-background-primary { background-color: var(--synapse-background); }
+.bg-background-secondary { background-color: var(--synapse-surface); }
+.bg-background-tertiary { background-color: var(--synapse-surface-hover); }
+.text-text-primary { color: var(--synapse-text-primary); }
+.text-text-secondary { color: var(--synapse-text-secondary); }
+.text-text-tertiary { color: var(--synapse-text-muted); }
+.border-border-subtle { border-color: var(--synapse-border); }
+
 .synapse-glass {
   background: rgba(54, 58, 79, 0.8);
   backdrop-filter: blur(16px);
