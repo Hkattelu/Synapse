@@ -94,7 +94,7 @@ export function KeyframePropertiesPanel({
   const handleKeyframeUpdate = useCallback(
     (updatedItem: TimelineItem) => {
       if (onKeyframeUpdate) {
-        onKeyframeUpdate(updatedItem.id, updatedItem.keyframes);
+        onKeyframeUpdate(updatedItem.id, updatedItem.keyframes ?? []);
       } else {
         updateTimelineItem(updatedItem.id, {
           keyframes: updatedItem.keyframes,
@@ -134,7 +134,7 @@ export function KeyframePropertiesPanel({
     (keyframeId: string, property: string, value: any) => {
       if (!selectedItem) return;
 
-      const keyframe = selectedItem.keyframes.find((k) => k.id === keyframeId);
+      const keyframe = (selectedItem.keyframes ?? []).find((k) => k.id === keyframeId);
       if (!keyframe) return;
 
       const updatedKeyframe = {
@@ -203,7 +203,7 @@ export function KeyframePropertiesPanel({
     (keyframeId: string) => {
       if (!selectedItem) return;
 
-      const keyframe = selectedItem.keyframes.find((k) => k.id === keyframeId);
+      const keyframe = (selectedItem.keyframes ?? []).find((k) => k.id === keyframeId);
       if (!keyframe) return;
 
       const newKeyframe: Omit<Keyframe, 'id'> = {
@@ -233,7 +233,7 @@ export function KeyframePropertiesPanel({
                 step={property.step}
                 value={value}
                 onChange={(e) => onChange(parseFloat(e.target.value))}
-                className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                className="flex-1 h-2 bg-synapse-surface-hover rounded-lg appearance-none cursor-pointer slider"
               />
               <input
                 type="number"
@@ -242,7 +242,7 @@ export function KeyframePropertiesPanel({
                 step={property.step}
                 value={value}
                 onChange={(e) => onChange(parseFloat(e.target.value))}
-                className="w-16 px-2 py-1 text-xs bg-gray-700 border border-gray-600 rounded text-white"
+                className="w-16 px-2 py-1 text-xs bg-background-secondary border border-border-subtle rounded text-text-primary"
               />
             </div>
           );
@@ -252,7 +252,7 @@ export function KeyframePropertiesPanel({
               type="text"
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              className="w-full px-2 py-1 text-xs bg-gray-700 border border-gray-600 rounded text-white"
+              className="w-full px-2 py-1 text-xs bg-background-secondary border border-border-subtle rounded text-text-primary"
             />
           );
       }
@@ -263,31 +263,31 @@ export function KeyframePropertiesPanel({
   if (!selectedItem) {
     return (
       <div
-        className={`keyframe-properties-panel bg-gray-800 border-l border-gray-700 p-4 ${className}`}
+        className={`keyframe-properties-panel bg-background-secondary border-l border-border-subtle p-4 ${className}`}
       >
-        <div className="text-center text-gray-500">
+        <div className="text-center text-text-secondary">
           <p>Select a timeline item to edit keyframes</p>
         </div>
       </div>
     );
   }
 
-  const selectedKeyframeObjects = selectedItem.keyframes.filter((k) =>
+  const selectedKeyframeObjects = (selectedItem.keyframes ?? []).filter((k) =>
     selectedKeyframes.includes(k.id)
   );
 
   return (
     <div
-      className={`keyframe-properties-panel bg-gray-800 border-l border-gray-700 ${className}`}
+      className={`keyframe-properties-panel bg-background-secondary border-l border-border-subtle ${className}`}
     >
       {/* Header */}
-      <div className="p-4 border-b border-gray-700">
-        <h3 className="text-lg font-semibold text-white">
+      <div className="p-4 border-b border-border-subtle">
+        <h3 className="text-lg font-semibold text-text-primary">
           Keyframe Properties
         </h3>
-        <div className="text-sm text-gray-400">
-          {selectedItem.keyframes.length} keyframe
-          {selectedItem.keyframes.length !== 1 ? 's' : ''} total
+        <div className="text-sm text-text-secondary">
+          {(selectedItem.keyframes?.length ?? 0)} keyframe
+          {(selectedItem.keyframes?.length ?? 0) !== 1 ? 's' : ''} total
           {selectedKeyframes.length > 0 && (
             <span className="ml-2">• {selectedKeyframes.length} selected</span>
           )}
@@ -296,10 +296,10 @@ export function KeyframePropertiesPanel({
 
       <div className="flex-1 overflow-y-auto">
         {/* Add New Keyframes Section */}
-        <div className="p-4 border-b border-gray-700">
+        <div className="p-4 border-b border-border-subtle">
           <button
             onClick={() => toggleSection('add-keyframes')}
-            className="flex items-center justify-between w-full text-left text-sm font-medium text-white hover:text-gray-300"
+            className="flex items-center justify-between w-full text-left text-sm font-medium text-text-primary hover:text-text-secondary"
           >
             <span>Add Keyframes</span>
             <svg
@@ -325,7 +325,7 @@ export function KeyframePropertiesPanel({
                 <button
                   key={property.key}
                   onClick={() => addKeyframeForProperty(property.key)}
-                  className="w-full px-3 py-2 text-left text-sm bg-gray-700 hover:bg-gray-600 rounded transition-colors text-white"
+                  className="w-full px-3 py-2 text-left text-sm bg-synapse-surface hover:bg-synapse-surface-hover rounded transition-colors text-text-primary"
                 >
                   Add {property.label} Keyframe
                 </button>
@@ -336,10 +336,10 @@ export function KeyframePropertiesPanel({
 
         {/* Selected Keyframes Section */}
         {selectedKeyframeObjects.length > 0 && (
-          <div className="p-4 border-b border-gray-700">
+          <div className="p-4 border-b border-border-subtle">
             <button
               onClick={() => toggleSection('selected-keyframes')}
-              className="flex items-center justify-between w-full text-left text-sm font-medium text-white hover:text-gray-300"
+              className="flex items-center justify-between w-full text-left text-sm font-medium text-text-primary hover:text-text-secondary"
             >
               <span>Selected Keyframes ({selectedKeyframeObjects.length})</span>
               <svg
@@ -362,15 +362,15 @@ export function KeyframePropertiesPanel({
             {expandedSections.has('selected-keyframes') && (
               <div className="mt-3 space-y-4">
                 {selectedKeyframeObjects.map((keyframe) => (
-                  <div key={keyframe.id} className="p-3 bg-gray-900 rounded">
+                  <div key={keyframe.id} className="p-3 bg-background-tertiary rounded">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-white">
+                      <span className="text-sm font-medium text-text-primary">
                         Keyframe @ {keyframe.time.toFixed(2)}s
                       </span>
                       <div className="flex space-x-1">
                         <button
                           onClick={() => duplicateKeyframe(keyframe.id)}
-                          className="p-1 text-gray-400 hover:text-white transition-colors"
+                          className="p-1 text-text-secondary hover:text-text-primary transition-colors"
                           title="Duplicate"
                         >
                           <svg
@@ -389,7 +389,7 @@ export function KeyframePropertiesPanel({
                         </button>
                         <button
                           onClick={() => deleteKeyframe(keyframe.id)}
-                          className="p-1 text-red-400 hover:text-red-300 transition-colors"
+                          className="p-1 text-status-error hover:text-status-error/80 transition-colors"
                           title="Delete"
                         >
                           <svg
@@ -411,7 +411,7 @@ export function KeyframePropertiesPanel({
 
                     {/* Time */}
                     <div className="mb-3">
-                      <label className="block text-xs font-medium text-gray-400 mb-1">
+                      <label className="block text-xs font-medium text-text-secondary mb-1">
                         Time (s)
                       </label>
                       <input
@@ -426,13 +426,13 @@ export function KeyframePropertiesPanel({
                             parseFloat(e.target.value)
                           )
                         }
-                        className="w-full px-2 py-1 text-xs bg-gray-700 border border-gray-600 rounded text-white"
+                        className="w-full px-2 py-1 text-xs bg-background-secondary border border-border-subtle rounded text-text-primary"
                       />
                     </div>
 
                     {/* Easing */}
                     <div className="mb-3">
-                      <label className="block text-xs font-medium text-gray-400 mb-1">
+                      <label className="block text-xs font-medium text-text-secondary mb-1">
                         Easing
                       </label>
                       <select
@@ -440,7 +440,7 @@ export function KeyframePropertiesPanel({
                         onChange={(e) =>
                           updateKeyframeEasing(keyframe.id, e.target.value)
                         }
-                        className="w-full px-2 py-1 text-xs bg-gray-700 border border-gray-600 rounded text-white"
+                        className="w-full px-2 py-1 text-xs bg-background-secondary border border-border-subtle rounded text-text-primary"
                       >
                         {EASING_OPTIONS.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -452,7 +452,7 @@ export function KeyframePropertiesPanel({
 
                     {/* Properties */}
                     <div className="space-y-2">
-                      <label className="block text-xs font-medium text-gray-400">
+                      <label className="block text-xs font-medium text-text-secondary">
                         Properties
                       </label>
                       {Object.entries(keyframe.properties).map(
@@ -464,7 +464,7 @@ export function KeyframePropertiesPanel({
 
                           return (
                             <div key={propKey}>
-                              <label className="block text-xs text-gray-500 mb-1">
+                              <label className="block text-xs text-text-tertiary mb-1">
                                 {propertyDef.label}
                               </label>
                               {renderPropertyInput(
@@ -493,7 +493,7 @@ export function KeyframePropertiesPanel({
         <div className="p-4">
           <button
             onClick={() => toggleSection('all-keyframes')}
-            className="flex items-center justify-between w-full text-left text-sm font-medium text-white hover:text-gray-300"
+            className="flex items-center justify-between w-full text-left text-sm font-medium text-text-primary hover:text-text-secondary"
           >
             <span>All Keyframes</span>
             <svg
@@ -515,23 +515,23 @@ export function KeyframePropertiesPanel({
 
           {expandedSections.has('all-keyframes') && (
             <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
-              {selectedItem.keyframes
+              {(selectedItem.keyframes ?? [])
                 .sort((a, b) => a.time - b.time)
                 .map((keyframe) => (
                   <div
                     key={keyframe.id}
                     className={`p-2 rounded cursor-pointer transition-colors ${
                       selectedKeyframes.includes(keyframe.id)
-                        ? 'bg-purple-900 border border-purple-600'
-                        : 'bg-gray-700 hover:bg-gray-600'
+                        ? 'bg-synapse-primary/20 border border-synapse-primary'
+                        : 'bg-synapse-surface hover:bg-synapse-surface-hover'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="text-sm text-white">
+                        <div className="text-sm text-text-primary">
                           {keyframe.time.toFixed(2)}s
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-text-secondary">
                           {Object.keys(keyframe.properties).join(', ')} •{' '}
                           {keyframe.easing}
                         </div>
@@ -539,7 +539,7 @@ export function KeyframePropertiesPanel({
                       <div className="flex space-x-1">
                         <button
                           onClick={() => duplicateKeyframe(keyframe.id)}
-                          className="p-1 text-gray-400 hover:text-white transition-colors"
+                          className="p-1 text-text-secondary hover:text-text-primary transition-colors"
                           title="Duplicate"
                         >
                           <svg
@@ -558,7 +558,7 @@ export function KeyframePropertiesPanel({
                         </button>
                         <button
                           onClick={() => deleteKeyframe(keyframe.id)}
-                          className="p-1 text-red-400 hover:text-red-300 transition-colors"
+                          className="p-1 text-status-error hover:text-status-error/80 transition-colors"
                           title="Delete"
                         >
                           <svg
@@ -580,8 +580,8 @@ export function KeyframePropertiesPanel({
                   </div>
                 ))}
 
-              {selectedItem.keyframes.length === 0 && (
-                <div className="text-center text-gray-500 py-8">
+              {(selectedItem.keyframes?.length ?? 0) === 0 && (
+                <div className="text-center text-text-secondary py-8">
                   <p>No keyframes yet</p>
                   <p className="text-xs">
                     Use the controls above to add keyframes

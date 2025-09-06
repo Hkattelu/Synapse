@@ -57,11 +57,10 @@ export function EducationalTrack({
   useVirtualization = true,
 }: EducationalTrackProps) {
   const { getMediaAssetById } = useMediaAssets();
-  const trackRef = useRef<HTMLDivElement>(null);
   const breakpoint = useResponsiveBreakpoint();
   
   // Intersection observer for lazy loading
-  const [trackElementRef, isTrackVisible] = useIntersectionObserver({
+  const [trackElementRef, isTrackVisible] = useIntersectionObserver<HTMLDivElement>({
     threshold: 0.1,
     rootMargin: '100px',
   });
@@ -124,8 +123,7 @@ export function EducationalTrack({
   return (
     <div
       ref={(el) => {
-        trackRef.current = el;
-        trackElementRef.current = el;
+        (trackElementRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
       }}
       className="educational-track relative"
       style={{ height: `${responsiveTrackHeight}px` }}
@@ -219,12 +217,12 @@ function EducationalTimelineClip({
       className={`
         absolute rounded cursor-move select-none border-2 transition-all overflow-hidden
         ${isSelected ? 'border-accent-yellow shadow-glow' : 'border-transparent'}
-        ${isDragging ? 'opacity-75 z-10' : 'opacity-100'}
+        ${isDragging ? 'z-10' : ''}
         hover:border-text-secondary
       `}
       style={{
         ...style,
-        backgroundColor: `${track.color}22`,
+        backgroundColor: track.color,
         borderColor: isSelected ? '#F59E0B' : track.color,
       }}
       onMouseDown={onMouseDown}
@@ -238,7 +236,7 @@ function EducationalTimelineClip({
         {getClipContent()}
         
         {/* Duration indicator */}
-        <div className="text-text-secondary text-opacity-75 mt-0.5 text-[10px]">
+        <div className="text-white mt-0.5 text-[10px]">
           {Math.round(item.duration * 10) / 10}s
         </div>
       </div>
@@ -452,6 +450,7 @@ function TraditionalTrackItems({
 
           // Use enhanced Visual track clip for Visual track
           if (track.id === 'visual') {
+            const isDragging = dragState.isDragging && dragState.itemId === item.id;
             return (
               <VisualTrackClip
                 key={item.id}
@@ -459,6 +458,7 @@ function TraditionalTrackItems({
                 asset={asset}
                 track={track}
                 isSelected={isSelected}
+                isDragging={isDragging}
                 style={{
                   left: `${timeToPixels(item.startTime)}px`,
                   width: `${timeToPixels(item.duration)}px`,
@@ -466,6 +466,7 @@ function TraditionalTrackItems({
                   top: '4px',
                 }}
                 onItemUpdate={onItemUpdate || (() => {})}
+                onMouseDown={(e) => onItemMouseDown(e, item)}
               />
             );
           }

@@ -320,14 +320,14 @@ export class ClientExportManager {
       console.warn('Export warnings:', validation.warnings);
     }
 
-    if (validation.recommendations.length > 0) {
-      console.info('Export recommendations:', validation.recommendations);
+    if ((validation as any).recommendations && (validation as any).recommendations.length > 0) {
+      console.info('Export recommendations:', (validation as any).recommendations);
     }
 
     // Log compatibility issues
-    if (validation.compatibilityIssues.length > 0) {
-      const errors = validation.compatibilityIssues.filter(issue => issue.severity === 'error');
-      const warnings = validation.compatibilityIssues.filter(issue => issue.severity === 'warning');
+    if ((validation as any).compatibilityIssues && (validation as any).compatibilityIssues.length > 0) {
+      const errors = (validation as any).compatibilityIssues.filter((issue: any) => issue.severity === 'error');
+      const warnings = (validation as any).compatibilityIssues.filter((issue: any) => issue.severity === 'warning');
       
       if (errors.length > 0) {
         console.error('Export compatibility errors:', errors);
@@ -642,7 +642,7 @@ export const getExportRecommendations = (requirements: {
 // Transparency format validation (enhanced)
 export const isTransparencySupported = (format: string, codec?: string): boolean => {
   try {
-    return isSupported(format);
+    return isSupported(format as any);
   } catch (error) {
     console.error('Transparency support check error:', error);
     // Fallback to basic check

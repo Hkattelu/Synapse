@@ -119,10 +119,10 @@ class VisualSettingsManager {
   // Save custom theme
   saveCustomTheme(theme: unknown): void {
     try {
-      const existing = this.getCustomThemes();
+      const existing = this.getCustomThemes() as Array<Record<string, unknown>>;
       const t = theme as { id: string } & Record<string, unknown>;
-      const updated = (existing as Array<{ id: string }>).filter(
-        (x) => x.id !== t.id
+      const updated: Array<Record<string, unknown>> = existing.filter(
+        (x) => (x as any).id !== t.id
       );
       updated.push({
         ...t,
@@ -150,8 +150,8 @@ class VisualSettingsManager {
   // Delete custom theme
   deleteCustomTheme(themeId: string): void {
     try {
-      const existing = this.getCustomThemes();
-      const updated = existing.filter((t) => t.id !== themeId);
+      const existing = this.getCustomThemes() as Array<Record<string, unknown>>;
+      const updated = existing.filter((t) => (t as any).id !== themeId);
       localStorage.setItem(this.CUSTOM_THEMES_KEY, JSON.stringify(updated));
     } catch (error) {
       console.error('Failed to delete custom theme:', error);
@@ -282,12 +282,20 @@ class VisualSettingsManager {
 
       // Import default settings
       if (config.defaults) {
+        const anim = config.defaults.animationMode as string;
+        const bgType = config.defaults.backgroundType as string;
+        const allowedAnim = ['typing', 'line-by-line', 'diff', 'none'] as const;
+        const allowedBg = ['none', 'color', 'gradient', 'wallpaper'] as const;
         const defaultSettings: Partial<ItemProperties> = {
           theme: config.defaults.theme,
           fontSize: config.defaults.fontSize,
           fontFamily: config.defaults.fontFamily,
-          animationMode: config.defaults.animationMode as string,
-          backgroundType: config.defaults.backgroundType as string,
+          animationMode: (allowedAnim as readonly string[]).includes(anim)
+            ? (anim as any)
+            : 'none',
+          backgroundType: (allowedBg as readonly string[]).includes(bgType)
+            ? (bgType as any)
+            : 'none',
         };
         this.saveAsDefaults(defaultSettings);
       }
@@ -357,7 +365,7 @@ class VisualSettingsManager {
         available,
         percentage: Math.min(percentage, 100),
       };
-    } catch {
+    } catch (error) {
       console.error('Failed to get storage info:', error);
       return { used: 0, available: 0, percentage: 0 };
     }
@@ -388,7 +396,7 @@ class VisualSettingsManager {
         savedAt: new Date().toISOString(),
       };
       localStorage.setItem(this.ACCESSIBILITY_KEY, JSON.stringify(next));
-    } catch {
+    } catch (error) {
       console.error('Failed to save accessibility preferences:', error);
     }
   }

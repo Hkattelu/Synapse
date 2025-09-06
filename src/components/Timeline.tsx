@@ -275,9 +275,30 @@ export function Timeline({ className = '' }: TimelineProps) {
   }, [ui.timeline.scrollPosition, pixelsToTime, maxDuration]);
   const handleScrubStart = useCallback((e: React.MouseEvent) => {
     setIsScrubbing(true);
-    const t = computeTimeFromClientX(e.clientX);
+    const el = timelineRef.current as HTMLDivElement | null;
+
+    const computeFromEl = (clientX: number) => {
+      if (!el) return 0;
+      const rect = el.getBoundingClientRect();
+      const x = Math.max(0, clientX - rect.left + ui.timeline.scrollPosition);
+      return Math.max(0, Math.min(maxDuration, pixelsToTime(x)));
+    };
+
+    const t = computeFromEl(e.clientX);
     seek(t);
-  }, [computeTimeFromClientX, seek]);
+
+    const onMove = (ev: MouseEvent) => {
+      const tt = computeFromEl(ev.clientX);
+      seek(tt);
+    };
+    const onUp = () => {
+      setIsScrubbing(false);
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }, [ui.timeline.scrollPosition, pixelsToTime, maxDuration, seek]);
   const handleScrubMove = useCallback((e: MouseEvent) => {
     if (!isScrubbing) return;
     const t = computeTimeFromClientX(e.clientX);
@@ -328,7 +349,7 @@ export function Timeline({ className = '' }: TimelineProps) {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => handleZoom(-0.2)}
-              className="p-1 text-text-secondary hover:text-text-primary transition-colors hover:bg-neutral-700 rounded"
+              className="p-1 text-text-secondary hover:text-text-primary transition-colors hover:bg-synapse-surface-hover rounded"
               title="Zoom Out"
             >
               <svg
@@ -350,7 +371,7 @@ export function Timeline({ className = '' }: TimelineProps) {
             </span>
             <button
               onClick={() => handleZoom(0.2)}
-              className="p-1 text-text-secondary hover:text-text-primary transition-colors hover:bg-neutral-700 rounded"
+              className="p-1 text-text-secondary hover:text-text-primary transition-colors hover:bg-synapse-surface-hover rounded"
               title="Zoom In"
             >
               <svg
@@ -374,8 +395,8 @@ export function Timeline({ className = '' }: TimelineProps) {
             }
             className={`px-2 py-1 text-xs rounded transition-colors ${
               ui.timeline.snapToGrid
-                ? 'bg-primary-600 text-white shadow-glow'
-                : 'bg-neutral-700 text-text-secondary hover:bg-neutral-600'
+                ? 'bg-synapse-primary text-synapse-text-inverse shadow-synapse-sm'
+                : 'bg-synapse-surface-hover text-synapse-text-secondary hover:bg-synapse-surface-active'
             }`}
           >
             Snap
@@ -496,15 +517,15 @@ function TimelineClip({
   const getClipColor = (type: string) => {
     switch (type) {
       case 'video':
-        return 'bg-accent-blue';
+        return 'bg-synapse-clip-video';
       case 'audio':
-        return 'bg-accent-green';
+        return 'bg-synapse-clip-audio';
       case 'code':
-        return 'bg-accent-mauve';
+        return 'bg-synapse-clip-code';
       case 'title':
-        return 'bg-accent-peach';
+        return 'bg-synapse-clip-text';
       default:
-        return 'bg-neutral-600';
+        return 'bg-synapse-surface-active';
     }
   };
 
@@ -513,9 +534,9 @@ function TimelineClip({
       className={`
         absolute rounded cursor-move select-none border-2 transition-all
         ${getClipColor(item.type)}
-        ${isSelected ? 'border-accent-yellow shadow-glow' : 'border-transparent'}
-        ${isDragging ? 'opacity-75 z-10' : 'opacity-100'}
-        hover:border-text-secondary
+        ${isSelected ? 'border-synapse-warning shadow-synapse-sm' : 'border-transparent'}
+        ${isDragging ? 'z-10' : ''}
+        hover:border-synapse-border-hover
       `}
       style={style}
       onMouseDown={onMouseDown}
@@ -525,11 +546,11 @@ function TimelineClip({
       <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize bg-text-primary bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
 
       {/* Clip Content */}
-      <div className="p-2 h-full flex flex-col justify-between text-white text-xs overflow-hidden">
+      <div className="p-2 h-full flex flex-col justify-between text-synapse-text-inverse text-xs overflow-hidden">
         <div className="font-medium truncate">
           {asset?.name || 'Unknown Asset'}
         </div>
-        <div className="text-white text-opacity-75">
+        <div>
           {Math.round(item.duration * 10) / 10}s
         </div>
       </div>

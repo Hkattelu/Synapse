@@ -453,14 +453,6 @@ export function applyEducationalAnimationPreset(
   return {
     ...item,
     properties: updatedProperties as ItemProperties,
-    animation: {
-      id: preset.id,
-      name: preset.name,
-      type: preset.type,
-      duration: preset.duration,
-      easing: preset.easing,
-      parameters: parameters,
-    },
   };
 }
 

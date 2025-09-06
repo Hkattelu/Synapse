@@ -229,7 +229,7 @@ function PresetCard({ preset, isRecommended, isPreviewOpen, onApply, onPreview }
       {isPreviewOpen && (
         <div className="border-t border-purple-200 p-3 bg-white">
           <div className="mb-3">
-            <h7 className="font-medium text-gray-800 text-sm mb-1 block">Preview</h7>
+            <h6 className="font-medium text-gray-800 text-sm mb-1 block">Preview</h6>
             <p className="text-xs text-gray-600">{preset.previewDescription}</p>
           </div>
           

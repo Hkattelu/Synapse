@@ -8,6 +8,8 @@ interface RecorderDialogProps {
   onClose: () => void;
 }
 
+import { AudioLevelMeter } from './AudioLevelMeter';
+
 export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
   const { addMediaAsset } = useMediaAssets();
   const { addTimelineItem } = useTimeline();
@@ -38,6 +40,11 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
   >('bottom-right');
   const [bubbleSize, setBubbleSize] = useState<'sm' | 'md'>('sm');
+
+  // Mic toggle and audio analysis refs
+  const [withMic, setWithMic] = useState(true);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const audioSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -70,20 +77,107 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
           (videoRef.current as any).srcObject = null;
         } catch {}
       }
+      // Clean up audio analysis
+      try { audioSourceRef.current?.disconnect(); } catch {}
+      try { audioCtxRef.current?.close(); } catch {}
+      audioSourceRef.current = null;
+      audioCtxRef.current = null;
     };
   }, [isOpen]);
+
+  // When opening the dialog or toggling capture settings, prepare stream
+  useEffect(() => {
+    if (!isOpen || isRecording) return;
+    const setup = async () => {
+      const needMedia = withCamera || withMic;
+      if (needMedia) {
+        const s = await requestStream();
+        if (!s) return;
+      } else {
+        // Neither camera nor mic requested: tear down
+        const s = stream;
+        if (s) {
+          s.getTracks().forEach((t) => t.stop());
+        }
+        setStream(null);
+        if (videoRef.current) {
+          try {
+            (videoRef.current as any).srcObject = null;
+          } catch {}
+        }
+        // Clean up audio analysis
+        try { audioSourceRef.current?.disconnect(); } catch {}
+        try { audioCtxRef.current?.close(); } catch {}
+        audioSourceRef.current = null;
+        audioCtxRef.current = null;
+      }
+    };
+    void setup();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [withCamera, withMic, isOpen, isRecording]);
+
+  // Set up audio analysis source when stream or mic setting changes
+  useEffect(() => {
+    if (!stream || !withMic) {
+      return;
+    }
+    try {
+      const hasAudio = stream.getAudioTracks().length > 0;
+      if (!hasAudio) return;
+      const Ctor: typeof AudioContext = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (!Ctor) return;
+      const ctx = new Ctor();
+      audioCtxRef.current = ctx;
+      const src = ctx.createMediaStreamSource(stream);
+      audioSourceRef.current = src;
+    } catch {}
+    return () => {
+      try { audioSourceRef.current?.disconnect(); } catch {}
+      try { audioCtxRef.current?.close(); } catch {}
+      audioSourceRef.current = null;
+      audioCtxRef.current = null;
+    };
+  }, [stream, withMic]);
 
   // Note: URL revocation is handled explicitly in start/save/discard/cancel paths.
   const requestStream = async (): Promise<MediaStream | null> => {
     try {
+      // Stop previous stream (if any) before requesting new constraints
+      if (stream) {
+        try { stream.getTracks().forEach((t) => t.stop()); } catch {}
+        setStream(null);
+      }
+      if (videoRef.current) {
+        try { (videoRef.current as any).srcObject = null; } catch {}
+      }
+      try { audioSourceRef.current?.disconnect(); } catch {}
+      try { audioCtxRef.current?.close(); } catch {}
+      audioSourceRef.current = null;
+      audioCtxRef.current = null;
+
       const media = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: withCamera,
+        audio: withMic
+          ? {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+            }
+          : false,
+        video: withCamera
+          ? {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              facingMode: 'user',
+            }
+          : false,
       });
       setStream(media);
       if (videoRef.current && withCamera) {
         try {
           (videoRef.current as any).srcObject = media;
+          // Ensure attributes are set before play for autoplay policies
+          videoRef.current.muted = true;
+          videoRef.current.playsInline = true as any;
           await videoRef.current.play().catch(() => {});
         } catch {}
       }
@@ -110,12 +204,8 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       } catch {}
       setPending(null);
     }
-    const s =
-      stream ??
-      (await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: withCamera,
-      }));
+    const s = stream ?? (await requestStream());
+    if (!s) return;
     chunksRef.current = [];
     // Pick a supported mime type
     const pickMime = () => {
@@ -178,6 +268,11 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
         (videoRef.current as any).srcObject = null;
       } catch {}
     }
+    // Clean up audio analysis
+    try { audioSourceRef.current?.disconnect(); } catch {}
+    try { audioCtxRef.current?.close(); } catch {}
+    audioSourceRef.current = null;
+    audioCtxRef.current = null;
   };
 
   const togglePause = () => {
@@ -204,6 +299,11 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
           (videoRef.current as any).srcObject = null;
         } catch {}
       }
+      // Clean up audio analysis
+      try { audioSourceRef.current?.disconnect(); } catch {}
+      try { audioCtxRef.current?.close(); } catch {}
+      audioSourceRef.current = null;
+      audioCtxRef.current = null;
     }
     // If there is a pending preview, discard it and revoke the URL
     if (pending?.url && pending.url.startsWith('blob:')) {
@@ -251,10 +351,37 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                     ref={videoRef}
                     muted
                     playsInline
+                    autoPlay
                     className="w-full h-full object-cover"
                   />
                 </div>
               )}
+
+              {/* Mic Toggle */}
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={withMic}
+                  onChange={(e) => setWithMic(e.target.checked)}
+                  disabled={isRecording}
+                />
+                <span>Record microphone narration</span>
+              </label>
+              {withMic && stream && (
+                <div className="pt-1">
+                  {/* Lightweight live level meter */}
+                  {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                  {/* @ts-ignore - component accepts AudioNode */}
+                  <AudioLevelMeter
+                    audioContext={audioCtxRef.current || undefined}
+                    audioSource={audioSourceRef.current || undefined}
+                    style="bars"
+                    width={180}
+                    height={12}
+                  />
+                </div>
+              )}
+
               <div className="flex items-center space-x-2">
                 {!isRecording ? (
                   <button
@@ -386,6 +513,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     </div>
   );
 }
+
 
 async function getBlobDuration(url: string, kind: 'audio' | 'video') {
   return new Promise<number | null>((resolve) => {

@@ -143,7 +143,7 @@ export function ResponsiveTimeline({
 
   if (breakpoint === 'mobile') {
     return (
-      <div ref={containerRef} className={`responsive-timeline-mobile ${className}`}>
+      <div ref={containerRef as unknown as React.Ref<HTMLDivElement>} className={`responsive-timeline-mobile ${className}`}>
         <MobileTimelineView
           config={config}
           visibleTracks={visibleTracks}
@@ -158,7 +158,7 @@ export function ResponsiveTimeline({
 
   if (breakpoint === 'tablet') {
     return (
-      <div ref={containerRef} className={`responsive-timeline-tablet ${className}`}>
+      <div ref={containerRef as unknown as React.Ref<HTMLDivElement>} className={`responsive-timeline-tablet ${className}`}>
         <TabletTimelineView
           config={config}
           visibleTracks={visibleTracks}
@@ -172,7 +172,7 @@ export function ResponsiveTimeline({
 
   // Desktop view - use full EducationalTimeline
   return (
-    <div ref={containerRef} className={`responsive-timeline-desktop ${className}`}>
+    <div ref={containerRef as unknown as React.Ref<HTMLDivElement>} className={`responsive-timeline-desktop ${className}`}>
       <EducationalTimeline
         mode={mode}
         onModeChange={onModeChange}

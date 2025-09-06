@@ -14,7 +14,7 @@ export const SelectTrigger: React.FC<
 > = ({ children, className = '', ...props }) => {
   return (
     <button
-      className={`flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 ${className}`}
+      className={`flex items-center justify-between px-3 py-2 border border-synapse-border rounded-md bg-synapse-surface text-synapse-text-primary hover:bg-synapse-surface-hover focus:outline-none focus:ring-2 focus:ring-synapse-border-focus focus:ring-offset-2 focus:ring-offset-synapse-background ${className}`}
       {...props}
     >
       {children}
@@ -25,14 +25,14 @@ export const SelectTrigger: React.FC<
 export const SelectValue: React.FC<{ placeholder?: string }> = ({
   placeholder,
 }) => {
-  return <span className="text-gray-500">{placeholder}</span>;
+  return <span className="text-synapse-text-muted">{placeholder}</span>;
 };
 
 export const SelectContent: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   return (
-    <div className="absolute z-10 w-lg mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+    <div className="absolute z-10 w-lg mt-1 bg-synapse-surface border border-synapse-border rounded-md shadow-synapse-lg">
       {children}
     </div>
   );
@@ -44,7 +44,7 @@ export const SelectItem: React.FC<{
 }> = ({ children, value }) => {
   return (
     <div
-      className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+      className="px-3 py-2 hover:bg-synapse-surface-hover cursor-pointer text-synapse-text-primary"
       data-value={value}
     >
       {children}

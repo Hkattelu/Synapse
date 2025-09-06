@@ -182,6 +182,10 @@ export interface ItemProperties {
   animationMode?: 'typing' | 'line-by-line' | 'diff' | 'none';
   typingSpeedCps?: number; // characters per second for typing
   lineRevealIntervalMs?: number; // interval per line for line-by-line
+  // Educational code helpers
+  highlightCurrentLine?: boolean;
+  focusMode?: 'block' | 'none';
+  dimOpacity?: number; // 0..1 dim amount for non-focused regions
 
   // Enhanced diff animation properties
   diffAnimationType?: 'none' | 'slide' | 'fade' | 'highlight' | 'typewriter-diff' | 'line-focus-diff';
@@ -222,6 +226,8 @@ export interface ItemProperties {
   // Title-specific properties
   text?: string;
   color?: string;
+  title?: string; // display-only title for some workflows
+  description?: string;
 
   // Talking head bubble overlay
   // When enabled on a video timeline item, the video is rendered as a small
@@ -230,7 +236,7 @@ export interface ItemProperties {
   talkingHeadEnabled?: boolean;
   talkingHeadShape?: 'circle' | 'rounded';
   talkingHeadCorner?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
-  talkingHeadSize?: 'sm' | 'md';
+  talkingHeadSize?: 'sm' | 'md' | 'lg';
   // Viewer-controlled, non-destructive visibility toggle
   talkingHeadHidden?: boolean;
 
@@ -244,6 +250,9 @@ export interface ItemProperties {
   boxStyle?: 'solid' | 'dashed' | 'dotted';
   boxThickness?: number;
   borderRadius?: number;
+  borderWidth?: number;
+  borderColor?: string;
+  shadow?: boolean;
   // Finger pointer properties
   fingerDirection?: 'up' | 'down' | 'left' | 'right';
   fingerStyle?: 'pointing' | 'tapping';
@@ -263,6 +272,37 @@ export interface ItemProperties {
   strokeWidth?: number;
   animateIn?: 'fade' | 'scale' | 'slide' | 'draw' | 'none';
   animateOut?: 'fade' | 'scale' | 'slide' | 'none';
+
+  // Audio / narration enhancements (optional, used by demos and features)
+  ducking?: {
+    enabled?: boolean;
+    threshold?: number;
+    ratio?: number;
+    attackTime?: number;
+    releaseTime?: number;
+    targetTracks?: number[];
+  };
+  syncPoints?: import('./audioUtils').TimingSyncPoint[];
+  noiseReduction?: boolean;
+  normalize?: boolean;
+  highPassFilter?: boolean;
+  gain?: number;
+
+  // You track / background enhancements
+  backgroundRemoval?: boolean;
+  backgroundBlur?: number;
+  presentationTemplate?: string;
+  audioDucking?: number;
+  audioFadeIn?: number;
+  showWaveform?: boolean;
+  waveformStyle?: string;
+  splitScreenRatio?: number;
+  audioEnhancement?: boolean;
+  chromaKeyEnabled?: boolean;
+  chromaKeyColor?: string;
+  chromaKeyTolerance?: number;
+  templateOverlays?: unknown[];
+  videoType?: string;
 }
 
 export interface TimelineItem {
@@ -279,14 +319,16 @@ export interface TimelineItem {
   /**
    * @deprecated Use `animation` instead. Kept for backward compatibility and will be removed in a future release.
    */
-  animations: AnimationPreset[];
-  keyframes: Keyframe[]; // Keyframe animations
+  animations?: AnimationPreset[];
+  keyframes?: Keyframe[]; // Keyframe animations
   locked?: boolean;
   muted?: boolean;
   solo?: boolean;
   visible?: boolean;
   label?: string;
   color?: string;
+  // Optional source for preview/demo components
+  src?: string;
 }
 
 export interface ProjectSettings {

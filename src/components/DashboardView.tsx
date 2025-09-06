@@ -164,19 +164,19 @@ export function DashboardView() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-synapse-background">
       {/* Navigation Header */}
-      <nav className="bg-white border-b border-gray-200">
+      <nav className="bg-background-tertiary border-b border-border-subtle">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <button
               onClick={() => navigate('/')}
               className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
             >
-              <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 bg-synapse-primary rounded-lg flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-synapse-text-inverse" />
               </div>
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-text-primary">
                 Synapse Studio
               </h1>
             </button>
@@ -190,10 +190,10 @@ export function DashboardView() {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            <h2 className="text-3xl font-bold text-text-primary mb-2">
               Your Projects
             </h2>
-            <p className="text-gray-600">
+            <p className="text-text-secondary">
               Create and manage your video projects
             </p>
           </div>
@@ -201,9 +201,9 @@ export function DashboardView() {
           {/* Quick Actions */}
           <div className="mb-8 space-y-4">
             {showCreateForm ? (
-              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+              <div className="bg-synapse-surface border border-border-subtle rounded-xl p-6 shadow-synapse-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-text-primary">
                     Create New Project
                   </h3>
                   <button
@@ -211,7 +211,7 @@ export function DashboardView() {
                       setShowCreateForm(false);
                       setProjectName('');
                     }}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    className="text-text-secondary hover:text-text-primary transition-colors"
                   >
                     <svg
                       className="w-5 h-5"
@@ -237,13 +237,13 @@ export function DashboardView() {
                       e.key === 'Enter' && handleCreateProject()
                     }
                     placeholder="Enter project name..."
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="flex-1 px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-synapse-border-focus focus:border-transparent"
                     autoFocus
                   />
                   <button
                     onClick={handleCreateProject}
                     disabled={!projectName.trim()}
-                    className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 text-white font-medium px-6 py-2 rounded-lg transition-colors disabled:cursor-not-allowed"
+                    className="bg-synapse-primary hover:bg-synapse-primary-hover disabled:bg-synapse-surface-active text-synapse-text-inverse font-medium px-6 py-2 rounded-lg transition-colors disabled:cursor-not-allowed"
                   >
                     Create
                   </button>
@@ -253,7 +253,7 @@ export function DashboardView() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() => setShowCreateForm(true)}
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-6 py-3 rounded-lg transition-colors flex items-center space-x-2"
+                  className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse font-medium px-6 py-3 rounded-lg transition-colors flex items-center space-x-2"
                 >
                   <Plus className="w-5 h-5" />
                   <span>New Project</span>
@@ -262,12 +262,12 @@ export function DashboardView() {
                 <button
                   onClick={() => setShowRepoModal(true)}
                   title="Generate a starter video project from a Git repository. We clone shallowly and extract a handful of representative files to create an editable timeline."
-                  className="bg-white border border-purple-200 hover:border-purple-300 text-purple-700 font-medium px-6 py-3 rounded-lg transition-colors flex items-center space-x-2"
+                  className="bg-synapse-surface border border-border-subtle hover:border-synapse-border-hover text-synapse-primary font-medium px-6 py-3 rounded-lg transition-colors flex items-center space-x-2"
                 >
                   <GitBranch className="w-5 h-5" />
                   <span>New from Repo</span>
                 </button>
-                <p className="text-sm text-gray-500 max-w-2xl">
+                <p className="text-sm text-text-tertiary max-w-2xl">
                   Tip: We clone the repo (depth 1), scan for code and docs, and propose a short timeline (titles and code segments). You can edit everything afterward.
                 </p>
               </div>
@@ -275,7 +275,7 @@ export function DashboardView() {
           </div>
 
           {/* Project Management */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
+          <div className="bg-synapse-surface border border-border-subtle rounded-xl shadow-synapse-sm">
             <div className="p-6">
               <ProjectManager />
             </div>
@@ -283,44 +283,44 @@ export function DashboardView() {
 
           {/* Current Project Status */}
           {project && (
-            <div className="mt-8 bg-purple-50 border border-purple-200 rounded-xl p-6">
+            <div className="mt-8 bg-synapse-primary/10 border border-synapse-primary rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <div className="w-3 h-3 bg-synapse-success rounded-full"></div>
+                  <h3 className="text-lg font-semibold text-text-primary">
                     Active Project
                   </h3>
                 </div>
                 <button
                   onClick={() => handleOpenProject()}
-                  className="text-purple-600 hover:text-purple-700 font-medium"
+                  className="text-synapse-primary hover:opacity-80 font-medium"
                 >
                   Open Studio →
                 </button>
               </div>
 
-              <h4 className="text-xl font-bold text-gray-900 mb-4">
+              <h4 className="text-xl font-bold text-text-primary mb-4">
                 {project.name}
               </h4>
 
               <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="bg-white rounded-lg p-4">
-                  <div className="text-2xl font-bold text-gray-900 mb-1">
+                <div className="bg-synapse-surface rounded-lg p-4">
+                  <div className="text-2xl font-bold text-text-primary mb-1">
                     {project.timeline.length}
                   </div>
-                  <div className="text-sm text-gray-600">Timeline Items</div>
+                  <div className="text-sm text-text-secondary">Timeline Items</div>
                 </div>
-                <div className="bg-white rounded-lg p-4">
-                  <div className="text-2xl font-bold text-gray-900 mb-1">
+                <div className="bg-synapse-surface rounded-lg p-4">
+                  <div className="text-2xl font-bold text-text-primary mb-1">
                     {project.mediaAssets.length}
                   </div>
-                  <div className="text-sm text-gray-600">Media Assets</div>
+                  <div className="text-sm text-text-secondary">Media Assets</div>
                 </div>
-                <div className="bg-white rounded-lg p-4">
-                  <div className="text-2xl font-bold text-gray-900 mb-1">
+                <div className="bg-synapse-surface rounded-lg p-4">
+                  <div className="text-2xl font-bold text-text-primary mb-1">
                     {project.createdAt.toLocaleDateString()}
                   </div>
-                  <div className="text-sm text-gray-600">Created</div>
+                  <div className="text-sm text-text-secondary">Created</div>
                 </div>
               </div>
             </div>
@@ -331,11 +331,11 @@ export function DashboardView() {
       {/* New from Repo Modal */}
       {showRepoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => !repoLoading && setShowRepoModal(false)}>
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-synapse-surface rounded-xl shadow-synapse-lg w-full max-w-lg p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">New Project from Git Repo</h3>
+              <h3 className="text-lg font-semibold text-text-primary">New Project from Git Repo</h3>
               <button
-                className="text-gray-400 hover:text-gray-600"
+                className="text-text-secondary hover:text-text-primary"
                 onClick={() => !repoLoading && setShowRepoModal(false)}
                 aria-label="Close"
               >
@@ -344,27 +344,27 @@ export function DashboardView() {
             </div>
 
             <div className="space-y-4">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-text-secondary">
                 Generate a starter project from a public Git repository. We don’t execute code; we only read files to assemble an initial timeline you can refine.
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Repository URL</label>
+                <label className="block text-sm font-medium text-text-secondary">Repository URL</label>
                 <input
                   type="url"
                   value={repoUrl}
                   onChange={(e) => setRepoUrl(e.target.value)}
                   placeholder="https://github.com/owner/repo.git (or https URL)"
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="mt-1 w-full px-3 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-synapse-border-focus"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Branch (optional)</label>
+                <label className="block text-sm font-medium text-text-secondary">Branch (optional)</label>
                 <input
                   type="text"
                   value={branch}
                   onChange={(e) => setBranch(e.target.value)}
                   placeholder="main"
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="mt-1 w-full px-3 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-synapse-border-focus"
                 />
               </div>
 
@@ -373,7 +373,7 @@ export function DashboardView() {
               )}
 
               <div className="flex items-center justify-between pt-2">
-                <label className="inline-flex items-center text-sm text-gray-700">
+                <label className="inline-flex items-center text-sm text-text-secondary">
                   <input
                     type="checkbox"
                     className="mr-2"
@@ -387,14 +387,14 @@ export function DashboardView() {
                   <button
                     onClick={() => setShowRepoModal(false)}
                     disabled={repoLoading}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    className="px-4 py-2 border border-border-subtle rounded-lg text-text-primary hover:bg-synapse-surface-hover disabled:opacity-50"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleNewFromRepo}
                     disabled={repoLoading || !repoUrl}
-                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg disabled:opacity-50"
+                    className="px-4 py-2 bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse rounded-lg disabled:opacity-50"
                   >
                     {repoLoading ? 'Generating…' : 'Generate'}
                   </button>

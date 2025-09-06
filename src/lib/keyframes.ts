@@ -54,7 +54,7 @@ export class KeyframeManager {
     };
 
     // Remove any existing keyframes at the same time for the same properties
-    const filteredKeyframes = item.keyframes.filter(
+    const filteredKeyframes = (item.keyframes ?? []).filter(
       (k) =>
         k.time !== adjustedKeyframe.time ||
         !this.hasOverlappingProperties(
@@ -75,7 +75,7 @@ export class KeyframeManager {
   static removeKeyframe(item: TimelineItem, keyframeId: string): TimelineItem {
     return {
       ...item,
-      keyframes: item.keyframes.filter((k) => k.id !== keyframeId),
+      keyframes: (item.keyframes ?? []).filter((k) => k.id !== keyframeId),
     };
   }
 
@@ -87,7 +87,7 @@ export class KeyframeManager {
   ): TimelineItem {
     return {
       ...item,
-      keyframes: item.keyframes
+      keyframes: (item.keyframes ?? [])
         .map((k) =>
           k.id === keyframeId
             ? {
@@ -109,7 +109,8 @@ export class KeyframeManager {
     item: TimelineItem,
     property: keyof ItemProperties
   ): Keyframe[] {
-    return item.keyframes
+    const keyframes = item.keyframes ?? [];
+    return keyframes
       .filter((k) => property in k.properties)
       .sort((a, b) => a.time - b.time);
   }
@@ -119,7 +120,7 @@ export class KeyframeManager {
     item: TimelineItem,
     property: keyof ItemProperties,
     time: number
-  ): number | string | boolean | GradientConfig | undefined {
+  ): ItemProperties[keyof ItemProperties] | undefined {
     const keyframes = this.getPropertyKeyframes(item, property);
 
     if (keyframes.length === 0) {
@@ -186,7 +187,7 @@ export class KeyframeManager {
 
     // Get all unique properties that have keyframes
     const keyframedProperties = new Set<keyof ItemProperties>();
-    item.keyframes.forEach((k) => {
+    (item.keyframes ?? []).forEach((k) => {
       Object.keys(k.properties).forEach((prop) => {
         keyframedProperties.add(prop as keyof ItemProperties);
       });
@@ -205,13 +206,14 @@ export class KeyframeManager {
 
   // Auto-generate keyframes from animation presets
   static generateKeyframesFromPresets(item: TimelineItem): TimelineItem {
-    if (item.animations.length === 0) {
+    const animations = item.animations ?? [];
+    if (animations.length === 0) {
       return item;
     }
 
     const generatedKeyframes: Keyframe[] = [];
 
-    item.animations.forEach((animation) => {
+    animations.forEach((animation) => {
       // Convert animation preset to keyframes based on type
       switch (animation.type) {
         case 'entrance':
@@ -236,16 +238,17 @@ export class KeyframeManager {
 
     return {
       ...item,
-      keyframes: [...item.keyframes, ...generatedKeyframes].sort(
-        (a, b) => a.time - b.time
-      ),
+      keyframes: [
+        ...((item.keyframes ?? []) as Keyframe[]),
+        ...generatedKeyframes,
+      ].sort((a, b) => a.time - b.time),
     };
   }
 
   // Optimize keyframes by removing redundant ones
   static optimizeKeyframes(item: TimelineItem): TimelineItem {
     const optimized: Keyframe[] = [];
-    const keyframes = [...item.keyframes].sort((a, b) => a.time - b.time);
+    const keyframes = [...((item.keyframes ?? []) as Keyframe[])].sort((a, b) => a.time - b.time);
 
     for (let i = 0; i < keyframes.length; i++) {
       const current = keyframes[i];
@@ -288,7 +291,7 @@ export class KeyframeManager {
   } {
     const errors: string[] = [];
 
-    item.keyframes.forEach((keyframe, index) => {
+    (item.keyframes ?? []).forEach((keyframe, index) => {
       // Check time bounds
       if (keyframe.time < 0 || keyframe.time > item.duration) {
         errors.push(

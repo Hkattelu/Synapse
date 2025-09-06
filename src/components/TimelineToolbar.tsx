@@ -236,10 +236,10 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
   }, [showHint, dismissHint]);
 
   return (
-    <div className={`bg-gradient-to-r from-gray-800 to-gray-700 border-b border-gray-600 px-4 py-3 relative ${className}`}>
+    <div className={`bg-background-tertiary border-b border-border-subtle px-4 py-3 relative ${className}`}>
       {/* Onboarding Hint */}
       {showHint && (
-        <div className="absolute top-full left-4 mt-2 bg-primary-600 text-white px-3 py-2 rounded-lg shadow-lg z-50 text-sm max-w-sm animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="absolute top-full left-4 mt-2 bg-synapse-primary text-synapse-text-inverse px-3 py-2 rounded-lg shadow-synapse-md z-50 text-sm max-w-sm animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="flex items-start space-x-2">
             <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -250,7 +250,7 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
             </div>
             <button
               onClick={dismissHint}
-              className="text-white/70 hover:text-white ml-2"
+              className="text-synapse-text-inverse/80 hover:text-synapse-text-inverse ml-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -258,24 +258,24 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
             </button>
           </div>
           {/* Arrow pointing up */}
-          <div className="absolute bottom-full left-6 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-primary-600"></div>
+          <div className="absolute bottom-full left-6 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent" style={{ borderBottomColor: 'var(--synapse-primary)' }}></div>
         </div>
       )}
 
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center space-x-2">
           <div className="flex items-center space-x-4">
-            <span className="text-sm font-medium text-gray-300">Add to Timeline:</span>
-            <span className="text-xs text-gray-400 hidden lg:block">Use Ctrl+Shift+C/T/A for quick access</span>
+            <span className="text-sm font-medium text-text-secondary">Add to Timeline:</span>
+            <span className="text-xs text-text-tertiary hidden lg:block">Use Ctrl+Shift+C/T/A for quick access</span>
           </div>
           
           {/* Code Button */}
           <button
             onClick={addCodeClip}
-            className={`flex items-center space-x-2 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-sm ${
+            className={`flex items-center space-x-2 text-synapse-text-inverse px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-synapse-sm ${
               recentlyAdded === 'code' 
-                ? 'bg-accent-green scale-105 shadow-lg' 
-                : 'bg-accent-green hover:bg-accent-green/80'
+                ? 'bg-synapse-clip-code scale-105 shadow-synapse-md' 
+                : 'bg-synapse-clip-code hover:opacity-90'
             }`}
             title="Add code clip to timeline (Ctrl+Shift+C)"
           >
@@ -288,10 +288,10 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
           {/* Title Button */}
           <button
             onClick={addTitleClip}
-            className={`flex items-center space-x-2 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-sm ${
+            className={`flex items-center space-x-2 text-synapse-text-inverse px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-synapse-sm ${
               recentlyAdded === 'title' 
-                ? 'bg-accent-mauve scale-105 shadow-lg' 
-                : 'bg-accent-mauve hover:bg-accent-mauve/80'
+                ? 'bg-synapse-clip-text scale-105 shadow-synapse-md' 
+                : 'bg-synapse-clip-text hover:opacity-90'
             }`}
             title="Add title to timeline (Ctrl+Shift+T)"
           >
@@ -305,10 +305,10 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
           <div className="relative">
             <button
               onClick={() => setShowVisualAssets(!showVisualAssets)}
-              className={`flex items-center space-x-2 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-sm ${
+            className={`flex items-center space-x-2 text-synapse-text-inverse px-3 py-2 rounded-lg text-sm font-medium transition-all shadow-synapse-sm ${
                 recentlyAdded === 'visual-asset' 
-                  ? 'bg-accent-orange scale-105 shadow-lg' 
-                  : 'bg-accent-orange hover:bg-accent-orange/80'
+                  ? 'bg-synapse-clip-video scale-105 shadow-synapse-md' 
+                  : 'bg-synapse-clip-video hover:opacity-90'
               }`}
               title="Add visual assets to timeline (Ctrl+Shift+A)"
             >
@@ -322,10 +322,10 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
             </button>
 
             {showVisualAssets && (
-              <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-50 min-w-[160px]">
+              <div className="absolute top-full left-0 mt-1 bg-background-tertiary border border-border-subtle rounded-lg shadow-synapse-lg z-50 min-w-[160px]">
                 <button
                   onClick={() => addVisualAsset('arrow')}
-                  className="w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 transition-colors flex items-center space-x-2 rounded-t-lg"
+                  className="w-full text-left px-3 py-2 text-sm text-text-primary hover:bg-synapse-surface-hover transition-colors flex items-center space-x-2 rounded-t-lg"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -334,7 +334,7 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
                 </button>
                 <button
                   onClick={() => addVisualAsset('box')}
-                  className="w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 transition-colors flex items-center space-x-2"
+                  className="w-full text-left px-3 py-2 text-sm text-text-primary hover:bg-synapse-surface-hover transition-colors flex items-center space-x-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16v12H4z" />
@@ -343,7 +343,7 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
                 </button>
                 <button
                   onClick={() => addVisualAsset('finger-pointer')}
-                  className="w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 transition-colors flex items-center space-x-2"
+                  className="w-full text-left px-3 py-2 text-sm text-text-primary hover:bg-synapse-surface-hover transition-colors flex items-center space-x-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 13l3 3 7-7" />
@@ -352,7 +352,7 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
                 </button>
                 <button
                   onClick={() => addVisualAsset('circle')}
-                  className="w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 transition-colors flex items-center space-x-2"
+                  className="w-full text-left px-3 py-2 text-sm text-text-primary hover:bg-synapse-surface-hover transition-colors flex items-center space-x-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="10" strokeWidth={2} />
@@ -361,7 +361,7 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
                 </button>
                 <button
                   onClick={() => addVisualAsset('line')}
-                  className="w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 transition-colors flex items-center space-x-2 rounded-b-lg"
+                  className="w-full text-left px-3 py-2 text-sm text-text-primary hover:bg-synapse-surface-hover transition-colors flex items-center space-x-2 rounded-b-lg"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14" />
@@ -391,7 +391,7 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
               };
               fileInput.click();
             }}
-            className="flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+            className="flex items-center space-x-2 bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-synapse-sm"
             title="Upload media files"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -27,32 +27,32 @@ const Navigation: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <nav className="bg-white border-b border-gray-200">
+    <nav className="bg-synapse-surface border-b border-border-subtle">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 bg-synapse-primary rounded-lg flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-synapse-text-inverse" />
             </div>
-            <h1 className="text-xl font-bold text-gray-900">Synapse Studio</h1>
+            <h1 className="text-xl font-bold text-text-primary">Synapse Studio</h1>
           </div>
 
           <div className="flex items-center space-x-6">
             <button
               onClick={() => navigate('/')}
-              className="text-gray-600 hover:text-purple-600 transition-colors"
+              className="text-text-secondary hover:text-synapse-primary transition-colors"
             >
               Home
             </button>
             <button
               onClick={() => navigate('/projects')}
-              className="text-gray-600 hover:text-purple-600 transition-colors"
+              className="text-text-secondary hover:text-synapse-primary transition-colors"
             >
               Projects
             </button>
             <button
               onClick={() => navigate('/projects')}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
+              className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse px-4 py-2 rounded-lg transition-colors"
             >
               Get Started
             </button>
@@ -76,15 +76,15 @@ const DownloadCard: React.FC<{ option: DownloadOption }> = ({ option }) => {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       viewport={{ once: true }}
-      className={`relative bg-white border-2 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 ${
+      className={`relative bg-synapse-surface border-2 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 ${
         option.isRecommended
-          ? 'border-purple-500 ring-2 ring-purple-200'
-          : 'border-gray-200 hover:border-purple-300'
+          ? 'border-synapse-primary ring-2 ring-synapse-primary/20'
+          : 'border-border-subtle hover:border-synapse-border-hover'
       }`}
     >
       {option.isRecommended && (
         <div className="absolute -top-3 left-6">
-          <span className="bg-purple-600 text-white text-sm font-medium px-3 py-1 rounded-full">
+          <span className="bg-synapse-primary text-synapse-text-inverse text-sm font-medium px-3 py-1 rounded-full">
             Recommended
           </span>
         </div>
@@ -96,31 +96,31 @@ const DownloadCard: React.FC<{ option: DownloadOption }> = ({ option }) => {
             {option.icon}
           </div>
           <div>
-            <h3 className="text-xl font-bold text-gray-900">
+            <h3 className="text-xl font-bold text-text-primary">
               {option.platform}
             </h3>
-            <p className="text-sm text-gray-600">Version {option.version}</p>
+            <p className="text-sm text-text-secondary">Version {option.version}</p>
           </div>
         </div>
-        <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+        <span className="text-sm text-text-secondary bg-background-tertiary px-2 py-1 rounded">
           {option.size}
         </span>
       </div>
 
-      <p className="text-gray-600 mb-4">{option.description}</p>
+      <p className="text-text-secondary mb-4">{option.description}</p>
 
       {option.requirements && (
         <div className="mb-4">
-          <h4 className="text-sm font-semibold text-gray-900 mb-2">
+          <h4 className="text-sm font-semibold text-text-primary mb-2">
             Requirements:
           </h4>
           <ul className="space-y-1">
             {option.requirements.map((req, index) => (
               <li
                 key={index}
-                className="flex items-center text-sm text-gray-600"
+                className="flex items-center text-sm text-text-secondary"
               >
-                <CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+                <CheckCircle className="w-4 h-4 text-synapse-success mr-2 flex-shrink-0" />
                 {req}
               </li>
             ))}
@@ -132,8 +132,8 @@ const DownloadCard: React.FC<{ option: DownloadOption }> = ({ option }) => {
         onClick={handleDownload}
         className={`w-full font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 ${
           option.isRecommended
-            ? 'bg-purple-600 hover:bg-purple-700 text-white'
-            : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+            ? 'bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse'
+            : 'bg-synapse-surface hover:bg-synapse-surface-hover text-text-primary'
         }`}
       >
         <Download className="w-5 h-5" />
@@ -209,7 +209,7 @@ const DownloadsPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-synapse-background">
       <Navigation />
 
       <div className="container mx-auto px-4 py-12">
@@ -244,69 +244,69 @@ const DownloadsPage: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="bg-white rounded-2xl p-8 shadow-lg"
+            className="bg-synapse-surface rounded-2xl p-8 shadow-synapse-md"
           >
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl font-bold text-text-primary mb-6">
               What's Included
             </h2>
 
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <div className="text-center">
-                <div className="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="w-8 h-8 text-purple-600" />
+                <div className="w-16 h-16 bg-synapse-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="w-8 h-8 text-synapse-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-text-primary mb-2">
                   Full Feature Set
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-text-secondary">
                   Complete video editing suite with timeline, effects, and
                   export capabilities.
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="w-8 h-8 text-green-600" />
+                <div className="w-16 h-16 bg-synapse-success/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-8 h-8 text-synapse-success" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-text-primary mb-2">
                   No Subscription
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-text-secondary">
                   One-time download, yours forever. No monthly fees or hidden
                   costs.
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <Github className="w-8 h-8 text-blue-600" />
+                <div className="w-16 h-16 bg-synapse-info/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Github className="w-8 h-8 text-synapse-info" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-text-primary mb-2">
                   Open Source
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-text-secondary">
                   Built in the open with community contributions and
                   transparency.
                 </p>
               </div>
             </div>
 
-            <div className="border-t border-gray-200 pt-6">
+            <div className="border-t border-border-subtle pt-6">
               <div className="flex flex-col md:flex-row items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h3 className="text-lg font-semibold text-text-primary mb-2">
                     Need Help?
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-text-secondary">
                     Check out our documentation and community support resources.
                   </p>
                 </div>
                 <div className="flex space-x-4 mt-4 md:mt-0">
-                  <button className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 font-medium">
+                  <button className="flex items-center space-x-2 text-synapse-primary hover:opacity-80 font-medium">
                     <ExternalLink className="w-4 h-4" />
                     <span>Documentation</span>
                   </button>
-                  <button className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 font-medium">
+                  <button className="flex items-center space-x-2 text-synapse-primary hover:opacity-80 font-medium">
                     <Github className="w-4 h-4" />
                     <span>GitHub</span>
                   </button>
@@ -321,14 +321,14 @@ const DownloadsPage: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
-            className="mt-8 bg-purple-50 border border-purple-200 rounded-2xl p-6"
+            className="mt-8 bg-synapse-primary/10 border border-synapse-primary rounded-2xl p-6"
           >
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">
+            <h3 className="text-lg font-semibold text-text-primary mb-3">
               Latest Release - v1.0.0
             </h3>
-            <ul className="space-y-2 text-gray-700">
+            <ul className="space-y-2 text-text-primary">
               <li className="flex items-start">
-                <CheckCircle className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="w-5 h-5 text-synapse-success mr-2 mt-0.5 flex-shrink-0" />
                 <span>
                   Initial release with full video editing capabilities
                 </span>

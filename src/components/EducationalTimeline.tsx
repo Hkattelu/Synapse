@@ -304,14 +304,14 @@ export function EducationalTimeline({
         keyframes: [],
       };
 
-      const addedItem = addTimelineItem(newItem);
+      const addedItemId = addTimelineItem(newItem) as unknown as string;
 
       // Show placement warning if needed
       if (!validation.isValid || validation.warnings.length > 0) {
         setPlacementWarnings(prev => [
-          ...prev.filter(w => w.itemId !== addedItem.id),
+          ...prev.filter(w => w.itemId !== addedItemId),
           {
-            itemId: addedItem.id,
+            itemId: addedItemId,
             suggestion,
             show: true,
           }
@@ -320,7 +320,7 @@ export function EducationalTimeline({
         // Auto-hide warning after 5 seconds
         setTimeout(() => {
           setPlacementWarnings(prev => 
-            prev.map(w => w.itemId === addedItem.id ? { ...w, show: false } : w)
+            prev.map(w => w.itemId === addedItemId ? { ...w, show: false } : w)
           );
         }, 5000);
       }
@@ -545,9 +545,30 @@ export function EducationalTimeline({
   const handleScrubStart = useCallback((e: React.MouseEvent) => {
     // Ignore scrubbing if a clip drag initiated (propagation is stopped in clip handler)
     setIsScrubbing(true);
-    const t = computeTimeFromClientX(e.clientX);
+    const el = timelineRef.current as HTMLDivElement | null;
+
+    const computeFromEl = (clientX: number) => {
+      if (!el) return 0;
+      const rect = el.getBoundingClientRect();
+      const xContent = Math.max(0, clientX - rect.left + ui.timeline.scrollPosition - HEADER_COL_WIDTH);
+      return Math.max(0, Math.min(maxDuration, pixelsToTime(xContent)));
+    };
+
+    const t = computeFromEl(e.clientX);
     seek(t);
-  }, [computeTimeFromClientX, seek]);
+
+    const onMove = (ev: MouseEvent) => {
+      const tt = computeFromEl(ev.clientX);
+      seek(tt);
+    };
+    const onUp = () => {
+      setIsScrubbing(false);
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }, [ui.timeline.scrollPosition, pixelsToTime, maxDuration, seek]);
 
   const handleScrubMove = useCallback((e: MouseEvent) => {
     if (!isScrubbing) return;
@@ -681,15 +702,9 @@ export function EducationalTimeline({
 
       {/* Timeline Content (grid with sticky left headers) */}
       <div
-        ref={(el) => {
-          scrollRef.current = el as HTMLDivElement;
-          containerRef.current = el as HTMLDivElement;
-        }}
+        ref={timelineRef}
         className="educational-timeline-content overflow-auto flex-1"
-        onScroll={(e) => {
-          const target = e.currentTarget;
-          handleScroll(target.scrollLeft, target.scrollTop);
-        }}
+        onScroll={handleScroll}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onClick={handleTimelineClick}

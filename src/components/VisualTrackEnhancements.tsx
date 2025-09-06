@@ -34,6 +34,8 @@ interface VisualTrackClipProps {
   isSelected: boolean;
   style: React.CSSProperties;
   onItemUpdate: (item: TimelineItem) => void;
+  onMouseDown?: (e: React.MouseEvent) => void;
+  isDragging?: boolean;
 }
 
 export function VisualTrackClip({
@@ -43,6 +45,8 @@ export function VisualTrackClip({
   isSelected,
   style,
   onItemUpdate,
+  onMouseDown,
+  isDragging,
 }: VisualTrackClipProps) {
   const [showAnimationMenu, setShowAnimationMenu] = useState(false);
   
@@ -74,13 +78,15 @@ export function VisualTrackClip({
       className={`
         absolute rounded cursor-move select-none border-2 transition-all overflow-hidden
         ${isSelected ? 'border-accent-yellow shadow-glow' : 'border-transparent'}
+        ${isDragging ? 'opacity-75 z-10' : 'opacity-100'}
         hover:border-text-secondary group
       `}
       style={{
         ...style,
-        backgroundColor: `${track.color}22`,
+        backgroundColor: track.color,
         borderColor: isSelected ? '#F59E0B' : track.color,
       }}
+      onMouseDown={onMouseDown}
     >
       {/* Thumbnail Preview */}
       {thumbnailUrl && (
@@ -127,7 +133,7 @@ export function VisualTrackClip({
         </div>
 
         {/* Content Info */}
-        <div className="text-text-secondary text-opacity-75">
+        <div className="text-white">
           <div className="flex items-center justify-between">
             <span>
               {asset?.type === 'video' ? 'Video' : 'Image'}

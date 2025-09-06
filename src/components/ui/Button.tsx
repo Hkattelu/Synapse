@@ -15,21 +15,25 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClass =
-    'inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
+    'inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-synapse-border-focus focus:ring-offset-synapse-background disabled:opacity-50 disabled:pointer-events-none';
 
   const variants = {
-    default: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+    // Primary/filled
+    default:
+      'bg-synapse-primary text-synapse-text-inverse hover:bg-synapse-primary-hover active:bg-synapse-primary-active',
+    // Outline
     outline:
-      'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-blue-500',
-    ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-blue-500',
-  };
+      'border border-synapse-border bg-synapse-surface text-synapse-text-primary hover:bg-synapse-surface-hover',
+    // Ghost
+    ghost: 'text-synapse-text-secondary hover:bg-synapse-surface-hover',
+  } as const;
 
   const sizes = {
     sm: 'px-3 py-2 text-sm rounded-md',
     md: 'px-4 py-2 text-sm rounded-md',
     lg: 'px-6 py-3 text-base rounded-md',
     icon: 'p-2 rounded-md',
-  };
+  } as const;
 
   const classes = `${baseClass} ${variants[variant]} ${sizes[size]} ${className}`;
 

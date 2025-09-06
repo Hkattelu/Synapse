@@ -7,7 +7,7 @@ import { TimingSyncTools } from './TimingSyncTools';
 import type { TimelineItem, MediaAsset } from '../lib/types';
 import type { EducationalTrack } from '../lib/educationalTypes';
 import type { TimingSyncPoint, AudioDuckingConfig } from '../lib/audioUtils';
-import { EDUCATIONAL_TRACKS, DEFAULT_NARRATION_PROPERTIES } from '../lib/educationalTypes';
+import { EDUCATIONAL_TRACKS } from '../lib/educationalTypes';
 
 export function NarrationTrackDemo() {
   const [currentTime, setCurrentTime] = useState(0);
@@ -36,7 +36,7 @@ export function NarrationTrackDemo() {
     track: 2, // Narration track
     type: 'audio',
     properties: {
-      ...DEFAULT_NARRATION_PROPERTIES,
+      // default narration-like properties
       volume: 0.8,
       gain: 2,
       noiseReduction: true,

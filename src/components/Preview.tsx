@@ -314,8 +314,11 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
       setIsDragging(true);
       handleTimelineScrub(event);
 
+      // Capture the DOM element now; don't rely on the pooled React event later
+      const targetEl = event.currentTarget as HTMLDivElement;
+
       const handleMouseMove = (e: MouseEvent) => {
-        const rect = event.currentTarget.getBoundingClientRect();
+        const rect = targetEl.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const percentage = Math.max(0, Math.min(1, x / rect.width));
         const time = percentage * compositionProps.settings.duration;
@@ -439,10 +442,6 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             loop={false}
             showVolumeControls={false}
             clickToPlay={false}
-            onTimeUpdate={(frame: number) => {
-              const seconds = frame / compositionProps.settings.fps;
-              seek(seconds);
-            }}
           />
           {/* Fullscreen Button */}
           <button
@@ -947,10 +946,6 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               loop={false}
               showVolumeControls={false}
               clickToPlay={false}
-              onTimeUpdate={(frame: number) => {
-                const seconds = frame / compositionProps.settings.fps;
-                seek(seconds);
-              }}
             />
 
             {/* Fullscreen Exit Button */}

@@ -5,6 +5,8 @@ import type { TimelineItem, ItemProperties } from '../lib/types';
 export function YouTrackDemo() {
   const [demoItem, setDemoItem] = useState<TimelineItem>({
     id: 'demo-you-item',
+    assetId: 'demo-you-asset',
+    track: 3,
     type: 'video',
     src: '/demo-talking-head.mp4', // Demo video file
     startTime: 0,
@@ -16,7 +18,9 @@ export function YouTrackDemo() {
       backgroundRemoval: false,
       backgroundBlur: 0,
       volume: 0.8
-    }
+    },
+    animations: [],
+    keyframes: []
   });
 
   const handleUpdateProperties = (properties: Partial<ItemProperties>) => {

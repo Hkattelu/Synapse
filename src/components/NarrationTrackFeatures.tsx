@@ -43,7 +43,12 @@ export function NarrationTrackFeatures({
   // Initialize narration properties if not present
   const narrationProps: NarrationTrackProperties = {
     ...DEFAULT_NARRATION_PROPERTIES,
-    ...item.properties,
+    ...(item.properties as any),
+    ducking: {
+      ...DEFAULT_NARRATION_PROPERTIES.ducking,
+      ...(item.properties.ducking ?? {}),
+    },
+    syncPoints: (item.properties.syncPoints as any) ?? DEFAULT_NARRATION_PROPERTIES.syncPoints,
   };
 
   // Load audio buffer for analysis
@@ -123,7 +128,6 @@ export function NarrationTrackFeatures({
       <audio
         ref={audioRef}
         src={asset.url}
-        currentTime={currentTime}
         style={{ display: 'none' }}
       />
 

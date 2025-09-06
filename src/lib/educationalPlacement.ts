@@ -59,8 +59,9 @@ const CONTENT_TYPE_MAPPINGS: ContentTypeMapping[] = [
       { track: 'You', confidence: 0.8, reason: 'Personal video content works better on You track' }
     ]
   },
+  // Images map to video timeline items in editor
   {
-    contentType: 'image',
+    contentType: 'video',
     primaryTrack: 'Visual',
     confidence: 0.7,
     alternatives: []
@@ -189,8 +190,9 @@ export function suggestTrackPlacement(
   }
 ): PlacementSuggestion {
   // Start with base content type mapping
+  const effectiveType: TimelineItemType = asset.type === 'image' ? 'video' : (asset.type as TimelineItemType);
   const baseMapping = CONTENT_TYPE_MAPPINGS.find(mapping => 
-    mapping.contentType === asset.type
+    mapping.contentType === effectiveType
   );
 
   if (!baseMapping) {
@@ -257,11 +259,12 @@ function applyContextualAdjustments(
   }
 ): { track: EducationalTrackName; confidence: number; reason: string } {
   let adjustedSuggestion = { ...suggestion };
+  const effectiveType: TimelineItemType = asset.type === 'image' ? 'video' : (asset.type as TimelineItemType);
 
   // If user has a track selected and it's compatible, boost confidence
   if (context.selectedTrack !== undefined) {
     const selectedEducationalTrack = getEducationalTrackByNumber(context.selectedTrack);
-    if (selectedEducationalTrack && isContentTypeAllowed(selectedEducationalTrack, asset.type)) {
+    if (selectedEducationalTrack && isContentTypeAllowed(selectedEducationalTrack, effectiveType)) {
       // Boost confidence for user's selected track if it's compatible
       if (selectedEducationalTrack.name === suggestion.track) {
         adjustedSuggestion.confidence = Math.min(0.98, adjustedSuggestion.confidence + 0.1);
@@ -293,7 +296,7 @@ function applyContextualAdjustments(
       const [trackName, count] = mostUsedTrack;
       const track = getEducationalTrackByName(trackName as EducationalTrackName);
       
-      if (track && isContentTypeAllowed(track, asset.type)) {
+      if (track && isContentTypeAllowed(track, effectiveType)) {
         adjustedSuggestion.track = trackName as EducationalTrackName;
         adjustedSuggestion.confidence = Math.min(0.9, adjustedSuggestion.confidence + 0.15);
         adjustedSuggestion.reason = `Maintaining consistency with recent ${trackName} track usage`;
@@ -313,6 +316,7 @@ function buildAlternativesList(
   baseMapping: ContentTypeMapping
 ): EducationalTrack[] {
   const alternatives: EducationalTrack[] = [];
+  const effectiveType: TimelineItemType = asset.type === 'image' ? 'video' : (asset.type as TimelineItemType);
 
   // Add base mapping alternatives
   for (const alt of baseMapping.alternatives) {
@@ -326,7 +330,7 @@ function buildAlternativesList(
   for (const track of EDUCATIONAL_TRACKS) {
     if (track.id !== suggestedTrack.id && 
         !alternatives.find(alt => alt.id === track.id) &&
-        isContentTypeAllowed(track, asset.type)) {
+        isContentTypeAllowed(track, effectiveType)) {
       alternatives.push(track);
     }
   }
@@ -344,9 +348,10 @@ function buildAlternativesList(
  */
 function getTrackCompatibilityScore(asset: MediaAsset, track: EducationalTrack): number {
   let score = 0;
+  const effectiveType: TimelineItemType = asset.type === 'image' ? 'video' : (asset.type as TimelineItemType);
 
   // Base compatibility from allowed content types
-  if (isContentTypeAllowed(track, asset.type)) {
+  if (isContentTypeAllowed(track, effectiveType)) {
     score += 0.5;
   }
 
@@ -408,7 +413,8 @@ export function validateTrackPlacement(
   let isValid = true;
 
   // Check if content type is allowed on the target track
-  if (!isContentTypeAllowed(targetTrack, asset.type)) {
+  const effectiveType: TimelineItemType = asset.type === 'image' ? 'video' : (asset.type as TimelineItemType);
+  if (!isContentTypeAllowed(targetTrack, effectiveType)) {
     isValid = false;
     conflicts.push(
       `${asset.type} content is not typically placed on ${targetTrack.name} track`

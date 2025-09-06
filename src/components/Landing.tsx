@@ -84,7 +84,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   return (
     <section
       id="hero-section"
-      className="relative min-h-screen bg-gradient-to-br from-rose-50 via-purple-50 to-indigo-50 overflow-hidden flex items-center"
+      className="relative min-h-screen bg-synapse-background overflow-hidden flex items-center"
     >
       <div className="absolute inset-0 z-0">
         <svg
@@ -143,7 +143,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-orange-100 to-purple-100 border border-orange-200 text-sm font-medium text-orange-700 mb-6 shadow-sm"
+            className="inline-flex items-center px-4 py-2 rounded-full bg-synapse-primary/10 border border-synapse-primary text-sm font-medium text-synapse-primary mb-6 shadow-synapse-sm"
           >
             <span className="mr-2">🚀</span>
             {subtitle}
@@ -153,7 +153,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight"
+            className="text-5xl md:text-6xl lg:text-7xl font-bold text-text-primary mb-6 leading-tight"
           >
             {title}
           </motion.h1>
@@ -162,7 +162,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xl md:text-2xl text-gray-600 mb-10 leading-relaxed"
+            className="text-xl md:text-2xl text-text-secondary mb-10 leading-relaxed"
           >
             {description}
           </motion.p>
@@ -176,7 +176,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             <Button
               size="lg"
               onClick={() => navigate('/projects')}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+              className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse px-8 py-4 rounded-full font-semibold text-lg shadow-synapse-md hover:shadow-synapse-lg transition-all duration-200 hover:scale-105"
             >
               <Play className="w-5 h-5 mr-2" />
               Start Creating
@@ -185,7 +185,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               variant="outline"
               size="lg"
               onClick={() => window.open('https://www.producthunt.com/products/synapse-studio', '_blank')}
-              className="border-orange-200 text-orange-700 hover:bg-orange-50 px-8 py-4 rounded-full font-semibold text-lg shadow-sm"
+              className="border-synapse-primary text-synapse-primary hover:bg-synapse-primary/10 px-8 py-4 rounded-full font-semibold text-lg shadow-synapse-sm"
             >
               <Heart className="w-5 h-5 mr-2" />
               Support on Product Hunt
@@ -199,20 +199,20 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             className="pt-12"
           >
             {/* Product Hunt Launch Countdown */}
-            <div className="bg-gradient-to-r from-orange-50 to-purple-50 border border-orange-200 rounded-2xl p-6 mb-8 max-w-2xl mx-auto">
+            <div className="bg-synapse-surface border border-synapse-border rounded-2xl p-6 mb-8 max-w-2xl mx-auto">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-text-primary mb-2">
                   🎯 Product Hunt Launch
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-text-secondary mb-4">
                   Join us on September 5th, 2025 and help us reach #1 Product of the Day!
                 </p>
                 <div className="flex items-center justify-center space-x-4 text-sm">
-                  <div className="bg-white rounded-lg px-3 py-2 shadow-sm">
-                    <div className="font-bold text-orange-600 text-lg">Sep 5</div>
-                    <div className="text-gray-500">2025</div>
+                  <div className="bg-synapse-surface rounded-lg px-3 py-2 shadow-synapse-sm">
+                    <div className="font-bold text-synapse-primary text-lg">Sep 5</div>
+                    <div className="text-text-tertiary">2025</div>
                   </div>
-                  <div className="text-orange-600 font-medium">
+                  <div className="text-synapse-primary font-medium">
                     Mark your calendars!
                   </div>
                 </div>

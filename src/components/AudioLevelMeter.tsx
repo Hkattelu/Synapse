@@ -132,7 +132,7 @@ function BarMeter({
   orientation: 'horizontal' | 'vertical';
 }) {
   const numBars = orientation === 'horizontal' ? Math.floor(width / 4) : Math.floor(height / 4);
-  const bars = [];
+  const bars: JSX.Element[] = [];
 
   for (let i = 0; i < numBars; i++) {
     const threshold = i / numBars;
