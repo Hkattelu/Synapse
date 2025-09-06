@@ -36,3 +36,6 @@ out/
 make/
 dist-electron/
 *.asar
+
+# Test coverage outputs
+coverage/
