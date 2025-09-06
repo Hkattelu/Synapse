@@ -59,21 +59,24 @@ export function ResizablePanel({
     if (storageKey) {
       try {
         localStorage.setItem(storageKey, String(sizeRef.current));
-      } catch {}
+      } catch {
+        void 0; // ignore persistence errors (e.g., private mode)
+      }
     }
   }, [storageKey]);
 
-  // Load persisted size on mount
+  // Load persisted size when the key or callback changes
   useEffect(() => {
-    if (storageKey) {
-      try {
-        const saved = parseInt(localStorage.getItem(storageKey) || '', 10);
-        if (!Number.isNaN(saved)) {
-          setSize(saved);
-          sizeRef.current = saved;
-          onSizeChange?.(saved);
-        }
-      } catch {}
+    if (!storageKey) return;
+    try {
+      const saved = parseInt(localStorage.getItem(storageKey) || '', 10);
+      if (!Number.isNaN(saved)) {
+        setSize(saved);
+        sizeRef.current = saved;
+        onSizeChange?.(saved);
+      }
+    } catch {
+      void 0; // ignore persistence errors (e.g., private mode)
     }
   }, [storageKey, onSizeChange]);
 
