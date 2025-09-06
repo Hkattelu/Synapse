@@ -15,7 +15,7 @@ Why: the repo already includes a Dockerfile for the API. Cloud Run runs that con
   - Root directory: repo root
   - Output directory: `dist/`
 - Runtime/build
-  - Node version: 18 or 20
+  - Node version: 20 (LTS), aligned with CI and Docker base image.
   - Build output type: Static assets
   - Install/Build commands: use defaults from Vercel’s Vite preset (no code changes needed here)
 - Environment variables
