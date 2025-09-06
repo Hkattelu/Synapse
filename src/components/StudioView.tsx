@@ -10,11 +10,7 @@ import { ExportDialog } from './ExportDialog';
 import { RecorderDialog } from './RecorderDialog';
 import { ExportProvider } from '../state/exportContext';
 import { ResizablePanel } from './ResizablePanel';
-import { ContentAdditionToolbar } from './ContentAdditionToolbar';
-import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left.js';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
-import Settings from 'lucide-react/dist/esm/icons/settings.js';
-import Archive from 'lucide-react/dist/esm/icons/archive.js';
+import { ArrowLeft, Sparkles, Settings, Archive } from 'lucide-react';
 import { UndoButton } from './UndoButton';
 import { RedoButton } from './RedoButton';
 import { ShortcutsDialog } from './ShortcutsDialog';
@@ -40,6 +36,8 @@ function StudioViewContent() {
   const [showGuide, setShowGuide] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   
+  const isRightPanelOpen = ui.mediaBinVisible || ui.inspectorVisible;
+
   useEffect(() => {
     try {
       const flag = localStorage.getItem('seui_onboarded_v1');
@@ -246,10 +244,6 @@ function StudioViewContent() {
             maxSize={500}
             className="border-r border-gray-700/50 bg-gradient-to-b from-gray-800 to-gray-900 flex-shrink-0 flex flex-col"
           >
-            <div data-tutorial="timeline-toolbar">
-              <ContentAdditionToolbar />
-            </div>
-            
             {/* Mode-aware timeline rendering */}
             <ModeAwareComponent mode="simplified">
               <div data-tutorial="educational-timeline">
@@ -274,18 +268,22 @@ function StudioViewContent() {
         </main>
 
         {/* Right Panels */}
-        {(ui.mediaBinVisible || ui.inspectorVisible) && (
+        <div
+          className="right-panels-container relative transition-all duration-200 ease-in-out overflow-hidden"
+          style={{ width: isRightPanelOpen ? 320 : 0, pointerEvents: isRightPanelOpen ? 'auto' as const : 'none' as const }}
+          aria-hidden={!isRightPanelOpen}
+        >
           <ResizablePanel
             direction="horizontal"
             initialSize={320}
             minSize={250}
             maxSize={600}
-            className="flex flex-col bg-white/95 backdrop-blur-sm border-l border-purple-200 rounded-r-2xl overflow-hidden shadow-inner"
+            className="flex flex-col bg-white/95 backdrop-blur-sm border-l border-purple-200 rounded-r-2xl overflow-hidden shadow-inner h-full"
           >
             <motion.div
               initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4 }}
+              animate={{ opacity: isRightPanelOpen ? 1 : 0, x: isRightPanelOpen ? 0 : 20 }}
+              transition={{ duration: 0.2 }}
               className="h-full flex flex-col"
             >
               {/* Media Bin */}
@@ -313,7 +311,7 @@ function StudioViewContent() {
               )}
             </motion.div>
           </ResizablePanel>
-        )}
+        </div>
       </motion.div>
 
       {/* Export Dialog */}

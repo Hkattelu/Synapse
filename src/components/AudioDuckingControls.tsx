@@ -1,9 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import type { AudioDuckingConfig } from '../lib/audioUtils';
 import { DEFAULT_NARRATION_PROPERTIES } from '../lib/audioUtils';
-import Volume2 from 'lucide-react/dist/esm/icons/volume-2.js';
-import VolumeX from 'lucide-react/dist/esm/icons/volume-x.js';
-import Settings from 'lucide-react/dist/esm/icons/settings.js';
+import { Volume2, VolumeX, Settings } from 'lucide-react';
 
 interface AudioDuckingControlsProps {
   duckingConfig: AudioDuckingConfig;

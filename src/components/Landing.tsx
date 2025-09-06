@@ -15,19 +15,20 @@ import { Button } from './ui/Button';
 import { Label } from './ui/Label';
 import { Input } from './ui/Input';
 import { Textarea } from './ui/Textarea';
-import Play from 'lucide-react/dist/esm/icons/play.js';
-import Video from 'lucide-react/dist/esm/icons/video.js';
-import Users from 'lucide-react/dist/esm/icons/users.js';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
-import Heart from 'lucide-react/dist/esm/icons/heart.js';
-
-import Mail from 'lucide-react/dist/esm/icons/mail.js';
-import MapPin from 'lucide-react/dist/esm/icons/map-pin.js';
-import Phone from 'lucide-react/dist/esm/icons/phone.js';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.js';
-import Zap from 'lucide-react/dist/esm/icons/zap.js';
-import Shield from 'lucide-react/dist/esm/icons/shield.js';
-import Layers from 'lucide-react/dist/esm/icons/layers.js';
+import { 
+  Play, 
+  Video, 
+  Users, 
+  Sparkles, 
+  Heart, 
+  Mail, 
+  MapPin, 
+  Phone, 
+  ArrowRight, 
+  Zap, 
+  Shield, 
+  Layers 
+} from 'lucide-react';
 import { section } from 'motion/react-client';
 
 

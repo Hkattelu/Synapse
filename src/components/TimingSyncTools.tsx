@@ -1,12 +1,8 @@
 import React, { useState, useCallback, useRef } from 'react';
 import type { TimingSyncPoint } from '../lib/audioUtils';
 import { generateAutoSyncPoints } from '../lib/audioUtils';
-import Clock from 'lucide-react/dist/esm/icons/clock.js';
-import Plus from 'lucide-react/dist/esm/icons/plus.js';
-import Trash2 from 'lucide-react/dist/esm/icons/trash-2.js';
-import Zap from 'lucide-react/dist/esm/icons/zap.js';
-import Play from 'lucide-react/dist/esm/icons/play.js';
-import Pause from 'lucide-react/dist/esm/icons/pause.js';
+import { Clock } from 'lucide-react';
+import { Plus, Trash2, Zap, Play, Pause } from 'lucide-react';
 
 interface TimingSyncToolsProps {
   syncPoints: TimingSyncPoint[];

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useRef, useState, useEffect, useMemo } from 'react';
 import { useTimeline, useMediaAssets, useUI } from '../state/hooks';
 import { EducationalTrack } from './EducationalTrack';
 import { suggestTrackPlacement, validateTrackPlacement } from '../lib/educationalPlacement';
@@ -11,9 +11,8 @@ import {
 import type { TimelineItem, MediaAsset } from '../lib/types';
 import type { EducationalTrack as EducationalTrackType, UIMode, PlacementSuggestion } from '../lib/educationalTypes';
 import { EDUCATIONAL_TRACKS, getEducationalTrackByNumber } from '../lib/educationalTypes';
-import Settings from 'lucide-react/dist/esm/icons/settings.js';
-import Eye from 'lucide-react/dist/esm/icons/eye.js';
-import EyeOff from 'lucide-react/dist/esm/icons/eye-off.js';
+import { Settings, Eye, EyeOff } from 'lucide-react';
+import { ContentAdditionToolbar } from './ContentAdditionToolbar';
 
 interface EducationalTimelineProps {
   className?: string;
@@ -37,7 +36,10 @@ interface PlacementWarning {
   show: boolean;
 }
 
-const TRACK_HEIGHT = 80; // Increased for educational track headers
+const TRACK_HEIGHT = 80; // Base track height (header moved to left column)
+const MIN_NONEMPTY_TRACK_HEIGHT = 56; // Minimum height to keep clips usable
+const MIN_EMPTY_TRACK_HEIGHT = 28; // Collapsed height for empty tracks
+const HEADER_COL_WIDTH = 200; // Left sticky header column width (px)
 const PIXELS_PER_SECOND = 100;
 const MIN_CLIP_DURATION = 0.1;
 
@@ -62,6 +64,7 @@ export function EducationalTimeline({
   const breakpoint = useResponsiveBreakpoint();
 
   const timelineRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null); // right scrollable area
   const [currentMode, setCurrentMode] = useState<'simplified' | 'advanced'>(mode);
   const [placementWarnings, setPlacementWarnings] = useState<PlacementWarning[]>([]);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
@@ -75,7 +78,7 @@ export function EducationalTimeline({
     startTrack: 0,
   });
 
-  // Resize observer for container dimensions
+  // Resize observer for container dimensions (observe the scroll container)
   const containerRef = useResizeObserver(
     useCallback((entry) => {
       setContainerSize({
@@ -87,14 +90,49 @@ export function EducationalTimeline({
 
   // Calculate timeline dimensions with responsive adjustments
   const maxDuration = Math.max(timelineDuration, 60); // Minimum 60 seconds
-  const responsiveTrackHeight = breakpoint === 'mobile' ? 60 : breakpoint === 'tablet' ? 70 : TRACK_HEIGHT;
+  // Determine which tracks are non-empty
+  const nonEmptyTrackIds = useMemo(() => {
+    const set = new Set<number>();
+    timeline.forEach((t) => set.add(t.track));
+    return new Set(Array.from(set));
+  }, [timeline]);
+
+  // Compute responsive per-track height to try to fit all non-empty tracks
+  const baseTrackHeight = breakpoint === 'mobile' ? 56 : breakpoint === 'tablet' ? 64 : TRACK_HEIGHT;
+
+  const { perTrackHeight, totalTimelineHeight } = useMemo(() => {
+    const emptyCount = EDUCATIONAL_TRACKS.filter(t => !nonEmptyTrackIds.has(t.trackNumber)).length;
+    const nonEmptyCount = EDUCATIONAL_TRACKS.length - emptyCount;
+
+    if (containerSize.height <= 0 || nonEmptyCount <= 0) {
+      // Fallback
+      const h = baseTrackHeight;
+      return {
+        perTrackHeight: EDUCATIONAL_TRACKS.map((t) => ({ id: t.id, height: nonEmptyTrackIds.has(t.trackNumber) ? h : Math.max(MIN_EMPTY_TRACK_HEIGHT, Math.round(h * 0.5)) })),
+        totalTimelineHeight: EDUCATIONAL_TRACKS.length * h,
+      };
+    }
+
+    // Available height for non-empty tracks after reserving empty track minimal heights
+    const reservedForEmpty = emptyCount * MIN_EMPTY_TRACK_HEIGHT;
+    const availableForNonEmpty = Math.max(0, containerSize.height - reservedForEmpty);
+    const dynamicHeight = Math.max(MIN_NONEMPTY_TRACK_HEIGHT, Math.floor(availableForNonEmpty / Math.max(1, nonEmptyCount)));
+
+    const per = EDUCATIONAL_TRACKS.map((t) => ({
+      id: t.id,
+      height: nonEmptyTrackIds.has(t.trackNumber) ? dynamicHeight : MIN_EMPTY_TRACK_HEIGHT,
+    }));
+
+    const total = per.reduce((sum, r) => sum + r.height, 0);
+    return { perTrackHeight: per, totalTimelineHeight: total };
+  }, [EDUCATIONAL_TRACKS, nonEmptyTrackIds, containerSize.height, baseTrackHeight]);
+
   const timelineWidth = TimelineCalculations.getTimeToPixels(
     maxDuration, 
     PIXELS_PER_SECOND, 
     ui.timeline.zoom,
     'timeline-width'
   );
-  const timelineHeight = EDUCATIONAL_TRACKS.length * responsiveTrackHeight;
 
   // Convert time to pixels with caching
   const timeToPixels = useCallback(
@@ -379,7 +417,7 @@ export function EducationalTimeline({
 
   // Handle scroll with throttling for performance
   const handleScroll = useThrottledScroll(
-    useCallback((scrollLeft: number, scrollTop: number) => {
+    useCallback((scrollLeft: number, _scrollTop: number) => {
       updateTimelineView({ scrollPosition: scrollLeft });
     }, [updateTimelineView]),
     16 // ~60fps
@@ -498,6 +536,11 @@ export function EducationalTimeline({
           >
             Snap
           </button>
+
+          {/* Inline quick-add actions */}
+          <div className="ml-4 flex items-center">
+            <ContentAdditionToolbar variant="inline" />
+          </div>
         </div>
 
         <div className="text-xs text-text-tertiary">
@@ -505,72 +548,95 @@ export function EducationalTimeline({
         </div>
       </div>
 
-      {/* Timeline Content */}
+      {/* Timeline Content (grid with sticky left headers) */}
       <div
+        ref={(el) => {
+          scrollRef.current = el as HTMLDivElement;
+          containerRef.current = el as HTMLDivElement;
+        }}
         className="educational-timeline-content overflow-auto flex-1"
-        onScroll={handleScroll}
+        onScroll={(e) => {
+          const target = e.currentTarget;
+          handleScroll(target.scrollLeft, target.scrollTop);
+        }}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onClick={handleTimelineClick}
       >
         <div
-          ref={(el) => {
-            timelineRef.current = el;
-            containerRef.current = el;
-          }}
-          className="educational-timeline-canvas relative"
+          ref={timelineRef}
+          className="educational-timeline-grid relative grid"
           style={{
-            width: `${timelineWidth}px`,
-            height: `${timelineHeight}px`,
-            minHeight: `${EDUCATIONAL_TRACKS.length * responsiveTrackHeight}px`,
+            gridTemplateColumns: `${HEADER_COL_WIDTH}px 1fr`,
+            width: `${HEADER_COL_WIDTH + timelineWidth}px`,
+            height: `${totalTimelineHeight}px`,
+            minHeight: `${totalTimelineHeight}px`,
           }}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onClick={handleTimelineClick}
         >
-          {/* Grid Lines */}
+          {/* Grid Lines overlay (right content column only) */}
           {ui.timeline.snapToGrid && (
-            <div className="absolute inset-0 pointer-events-none">
-              {Array.from({
-                length: Math.ceil(maxDuration / ui.timeline.gridSize),
-              }).map((_, i) => (
+            <div
+              className="pointer-events-none absolute top-0 bottom-0"
+              style={{ left: `${HEADER_COL_WIDTH}px`, right: 0 }}
+            >
+              {Array.from({ length: Math.ceil(maxDuration / ui.timeline.gridSize) }).map((_, i) => (
                 <div
                   key={i}
                   className="absolute top-0 bottom-0 border-l border-border-subtle opacity-30"
-                  style={{
-                    left: `${timeToPixels(i * ui.timeline.gridSize)}px`,
-                  }}
+                  style={{ left: `${timeToPixels(i * ui.timeline.gridSize)}px` }}
                 />
               ))}
             </div>
           )}
 
-          {/* Educational Tracks */}
-          {EDUCATIONAL_TRACKS.map((track, index) => (
-            <div
-              key={track.id}
-              className="absolute left-0 right-0"
-              style={{
-                top: `${index * responsiveTrackHeight}px`,
-                height: `${responsiveTrackHeight}px`,
-              }}
-            >
-              <EducationalTrack
-                track={track}
-                items={timeline}
-                isActive={false}
-                trackHeight={responsiveTrackHeight}
-                timeToPixels={timeToPixels}
-                onItemDrop={(item) => handleSmartDrop(new DragEvent('drop') as any, track)}
-                onItemMouseDown={handleClipMouseDown}
-                selectedItems={selectedItems}
-                dragState={dragState}
-                // Performance optimization props
-                containerWidth={containerSize.width}
-                pixelsPerSecond={PIXELS_PER_SECOND}
-                zoom={ui.timeline.zoom}
-                scrollLeft={ui.timeline.scrollPosition}
-                useVirtualization={breakpoint === 'desktop' && timeline.length > 20}
-              />
-            </div>
-          ))}
+          {/* Rows: Header cell + Content cell per track */}
+          {EDUCATIONAL_TRACKS.map((track) => {
+            const row = perTrackHeight.find((r) => r.id === track.id)!;
+            const rowStyle: React.CSSProperties = { height: `${row.height}px` };
+            return (
+              <React.Fragment key={track.id}>
+                {/* Left sticky header cell */}
+                <div
+                  className="sticky left-0 z-20 bg-background-tertiary border-b border-border-subtle flex items-center gap-2 px-3"
+                  style={{ ...rowStyle, width: `${HEADER_COL_WIDTH}px` }}
+                >
+                  {/* Compact header content */}
+                  <div
+                    className="w-6 h-6 rounded-md flex items-center justify-center text-white text-xs font-semibold"
+                    style={{ backgroundColor: track.color }}
+                    title={`Track ${track.trackNumber + 1}`}
+                  >
+                    {track.name[0]}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-medium text-text-primary truncate">{track.name}</div>
+                    <div className="text-[10px] text-text-tertiary">Track {track.trackNumber + 1}</div>
+                  </div>
+                </div>
+
+                {/* Right content cell */}
+                <div className="relative border-b border-border-subtle" style={rowStyle}>
+                  <EducationalTrack
+                    track={track}
+                    items={timeline}
+                    isActive={false}
+                    trackHeight={row.height}
+                    timeToPixels={timeToPixels}
+                    onItemDrop={(item) => handleSmartDrop(new DragEvent('drop') as any, track)}
+                    onItemMouseDown={handleClipMouseDown}
+                    selectedItems={selectedItems}
+                    dragState={dragState}
+                    // Performance optimization props
+                    containerWidth={containerSize.width}
+                    pixelsPerSecond={PIXELS_PER_SECOND}
+                    zoom={ui.timeline.zoom}
+                    scrollLeft={ui.timeline.scrollPosition}
+                    useVirtualization={breakpoint === 'desktop' && timeline.length > 20}
+                  />
+                </div>
+              </React.Fragment>
+            );
+          })}
         </div>
       </div>
 

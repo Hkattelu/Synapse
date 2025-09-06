@@ -1,14 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
-import Download from 'lucide-react/dist/esm/icons/download.js';
-import Monitor from 'lucide-react/dist/esm/icons/monitor.js';
-import Smartphone from 'lucide-react/dist/esm/icons/smartphone.js';
-import Globe from 'lucide-react/dist/esm/icons/globe.js';
-import CheckCircle from 'lucide-react/dist/esm/icons/check-circle.js';
-import ExternalLink from 'lucide-react/dist/esm/icons/external-link.js';
-import Github from 'lucide-react/dist/esm/icons/github.js';
+import { 
+  Sparkles, 
+  Download, 
+  Monitor, 
+  Smartphone, 
+  Globe, 
+  CheckCircle, 
+  ExternalLink, 
+  Github 
+} from 'lucide-react';
 
 interface DownloadOption {
   platform: string;

@@ -6,8 +6,7 @@ import { MainComposition } from '../remotion/MainComposition';
 import type { MainCompositionProps } from '../remotion/types';
 import type { TimelineItem } from '../lib/types';
 import { getEducationalTrackByNumber } from '../lib/educationalTypes';
-import Eye from 'lucide-react/dist/esm/icons/eye.js';
-import EyeOff from 'lucide-react/dist/esm/icons/eye-off.js';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface PreviewProps {
   className?: string;

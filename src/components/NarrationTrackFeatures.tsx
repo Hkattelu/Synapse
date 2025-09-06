@@ -7,11 +7,7 @@ import { WaveformVisualization } from './WaveformVisualization';
 import { AudioLevelMeter } from './AudioLevelMeter';
 import { AudioDuckingControls, DuckingPresetSelector } from './AudioDuckingControls';
 import { TimingSyncTools } from './TimingSyncTools';
-import Mic from 'lucide-react/dist/esm/icons/mic.js';
-import Volume2 from 'lucide-react/dist/esm/icons/volume-2.js';
-import Settings from 'lucide-react/dist/esm/icons/settings.js';
-import Waveform from 'lucide-react/dist/esm/icons/activity.js';
-import Clock from 'lucide-react/dist/esm/icons/clock.js';
+import { Mic, Volume2, Settings, Activity as Waveform, Clock } from 'lucide-react';
 
 interface NarrationTrackFeaturesProps {
   item: TimelineItem;

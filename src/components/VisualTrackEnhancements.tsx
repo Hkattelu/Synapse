@@ -16,14 +16,16 @@ import {
   type VisualAnimationPreset,
   type SideBySideLayout,
 } from '../lib/visualTrackEnhancements';
-import Monitor from 'lucide-react/dist/esm/icons/monitor.js';
-import Play from 'lucide-react/dist/esm/icons/play.js';
-import Code from 'lucide-react/dist/esm/icons/code.js';
-import MousePointer from 'lucide-react/dist/esm/icons/mouse-pointer.js';
-import Maximize from 'lucide-react/dist/esm/icons/maximize.js';
-import Zap from 'lucide-react/dist/esm/icons/zap.js';
-import Eye from 'lucide-react/dist/esm/icons/eye.js';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.js';
+import { 
+  Monitor, 
+  Play, 
+  Code, 
+  MousePointer, 
+  Maximize, 
+  Zap, 
+  Eye, 
+  ArrowRight 
+} from 'lucide-react';
 
 interface VisualTrackClipProps {
   item: TimelineItem;
