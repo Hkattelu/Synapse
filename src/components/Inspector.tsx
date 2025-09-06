@@ -93,7 +93,7 @@ export function Inspector({ className = '' }: InspectorProps) {
               return track ? (
                 <div className="flex items-center gap-1">
                   <span
-                    className="text-xs px-2 py-1 rounded text-white font-medium"
+                    className="text-xs px-2 py-1 rounded text-synapse-text-inverse font-medium"
                     title={`Educational Track: ${track.name} - ${track.allowedContentTypes.join(', ')} content`}
                     style={{ backgroundColor: track.color }}
                   >
@@ -172,7 +172,7 @@ export function Inspector({ className = '' }: InspectorProps) {
                   <div className="p-4 border-b border-border-subtle bg-background-tertiary">
                     <div className="flex items-center gap-3 mb-2">
                       <div 
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-synapse-text-inverse text-sm font-bold"
                         style={{ backgroundColor: track.color }}
                       >
                         {track.icon === 'code' && '💻'}

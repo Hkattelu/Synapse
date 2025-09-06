@@ -99,7 +99,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(({
                     setShowRename(false);
                     setNewName(project.project.name);
                   }}
-                  className="p-1 text-gray-500 hover:text-gray-600"
+                  className="p-1 text-text-secondary hover:text-text-primary"
                 >
                   <X className="w-4 h-4" />
                 </button>

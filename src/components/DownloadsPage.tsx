@@ -147,7 +147,7 @@ const DownloadsPage: React.FC = () => {
   const downloadOptions: DownloadOption[] = [
     {
       platform: 'Windows',
-      icon: <Monitor className="w-6 h-6 text-purple-600" />,
+      icon: <Monitor className="w-6 h-6 text-synapse-primary" />,
       version: '1.0.0',
       size: '125 MB',
       description:
@@ -163,7 +163,7 @@ const DownloadsPage: React.FC = () => {
     },
     {
       platform: 'macOS',
-      icon: <Monitor className="w-6 h-6 text-purple-600" />,
+      icon: <Monitor className="w-6 h-6 text-synapse-primary" />,
       version: '1.0.0',
       size: '130 MB',
       description:
@@ -178,7 +178,7 @@ const DownloadsPage: React.FC = () => {
     },
     {
       platform: 'Linux',
-      icon: <Monitor className="w-6 h-6 text-purple-600" />,
+      icon: <Monitor className="w-6 h-6 text-synapse-primary" />,
       version: '1.0.0',
       size: '120 MB',
       description:
@@ -193,7 +193,7 @@ const DownloadsPage: React.FC = () => {
     },
     {
       platform: 'Web App',
-      icon: <Globe className="w-6 h-6 text-purple-600" />,
+      icon: <Globe className="w-6 h-6 text-synapse-primary" />,
       version: '1.0.0',
       size: 'No download',
       description:
@@ -221,10 +221,10 @@ const DownloadsPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
               Download Synapse Studio
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-text-secondary max-w-3xl mx-auto">
               Choose the perfect version for your platform. All versions include
               the same powerful features for creating authentic, human-powered
               video content.

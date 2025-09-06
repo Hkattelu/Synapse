@@ -647,7 +647,7 @@ function RegionItem({
                 if (e.key === 'Enter') handleSave();
                 if (e.key === 'Escape') handleCancel();
               }}
-              className="flex-1 px-1 py-0 text-sm bg-gray-700 border border-gray-600 rounded text-white"
+              className="flex-1 px-1 py-0 text-sm bg-background-secondary border border-border-subtle rounded text-text-primary"
             />
           ) : (
             <span

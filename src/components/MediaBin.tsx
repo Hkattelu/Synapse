@@ -875,7 +875,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                         return (
                           <div className="mt-1 flex items-center justify-between">
                             <span
-                              className="inline-block px-1.5 py-0.5 rounded text-white text-[10px] font-medium"
+                              className="inline-block px-1.5 py-0.5 rounded text-synapse-text-inverse text-[10px] font-medium"
                               title={`Suggested Track: ${track.name} (${Math.round(
                                 suggestion.confidence * 100
                               )}% confidence) - ${suggestion.reason}`}
