@@ -144,7 +144,10 @@
 
   --synapse-text-primary: var(--synapse-text);
   --synapse-text-secondary: var(--synapse-subtext1);
-  --synapse-text-muted: var(--synapse-subtext0);
+  --synapse-text-muted: var(--synapse-subtext0
+
+  /* Ensure the Timeline playhead is clearly visible on light surfaces */
+  --synapse-playhead: var(--synapse-primary);
 }
 
 /* ===== BASE STYLES ===== */
