@@ -166,6 +166,8 @@ See docs/BACKGROUNDS.md for details on code themes, wallpapers (including subtle
   - Optional: Electron desktop basics and staging deployment
 - For launch process details and checklist, see docs/PRODUCT_HUNT_LAUNCH.md.
 
+
+For new engineers, start with Quick Start above, then run through docs/TESTING.md to validate your environment.
 ## Production launch documentation
 
 The following docs describe how to take the app live (hosting, auth, CI/CD) and how we’ll collect feedback from first clients:

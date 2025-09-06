@@ -286,6 +286,7 @@ export function Timeline({ className = '' }: TimelineProps) {
   const handleScrubEnd = useCallback(() => setIsScrubbing(false), []);
 
   useEffect(() => {
+    if (!isScrubbing) return;
     const onMove = (e: MouseEvent) => handleScrubMove(e);
     const onUp = () => handleScrubEnd();
     document.addEventListener('mousemove', onMove);
@@ -294,7 +295,7 @@ export function Timeline({ className = '' }: TimelineProps) {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
     };
-  }, [handleScrubMove, handleScrubEnd]);
+  }, [isScrubbing, handleScrubMove, handleScrubEnd]);
 
   // Add global mouse event listeners
   useEffect(() => {

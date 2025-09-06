@@ -59,6 +59,7 @@ export function ResizablePanel({
     if (storageKey) {
       try {
         localStorage.setItem(storageKey, String(sizeRef.current));
+
       } catch {}
     }
   }, [storageKey]);
