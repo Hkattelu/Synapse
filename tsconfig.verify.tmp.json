@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.app.json",
+  "include": [
+    "src/lib/keyframes.ts",
+    "src/lib/types.ts"
+  ]
+}
