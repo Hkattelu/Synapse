@@ -66,7 +66,6 @@ export function EducationalTimeline({
   const { playback, seek } = usePlayback();
 
   const timelineRef = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null); // right scrollable area
   const [currentMode, setCurrentMode] = useState<'simplified' | 'advanced'>(mode);
   const [placementWarnings, setPlacementWarnings] = useState<PlacementWarning[]>([]);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
@@ -682,14 +681,10 @@ export function EducationalTimeline({
       {/* Timeline Content (grid with sticky left headers) */}
       <div
         ref={(el) => {
-          scrollRef.current = el as HTMLDivElement;
-          containerRef.current = el as HTMLDivElement;
+          (containerRef as unknown as React.MutableRefObject<HTMLDivElement | null>).current = el as HTMLDivElement;
         }}
         className="educational-timeline-content overflow-auto flex-1"
-        onScroll={(e) => {
-          const target = e.currentTarget;
-          handleScroll(target.scrollLeft, target.scrollTop);
-        }}
+        onScroll={handleScroll}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onClick={handleTimelineClick}
