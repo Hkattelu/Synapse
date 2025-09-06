@@ -1080,24 +1080,7 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
       <div className="p-4">
         <h4 className="font-medium text-text-primary mb-3">Properties</h4>
 
-        {/* Transform Properties - Always shown */}
-        <div className="mb-4">
-          <h5 className="text-sm font-medium text-text-secondary mb-2">
-            Transform
-          </h5>
-          {renderTransformProperties()}
-        </div>
-
-        {/* Type-specific Properties */}
-        {(item.type === 'video' || item.type === 'audio') && (
-          <div className="mb-4">
-            <h5 className="text-sm font-medium text-text-secondary mb-2">
-              Media
-            </h5>
-            {renderVideoProperties()}
-          </div>
-        )}
-
+        {/* If code, show Code properties first to avoid scrolling */}
         {item.type === 'code' && (
           <div className="mb-4">
             <h5 className="text-sm font-medium text-text-secondary mb-2">
@@ -1183,6 +1166,31 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
               />
             </div>
           </div>
+        )}
+
+        {/* Transform Properties - Always shown */}
+        <div className="mb-4">
+          <h5 className="text-sm font-medium text-text-secondary mb-2">
+            Transform
+          </h5>
+          {renderTransformProperties()}
+        </div>
+
+        {/* Type-specific Properties */}
+        {(item.type === 'video' || item.type === 'audio') && (
+          <div className="mb-4">
+            <h5 className="text-sm font-medium text-text-secondary mb-2">
+              Media
+            </h5>
+            {renderVideoProperties()}
+          </div>
+        )}
+
+        {/* If not code, render Code properties in normal position */}
+        {item.type !== 'code' && (
+          <>
+            {/* No-op here; non-code types won’t show Code section */}
+          </>
         )}
 
         {item.type === 'title' && (

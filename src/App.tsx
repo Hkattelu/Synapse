@@ -17,6 +17,7 @@ import { LicenseProvider } from './state/license';
 import { UpdateBanner } from './components/UpdateBanner';
 import { LicenseGate } from './components/LicenseGate';
 import { PerformanceMonitor } from './components/PerformanceMonitor';
+import { FLAGS } from './lib/flags';
 
 function GlobalShortcutsAndBridge() {
   // Global shortcuts only; no store subscription needed here
@@ -100,7 +101,7 @@ function App() {
                 </Router>
                 <LoadingOverlay />
                 <LicenseGate />
-                <PerformanceMonitor />
+                {FLAGS.SHOW_FPS && <PerformanceMonitor enabled />}
               </HistoryProvider>
             </ErrorBoundary>
           </NotificationsProvider>

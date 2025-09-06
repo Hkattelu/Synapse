@@ -13,6 +13,7 @@ import type { EducationalTrack as EducationalTrackType, UIMode, PlacementSuggest
 import { EDUCATIONAL_TRACKS, getEducationalTrackByNumber } from '../lib/educationalTypes';
 import { Settings, Eye, EyeOff } from 'lucide-react';
 import { ContentAdditionToolbar } from './ContentAdditionToolbar';
+import { FLAGS } from '../lib/flags';
 
 interface EducationalTimelineProps {
   className?: string;
@@ -113,14 +114,26 @@ export function EducationalTimeline({
       };
     }
 
-    // Available height for non-empty tracks after reserving empty track minimal heights
     const reservedForEmpty = emptyCount * MIN_EMPTY_TRACK_HEIGHT;
-    const availableForNonEmpty = Math.max(0, containerSize.height - reservedForEmpty);
-    const dynamicHeight = Math.max(MIN_NONEMPTY_TRACK_HEIGHT, Math.floor(availableForNonEmpty / Math.max(1, nonEmptyCount)));
+
+    // Preferred height for non-empty tracks
+    const desiredHeight = baseTrackHeight;
+    const totalIfDesired = nonEmptyCount * desiredHeight + reservedForEmpty;
+
+    let chosenHeight: number;
+    if (totalIfDesired <= containerSize.height) {
+      // Plenty of space: use desired height (no vertical scroll)
+      chosenHeight = desiredHeight;
+    } else {
+      // Try to fit; if too many tracks, this may still overflow and enable vertical scrolling
+      const availableForNonEmpty = Math.max(0, containerSize.height - reservedForEmpty);
+      const fitted = Math.floor(availableForNonEmpty / Math.max(1, nonEmptyCount));
+      chosenHeight = Math.max(MIN_NONEMPTY_TRACK_HEIGHT, fitted);
+    }
 
     const per = EDUCATIONAL_TRACKS.map((t) => ({
       id: t.id,
-      height: nonEmptyTrackIds.has(t.trackNumber) ? dynamicHeight : MIN_EMPTY_TRACK_HEIGHT,
+      height: nonEmptyTrackIds.has(t.trackNumber) ? chosenHeight : MIN_EMPTY_TRACK_HEIGHT,
     }));
 
     const total = per.reduce((sum, r) => sum + r.height, 0);
@@ -184,6 +197,47 @@ export function EducationalTimeline({
     [onModeChange, updateTimelineView]
   );
 
+  // Utility: prevent overlap by adjusting start/duration to nearest free slot
+  const resolveNoOverlap = useCallback((
+    trackNumber: number,
+    start: number,
+    duration: number,
+    excludeItemId?: string
+  ): { start: number; duration: number } => {
+    const items = timeline
+      .filter((i) => i.track === trackNumber && i.id !== excludeItemId)
+      .sort((a, b) => a.startTime - b.startTime);
+
+    let proposedStart = Math.max(0, start);
+    let proposedEnd = proposedStart + duration;
+
+    // Push to the right until no overlap
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      const itEnd = it.startTime + it.duration;
+      const overlaps = !(proposedEnd <= it.startTime || proposedStart >= itEnd);
+      if (overlaps) {
+        proposedStart = itEnd;
+        proposedEnd = proposedStart + duration;
+      }
+    }
+
+    // Clamp to next neighbor if needed (shrink to fit)
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      if (proposedStart < it.startTime) {
+        const nextStart = it.startTime;
+        if (proposedEnd > nextStart) {
+          proposedEnd = nextStart;
+          duration = Math.max(MIN_CLIP_DURATION, proposedEnd - proposedStart);
+        }
+        break;
+      }
+    }
+
+    return { start: proposedStart, duration: Math.max(MIN_CLIP_DURATION, duration) };
+  }, [timeline]);
+
   // Smart content placement with suggestions
   const handleSmartDrop = useCallback(
     (e: React.DragEvent, targetTrack?: EducationalTrackType) => {
@@ -198,10 +252,11 @@ export function EducationalTimeline({
       const rect = timelineRef.current?.getBoundingClientRect();
       if (!rect) return;
 
-      const x = e.clientX - rect.left + ui.timeline.scrollPosition;
+      const xRaw = e.clientX - rect.left + ui.timeline.scrollPosition;
+      const x = Math.max(0, xRaw - HEADER_COL_WIDTH);
       const y = e.clientY - rect.top;
 
-      const startTime = snapToGrid(pixelsToTime(x));
+      let startTime = snapToGrid(pixelsToTime(x));
       
       // Determine target track
       let finalTrack: EducationalTrackType;
@@ -210,8 +265,14 @@ export function EducationalTimeline({
         // Dropped on specific educational track
         finalTrack = targetTrack;
       } else {
-        // Calculate track from Y position with responsive track height
-        const trackIndex = Math.floor(y / responsiveTrackHeight);
+        // Calculate track from Y position using per-track dynamic heights
+        let acc = 0;
+        let trackIndex = 0;
+        for (let i = 0; i < perTrackHeight.length; i++) {
+          acc += perTrackHeight[i].height;
+          if (y < acc) { trackIndex = i; break; }
+          if (i === perTrackHeight.length - 1) trackIndex = i;
+        }
         finalTrack = EDUCATIONAL_TRACKS[Math.max(0, Math.min(trackIndex, EDUCATIONAL_TRACKS.length - 1))];
       }
 
@@ -225,11 +286,14 @@ export function EducationalTimeline({
       // Validate placement
       const validation = validateTrackPlacement(asset, finalTrack);
 
+      // Adjust to avoid overlap on this track
+      const adjusted = resolveNoOverlap(finalTrack.trackNumber, Math.max(0, startTime), asset.duration || 5);
+
       // Create timeline item
       const newItem: Omit<TimelineItem, 'id'> = {
         assetId: asset.id,
-        startTime: Math.max(0, startTime),
-        duration: asset.duration || 5,
+        startTime: adjusted.start,
+        duration: adjusted.duration,
         track: finalTrack.trackNumber,
         type: asset.type === 'image' ? 'video' : asset.type,
         properties: {
@@ -294,13 +358,13 @@ export function EducationalTimeline({
       const rect = timelineRef.current?.getBoundingClientRect();
       if (!rect) return;
 
-      const x = e.clientX - rect.left + ui.timeline.scrollPosition;
+      const xContent = Math.max(0, e.clientX - rect.left + ui.timeline.scrollPosition - HEADER_COL_WIDTH);
       const clipX = timeToPixels(item.startTime);
       const clipWidth = timeToPixels(item.duration);
 
       // Determine drag type based on mouse position
       let dragType: 'move' | 'resize-left' | 'resize-right' = 'move';
-      const relativeX = x - clipX;
+      const relativeX = xContent - clipX;
 
       if (relativeX < 10) {
         dragType = 'resize-left';
@@ -312,7 +376,7 @@ export function EducationalTimeline({
         isDragging: true,
         dragType,
         itemId: item.id,
-        startX: x,
+        startX: xContent,
         startTime: item.startTime,
         startDuration: item.duration,
         startTrack: item.track,
@@ -339,37 +403,72 @@ export function EducationalTimeline({
       const rect = timelineRef.current?.getBoundingClientRect();
       if (!rect) return;
 
-      const currentX = e.clientX - rect.left + ui.timeline.scrollPosition;
+      const currentX = Math.max(0, e.clientX - rect.left + ui.timeline.scrollPosition - HEADER_COL_WIDTH);
       const currentY = e.clientY - rect.top;
       const deltaX = currentX - dragState.startX;
       const deltaTime = pixelsToTime(deltaX);
 
       if (dragState.dragType === 'move') {
-        const newStartTime = snapToGrid(
+        let newStartTime = snapToGrid(
           Math.max(0, dragState.startTime + deltaTime)
         );
         
-        // Calculate new track based on educational tracks with responsive height
-        const trackIndex = Math.floor(currentY / responsiveTrackHeight);
+        // Calculate new track based on dynamic per-track heights
+        let acc = 0;
+        let trackIndex = 0;
+        for (let i = 0; i < perTrackHeight.length; i++) {
+          acc += perTrackHeight[i].height;
+          if (currentY < acc) { trackIndex = i; break; }
+          if (i === perTrackHeight.length - 1) trackIndex = i;
+        }
         const newTrack = Math.max(0, Math.min(trackIndex, EDUCATIONAL_TRACKS.length - 1));
 
-        moveTimelineItem(dragState.itemId, newStartTime, newTrack);
+        // Enforce no overlap on target track using current item duration
+        const thisItem = timeline.find((t) => t.id === dragState.itemId);
+        const dur = thisItem ? thisItem.duration : 1;
+        const adjustedMove = resolveNoOverlap(newTrack, newStartTime, dur, dragState.itemId || undefined);
+        moveTimelineItem(dragState.itemId, adjustedMove.start, newTrack);
       } else if (dragState.dragType === 'resize-left') {
-        const newStartTime = snapToGrid(
+        let newStartTime = snapToGrid(
           Math.max(0, dragState.startTime + deltaTime)
         );
-        const newDuration = Math.max(
+        let newDuration = Math.max(
           MIN_CLIP_DURATION,
           dragState.startDuration - deltaTime
         );
 
+        // Clamp against previous neighbor to avoid overlap
+        const itemsSameTrack = timeline
+          .filter((i) => i.track === dragState.startTrack && i.id !== dragState.itemId)
+          .sort((a, b) => a.startTime - b.startTime);
+        const prev = itemsSameTrack.filter((i) => i.startTime <= dragState.startTime).pop();
+        if (prev) {
+          const prevEnd = prev.startTime + prev.duration;
+          if (newStartTime < prevEnd) {
+            const deltaBlock = prevEnd - newStartTime;
+            newStartTime = prevEnd;
+            newDuration = Math.max(MIN_CLIP_DURATION, newDuration - deltaBlock);
+          }
+        }
+
         moveTimelineItem(dragState.itemId, newStartTime, dragState.startTrack);
         resizeTimelineItem(dragState.itemId, newDuration);
       } else if (dragState.dragType === 'resize-right') {
-        const newDuration = Math.max(
+        let newDuration = Math.max(
           MIN_CLIP_DURATION,
           dragState.startDuration + deltaTime
         );
+
+        // Clamp against next neighbor to avoid overlap
+        const itemsSameTrack = timeline
+          .filter((i) => i.track === dragState.startTrack && i.id !== dragState.itemId)
+          .sort((a, b) => a.startTime - b.startTime);
+        const next = itemsSameTrack.find((i) => i.startTime >= dragState.startTime);
+        if (next) {
+          const maxEnd = next.startTime;
+          const maxDuration = Math.max(MIN_CLIP_DURATION, maxEnd - dragState.startTime);
+          if (newDuration > maxDuration) newDuration = maxDuration;
+        }
         resizeTimelineItem(dragState.itemId, newDuration);
       }
     },
@@ -469,33 +568,35 @@ export function EducationalTimeline({
         <div className="flex items-center space-x-4">
           <span className="text-sm font-medium text-text-primary">Educational Timeline</span>
           
-          {/* Mode Toggle */}
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => handleModeChange(currentMode === 'simplified' ? 'advanced' : 'simplified')}
-              className={`
-                flex items-center space-x-2 px-3 py-1.5 text-xs rounded-md transition-all
-                ${currentMode === 'simplified' 
-                  ? 'bg-primary-600 text-white shadow-glow' 
-                  : 'bg-neutral-700 text-text-secondary hover:bg-neutral-600'
-                }
-              `}
-              title={`Switch to ${currentMode === 'simplified' ? 'Advanced' : 'Simplified'} Mode`}
-              data-help-id="timeline-mode-toggle"
-            >
-              {currentMode === 'simplified' ? (
-                <>
-                  <Eye className="w-3 h-3" />
-                  <span>Simplified</span>
-                </>
-              ) : (
-                <>
-                  <Settings className="w-3 h-3" />
-                  <span>Advanced</span>
-                </>
-              )}
-            </button>
-          </div>
+          {/* Mode Toggle (behind ADVANCED_UI flag) */}
+          {FLAGS.ADVANCED_UI && (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handleModeChange(currentMode === 'simplified' ? 'advanced' : 'simplified')}
+                className={`
+                  flex items-center space-x-2 px-3 py-1.5 text-xs rounded-md transition-all
+                  ${currentMode === 'simplified' 
+                    ? 'bg-primary-600 text-white shadow-glow' 
+                    : 'bg-neutral-700 text-text-secondary hover:bg-neutral-600'
+                  }
+                `}
+                title={`Switch to ${currentMode === 'simplified' ? 'Advanced' : 'Simplified'} Mode`}
+                data-help-id="timeline-mode-toggle"
+              >
+                {currentMode === 'simplified' ? (
+                  <>
+                    <Eye className="w-3 h-3" />
+                    <span>Simplified</span>
+                  </>
+                ) : (
+                  <>
+                    <Settings className="w-3 h-3" />
+                    <span>Advanced</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
 
           {/* Timeline Controls */}
           <div className="flex items-center space-x-2">

@@ -22,6 +22,7 @@ import { OnboardingDialog } from './educational/OnboardingDialog';
 import { HelpTipsOverlay } from './educational/HelpTipsOverlay';
 import { EducationalBestPractices } from './educational/EducationalBestPractices';
 import { InteractiveTutorial } from './educational/InteractiveTutorial';
+import { FLAGS } from '../lib/flags';
 
 function StudioViewContent() {
   const { project } = useProject();
@@ -37,6 +38,14 @@ function StudioViewContent() {
   const [showTutorial, setShowTutorial] = useState(false);
   
   const isRightPanelOpen = ui.mediaBinVisible || ui.inspectorVisible;
+  const [rightPanelWidth, setRightPanelWidth] = useState<number>(() => {
+    try {
+      const saved = parseInt(localStorage.getItem('ui:rightPanelWidth') || '', 10);
+      return Number.isNaN(saved) ? 320 : saved;
+    } catch {
+      return 320;
+    }
+  });
 
   useEffect(() => {
     try {
@@ -143,10 +152,12 @@ function StudioViewContent() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* UI Mode Toggle */}
-            <div data-tutorial="mode-toggle">
-              <UIModeToggle />
-            </div>
+            {/* UI Mode Toggle (gated) */}
+            {FLAGS.ADVANCED_UI && (
+              <div data-tutorial="mode-toggle">
+                <UIModeToggle />
+              </div>
+            )}
             
             {/* Help Controls */}
             <div className="flex items-center space-x-2">
@@ -183,7 +194,13 @@ function StudioViewContent() {
                 />
               </ModeAwareComponent>
               <button
-                onClick={toggleMediaBin}
+                onClick={() => {
+                  // Open Media Bin; ensure Inspector is closed to avoid overlap
+                  if (!ui.mediaBinVisible && ui.inspectorVisible) {
+                    toggleInspector();
+                  }
+                  toggleMediaBin();
+                }}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
                   ui.mediaBinVisible
                     ? 'bg-purple-600 text-white shadow-lg'
@@ -194,7 +211,13 @@ function StudioViewContent() {
                 <Archive className="w-4 h-4" />
               </button>
               <button
-                onClick={toggleInspector}
+                onClick={() => {
+                  // Open Inspector; ensure Media Bin is closed to avoid overlap
+                  if (!ui.inspectorVisible && ui.mediaBinVisible) {
+                    toggleMediaBin();
+                  }
+                  toggleInspector();
+                }}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
                   ui.inspectorVisible
                     ? 'bg-purple-600 text-white shadow-lg'
@@ -261,23 +284,28 @@ function StudioViewContent() {
               </div>
             </ModeAwareComponent>
             
-            <ModeAwareComponent mode="advanced">
-              <EnhancedTimelineView className="flex-1" />
-            </ModeAwareComponent>
+            {/** Advanced timeline gated by feature flag */}
+            {FLAGS.ADVANCED_UI ? (
+              <ModeAwareComponent mode="advanced">
+                <EnhancedTimelineView className="flex-1" />
+              </ModeAwareComponent>
+            ) : null}
           </ResizablePanel>
         </main>
 
         {/* Right Panels */}
         <div
           className="right-panels-container relative transition-all duration-200 ease-in-out overflow-hidden"
-          style={{ width: isRightPanelOpen ? 320 : 0, pointerEvents: isRightPanelOpen ? 'auto' as const : 'none' as const }}
+          style={{ width: isRightPanelOpen ? rightPanelWidth : 0, pointerEvents: isRightPanelOpen ? 'auto' as const : 'none' as const }}
           aria-hidden={!isRightPanelOpen}
         >
           <ResizablePanel
             direction="horizontal"
-            initialSize={320}
+            initialSize={rightPanelWidth}
             minSize={250}
             maxSize={600}
+            storageKey="ui:rightPanelWidth"
+            onSizeChange={(s) => setRightPanelWidth(s)}
             className="flex flex-col bg-white/95 backdrop-blur-sm border-l border-purple-200 rounded-r-2xl overflow-hidden shadow-inner h-full"
           >
             <motion.div
@@ -287,28 +315,26 @@ function StudioViewContent() {
               className="h-full flex flex-col"
             >
               {/* Media Bin */}
-              {ui.mediaBinVisible && (
+              {/* Right panel content: show one at a time to avoid overlap */}
+              {ui.mediaBinVisible && !ui.inspectorVisible ? (
                 <ResizablePanel
                   direction="vertical"
-                  initialSize={ui.inspectorVisible ? 300 : 600}
+                  initialSize={600}
                   minSize={200}
                   maxSize={800}
-                  className={`${ui.inspectorVisible ? '' : 'h-full'} border-b border-purple-200/50 bg-gradient-to-b from-white to-purple-50/30`}
+                  className={`h-full border-b border-purple-200/50 bg-gradient-to-b from-white to-purple-50/30`}
                 >
                   <div data-tutorial="media-bin">
                     <MediaBin />
                   </div>
                 </ResizablePanel>
-              )}
+              ) : null}
 
-              {/* Inspector Panel */}
-              {ui.inspectorVisible && (
-                <div
-                  className={`${ui.mediaBinVisible ? 'flex-1' : 'h-full'} bg-gradient-to-b from-purple-50/30 to-white`}
-                >
+              {ui.inspectorVisible && !ui.mediaBinVisible ? (
+                <div className={`h-full bg-gradient-to-b from-purple-50/30 to-white`}>
                   <Inspector />
                 </div>
-              )}
+              ) : null}
             </motion.div>
           </ResizablePanel>
         </div>
