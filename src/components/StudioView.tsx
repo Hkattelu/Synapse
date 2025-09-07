@@ -87,6 +87,29 @@ function StudioViewContent() {
     };
   }, []);
 
+  // Loader hooks must be defined unconditionally before any return path
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [showLoader, setShowLoader] = useState(true);
+
+  // Simulate staged loading until the main editor mounts
+  useEffect(() => {
+    let p = 0;
+    const tick = () => {
+      p = Math.min(90, p + Math.random() * 8 + 4);
+      setLoadingProgress(p);
+    };
+    const id = setInterval(tick, 180);
+    // When content mounts, complete and hide
+    const done = setTimeout(() => {
+      setLoadingProgress(100);
+      setTimeout(() => setShowLoader(false), 250);
+    }, 1200);
+    return () => {
+      clearInterval(id);
+      clearTimeout(done);
+    };
+  }, []);
+
   if (!project) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50 via-purple-50 to-indigo-50 flex items-center justify-center">
@@ -117,28 +140,6 @@ function StudioViewContent() {
       </div>
     );
   }
-
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const [showLoader, setShowLoader] = useState(true);
-
-  // Simulate staged loading until the main editor mounts
-  useEffect(() => {
-    let p = 0;
-    const tick = () => {
-      p = Math.min(90, p + Math.random() * 8 + 4);
-      setLoadingProgress(p);
-    };
-    const id = setInterval(tick, 180);
-    // When content mounts, complete and hide
-    const done = setTimeout(() => {
-      setLoadingProgress(100);
-      setTimeout(() => setShowLoader(false), 250);
-    }, 1200);
-    return () => {
-      clearInterval(id);
-      clearTimeout(done);
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-synapse-background flex flex-col">
