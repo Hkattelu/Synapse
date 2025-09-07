@@ -42,6 +42,20 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
+    // Prebundle frequently used, heavy deps for faster cold starts in dev
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'framer-motion',
+      'lucide-react',
+      'zustand',
+      'zundo',
+      'prismjs',
+      'remotion',
+      '@remotion/player'
+    ],
+    // Avoid trying to prebundle Node/Electron-side packages
     exclude: ['@remotion/bundler', '@remotion/renderer', '@remotion/cli'],
   },
   build: {

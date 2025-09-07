@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, Suspense, lazy } from 'react';
 import { useMediaAssets, useTimeline } from '../state/hooks';
 import { useNotifications } from '../state/notifications';
 import { usePlayback } from '../state/hooks';
@@ -8,7 +8,7 @@ interface RecorderDialogProps {
   onClose: () => void;
 }
 
-import { AudioLevelMeter } from './AudioLevelMeter';
+const AudioLevelMeter = lazy(() => import('./AudioLevelMeter').then(m => ({ default: m.AudioLevelMeter })));
 
 export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
   const { addMediaAsset } = useMediaAssets();
@@ -372,13 +372,15 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                   {/* Lightweight live level meter */}
                   {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                   {/* @ts-ignore - component accepts AudioNode */}
-                  <AudioLevelMeter
-                    audioContext={audioCtxRef.current || undefined}
-                    audioSource={audioSourceRef.current || undefined}
-                    style="bars"
-                    width={180}
-                    height={12}
-                  />
+                  <Suspense fallback={<div className="h-3 bg-gray-200 rounded" />}>
+                    <AudioLevelMeter
+                      audioContext={audioCtxRef.current || undefined}
+                      audioSource={audioSourceRef.current || undefined}
+                      style="bars"
+                      width={180}
+                      height={12}
+                    />
+                  </Suspense>
                 </div>
               )}
 

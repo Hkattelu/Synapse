@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useProject, useUI } from '../state/hooks';
-import { MediaBin } from './MediaBin';
-import { EnhancedTimelineView } from './EnhancedTimelineView';
 import { Preview } from './Preview';
-import { Inspector } from './Inspector';
+const MediaBin = React.lazy(() => import('./MediaBin').then(m => ({ default: m.MediaBin })));
+const EnhancedTimelineView = React.lazy(() => import('./EnhancedTimelineView').then(m => ({ default: m.EnhancedTimelineView })));
+const Inspector = React.lazy(() => import('./Inspector').then(m => ({ default: m.Inspector })));
 import { ExportDialog } from './ExportDialog';
 import { RecorderDialog } from './RecorderDialog';
 import { ExportProvider } from '../state/exportContext';
@@ -313,7 +313,9 @@ function StudioViewContent() {
             {/** Advanced timeline gated by feature flag */}
             {FLAGS.ADVANCED_UI ? (
               <ModeAwareComponent mode="advanced">
-                <EnhancedTimelineView className="flex-1" />
+                <React.Suspense fallback={<div className="flex-1 p-4 text-text-secondary">Loading timeline…</div>}>
+                  <EnhancedTimelineView className="flex-1" />
+                </React.Suspense>
               </ModeAwareComponent>
             ) : null}
           </ResizablePanel>
@@ -351,14 +353,18 @@ function StudioViewContent() {
                   className={`h-full border-b border-synapse-border bg-synapse-surface`}
                 >
                   <div data-tutorial="media-bin">
-                    <MediaBin />
+                    <React.Suspense fallback={<div className="p-4 text-text-secondary">Loading media…</div>}>
+                      <MediaBin />
+                    </React.Suspense>
                   </div>
                 </ResizablePanel>
               ) : null}
 
               {ui.inspectorVisible && !ui.mediaBinVisible ? (
                 <div className={`h-full bg-synapse-surface`}>
-                  <Inspector />
+                  <React.Suspense fallback={<div className="p-4 text-text-secondary">Loading inspector…</div>}>
+                    <Inspector />
+                  </React.Suspense>
                 </div>
               ) : null}
             </motion.div>
