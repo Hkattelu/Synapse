@@ -196,7 +196,7 @@ function StudioViewContent() {
               </button>
               <button
                 onClick={() => setShowGuide(true)}
-                className="px-3 py-2 rounded-lg bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300 text-sm"
+                className="px-3 py-2 rounded-lg bg-synapse-surface border border-synapse-border text-text-primary hover:bg-synapse-surface-hover hover:border-synapse-border-hover text-sm"
                 title="Open best practices guide"
               >
                 Guide
@@ -210,11 +210,11 @@ function StudioViewContent() {
               {/* Undo/Redo Buttons - Show in both modes but more prominent in advanced */}
               <ModeAwareComponent mode="both">
                 <UndoButton
-                  className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border text-purple-600 hover:bg-purple-50 hover:border-purple-300 disabled:border-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:bg-gray-50`}
+                  className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-synapse-surface border border-synapse-border text-text-primary hover:bg-synapse-surface-hover hover:border-synapse-border-hover disabled:border-synapse-border disabled:text-text-tertiary disabled:cursor-not-allowed disabled:hover:scale-100 disabled:bg-synapse-surface`}
                   title="Undo (Ctrl+Z)"
                 />
                 <RedoButton
-                  className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border text-purple-600 hover:bg-purple-50 hover:border-purple-300 disabled:border-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:bg-gray-50`}
+                  className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-synapse-surface border border-synapse-border text-text-primary hover:bg-synapse-surface-hover hover:border-synapse-border-hover disabled:border-synapse-border disabled:text-text-tertiary disabled:cursor-not-allowed disabled:hover:scale-100 disabled:bg-synapse-surface`}
                   title="Redo (Ctrl+Y / Shift+Ctrl+Z)"
                 />
               </ModeAwareComponent>
@@ -257,7 +257,7 @@ function StudioViewContent() {
               <ModeAwareComponent mode="advanced">
                 <button
                   onClick={() => setIsShortcutsDialogOpen(true)}
-                  className="p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300"
+                  className="p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-synapse-surface border border-synapse-border text-text-primary hover:bg-synapse-surface-hover hover:border-synapse-border-hover"
                   title="Keyboard Shortcuts (?)"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -450,7 +450,7 @@ function HeaderSettingsMenu() {
       <button
         ref={btnRef}
         onClick={() => setOpen((v) => !v)}
-        className="p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300"
+        className="p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-synapse-surface border border-synapse-border text-text-primary hover:bg-synapse-surface-hover hover:border-synapse-border-hover"
         title="Settings"
       >
         <Settings className="w-4 h-4" />
