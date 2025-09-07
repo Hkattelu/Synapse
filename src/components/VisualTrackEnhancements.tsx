@@ -35,6 +35,7 @@ interface VisualTrackClipProps {
   style: React.CSSProperties;
   onItemUpdate: (item: TimelineItem) => void;
   onMouseDown?: (e: React.MouseEvent) => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
   isDragging?: boolean;
 }
 
@@ -46,6 +47,7 @@ export function VisualTrackClip({
   style,
   onItemUpdate,
   onMouseDown,
+  onContextMenu,
   isDragging,
 }: VisualTrackClipProps) {
   const [showAnimationMenu, setShowAnimationMenu] = useState(false);
@@ -87,6 +89,7 @@ export function VisualTrackClip({
         borderColor: isSelected ? '#F59E0B' : track.color,
       }}
       onMouseDown={onMouseDown}
+      onContextMenu={onContextMenu}
     >
       {/* Thumbnail Preview */}
       {thumbnailUrl && (

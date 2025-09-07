@@ -20,6 +20,7 @@ interface VirtualizedTimelineItemsProps {
   scrollLeft: number;
   selectedItems: string[];
   onItemMouseDown: (e: React.MouseEvent, item: TimelineItem) => void;
+  onItemContextMenu?: (e: React.MouseEvent, item: TimelineItem) => void;
   onItemUpdate?: (item: TimelineItem) => void;
 }
 
@@ -37,6 +38,7 @@ export const VirtualizedTimelineItems = memo(function VirtualizedTimelineItems({
   scrollLeft,
   selectedItems,
   onItemMouseDown,
+  onItemContextMenu,
   onItemUpdate,
 }: VirtualizedTimelineItemsProps) {
   const batchUpdater = useRef(new BatchUpdater());
@@ -128,6 +130,7 @@ export const VirtualizedTimelineItems = memo(function VirtualizedTimelineItems({
             height={trackHeight - 16} // Account for track header
             isSelected={isSelected}
             onMouseDown={onItemMouseDown}
+            onContextMenu={onItemContextMenu}
             onUpdate={handleItemUpdate}
           />
         );
@@ -146,6 +149,7 @@ const VirtualizedTimelineItem = memo(function VirtualizedTimelineItem({
   height,
   isSelected,
   onMouseDown,
+  onContextMenu,
   onUpdate,
 }: {
   item: TimelineItem;
@@ -156,6 +160,7 @@ const VirtualizedTimelineItem = memo(function VirtualizedTimelineItem({
   height: number;
   isSelected: boolean;
   onMouseDown: (e: React.MouseEvent, item: TimelineItem) => void;
+  onContextMenu?: (e: React.MouseEvent, item: TimelineItem) => void;
   onUpdate: (item: TimelineItem) => void;
 }) {
   const itemRef = useRef<HTMLDivElement>(null);
@@ -188,6 +193,7 @@ const VirtualizedTimelineItem = memo(function VirtualizedTimelineItem({
       `}
       style={itemStyle}
       onMouseDown={handleMouseDown}
+      onContextMenu={onContextMenu ? (e) => onContextMenu(e, item) : undefined}
     >
       {/* Resize Handles */}
       <div className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize bg-text-primary bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />

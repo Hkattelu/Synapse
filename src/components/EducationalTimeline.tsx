@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useTimeline, useMediaAssets, useUI, usePlayback } from '../state/hooks';
 import { EducationalTrack } from './EducationalTrack';
 import { suggestTrackPlacement, validateTrackPlacement } from '../lib/educationalPlacement';
@@ -11,7 +12,7 @@ import {
 import type { TimelineItem, MediaAsset } from '../lib/types';
 import type { EducationalTrack as EducationalTrackType, UIMode, PlacementSuggestion } from '../lib/educationalTypes';
 import { EDUCATIONAL_TRACKS, getEducationalTrackByNumber } from '../lib/educationalTypes';
-import { Settings, Eye, EyeOff } from 'lucide-react';
+import { Settings, Eye, EyeOff, Code, Monitor, Mic, User, Copy, Trash2 } from 'lucide-react';
 import { ContentAdditionToolbar } from './ContentAdditionToolbar';
 import { FLAGS } from '../lib/flags';
 
@@ -55,6 +56,8 @@ export function EducationalTimeline({
     addTimelineItem,
     moveTimelineItem,
     resizeTimelineItem,
+    removeTimelineItem,
+    duplicateTimelineItem,
     selectTimelineItems,
     clearTimelineSelection,
     timelineDuration,
@@ -77,6 +80,14 @@ export function EducationalTimeline({
     startTime: 0,
     startDuration: 0,
     startTrack: 0,
+  });
+
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; itemId: string | null }>({
+    visible: false,
+    x: 0,
+    y: 0,
+    itemId: null,
   });
 
   // Resize observer for container dimensions (observe the scroll container)
@@ -567,6 +578,63 @@ export function EducationalTimeline({
     }
   }, [timeline, moveTimelineItem, dismissPlacementWarning]);
 
+  // Context menu handlers
+  const handleClipContextMenu = useCallback((e: React.MouseEvent, item: TimelineItem) => {
+    e.preventDefault();
+    setContextMenu({ visible: true, x: e.clientX, y: e.clientY, itemId: item.id });
+    // Ensure the item is selected
+    if (!selectedItems.includes(item.id)) {
+      selectTimelineItems([item.id]);
+    }
+  }, [selectTimelineItems, selectedItems]);
+
+  const closeContextMenu = useCallback(() => {
+    setContextMenu(prev => ({ ...prev, visible: false }));
+  }, []);
+
+  // Keyboard shortcuts (delete, duplicate, esc)
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedItems.length > 0) {
+          e.preventDefault();
+          selectedItems.forEach(id => removeTimelineItem(id));
+          clearTimelineSelection();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+        if (selectedItems.length > 0) {
+          e.preventDefault();
+          const newIds: string[] = [];
+          selectedItems.forEach(id => {
+            const dupId = duplicateTimelineItem(id) as unknown as string | null;
+            if (dupId) newIds.push(dupId);
+          });
+          if (newIds.length > 0) selectTimelineItems(newIds);
+        }
+      } else if (e.key === 'Escape') {
+        clearTimelineSelection();
+        closeContextMenu();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [selectedItems, removeTimelineItem, clearTimelineSelection, duplicateTimelineItem, selectTimelineItems, closeContextMenu]);
+
+  // Close context menu on global click
+  useEffect(() => {
+    const onGlobalClick = (e: MouseEvent) => {
+      if (contextMenu.visible) {
+        closeContextMenu();
+      }
+    };
+    window.addEventListener('mousedown', onGlobalClick);
+    return () => window.removeEventListener('mousedown', onGlobalClick);
+  }, [contextMenu.visible, closeContextMenu]);
+
   // Add global mouse event listeners for dragging and scrubbing
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
@@ -729,6 +797,8 @@ export function EducationalTimeline({
           {EDUCATIONAL_TRACKS.map((track) => {
             const row = perTrackHeight.find((r) => r.id === track.id)!;
             const rowStyle: React.CSSProperties = { height: `${row.height}px` };
+            const TRACK_ICONS: Record<string, React.ComponentType<{ className?: string }>> = { code: Code, monitor: Monitor, mic: Mic, user: User };
+            const IconComponent = TRACK_ICONS[track.icon as keyof typeof TRACK_ICONS] || Code;
             return (
               <React.Fragment key={track.id}>
                 {/* Left sticky header cell */}
@@ -738,11 +808,11 @@ export function EducationalTimeline({
                 >
                   {/* Compact header content */}
                   <div
-                    className="w-6 h-6 rounded-md flex items-center justify-center text-white text-xs font-semibold"
+                    className="w-6 h-6 rounded-md flex items-center justify-center text-white"
                     style={{ backgroundColor: track.color }}
                     title={`Track ${track.trackNumber + 1}`}
                   >
-                    {track.name[0]}
+                    <IconComponent className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
                     <div className="text-xs font-medium text-text-primary truncate">{track.name}</div>
@@ -760,6 +830,7 @@ export function EducationalTimeline({
                     timeToPixels={timeToPixels}
                     onItemDrop={(item) => handleSmartDrop(new DragEvent('drop') as any, track)}
                     onItemMouseDown={handleClipMouseDown}
+                    onItemContextMenu={handleClipContextMenu}
                     selectedItems={selectedItems}
                     dragState={dragState}
                     // Performance optimization props
@@ -775,6 +846,43 @@ export function EducationalTimeline({
           })}
         </div>
       </div>
+
+      {/* Context Menu */}
+      {contextMenu.visible && contextMenu.itemId && createPortal(
+        <div
+          className="fixed bg-background-tertiary border border-border-subtle rounded-md shadow-lg py-1"
+          style={{ 
+            left: Math.min(contextMenu.x, Math.max(0, window.innerWidth - 200)),
+            top: Math.min(contextMenu.y, Math.max(0, window.innerHeight - 120)),
+            zIndex: 10000,
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <button
+            className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-text-primary hover:bg-neutral-700"
+            onClick={() => {
+              removeTimelineItem(contextMenu.itemId!);
+              clearTimelineSelection();
+              closeContextMenu();
+            }}
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete Clip (Del)
+          </button>
+          <button
+            className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-text-primary hover:bg-neutral-700"
+            onClick={() => {
+              const dupId = duplicateTimelineItem(contextMenu.itemId!) as unknown as string | null;
+              if (dupId) selectTimelineItems([dupId]);
+              closeContextMenu();
+            }}
+          >
+            <Copy className="w-4 h-4" />
+            Duplicate (Ctrl+D)
+          </button>
+        </div>,
+        document.body
+      )}
 
       {/* Placement Warnings */}
       {placementWarnings

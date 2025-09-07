@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { api, ApiError } from '../lib/api';
+import { isEnabled } from '../lib/flags';
 import {
   Select,
   SelectContent,
@@ -139,15 +140,17 @@ const HeroSection: React.FC<HeroSectionProps> = ({
 
       <div className="relative z-10 container mx-auto px-4">
         <div className="text-center max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center px-4 py-2 rounded-full bg-synapse-primary/10 border border-synapse-primary text-sm font-medium text-synapse-primary mb-6 shadow-synapse-sm"
-          >
-            <span className="mr-2">🚀</span>
-            {subtitle}
-          </motion.div>
+          {isEnabled('PRODUCT_HUNT') && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center px-4 py-2 rounded-full bg-synapse-primary/10 border border-synapse-primary text-sm font-medium text-synapse-primary mb-6 shadow-synapse-sm"
+            >
+              <span className="mr-2">🚀</span>
+              {subtitle}
+            </motion.div>
+          )}
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -181,15 +184,17 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               <Play className="w-5 h-5 mr-2" />
               Start Creating
             </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => window.open('https://www.producthunt.com/products/synapse-studio', '_blank')}
-              className="border-synapse-primary text-synapse-primary hover:bg-synapse-primary/10 px-8 py-4 rounded-full font-semibold text-lg shadow-synapse-sm"
-            >
-              <Heart className="w-5 h-5 mr-2" />
-              Support on Product Hunt
-            </Button>
+            {isEnabled('PRODUCT_HUNT') && (
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => window.open('https://www.producthunt.com/products/synapse-studio', '_blank')}
+                className="border-synapse-primary text-synapse-primary hover:bg-synapse-primary/10 px-8 py-4 rounded-full font-semibold text-lg shadow-synapse-sm"
+              >
+                <Heart className="w-5 h-5 mr-2" />
+                Support on Product Hunt
+              </Button>
+            )}
           </motion.div>
 
           <motion.div
@@ -198,26 +203,30 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             transition={{ duration: 0.6, delay: 0.4 }}
             className="pt-12"
           >
-            {/* Product Hunt Launch Countdown */}
-            <div className="bg-synapse-surface border border-synapse-border rounded-2xl p-6 mb-8 max-w-2xl mx-auto">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold text-text-primary mb-2">
-                  🎯 Product Hunt Launch
-                </h3>
-                <p className="text-text-secondary mb-4">
-                  Join us on September 5th, 2025 and help us reach #1 Product of the Day!
-                </p>
-                <div className="flex items-center justify-center space-x-4 text-sm">
-                  <div className="bg-synapse-surface rounded-lg px-3 py-2 shadow-synapse-sm">
-                    <div className="font-bold text-synapse-primary text-lg">Sep 5</div>
-                    <div className="text-text-tertiary">2025</div>
-                  </div>
-                  <div className="text-synapse-primary font-medium">
-                    Mark your calendars!
+            {isEnabled('PRODUCT_HUNT') && (
+              <>
+                {/* Product Hunt Launch Countdown */}
+                <div className="bg-synapse-surface border border-synapse-border rounded-2xl p-6 mb-8 max-w-2xl mx-auto">
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold text-text-primary mb-2">
+                      🎯 Product Hunt Launch
+                    </h3>
+                    <p className="text-text-secondary mb-4">
+                      Join us on September 5th, 2025 and help us reach #1 Product of the Day!
+                    </p>
+                    <div className="flex items-center justify-center space-x-4 text-sm">
+                      <div className="bg-synapse-surface rounded-lg px-3 py-2 shadow-synapse-sm">
+                        <div className="font-bold text-synapse-primary text-lg">Sep 5</div>
+                        <div className="text-text-tertiary">2025</div>
+                      </div>
+                      <div className="text-synapse-primary font-medium">
+                        Mark your calendars!
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
 
             {/* Stats */}
             <div className="flex items-center justify-center space-x-8 text-sm text-text-tertiary">
@@ -728,14 +737,16 @@ const Footer: React.FC = () => {
                   Features
                 </a>
               </li>
-              <li>
-                <button
-                  onClick={() => window.open('https://www.producthunt.com/products/synapse-studio', '_blank')}
-                  className="hover:text-orange-400 transition-colors text-left"
-                >
-                  🚀 Product Hunt
-                </button>
-              </li>
+              {isEnabled('PRODUCT_HUNT') && (
+                <li>
+                  <button
+                    onClick={() => window.open('https://www.producthunt.com/products/synapse-studio', '_blank')}
+                    className="hover:text-orange-400 transition-colors text-left"
+                  >
+                    🚀 Product Hunt
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
 
@@ -802,12 +813,14 @@ const Navigation: React.FC = () => {
             >
               Why Choose Us
             </a>
-            <button
-              onClick={() => window.open('https://www.producthunt.com/products/synapse-studio', '_blank')}
-              className="text-orange-600 hover:text-orange-700 transition-colors font-medium"
-            >
-              🚀 Product Hunt
-            </button>
+            {isEnabled('PRODUCT_HUNT') && (
+              <button
+                onClick={() => window.open('https://www.producthunt.com/products/synapse-studio', '_blank')}
+                className="text-orange-600 hover:text-orange-700 transition-colors font-medium"
+              >
+                🚀 Product Hunt
+              </button>
+            )}
             <a
               href="#contact"
               className="text-text-secondary hover:text-synapse-primary transition-colors"
@@ -873,7 +886,7 @@ const SynapseStudioLanding: React.FC = () => {
       <Navigation />
       <div className="pt-16">
         <HeroSection />
-        <ProductHuntSection />
+        {isEnabled('PRODUCT_HUNT') && <ProductHuntSection />}
         <div id="features">
           <FeaturesSection />
         </div>

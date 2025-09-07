@@ -17,6 +17,7 @@ interface EducationalTrackProps {
   timeToPixels: (time: number) => number;
   onItemDrop: (item: TimelineItem) => void;
   onItemMouseDown: (e: React.MouseEvent, item: TimelineItem) => void;
+  onItemContextMenu?: (e: React.MouseEvent, item: TimelineItem) => void;
   onItemUpdate?: (item: TimelineItem) => void;
   selectedItems: string[];
   dragState: {
@@ -46,6 +47,7 @@ export function EducationalTrack({
   timeToPixels,
   onItemDrop,
   onItemMouseDown,
+  onItemContextMenu,
   onItemUpdate,
   selectedItems,
   dragState,
@@ -144,6 +146,7 @@ export function EducationalTrack({
             scrollLeft={scrollLeft}
             selectedItems={selectedItems}
             onItemMouseDown={onItemMouseDown}
+            onItemContextMenu={onItemContextMenu}
             onItemUpdate={onItemUpdate}
           />
         ) : (
@@ -157,6 +160,7 @@ export function EducationalTrack({
             selectedItems={selectedItems}
             dragState={dragState}
             onItemMouseDown={onItemMouseDown}
+            onItemContextMenu={onItemContextMenu}
             onItemUpdate={onItemUpdate}
           />
         )}
@@ -185,6 +189,7 @@ interface EducationalTimelineClipProps {
   isDragging: boolean;
   style: React.CSSProperties;
   onMouseDown: (e: React.MouseEvent) => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
 }
 
 function EducationalTimelineClip({
@@ -195,6 +200,7 @@ function EducationalTimelineClip({
   isDragging,
   style,
   onMouseDown,
+  onContextMenu,
 }: EducationalTimelineClipProps) {
 
   return (
@@ -211,6 +217,7 @@ function EducationalTimelineClip({
         borderColor: isSelected ? '#F59E0B' : track.color,
       }}
       onMouseDown={onMouseDown}
+      onContextMenu={onContextMenu}
     >
       {/* Resize Handles */}
       <div className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize bg-text-primary bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
@@ -246,6 +253,7 @@ function TraditionalTrackItems({
   selectedItems,
   dragState,
   onItemMouseDown,
+  onItemContextMenu,
   onItemUpdate,
 }: {
   track: EducationalTrack;
@@ -256,6 +264,7 @@ function TraditionalTrackItems({
   selectedItems: string[];
   dragState: { isDragging: boolean; itemId: string | null };
   onItemMouseDown: (e: React.MouseEvent, item: TimelineItem) => void;
+  onItemContextMenu?: (e: React.MouseEvent, item: TimelineItem) => void;
   onItemUpdate?: (item: TimelineItem) => void;
 }) {
   return (
@@ -286,6 +295,7 @@ function TraditionalTrackItems({
                 }}
                 onItemUpdate={onItemUpdate || (() => {})}
                 onMouseDown={(e) => onItemMouseDown(e, item)}
+                onContextMenu={onItemContextMenu ? (e) => onItemContextMenu(e, item) : undefined}
               />
             );
           }
@@ -305,6 +315,7 @@ function TraditionalTrackItems({
                 top: '4px',
               }}
               onMouseDown={(e) => onItemMouseDown(e, item)}
+              onContextMenu={onItemContextMenu ? (e) => onItemContextMenu(e, item) : undefined}
             />
           );
         })}
