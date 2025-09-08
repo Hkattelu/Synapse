@@ -19,6 +19,7 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "generate:launch-og": "node ./scripts/generate-og.mjs public/launch/og-image.svg public/launch/og-image.png",
+    "generate:logo": "node ./scripts/generate-logo.mjs",
     "electron:build": "tsc -p tsconfig.electron.json",
     "desktop:dev": "npm run -s electron:build && cross-env SYNAPSE_ELECTRON_DEV_URL=http://localhost:5173 electron electron/dist/main.js",
     "desktop:start": "npm run -s electron:build && electron electron/dist/main.js",

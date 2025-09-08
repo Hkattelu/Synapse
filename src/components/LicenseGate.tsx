@@ -1,9 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { useLicense } from '../state/license';
+import { useLocation } from 'react-router-dom';
 
 export const LicenseGate: React.FC = () => {
   const { status, loading, setLicense, validateNow, clear } = useLicense();
+  const { pathname } = useLocation();
   const [input, setInput] = useState('');
+
   const needsGate = useMemo(() => {
     const s = status?.state;
     return (
@@ -13,7 +16,12 @@ export const LicenseGate: React.FC = () => {
     );
   }, [status]);
 
-  if (!needsGate) return null;
+  // Only gate specific routes: Studio and Projects. Do NOT gate launch page.
+  const routeRequiresLicense = useMemo(() => {
+    return pathname.startsWith('/studio') || pathname.startsWith('/projects');
+  }, [pathname]);
+
+  if (!routeRequiresLicense || !needsGate) return null;
 
   return (
     <div

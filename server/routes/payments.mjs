@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { requireAuth } from '../services/auth.mjs';
-import { activateMembership } from '../services/licensing.mjs';
+import { activateMembership } from '../db.mjs';
 import { validateDemoPayment } from '../validation/validators.mjs';
 
 export const paymentsRouter = Router();

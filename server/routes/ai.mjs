@@ -3,7 +3,7 @@ import { generateFromRepo } from '../services/ai.mjs';
 
 export const aiRouter = Router();
 
-aioRouter.post('/generate-from-repo', async (req, res) => {
+aiRouter.post('/generate-from-repo', async (req, res) => {
   try {
     const { repoUrl, branch } = req.body || {};
     const proposal = await generateFromRepo({ repoUrl, branch });

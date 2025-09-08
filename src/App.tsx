@@ -98,9 +98,10 @@ function App() {
                     <Route path="/studio" element={<StudioView />} />
                     <Route path="/downloads" element={<DownloadsPage />} />
                   </Routes>
+                  {/* License gate must be inside Router to scope by route */}
+                  <LicenseGate />
                 </Router>
                 <LoadingOverlay />
-                <LicenseGate />
                 {FLAGS.SHOW_FPS && <PerformanceMonitor enabled />}
               </HistoryProvider>
             </ErrorBoundary>

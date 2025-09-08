@@ -716,10 +716,8 @@ const Footer: React.FC = () => {
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-synapse-primary rounded-lg flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-synapse-text-inverse" />
-              </div>
-              <span className="text-xl font-bold">Synapse Studio</span>
+              <img src="/branding/logo.svg" alt="Synapse Studio" className="h-8 w-auto" />
+              <span className="sr-only">Synapse Studio</span>
             </div>
             <p className="text-text-tertiary text-sm">
               Human-powered video creation for authentic storytellers.
@@ -792,12 +790,8 @@ const Navigation: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-synapse-primary rounded-lg flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-synapse-text-inverse" />
-            </div>
-            <span className="text-xl font-bold text-text-primary">
-              Synapse Studio
-            </span>
+            <img src="/branding/logo.svg" alt="Synapse Studio" className="h-8 w-auto" />
+            <span className="sr-only">Synapse Studio</span>
           </div>
 
           <div className="hidden md:flex items-center space-x-8">

@@ -173,12 +173,8 @@ export function DashboardView() {
               onClick={() => navigate('/')}
               className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
             >
-              <div className="w-8 h-8 bg-synapse-primary rounded-lg flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-synapse-text-inverse" />
-              </div>
-              <h1 className="text-xl font-bold text-text-primary">
-                Synapse Studio
-              </h1>
+              <img src="/branding/logo.svg" alt="Synapse Studio" className="h-8 w-auto" />
+              <span className="sr-only">Synapse Studio</span>
             </button>
             <div></div>
           </div>
