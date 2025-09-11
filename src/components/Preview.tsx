@@ -730,51 +730,73 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
           <div className="flex items-center space-x-2">
             {/* Dimensions controls */}
             <div className="flex items-center space-x-2 mr-3">
-              <select
-                onChange={(e) => applyAspectPreset(e.target.value as any)}
-                className="text-xs bg-background-tertiary text-text-secondary border border-border-subtle rounded px-2 py-1 hover:text-text-primary"
-                title="Aspect Preset"
-                value={(() => {
-                  const w = project?.settings.width || dimWidth;
-                  const h = project?.settings.height || dimHeight;
-                  if (w === 1920 && h === 1080) return '16:9';
-                  if (w === 1280 && h === 720) return '720p';
-                  if (w === 1080 && h === 1920) return '9:16';
-                  if (w === 720 && h === 1280) return 'vertical-720';
-                  if (w === 1080 && h === 1080) return '1:1';
-                  return '';
-                })()}
-              >
-                <option value="">Aspect</option>
-                <option value="16:9">16:9 (1920×1080)</option>
-                <option value="720p">16:9 (1280×720)</option>
-                <option value="1:1">1:1 (1080×1080)</option>
-                <option value="9:16">9:16 (1080×1920)</option>
-                <option value="vertical-720">9:16 (720×1280)</option>
-              </select>
-              <div className="flex items-center space-x-1 text-xs text-text-secondary">
-                <input
-                  type="number"
-                  min={256}
-                  max={3840}
-                  value={dimWidth}
-                  onChange={(e) => setDimWidth(Number(e.target.value) || 0)}
-                  onBlur={() => applyDimensions(dimWidth, dimHeight)}
-                  className="w-20 bg-background-tertiary text-text-primary border border-border-subtle rounded px-2 py-1"
-                  title="Width"
-                />
-                <span>×</span>
-                <input
-                  type="number"
-                  min={256}
-                  max={3840}
-                  value={dimHeight}
-                  onChange={(e) => setDimHeight(Number(e.target.value) || 0)}
-                  onBlur={() => applyDimensions(dimWidth, dimHeight)}
-                  className="w-20 bg-background-tertiary text-text-primary border border-border-subtle rounded px-2 py-1"
-                  title="Height"
-                />
-              </div>
+              {/* Simplified aspect ratio radio group: 16/9, 1/1, 9/16 */}
+              {(() => {
+                // Determine current aspect ratio label by reducing width/height
+                const w = project?.settings.width || dimWidth;
+                const h = project?.settings.height || dimHeight;
+                const gcd = (a: number, b: number): number => (b === 0 ? Math.abs(a) : gcd(b, a % b));
+                const g = gcd(w, h) || 1;
+                const ratioLabel = `${Math.round(w / g)}/${Math.round(h / g)}`; // e.g., 16/9, 1/1, 9/16
+
+                const isChecked = (val: '16/9' | '1/1' | '9/16') => ratioLabel === val;
+                const baseBtn =
+                  'inline-flex items-center justify-center whitespace-nowrap px-3 py-1.5 text-xs font-medium rounded-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+                const checkedCls = 'bg-background-primary text-text-primary shadow-sm';
+                const uncheckedCls = 'text-text-secondary';
+
+                return (
+                  <div
+                    role="radiogroup"
+                    aria-label="Aspect ratio"
+                    className="inline-flex items-center justify-center bg-background-tertiary rounded-lg p-1 h-9"
+                    tabIndex={0}
+                  >
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={isChecked('16/9')}
+                      className={`${baseBtn} ${isChecked('16/9') ? checkedCls : uncheckedCls}`}
+                      onClick={() => applyDimensions(1920, 1080)}
+                      title="Landscape 16:9"
+                      value="16/9"
+                      tabIndex={-1}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                        <rect width="20" height="12" x="2" y="6" rx="2"></rect>
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={isChecked('1/1')}
+                      className={`${baseBtn} ${isChecked('1/1') ? checkedCls : uncheckedCls}`}
+                      onClick={() => applyDimensions(1080, 1080)}
+                      title="Square 1:1"
+                      value="1/1"
+                      tabIndex={-1}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                        <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={isChecked('9/16')}
+                      className={`${baseBtn} ${isChecked('9/16') ? checkedCls : uncheckedCls}`}
+                      onClick={() => applyDimensions(1080, 1920)}
+                      title="Vertical 9:16"
+                      value="9/16"
+                      tabIndex={0}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                        <rect width="12" height="20" x="6" y="2" rx="2"></rect>
+                      </svg>
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
             {/* Record button */}
             <button
