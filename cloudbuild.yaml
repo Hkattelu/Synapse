@@ -5,7 +5,7 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  _REGION: us-central1
+  _REGION: us-east1
 
 steps:
   # Build the container image from Dockerfile

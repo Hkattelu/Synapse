@@ -437,6 +437,13 @@ export interface ExportSettings {
   audioBitrate?: number; // Audio bitrate in kbps
   audioSampleRate?: number; // Audio sample rate in Hz
 
+  // File naming
+  /**
+   * Optional custom base name for the output file (without extension).
+   * If provided, the correct extension for the selected format will be appended automatically.
+   */
+  outputName?: string;
+
   // Range settings
   startTime?: number; // Export start time in seconds
   endTime?: number; // Export end time in seconds

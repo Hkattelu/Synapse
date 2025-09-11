@@ -231,17 +231,31 @@ const getQualitySettings = (quality: ExportQuality) => {
   }
 };
 
+// Sanitize a user-provided file base name (no extension)
+const sanitizeFileBase = (name: string): string => {
+  const trimmed = name.trim();
+  // Replace illegal filename characters with dashes and collapse repeats
+  const cleaned = trimmed.replace(/[^a-zA-Z0-9 _.-]+/g, '-').replace(/-+/g, '-');
+  // Avoid empty names
+  return cleaned || 'export';
+};
+
 // Generate output filename
 const generateOutputFilename = (
   project: Project,
   settings: ExportSettings
 ): string => {
+  const ext = settings.format;
+  if (settings.outputName && typeof settings.outputName === 'string') {
+    const base = sanitizeFileBase(settings.outputName);
+    return `${base}.${ext}`;
+  }
   const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-');
   const qualityLabel =
     settings.quality.charAt(0).toUpperCase() + settings.quality.slice(1);
   const resolution = `${settings.width || project.settings.width}x${settings.height || project.settings.height}`;
 
-  return `${project.name}_${qualityLabel}_${resolution}_${timestamp}.${settings.format}`;
+  return `${project.name}_${qualityLabel}_${resolution}_${timestamp}.${ext}`;
 };
 
 // Create export job
@@ -439,6 +453,8 @@ export class ClientExportManager {
             includeWallpaper: settings.includeWallpaper !== false,
             includeGradient: settings.includeGradient !== false,
           },
+          // Pass desired filename to the server render pipeline as a hint
+          outputFilename,
         };
         const { jobId } = await api.startRender(inputProps);
         serverJobId = jobId;

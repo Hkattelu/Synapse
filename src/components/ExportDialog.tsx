@@ -48,6 +48,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const [activeTab, setActiveTab] = useState<'presets' | 'custom'>('presets');
   const [selectedPresetId, setSelectedPresetId] =
     useState<string>('youtube-1080p');
+  const [outputName, setOutputName] = useState<string>(project?.name || 'export');
 
   // Calculate estimated file size
   const estimatedSize = project ? getEstimatedFileSize(project) : 0;
@@ -67,7 +68,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
       // downstream pipelines use the exact values (width/height, etc.).
       // Pass the currently selected settings explicitly so tests and
       // downstream pipelines use the exact values (width/height, etc.).
-      await startExport(project, { ...settings });
+      await startExport(project, { ...settings, outputName });
       // Keep dialog open to show progress
     } catch (error) {
       console.error('Export failed:', error);
@@ -308,22 +309,51 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               </div>
 
               <div className="p-6">
+                {/* File name input */}
+                <div className="mb-6">
+                  <label className="block text-xs font-medium text-text-secondary mb-1">
+                    Video name
+                  </label>
+                  <div className="flex gap-2 items-center">
+                    <input
+                      value={outputName}
+                      onChange={(e) => setOutputName(e.target.value)}
+                      placeholder={project?.name || 'My Video'}
+                      className="flex-1 p-2 bg-background-secondary border border-border-subtle rounded text-sm text-text-primary"
+                    />
+                    <span className="text-xs text-text-secondary whitespace-nowrap">
+                      .{settings.format}
+                    </span>
+                  </div>
+                </div>
                 {activeTab === 'presets' ? (
                   // Presets Tab
-                  <div className="space-y-4">
+                  <div className="space-y-4" role="radiogroup" aria-label="Export presets">
                     {presets.map((preset) => (
                       <div
                         key={preset.id}
+                        role="radio"
+                        aria-checked={selectedPresetId === preset.id}
+                        tabIndex={0}
                         className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedPresetId === preset.id
-                          ? 'border-primary-400 bg-primary-900/20'
+                          ? 'border-primary-400 bg-primary-900/20 ring-1 ring-primary-500'
                           : 'border-border-subtle hover:border-border-primary'
                           }`}
                         onClick={() => handlePresetSelect(preset)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') handlePresetSelect(preset);
+                        }}
                       >
                         <div className="flex items-start justify-between">
                           <div>
-                            <h3 className="font-medium text-text-primary">
+                            <h3 className="font-medium text-text-primary flex items-center gap-2">
+                              <span className={`inline-block w-3 h-3 rounded-full border ${selectedPresetId === preset.id ? 'bg-primary-600 border-primary-600' : 'border-border-subtle'}`} />
                               {preset.name}
+                              {selectedPresetId === preset.id && (
+                                <span className="ml-2 text-xxs uppercase tracking-wide text-primary-300 bg-primary-900/40 px-2 py-0.5 rounded">
+                                  Selected
+                                </span>
+                              )}
                             </h3>
                             <p className="text-sm text-text-secondary mt-1">
                               {preset.description}

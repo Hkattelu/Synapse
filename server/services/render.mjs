@@ -37,6 +37,12 @@ const pickExtForFormat = (format) => {
   }
 };
 
+const sanitizeBase = (name) => {
+  if (!name || typeof name !== 'string') return '';
+  const cleaned = name.trim().replace(/[^a-zA-Z0-9 _.-]+/g, '-').replace(/-+/g, '-');
+  return cleaned || '';
+};
+
 const runNext = async () => {
   if (active >= Math.max(1, Number(config.render.concurrency || 1))) return;
   const next = pending.shift();
@@ -51,7 +57,15 @@ const runNext = async () => {
 
     const format = String(inputProps?.exportSettings?.format || 'mp4');
     const codec = String(inputProps?.exportSettings?.codec || 'h264');
-    const out = path.join(config.render.outputDir, `${id}.${pickExtForFormat(format)}`);
+    // Honor custom output filename if provided, else default to id.ext
+    let base = sanitizeBase(inputProps?.outputFilename);
+    const ext = pickExtForFormat(format);
+    if (base) {
+      // Strip any provided extension and enforce correct ext
+      base = base.replace(/\.[a-zA-Z0-9]+$/, '');
+    }
+    const filename = `${base || id}.${ext}`;
+    const out = path.join(config.render.outputDir, filename);
 
     jobs.set(id, { status: 'rendering', output: out, progress: 0 });
     await renderMedia({
