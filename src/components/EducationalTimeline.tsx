@@ -770,9 +770,9 @@ export function EducationalTimeline({
       {/* Timeline Content (grid with sticky left headers) */}
       <div
         ref={(el) => {
+          (scrollRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
           (containerRef as unknown as React.MutableRefObject<HTMLDivElement | null>).current = el as HTMLDivElement;
         }}
-        ref={scrollRef}
         className="educational-timeline-content overflow-x-auto overflow-y-hidden flex-1"
         onScroll={handleScroll}
         onWheel={(e) => {
