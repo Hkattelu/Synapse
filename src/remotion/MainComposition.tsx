@@ -15,10 +15,15 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
 }) => {
   const { fps } = useVideoConfig();
 
+  // Guard against missing or zero durations by deriving from project settings when needed
+  const fallbackDurationSec = Math.max(1, Number(settings?.duration ?? 60));
+
   const sequences = timeline
     .map((item) => {
-      const startFrame = Math.round(item.startTime * fps);
-      const durationInFrames = Math.round(item.duration * fps);
+      const startSec = Number.isFinite(item.startTime) ? item.startTime : 0;
+      const itemDurSec = Number.isFinite(item.duration) && item.duration! > 0 ? item.duration : fallbackDurationSec;
+      const startFrame = Math.round(startSec * fps);
+      const durationInFrames = Math.round(itemDurSec * fps);
 
       // Handle sequences that don't need assets
       if (item.type === 'code') {

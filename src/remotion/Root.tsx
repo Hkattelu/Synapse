@@ -12,6 +12,17 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
+        calculateMetadata={({ props }: { props: MainCompositionProps }) => {
+          // Dynamically compute duration from incoming props if provided
+          const fps = 30;
+          const durationSec = Math.max(1, Math.floor(props.settings?.duration ?? 60));
+          return {
+            durationInFrames: durationSec * fps,
+            fps,
+            width: props.settings?.width ?? 1920,
+            height: props.settings?.height ?? 1080,
+          };
+        }}
         defaultProps={
           {
             timeline: [],

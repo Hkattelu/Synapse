@@ -39,3 +39,5 @@ dist-electron/
 
 # Test coverage outputs
 coverage/
+
+server/output/

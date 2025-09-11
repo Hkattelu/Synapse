@@ -433,15 +433,24 @@ export class ClientExportManager {
             width: settings.width || project.settings.width,
             height: settings.height || project.settings.height,
             fps: project.settings.fps,
+            // Prefer explicit project duration; otherwise derive from timeline, fallback to 60s
             duration:
-              project.settings.duration ??
-              Math.ceil(
-                project.timeline?.reduce(
-                  (max, item) =>
-                    Math.max(max, (item.startTime || 0) + (item.duration || 0)),
-                  0
-                ) || 0
-              ),
+              project.settings.duration && project.settings.duration > 0
+                ? project.settings.duration
+                : Math.max(
+                    60,
+                    Math.ceil(
+                      (project.timeline || [])
+                        .reduce(
+                          (max, item) =>
+                            Math.max(
+                              max,
+                              (Number(item.startTime) || 0) + (Number(item.duration) || 0)
+                            ),
+                          0
+                        ) || 0
+                    )
+                  ),
             backgroundColor: project.settings.backgroundColor || '#000000',
           },
           exportSettings: {

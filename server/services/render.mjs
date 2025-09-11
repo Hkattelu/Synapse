@@ -8,19 +8,21 @@ import { config } from '../config.mjs';
 
 const jobs = new Map(); // id -> {status, output, error, progress?}
 let bundleLocation = null;
-let compositions = null;
 
 // Simple in-process queue control
 let active = 0;
 const pending = [];
 
-const ensureBundle = async () => {
-  if (bundleLocation && compositions) return { bundleLocation, compositions };
-  bundleLocation = await bundle({
-    entryPoint: config.render.entryPoint,
-    outDir: path.join(os.tmpdir(), 'synapse-remotion-bundle'),
-  });
-  compositions = await getCompositions(bundleLocation);
+const ensureBundle = async (inputProps) => {
+  // Bundle once and reuse; compositions may depend on inputProps, so query fresh each time
+  if (!bundleLocation) {
+    bundleLocation = await bundle({
+      entryPoint: config.render.entryPoint,
+      outDir: path.join(os.tmpdir(), 'synapse-remotion-bundle'),
+    });
+  }
+  // Always fetch compositions with the current inputProps so any prop-dependent logic applies
+  const compositions = await getCompositions(bundleLocation, { inputProps });
   return { bundleLocation, compositions };
 };
 
@@ -51,7 +53,13 @@ const runNext = async () => {
   const { id, inputProps } = next;
 
   try {
-    const { bundleLocation, compositions } = await ensureBundle();
+    // Log a small debug line for troubleshooting (safe, no PII)
+    console.log('[render] starting job', id, {
+      timeline: Array.isArray(inputProps?.timeline) ? inputProps.timeline.length : 0,
+      mediaAssets: Array.isArray(inputProps?.mediaAssets) ? inputProps.mediaAssets.length : 0,
+    });
+
+    const { bundleLocation, compositions } = await ensureBundle(inputProps);
     const composition = compositions.find((c) => c.id === config.render.compositionId);
     if (!composition) throw new Error(`Composition ${config.render.compositionId} not found`);
 
