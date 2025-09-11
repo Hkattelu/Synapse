@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
-import { useTimeline, useMediaAssets, useUI, usePlayback } from '../state/hooks';
+import { useTimeline, useMediaAssets, useUI, usePlayback, useProject } from '../state/hooks';
 import type { TimelineItem, MediaAsset } from '../lib/types';
 
 interface TimelineProps {
@@ -35,8 +35,10 @@ export function Timeline({ className = '' }: TimelineProps) {
   const { getMediaAssetById } = useMediaAssets();
   const { ui, updateTimelineView } = useUI();
   const { playback, seek } = usePlayback();
+  const { project } = useProject();
 
   const timelineRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
     dragType: null,
@@ -47,8 +49,9 @@ export function Timeline({ className = '' }: TimelineProps) {
     startTrack: 0,
   });
 
-  // Calculate timeline dimensions
-  const maxDuration = Math.max(timelineDuration, 60); // Minimum 60 seconds
+  // Calculate timeline dimensions using project duration as a floor
+  const compositionDuration = project?.settings?.duration ?? 0;
+  const maxDuration = Math.max(timelineDuration, compositionDuration, 60); // Minimum 60 seconds
   const timelineWidth = maxDuration * PIXELS_PER_SECOND * ui.timeline.zoom;
   const maxTrack = Math.max(...timeline.map((item) => item.track), 3); // Minimum 4 tracks
   const timelineHeight = (maxTrack + 1) * TRACK_HEIGHT;
@@ -256,6 +259,17 @@ export function Timeline({ className = '' }: TimelineProps) {
     [ui.timeline.zoom, updateTimelineView]
   );
 
+  // Fit to duration
+  const handleFitToDuration = useCallback(() => {
+    const viewport = scrollRef.current;
+    if (!viewport) return;
+    const available = Math.max(1, viewport.clientWidth - 16); // padding safety
+    const contentWidth = timeToPixels(maxDuration) / ui.timeline.zoom; // width at zoom=1
+    const targetZoom = Math.max(0.1, Math.min(5, available / contentWidth));
+    updateTimelineView({ zoom: targetZoom, scrollPosition: 0 });
+    if (viewport) viewport.scrollLeft = 0;
+  }, [scrollRef, timeToPixels, maxDuration, ui.timeline.zoom, updateTimelineView]);
+
   // Handle scroll
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
@@ -263,6 +277,27 @@ export function Timeline({ className = '' }: TimelineProps) {
       updateTimelineView({ scrollPosition: scrollLeft });
     },
     [updateTimelineView]
+  );
+
+  // Wheel handler: Shift+Wheel to zoom, Wheel to scroll horizontally
+  const handleWheel = useCallback(
+    (e: React.WheelEvent<HTMLDivElement>) => {
+      if (e.shiftKey) {
+        e.preventDefault();
+        const delta = Math.sign(e.deltaY) * -0.2; // scroll down -> zoom out
+        const newZoom = Math.max(0.1, Math.min(5, ui.timeline.zoom + delta));
+        updateTimelineView({ zoom: newZoom });
+      } else {
+        const el = e.currentTarget;
+        const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
+        if (delta !== 0) {
+          e.preventDefault();
+          el.scrollLeft += delta;
+          updateTimelineView({ scrollPosition: el.scrollLeft });
+        }
+      }
+    },
+    [ui.timeline.zoom, updateTimelineView]
   );
 
   // Scrubbing
@@ -381,6 +416,13 @@ export function Timeline({ className = '' }: TimelineProps) {
           >
             Snap
           </button>
+          <button
+            onClick={handleFitToDuration}
+            className="ml-2 px-2 py-1 text-xs rounded bg-synapse-surface-hover text-text-secondary hover:text-text-primary hover:bg-synapse-surface-active transition-colors"
+            title="Fit to duration"
+          >
+            Fit
+          </button>
         </div>
         <div className="text-xs text-text-tertiary">
           Duration: {Math.round(timelineDuration * 10) / 10}s
@@ -389,9 +431,11 @@ export function Timeline({ className = '' }: TimelineProps) {
 
       {/* Timeline Content */}
       <div
-        className="timeline-content overflow-auto flex-1"
+        ref={scrollRef}
+        className="timeline-content overflow-x-auto overflow-y-hidden flex-1"
         onScroll={handleScroll}
         onMouseDown={handleScrubStart}
+        onWheel={handleWheel}
       >
         <div
           ref={timelineRef}
@@ -441,8 +485,34 @@ export function Timeline({ className = '' }: TimelineProps) {
                 height: `${TRACK_HEIGHT}px`,
               }}
             >
-              <div className="absolute left-2 top-2 text-xs text-text-tertiary">
-                Track {trackIndex + 1}
+              <div className="absolute left-2 top-2 text-xs text-text-tertiary flex items-center gap-1">
+                <div className="relative group">
+                  <button
+                    className="p-1 rounded hover:bg-synapse-surface-hover text-text-tertiary hover:text-text-primary"
+                    aria-describedby={`tl-tip-${trackIndex}`}
+                    aria-label={`Tips for track ${trackIndex + 1}`}
+                  >
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 18h.01" />
+                      <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+                      <circle cx="12" cy="12" r="9" />
+                    </svg>
+                  </button>
+                  <div
+                    role="tooltip"
+                    id={`tl-tip-${trackIndex}`}
+                    className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-background-tertiary border border-border-subtle text-text-primary text-xs rounded-md shadow-lg w-60"
+                  >
+                    <div className="px-3 py-2 border-b border-border-subtle font-medium">Timeline Tips</div>
+                    <div className="px-3 py-2">
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li>Drag clips to move; drag edges to trim</li>
+                        <li>Use Snap for alignment</li>
+                        <li>Adjust Zoom for precision</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           ))}

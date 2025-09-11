@@ -6,7 +6,6 @@ import { MainComposition } from '../remotion/MainComposition';
 import type { MainCompositionProps } from '../remotion/types';
 import type { TimelineItem } from '../lib/types';
 import { getEducationalTrackByNumber } from '../lib/educationalTypes';
-import { Eye, EyeOff } from 'lucide-react';
 
 interface PreviewProps {
   className?: string;
@@ -46,44 +45,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   const playerRef = React.useRef<PlayerRef>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  // Persisted toggle for the educational tracks overlay
-  const [showEduOverlay, setShowEduOverlay] = useState<boolean>(() => {
-    try {
-      const val = localStorage.getItem('synapse-show-edu-overlay');
-      return val === null ? true : val === 'true';
-    } catch {
-      return true;
-    }
-  });
 
-  // Determine which timeline items are active at the current time
-  const activeItems = useMemo(
-    () =>
-      timeline.filter(
-        (i) => playback.currentTime >= i.startTime && playback.currentTime < i.startTime + i.duration
-      ),
-    [timeline, playback.currentTime]
-  );
-
-  // Find any talking head items to enable viewer controls
-  const talkingHeads = useMemo(
-    () =>
-      timeline.filter(
-        (i) => i.type === 'video' && i.properties.talkingHeadEnabled
-      ),
-    [timeline]
-  );
-  const bubbleHidden = useMemo(
-    () =>
-      talkingHeads.length > 0 &&
-      talkingHeads.every((i) => i.properties.talkingHeadHidden === true),
-    [talkingHeads]
-  );
-  const bubbleMuted = useMemo(
-    () =>
-      talkingHeads.length > 0 && talkingHeads.every((i) => i.muted === true),
-    [talkingHeads]
-  );
 
   // Local state for editable dimensions
   const [dimWidth, setDimWidth] = useState<number>(() => project?.settings.width || 1920);
@@ -351,19 +313,6 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     [setVolume]
   );
 
-  // Handle skip forward/backward
-  const handleSkipBackward = useCallback(() => {
-    const newTime = Math.max(0, playback.currentTime - 10);
-    handleSeek(newTime);
-  }, [playback.currentTime, handleSeek]);
-
-  const handleSkipForward = useCallback(() => {
-    const newTime = Math.min(
-      compositionProps.settings.duration,
-      playback.currentTime + 10
-    );
-    handleSeek(newTime);
-  }, [playback.currentTime, compositionProps.settings.duration, handleSeek]);
 
   // Handle frame-by-frame navigation
   const handleFrameBackward = useCallback(() => {
@@ -421,7 +370,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     <div className={`bg-background-primary flex flex-col ${className}`}>
       {/* Preview Area */}
       <div className="flex-1 flex items-center justify-center p-4 bg-black">
-        <div className="relative w-full h-full flex items-center justify-center">
+        <div className="relative w-full h-full flex items-center justify-center group">
           <Player
             acknowledgeRemotionLicense
             ref={playerRef}
@@ -443,6 +392,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             showVolumeControls={false}
             clickToPlay={false}
           />
+
           {/* Fullscreen Button */}
           <button
             onClick={handleFullscreenToggle}
@@ -480,108 +430,119 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             )}
           </button>
 
-          {/* Controls stack (top-left) */}
-          <div className="absolute top-3 left-3 flex flex-col gap-2">
-            {/* Educational track-specific controls */}
-            {talkingHeads.length > 0 && (
-              <div className="flex items-center space-x-2 bg-neutral-900/80 backdrop-blur-sm px-3 py-2 rounded-lg text-white text-xs border border-white/10">
-                <div className="flex items-center gap-1 text-red-400">
-                  <span>👤</span>
-                  <span className="font-medium">You Track</span>
-                </div>
-                <div className="w-px h-4 bg-white/20"></div>
-                <button
-                  onClick={() => {
-                    // Toggle hidden for all talking head items
-                    for (const item of talkingHeads) {
-                      updateTimelineItem(item.id, {
-                        properties: {
-                          ...item.properties,
-                          talkingHeadHidden: !bubbleHidden,
-                        },
-                      });
-                    }
-                  }}
-                  className="px-2 py-1 rounded hover:bg-white/10 transition-colors"
-                  title={bubbleHidden ? 'Show personal video' : 'Hide personal video'}
-                >
-                  {bubbleHidden ? '👁️ Show' : '🙈 Hide'}
-                </button>
-                <button
-                  onClick={() => {
-                    // Toggle mute for all talking head items
-                    for (const item of talkingHeads) {
-                      updateTimelineItem(item.id, { muted: !bubbleMuted });
-                    }
-                  }}
-                  className="px-2 py-1 rounded hover:bg-white/10 transition-colors"
-                  title={bubbleMuted ? 'Unmute personal video' : 'Mute personal video'}
-                >
-                  {bubbleMuted ? '🔊 Unmute' : '🔇 Mute'}
-                </button>
-              </div>
-            )}
-            
-            {/* Educational track performance indicators */}
-            {activeItems.some(item => getEducationalTrackByNumber(item.track)?.name === 'Code') && (
-              <div className="bg-purple-900/80 backdrop-blur-sm px-2 py-1 rounded text-white text-xs border border-purple-400/30">
-                <div className="flex items-center gap-1">
-                  <span>💻</span>
-                  <span>Code Track Active</span>
-                </div>
-              </div>
-            )}
-            
-            {activeItems.some(item => getEducationalTrackByNumber(item.track)?.name === 'Narration') && (
-              <div className="bg-amber-900/80 backdrop-blur-sm px-2 py-1 rounded text-white text-xs border border-amber-400/30">
-                <div className="flex items-center gap-1">
-                  <span>🎤</span>
-                  <span>Narration Active</span>
-                </div>
-              </div>
-            )}
-            {/* Overlay visibility toggle */}
-            <button
-              onClick={() => {
-                const next = !showEduOverlay;
-                setShowEduOverlay(next);
-                try { localStorage.setItem('synapse-show-edu-overlay', String(next)); } catch {}
-              }}
-              className="flex items-center gap-1 bg-neutral-900/70 backdrop-blur px-2 py-1 rounded text-white text-xs hover:bg-neutral-800/70"
-              title={showEduOverlay ? 'Hide Educational Tracks Overlay' : 'Show Educational Tracks Overlay'}
-              aria-pressed={showEduOverlay}
-            >
-              {showEduOverlay ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-              <span className="hidden sm:inline">Tracks Overlay</span>
-            </button>
-          </div>
+          {/* Hover Controls Overlay */}
+          <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="pointer-events-auto bg-neutral-900/70 backdrop-blur rounded-lg px-3 py-2 text-white flex items-center gap-4 border border-white/10">
+              {/* Play/Pause */}
+              <button
+                onClick={handlePlayPause}
+                className="bg-primary-600 hover:bg-primary-700 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+                title={playback.isPlaying ? 'Pause' : 'Play'}
+              >
+                {playback.isPlaying ? (
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 9v6m4-6v6"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-5 h-5 ml-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                    />
+                  </svg>
+                )}
+              </button>
 
-          {/* Active educational tracks overlay */}
-          {showEduOverlay && activeItems.length > 0 && (
-            <div className="absolute top-3 left-3 mt-20 bg-neutral-900/70 backdrop-blur px-2 py-1 rounded text-white text-xs max-w-[60%]">
-              <div className="font-medium mb-1 opacity-90">Now Playing</div>
-              <div className="space-y-1">
-                {activeItems.map((item) => {
-                  const track = getEducationalTrackByNumber(item.track);
-                  const asset = project?.mediaAssets.find((a) => a.id === item.assetId);
-                  return (
-                    <div key={item.id} className="flex items-center gap-2">
-                      {track ? (
-                        <span
-                          className="inline-block w-2 h-2 rounded-full"
-                          style={{ backgroundColor: track.color }}
-                          title={track.name}
-                        />
-                      ) : null}
-                      <span className="opacity-90">{track?.name ?? `Track ${item.track + 1}`}</span>
-                      <span className="opacity-70">•</span>
-                      <span className="truncate opacity-90">{asset?.name ?? item.type}</span>
-                    </div>
-                  );
-                })}
+              {/* Time Display */}
+              <div className="flex items-center gap-1 text-xs">
+                <span className="font-mono">
+                  {formatTime(
+                    playback.currentTime,
+                    compositionProps.settings.fps
+                  )}
+                </span>
+                <span className="opacity-70">/</span>
+                <span className="font-mono">
+                  {formatTime(
+                    compositionProps.settings.duration,
+                    compositionProps.settings.fps
+                  )}
+                </span>
+              </div>
+
+              {/* Volume Controls */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={toggleMute}
+                  className="text-white/90 hover:text-white p-2 rounded transition-colors"
+                  title={playback.muted ? 'Unmute' : 'Mute'}
+                >
+                  {playback.muted || playback.volume === 0 ? (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                      />
+                    </svg>
+                  )}
+                </button>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={playback.muted ? 0 : playback.volume}
+                  onChange={handleVolumeChange}
+                  className="w-20 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer slider"
+                  title="Volume"
+                />
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
       {/* Timeline Scrubber */}
@@ -617,141 +578,61 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
         </div>
       </div>
 
-      {/* Preview Controls */}
-      <div className="bg-background-secondary border-t border-border-subtle p-4">
+
+      {/* Condensed Preview Controls (reduced height) */}
+      <div className="bg-background-secondary/80 border-t border-border-subtle px-3 py-2">
         <div className="flex items-center justify-between">
-          {/* Left controls */}
-          <div className="flex items-center space-x-2">
-            {/* Frame backward */}
+          {/* Left: Frame step */}
+          <div className="flex items-center gap-1">
             <button
               onClick={handleFrameBackward}
-              className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
+              className="text-text-secondary hover:text-text-primary p-1.5 rounded hover:bg-neutral-700"
               title="Previous Frame"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"
-                />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
               </svg>
             </button>
-
-            {/* Skip backward */}
             <button
-              onClick={handleSkipBackward}
-              className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
-              title="Skip Backward 10s"
+              onClick={handleFrameForward}
+              className="text-text-secondary hover:text-text-primary p-1.5 rounded hover:bg-neutral-700"
+              title="Next Frame"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"
-                />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 4v16l6-8-6-8zM11 4v16l6-8-6-8z" />
               </svg>
             </button>
           </div>
 
-          {/* Center controls */}
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={handlePlayPause}
-              className="bg-primary-600 hover:bg-primary-700 text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors shadow-glow"
-              title={playback.isPlaying ? 'Pause' : 'Play'}
-            >
-              {playback.isPlaying ? (
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 9v6m4-6v6"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="w-6 h-6 ml-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                  />
-                </svg>
+          {/* Center: Time display (secondary) */}
+          <div className="flex items-center gap-1 text-xs text-text-secondary">
+            <span className="font-mono">
+              {formatTime(playback.currentTime, compositionProps.settings.fps)}
+            </span>
+            <span>/</span>
+            <span className="font-mono">
+              {formatTime(
+                compositionProps.settings.duration,
+                compositionProps.settings.fps
               )}
-            </button>
-
-            <div className="flex items-center space-x-2 text-sm text-text-secondary">
-              <span className="font-mono">
-                {formatTime(
-                  playback.currentTime,
-                  compositionProps.settings.fps
-                )}
-              </span>
-              <span>/</span>
-              <span className="font-mono">
-                {formatTime(
-                  compositionProps.settings.duration,
-                  compositionProps.settings.fps
-                )}
-              </span>
-            </div>
+            </span>
           </div>
 
-          {/* Right controls */}
-          <div className="flex items-center space-x-2">
-            {/* Dimensions controls */}
-            <div className="flex items-center space-x-2 mr-3">
-              {/* Simplified aspect ratio radio group: 16/9, 1/1, 9/16 */}
+          {/* Right: Aspect ratio + Record (Export moved to header; Audio moved to overlay) */}
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-1">
               {(() => {
-                // Determine current aspect ratio label by reducing width/height
                 const w = project?.settings.width || dimWidth;
                 const h = project?.settings.height || dimHeight;
                 const gcd = (a: number, b: number): number => (b === 0 ? Math.abs(a) : gcd(b, a % b));
                 const g = gcd(w, h) || 1;
-                const ratioLabel = `${Math.round(w / g)}/${Math.round(h / g)}`; // e.g., 16/9, 1/1, 9/16
-
+                const ratioLabel = `${Math.round(w / g)}/${Math.round(h / g)}`;
                 const isChecked = (val: '16/9' | '1/1' | '9/16') => ratioLabel === val;
-                const baseBtn =
-                  'inline-flex items-center justify-center whitespace-nowrap px-3 py-1.5 text-xs font-medium rounded-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+                const baseBtn = 'inline-flex items-center justify-center px-2.5 py-1 text-xs rounded-md';
                 const checkedCls = 'bg-background-primary text-text-primary shadow-sm';
-                const uncheckedCls = 'text-text-secondary';
-
+                const uncheckedCls = 'text-text-secondary hover:bg-background-primary/30';
                 return (
-                  <div
-                    role="radiogroup"
-                    aria-label="Aspect ratio"
-                    className="inline-flex items-center justify-center bg-background-tertiary rounded-lg p-1 h-9"
-                    tabIndex={0}
-                  >
+                  <div role="radiogroup" aria-label="Aspect ratio" className="inline-flex items-center bg-background-tertiary rounded-md p-0.5">
                     <button
                       type="button"
                       role="radio"
@@ -762,7 +643,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
                       value="16/9"
                       tabIndex={-1}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
                         <rect width="20" height="12" x="2" y="6" rx="2"></rect>
                       </svg>
                     </button>
@@ -776,7 +657,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
                       value="1/1"
                       tabIndex={-1}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
                         <rect width="18" height="18" x="3" y="3" rx="2"></rect>
                       </svg>
                     </button>
@@ -790,7 +671,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
                       value="9/16"
                       tabIndex={0}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
                         <rect width="12" height="20" x="6" y="2" rx="2"></rect>
                       </svg>
                     </button>
@@ -798,148 +679,15 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
                 );
               })()}
             </div>
-            {/* Record button */}
             <button
-              onClick={() =>
-                window.dispatchEvent(new CustomEvent('openRecorderDialog'))
-              }
-              className="text-red-400 hover:text-red-300 p-2 rounded transition-colors hover:bg-neutral-700"
+              onClick={() => window.dispatchEvent(new CustomEvent('openRecorderDialog'))}
+              className="text-red-400 hover:text-red-300 p-1.5 rounded hover:bg-neutral-700"
               title="Record Narration"
             >
-              <svg
-                className="w-5 h-5"
-                fill="currentColor"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-4 h-4" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="8" strokeWidth={0} />
               </svg>
             </button>
-            
-            {/* Export button */}
-            <button
-              onClick={() =>
-                window.dispatchEvent(new CustomEvent('openExportDialog'))
-              }
-              className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
-              title="Export Video"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </button>
-            {/* Skip forward */}
-            <button
-              onClick={handleSkipForward}
-              className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
-              title="Skip Forward 10s"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 4v16l6-8-6-8zM11 4v16l6-8-6-8z"
-                />
-              </svg>
-            </button>
-
-            {/* Frame forward */}
-            <button
-              onClick={handleFrameForward}
-              className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
-              title="Next Frame"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 4v16l6-8-6-8zM11 4v16l6-8-6-8z"
-                />
-              </svg>
-            </button>
-
-            {/* Volume controls */}
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={toggleMute}
-                className="text-text-secondary hover:text-text-primary p-2 rounded transition-colors hover:bg-neutral-700"
-                title={playback.muted ? 'Unmute' : 'Mute'}
-              >
-                {playback.muted || playback.volume === 0 ? (
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
-                    />
-                  </svg>
-                )}
-              </button>
-
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={playback.muted ? 0 : playback.volume}
-                onChange={handleVolumeChange}
-                className="w-16 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-                style={
-                  {
-                    '--value': `${(playback.muted ? 0 : playback.volume) * 100}%`,
-                  } as React.CSSProperties
-                }
-                title="Volume"
-              />
-            </div>
           </div>
         </div>
       </div>

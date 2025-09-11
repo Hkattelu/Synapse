@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { useTimeline, useMediaAssets, useUI, usePlayback } from '../state/hooks';
+import { useTimeline, useMediaAssets, useUI, usePlayback, useProject } from '../state/hooks';
 import { EducationalTrack } from './EducationalTrack';
 import { suggestTrackPlacement, validateTrackPlacement } from '../lib/educationalPlacement';
 import { 
@@ -67,8 +67,10 @@ export function EducationalTimeline({
   const { ui, updateTimelineView } = useUI();
   const breakpoint = useResponsiveBreakpoint();
   const { playback, seek } = usePlayback();
+  const { project } = useProject();
 
   const timelineRef = useRef<HTMLDivElement>(null);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
   const [currentMode, setCurrentMode] = useState<'simplified' | 'advanced'>(mode);
   const [placementWarnings, setPlacementWarnings] = useState<PlacementWarning[]>([]);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
@@ -101,7 +103,8 @@ export function EducationalTimeline({
   );
 
   // Calculate timeline dimensions with responsive adjustments
-  const maxDuration = Math.max(timelineDuration, 60); // Minimum 60 seconds
+  const compositionDuration = project?.settings?.duration ?? 0;
+  const maxDuration = Math.max(timelineDuration, compositionDuration, 60); // Minimum 60 seconds
   // Determine which tracks are non-empty
   const nonEmptyTrackIds = useMemo(() => {
     const set = new Set<number>();
@@ -541,6 +544,17 @@ export function EducationalTimeline({
     );
   }, []);
 
+  // Fit to duration (accounts for left header column)
+  const handleFitToDuration = useCallback(() => {
+    const viewport = scrollRef.current;
+    if (!viewport) return;
+    const available = Math.max(1, viewport.clientWidth - (HEADER_COL_WIDTH + 16));
+    const contentWidth = timeToPixels(maxDuration) / ui.timeline.zoom; // width at zoom=1
+    const targetZoom = Math.max(0.1, Math.min(5, available / contentWidth));
+    updateTimelineView({ zoom: targetZoom, scrollPosition: 0 });
+    viewport.scrollLeft = 0;
+  }, [scrollRef, timeToPixels, maxDuration, ui.timeline.zoom, updateTimelineView]);
+
   // Playhead scrubbing state
   const [isScrubbing, setIsScrubbing] = useState(false);
 
@@ -734,6 +748,13 @@ export function EducationalTimeline({
           >
             Snap
           </button>
+          <button
+            onClick={handleFitToDuration}
+            className="ml-2 px-2 py-1 text-xs rounded bg-neutral-700 text-text-secondary hover:text-text-primary hover:bg-neutral-600 transition-colors"
+            title="Fit to duration"
+          >
+            Fit
+          </button>
 
           {/* Inline quick-add actions */}
           <div className="ml-4 flex items-center">
@@ -751,8 +772,25 @@ export function EducationalTimeline({
         ref={(el) => {
           (containerRef as unknown as React.MutableRefObject<HTMLDivElement | null>).current = el as HTMLDivElement;
         }}
-        className="educational-timeline-content overflow-auto flex-1"
+        ref={scrollRef}
+        className="educational-timeline-content overflow-x-auto overflow-y-hidden flex-1"
         onScroll={handleScroll}
+        onWheel={(e) => {
+          if (e.shiftKey) {
+            e.preventDefault();
+            const delta = Math.sign(e.deltaY) * -0.2;
+            const newZoom = Math.max(0.1, Math.min(5, ui.timeline.zoom + delta));
+            updateTimelineView({ zoom: newZoom });
+          } else {
+            const el = e.currentTarget as HTMLDivElement;
+            const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
+            if (delta !== 0) {
+              e.preventDefault();
+              el.scrollLeft += delta;
+              updateTimelineView({ scrollPosition: el.scrollLeft });
+            }
+          }
+        }}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onClick={handleTimelineClick}
@@ -810,13 +848,43 @@ export function EducationalTimeline({
                   <div
                     className="w-6 h-6 rounded-md flex items-center justify-center text-white"
                     style={{ backgroundColor: track.color }}
-                    title={`Track ${track.trackNumber + 1}`}
                   >
                     <IconComponent className="w-4 h-4" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex items-center gap-1">
                     <div className="text-xs font-medium text-text-primary truncate">{track.name}</div>
-                    <div className="text-[10px] text-text-tertiary">Track {track.trackNumber + 1}</div>
+                    <div className="relative group">
+                      <button
+                        className="p-1 rounded text-text-tertiary hover:text-text-primary hover:bg-neutral-700"
+                        aria-describedby={`tip-${track.id}`}
+                        aria-label={`Tips for ${track.name} track`}
+                      >
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 18h.01" />
+                          <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+                          <circle cx="12" cy="12" r="9" />
+                        </svg>
+                      </button>
+                      <div
+                        role="tooltip"
+                        id={`tip-${track.id}`}
+                        className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-background-tertiary border border-border-subtle text-text-primary text-xs rounded-md shadow-lg w-64"
+                      >
+                        <div className="px-3 py-2 border-b border-border-subtle font-medium">{track.name} Tips</div>
+                        <div className="px-3 py-2">
+                          <ul className="list-disc pl-4 space-y-1">
+                            <li>Allowed: {track.allowedContentTypes.join(', ')}</li>
+                            <li>Suggested: {track.suggestedAnimations.join(', ')}</li>
+                            <li>
+                              {track.id === 'code' && 'Use typing animation; enable line numbers; readable theme'}
+                              {track.id === 'visual' && 'Use gentle motion (Ken Burns/Slide); focus important UI; avoid clutter'}
+                              {track.id === 'narration' && 'Keep volume balanced (~0.8); avoid overlapping speech'}
+                              {track.id === 'you' && 'Place talking head in a corner; mute when not speaking'}
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
