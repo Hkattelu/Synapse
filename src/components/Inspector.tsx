@@ -4,8 +4,9 @@ import { validateItemProperties } from '../lib/validation';
 import { PresetSelector } from './animation/PresetSelector';
 import { getApplicablePresets, getRecommendedPresetsFor } from '../remotion/animations/presets';
 import * as animationPresetsModule from '../lib/animationPresets';
-import { ThemePicker } from './ui/ThemePicker';
 import { VisualControlsTabs } from './ui/VisualControlsTabs';
+import { BackgroundPicker } from './ui/BackgroundPicker';
+import { themeManager } from '../lib/themes';
 import { detectLanguageFromCode, getCodeLanguageDefaults, getEducationalTrackByNumber } from '../lib/educationalTypes';
 import type {
   TimelineItem,
@@ -20,7 +21,7 @@ interface InspectorProps {
 export function Inspector({ className = '' }: InspectorProps) {
   const { selectedTimelineItems, updateTimelineItem } = useTimeline();
   const { getMediaAssetById } = useMediaAssets();
-  const [activeTab, setActiveTab] = useState<'properties' | 'animation' | 'visual' | 'layout'>('properties');
+  const [activeTab, setActiveTab] = useState<'properties' | 'visual' | 'layout'>('properties');
 
   // Get the first selected item (for now, we'll handle single selection)
   const selectedItem = selectedTimelineItems[0];
@@ -71,8 +72,8 @@ export function Inspector({ className = '' }: InspectorProps) {
     );
   }
 
-  // Check if animation tab should be available
-  const hasAnimationPresets = getApplicablePresets(selectedItem.type, selectedAsset?.type).length > 0;
+  // Animation tab removed for now; presets still accessible via properties where relevant
+  const hasAnimationPresets = false;
 
   return (
     <div
@@ -131,29 +132,19 @@ export function Inspector({ className = '' }: InspectorProps) {
             Properties
           </button>
           
-          {hasAnimationPresets && (
+          {/* Visual tab hidden for code items */}
+          {selectedItem.type !== 'code' && (
             <button
-              onClick={() => setActiveTab('animation')}
+              onClick={() => setActiveTab('visual')}
               className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
-                activeTab === 'animation'
+                activeTab === 'visual'
                   ? 'text-text-primary bg-synapse-surface border-b-2 border-synapse-primary'
                   : 'text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover'
               }`}
             >
-              Animation
+              Visual
             </button>
           )}
-          
-          <button
-            onClick={() => setActiveTab('visual')}
-            className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
-              activeTab === 'visual'
-                ? 'text-text-primary bg-synapse-surface border-b-2 border-synapse-primary'
-                : 'text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover'
-            }`}
-          >
-            Visual
-          </button>
 
           <button
             onClick={() => setActiveTab('layout')}
@@ -200,27 +191,7 @@ export function Inspector({ className = '' }: InspectorProps) {
           </>
         )}
         
-        {activeTab === 'animation' && hasAnimationPresets && (
-          <div>
-            <PresetSelector
-              item={selectedItem}
-              asset={selectedAsset}
-              onChange={(animation) =>
-                updateTimelineItem(selectedItem.id, { animation })
-              }
-            />
-            {!selectedItem.animation && (
-              <AnimationSettings
-                item={selectedItem}
-                onUpdateAnimations={(animations) =>
-                  updateTimelineItem(selectedItem.id, { animations })
-                }
-              />
-            )}
-          </div>
-        )}
-        
-        {activeTab === 'visual' && (
+        {activeTab === 'visual' && selectedItem.type !== 'code' && (
           <VisualControlsTabs
             item={selectedItem}
             onUpdateProperties={(properties) =>
@@ -429,6 +400,77 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
   const [localProperties, setLocalProperties] = useState<ItemProperties>(
     item.properties
   );
+
+  const { getMediaAssetById } = useMediaAssets();
+
+  // Simplified theme dropdown options
+  const themeOptions = React.useMemo(() => {
+    try {
+      const all = themeManager.getAllThemes();
+      return all.map((t) => ({
+        value: t.id,
+        label: `${t.name} (${t.category}) • ${t.colors.background}`,
+      }));
+    } catch {
+      return [
+        { value: 'vscode-dark-plus', label: 'VSCode Dark Plus • #1e1e1e' },
+      ];
+    }
+  }, []);
+
+  // Sensible default monospace font stacks
+  const defaultFontOptions = React.useMemo(
+    () => [
+      {
+        label: 'Monaco / Menlo / Ubuntu Mono',
+        value: 'Monaco, Menlo, "Ubuntu Mono", monospace',
+      },
+      {
+        label: 'Fira Code',
+        value:
+          'Fira Code, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+      },
+      {
+        label: 'JetBrains Mono',
+        value: 'JetBrains Mono, Menlo, Monaco, "Courier New", monospace',
+      },
+      {
+        label: 'Consolas / Liberation Mono',
+        value: 'Consolas, "Liberation Mono", Menlo, Courier, monospace',
+      },
+      {
+        label: 'Source Code Pro',
+        value: 'Source Code Pro, Menlo, Monaco, Consolas, monospace',
+      },
+      {
+        label: 'Cascadia Code',
+        value: 'Cascadia Code, Segoe UI, Consolas, monospace',
+      },
+      {
+        label: 'Courier New',
+        value: 'Courier New, Courier, monospace',
+      },
+      {
+        label: 'IBM Plex Mono',
+        value: 'IBM Plex Mono, Menlo, Monaco, Consolas, monospace',
+      },
+      {
+        label: 'SF Mono',
+        value:
+          'SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+      },
+    ],
+    []
+  );
+
+  const fontOptions = React.useMemo(() => {
+    const opts = [...defaultFontOptions];
+    const current = localProperties.fontFamily;
+    if (current && !opts.some((o) => o.value === current)) {
+      opts.unshift({ label: `Current (${current.slice(0, 40)}${current.length > 40 ? '…' : ''})`, value: current });
+    }
+    return opts;
+  }, [defaultFontOptions, localProperties.fontFamily]);
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
@@ -437,6 +479,64 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
   const getSideBySideOptions = React.useCallback(() => {
     return [] as { value: string; label: string }[];
   }, []);
+
+  // Compute preview background style to match selected background options
+  const gradientToCss = React.useCallback((g: any): string => {
+    if (!g) return '';
+    if (g.type === 'linear') {
+      const angle = typeof g.angle === 'number' ? g.angle : 180;
+      const stops = (g.colors || []).map((c: any) => `${c.color} ${Math.round((c.position || 0) * 100)}%`).join(', ');
+      return `linear-gradient(${angle}deg, ${stops})`;
+    }
+    if (g.type === 'radial') {
+      const cx = Math.round(((g.centerX ?? 0.5) * 100));
+      const cy = Math.round(((g.centerY ?? 0.5) * 100));
+      const stops = (g.colors || []).map((c: any) => `${c.color} ${Math.round((c.position || 0) * 100)}%`).join(', ');
+      return `radial-gradient(at ${cx}% ${cy}%, ${stops})`;
+    }
+    return '';
+  }, []);
+
+  const computeBackgroundStyle = React.useCallback((): React.CSSProperties => {
+    const props = localProperties;
+    const style: React.CSSProperties = { border: '1px solid var(--synapse-border, rgba(255,255,255,0.1))', borderRadius: 8, padding: 8 };
+
+    // If no explicit background set, fall back to theme background
+    const theme = themeManager.getTheme(props.theme || 'vscode-dark-plus');
+
+    if (!props.backgroundType || props.backgroundType === 'none') {
+      style.backgroundColor = theme?.colors?.background || '#1e1e1e';
+      return style;
+    }
+
+    if (props.backgroundType === 'color') {
+      style.backgroundColor = props.backgroundColor || theme?.colors?.background || '#1e1e1e';
+      return style;
+    }
+
+    if (props.backgroundType === 'gradient' && props.backgroundGradient) {
+      style.backgroundImage = gradientToCss(props.backgroundGradient as any);
+      style.backgroundColor = theme?.colors?.background || '#1e1e1e';
+      style.backgroundSize = 'cover';
+      style.backgroundPosition = 'center';
+      return style;
+    }
+
+    if (props.backgroundType === 'wallpaper' && props.backgroundWallpaper) {
+      const asset = getMediaAssetById(props.backgroundWallpaper);
+      if (asset?.url) {
+        style.backgroundImage = `url(${asset.url})`;
+        style.backgroundSize = 'cover';
+        style.backgroundPosition = 'center';
+      } else {
+        style.backgroundColor = theme?.colors?.background || '#1e1e1e';
+      }
+      return style;
+    }
+
+    style.backgroundColor = theme?.colors?.background || '#1e1e1e';
+    return style;
+  }, [getMediaAssetById, gradientToCss, localProperties]);
 
   // Update local state when item changes
   React.useEffect(() => {
@@ -554,18 +654,18 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
 
   const renderCodeProperties = () => (
     <div className="space-y-3">
-      {/* Theme and font controls first */}
-      <ThemePicker
+      {/* Theme and font controls first (simplified dropdowns) */}
+      <SelectInput
+        label="Theme"
         value={localProperties.theme ?? 'vscode-dark-plus'}
         onChange={(value) => updateProperty('theme', value)}
+        options={themeOptions}
       />
-      <TextInput
+      <SelectInput
         label="Font Family"
-        value={
-          localProperties.fontFamily ??
-          'Monaco, Menlo, \"Ubuntu Mono\", monospace'
-        }
+        value={localProperties.fontFamily ?? defaultFontOptions[0].value}
         onChange={(value) => updateProperty('fontFamily', value)}
+        options={fontOptions}
         error={validationErrors.fontFamily}
       />
       <NumberInput
@@ -578,6 +678,9 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
         step={1}
         suffix="px"
       />
+
+      {/* Background settings moved here for code items */}
+      {renderBackgroundControlsInline()}
 
       {/* Code content */}
       <TextAreaWithFormat
@@ -768,17 +871,19 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
         >
           {label}
         </label>
-        <textarea
-          id={inputId}
-          value={localValue}
-          onChange={handleChange}
-          onPaste={handlePaste}
-          rows={8}
-          className={`w-full bg-synapse-surface border rounded px-3 py-2 text-synapse-text-primary text-sm focus:outline-none focus:border-synapse-border-focus focus:ring-1 focus:ring-synapse-border-focus ${error ? 'border-synapse-error' : 'border-synapse-border'}`}
-          aria-invalid={error ? 'true' : 'false'}
-          aria-describedby={error ? `${inputId}-error` : undefined}
-          style={{ fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace' }}
-        />
+        <div className="rounded" style={computeBackgroundStyle()}>
+          <textarea
+            id={inputId}
+            value={localValue}
+            onChange={handleChange}
+            onPaste={handlePaste}
+            rows={8}
+            className={`w-full bg-transparent border-0 outline-none px-2 py-2 text-sm resize-vertical ${error ? '' : ''}`}
+            aria-invalid={error ? 'true' : 'false'}
+            aria-describedby={error ? `${inputId}-error` : undefined}
+            style={{ fontFamily: localProperties.fontFamily || 'Monaco, Menlo, "Ubuntu Mono", monospace', fontSize: (localProperties.fontSize || 14) + 'px', color: themeManager.getTheme(localProperties.theme || 'vscode-dark-plus')?.colors?.foreground || 'var(--synapse-text-primary, #e6e6e6)' }}
+          />
+        </div>
         {error && (
           <p
             id={`${inputId}-error`}
@@ -821,6 +926,70 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
       />
     </div>
   );
+
+  const renderBackgroundControlsInline = () => {
+    // Derive current background config
+    const getCurrentBackgroundConfig = () => {
+      const props = localProperties;
+      if (!props.backgroundType || props.backgroundType === 'none') return undefined;
+      switch (props.backgroundType) {
+        case 'color':
+          return { type: 'color', color: props.backgroundColor || '#1e1e1e' } as any;
+        case 'gradient':
+          return props.backgroundGradient
+            ? ({ type: 'gradient', gradient: props.backgroundGradient } as any)
+            : undefined;
+        case 'wallpaper':
+          return props.backgroundWallpaper
+            ? ({
+                type: 'wallpaper',
+                wallpaper: {
+                  assetId: props.backgroundWallpaper,
+                  opacity: props.backgroundOpacity || 1,
+                  blendMode: 'normal',
+                },
+              } as any)
+            : undefined;
+        default:
+          return undefined;
+      }
+    };
+
+    const handleBackgroundChange = (config: any | null) => {
+      if (!config) {
+        updateProperty('backgroundType', 'none' as any);
+        updateProperty('backgroundWallpaper', undefined as any);
+        updateProperty('backgroundGradient', undefined as any);
+        updateProperty('backgroundColor', undefined as any);
+        return;
+      }
+      updateProperty('backgroundType', config.type as any);
+      if (config.type === 'color') {
+        updateProperty('backgroundColor', config.color);
+        updateProperty('backgroundWallpaper', undefined as any);
+        updateProperty('backgroundGradient', undefined as any);
+      } else if (config.type === 'gradient') {
+        updateProperty('backgroundGradient', config.gradient);
+        updateProperty('backgroundColor', undefined as any);
+        updateProperty('backgroundWallpaper', undefined as any);
+      } else if (config.type === 'wallpaper') {
+        updateProperty('backgroundWallpaper', config.wallpaper?.assetId);
+        updateProperty('backgroundColor', undefined as any);
+        updateProperty('backgroundGradient', undefined as any);
+      }
+    };
+
+    return (
+      <div className="space-y-2">
+        <BackgroundPicker
+          value={getCurrentBackgroundConfig()}
+          onChange={handleBackgroundChange}
+          opacity={localProperties.backgroundOpacity || 1}
+          onOpacityChange={(opacity) => updateProperty('backgroundOpacity', opacity)}
+        />
+      </div>
+    );
+  };
 
   const renderVisualAssetProperties = () => {
     const assetType = localProperties.visualAssetType;
@@ -1078,6 +1247,19 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
                 <h5 className="text-sm font-medium text-text-secondary mb-2">
                   Text
                 </h5>
+                {renderTitleProperties()}
+              </div>
+            )}
+
+            {item.type === 'visual-asset' && (
+              <div className="mb-4">
+                <h5 className="text-sm font-medium text-text-secondary mb-2">
+                  Visual Asset
+                </h5>
+                {renderVisualAssetProperties()}
+              </div>
+            )}
+          </>
         )}
 
         {mode === 'layout' && (
@@ -1177,23 +1359,6 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
           </>
         )}
 
-        {item.type === 'title' && (
-          <div className="mb-4">
-            <h5 className="text-sm font-medium text-text-secondary mb-2">
-              Text
-            </h5>
-            {renderTitleProperties()}
-          </div>
-        )}
-
-        {item.type === 'visual-asset' && (
-          <div className="mb-4">
-            <h5 className="text-sm font-medium text-text-secondary mb-2">
-              Visual Asset
-            </h5>
-            {renderVisualAssetProperties()}
-          </div>
-        )}
       </div>
     </div>
   );

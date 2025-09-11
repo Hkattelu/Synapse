@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useProject, useUI } from '../state/hooks';
+import { useProject, useUI, useTimeline } from '../state/hooks';
 import { Preview } from './Preview';
 const MediaBin = React.lazy(() => import('./MediaBin').then(m => ({ default: m.MediaBin })));
 const EnhancedTimelineView = React.lazy(() => import('./EnhancedTimelineView').then(m => ({ default: m.EnhancedTimelineView })));
@@ -11,7 +11,7 @@ import { RecorderDialog } from './RecorderDialog';
 import { ExportProvider } from '../state/exportContext';
 import { StudioLoader } from './ui/StudioLoader';
 import { ResizablePanel } from './ResizablePanel';
-import { ArrowLeft, Sparkles, Settings, Archive, PanelRight } from 'lucide-react';
+import { ArrowLeft, Sparkles, Settings, Archive } from 'lucide-react';
 import { UndoButton } from './UndoButton';
 import { RedoButton } from './RedoButton';
 import { ShortcutsDialog } from './ShortcutsDialog';
@@ -27,7 +27,8 @@ import { FLAGS } from '../lib/flags';
 
 function StudioViewContent() {
   const { project } = useProject();
-  const { ui, toggleInspector, toggleMediaBin } = useUI();
+  const { ui, toggleMediaBin } = useUI();
+  const { selectedTimelineItems } = useTimeline();
   const navigate = useNavigate();
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isRecorderDialogOpen, setIsRecorderDialogOpen] = useState(false);
@@ -38,7 +39,8 @@ function StudioViewContent() {
   const [showGuide, setShowGuide] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   
-  const isRightPanelOpen = ui.mediaBinVisible || ui.inspectorVisible;
+  const shouldShowInspector = selectedTimelineItems.length > 0;
+  const isRightPanelOpen = ui.mediaBinVisible || shouldShowInspector;
   const [rightPanelWidth, setRightPanelWidth] = useState<number>(() => {
     try {
       const saved = parseInt(localStorage.getItem('ui:rightPanelWidth') || '', 10);
@@ -90,6 +92,13 @@ function StudioViewContent() {
   // Loader hooks must be defined unconditionally before any return path
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showLoader, setShowLoader] = useState(true);
+
+  // When a clip is selected, prefer showing the Inspector by closing Media Bin if open
+  useEffect(() => {
+    if (shouldShowInspector && ui.mediaBinVisible) {
+      toggleMediaBin();
+    }
+  }, [shouldShowInspector, ui.mediaBinVisible, toggleMediaBin]);
 
   // Simulate staged loading until the main editor mounts
   useEffect(() => {
@@ -219,10 +228,6 @@ function StudioViewContent() {
               </ModeAwareComponent>
               <button
                 onClick={() => {
-                  // Open Media Bin; ensure Inspector is closed to avoid overlap
-                  if (!ui.mediaBinVisible && ui.inspectorVisible) {
-                    toggleInspector();
-                  }
                   toggleMediaBin();
                 }}
                 className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
@@ -233,23 +238,6 @@ function StudioViewContent() {
                 title="Toggle Media Bin"
               >
                 <Archive className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => {
-                  // Open Inspector; ensure Media Bin is closed to avoid overlap
-                  if (!ui.inspectorVisible && ui.mediaBinVisible) {
-                    toggleMediaBin();
-                  }
-                  toggleInspector();
-                }}
-                className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 ${
-                  ui.inspectorVisible
-                    ? 'bg-synapse-primary text-synapse-text-inverse shadow-synapse-md'
-                    : 'bg-synapse-surface border border-synapse-border text-synapse-primary hover:bg-synapse-primary/10 hover:border-synapse-border-hover'
-                }`}
-                title="Toggle Properties Panel"
-              >
-                <PanelRight className="w-4 h-4" />
               </button>
               
               {/* Shortcuts Button - Advanced mode only */}
@@ -265,6 +253,28 @@ function StudioViewContent() {
                 </button>
               </ModeAwareComponent>
             </div>
+
+            {/* Export button in header (top-right) */}
+            <button
+              onClick={() => setIsExportDialogOpen(true)}
+              className="px-4 py-2 rounded-lg bg-synapse-primary text-synapse-text-inverse hover:bg-synapse-primary/90 shadow-synapse-md transition-colors"
+              title="Export Video"
+            >
+              <span className="hidden sm:inline">Export</span>
+              <svg
+                className="w-4 h-4 sm:ml-2 inline-block align-middle"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </button>
           </div>
         </div>
       </motion.header>
@@ -342,7 +352,7 @@ function StudioViewContent() {
             >
               {/* Media Bin */}
               {/* Right panel content: show one at a time to avoid overlap */}
-              {ui.mediaBinVisible && !ui.inspectorVisible ? (
+              {ui.mediaBinVisible ? (
                 <ResizablePanel
                   direction="vertical"
                   initialSize={600}
@@ -358,7 +368,7 @@ function StudioViewContent() {
                 </ResizablePanel>
               ) : null}
 
-              {ui.inspectorVisible && !ui.mediaBinVisible ? (
+              {shouldShowInspector && !ui.mediaBinVisible ? (
                 <div className={`h-full bg-synapse-surface`}>
                   <React.Suspense fallback={<div className="p-4 text-text-secondary">Loading inspector…</div>}>
                     <Inspector />

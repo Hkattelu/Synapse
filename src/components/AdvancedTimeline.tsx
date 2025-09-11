@@ -4,6 +4,7 @@ import {
   useMediaAssets,
   useUI,
   usePlayback,
+  useProject,
 } from '../state/hooks';
 import { useProjectStore } from '../state/projectStore';
 import type { TimelineItem, MediaAsset, Keyframe } from '../lib/types';
@@ -44,8 +45,10 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
   const { getMediaAssetById } = useMediaAssets();
   const { ui, updateTimelineView } = useUI();
   const { playback, seek } = usePlayback();
+  const { project } = useProject();
 
   const timelineRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
     dragType: null,
@@ -72,8 +75,9 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // Calculate timeline dimensions
-  const maxDuration = Math.max(timelineDuration, 60);
+  // Calculate timeline dimensions using project duration as a floor
+  const compositionDuration = project?.settings?.duration ?? 0;
+  const maxDuration = Math.max(timelineDuration, compositionDuration, 60);
   const timelineWidth = maxDuration * PIXELS_PER_SECOND * ui.timeline.zoom;
   const maxTrack = Math.max(...timeline.map((item) => item.track), 3);
   const timelineHeight = (maxTrack + 1) * TRACK_HEIGHT;
@@ -314,6 +318,17 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
     [timeline, updateTimelineItem]
   );
 
+  // Fit to duration
+  const handleFitToDuration = useCallback(() => {
+    const viewport = scrollRef.current;
+    if (!viewport) return;
+    const available = Math.max(1, viewport.clientWidth - 16);
+    const contentWidth = timeToPixels(maxDuration) / ui.timeline.zoom; // width at zoom=1
+    const targetZoom = Math.max(0.1, Math.min(5, available / contentWidth));
+    updateTimelineView({ zoom: targetZoom, scrollPosition: 0 });
+    viewport.scrollLeft = 0;
+  }, [scrollRef, timeToPixels, maxDuration, ui.timeline.zoom, updateTimelineView]);
+
   // Delete selected keyframes
   const deleteSelectedKeyframes = useCallback(() => {
     selectedKeyframes.forEach((keyframeId) => {
@@ -473,6 +488,13 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
           >
             Snap
           </button>
+          <button
+            onClick={handleFitToDuration}
+            className="ml-2 px-2 py-1 text-xs rounded bg-synapse-surface-hover text-text-secondary hover:text-text-primary hover:bg-synapse-surface-active transition-colors"
+            title="Fit to duration"
+          >
+            Fit
+          </button>
 
           {/* Auto-Generate Keyframes */}
           {selectedItems.length === 1 && (
@@ -501,10 +523,27 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
 
       {/* Timeline Content */}
       <div
-        className="timeline-content overflow-auto flex-1"
+        ref={scrollRef}
+        className="timeline-content overflow-x-auto overflow-y-hidden flex-1"
         onScroll={(e) => {
           const scrollLeft = e.currentTarget.scrollLeft;
           updateTimelineView({ scrollPosition: scrollLeft });
+        }}
+        onWheel={(e) => {
+          if (e.shiftKey) {
+            e.preventDefault();
+            const delta = Math.sign(e.deltaY) * -0.2;
+            const newZoom = Math.max(0.1, Math.min(5, ui.timeline.zoom + delta));
+            updateTimelineView({ zoom: newZoom });
+          } else {
+            const el = e.currentTarget as HTMLDivElement;
+            const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
+            if (delta !== 0) {
+              e.preventDefault();
+              el.scrollLeft += delta;
+              updateTimelineView({ scrollPosition: el.scrollLeft });
+            }
+          }
         }}
       >
         {/* Time Ruler */}
@@ -582,8 +621,34 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
                 height: `${TRACK_HEIGHT}px`,
               }}
             >
-              <div className="absolute left-2 top-2 text-xs text-text-secondary font-medium bg-background-secondary/80 px-2 py-1 rounded">
-                Track {trackIndex + 1}
+              <div className="absolute left-2 top-2 text-xs text-text-secondary font-medium bg-background-secondary/80 px-2 py-1 rounded flex items-center gap-1">
+                <div className="relative group">
+                  <button
+                    className="p-1 rounded hover:bg-synapse-surface-hover text-text-tertiary hover:text-text-primary"
+                    aria-describedby={`adv-tip-${trackIndex}`}
+                    aria-label={`Tips for track ${trackIndex + 1}`}
+                  >
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 18h.01" />
+                      <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+                      <circle cx="12" cy="12" r="9" />
+                    </svg>
+                  </button>
+                  <div
+                    role="tooltip"
+                    id={`adv-tip-${trackIndex}`}
+                    className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-background-tertiary border border-border-subtle text-text-primary text-xs rounded-md shadow-lg w-64"
+                  >
+                    <div className="px-3 py-2 border-b border-border-subtle font-medium">Advanced Timeline Tips</div>
+                    <div className="px-3 py-2">
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li>Double-click to add keyframes</li>
+                        <li>Drag keyframes to retime</li>
+                        <li>Use Snap and Zoom for alignment</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           ))}
