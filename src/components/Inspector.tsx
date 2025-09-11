@@ -20,7 +20,7 @@ interface InspectorProps {
 export function Inspector({ className = '' }: InspectorProps) {
   const { selectedTimelineItems, updateTimelineItem } = useTimeline();
   const { getMediaAssetById } = useMediaAssets();
-  const [activeTab, setActiveTab] = useState<'properties' | 'animation' | 'visual'>('properties');
+  const [activeTab, setActiveTab] = useState<'properties' | 'animation' | 'visual' | 'layout'>('properties');
 
   // Get the first selected item (for now, we'll handle single selection)
   const selectedItem = selectedTimelineItems[0];
@@ -154,6 +154,17 @@ export function Inspector({ className = '' }: InspectorProps) {
           >
             Visual
           </button>
+
+          <button
+            onClick={() => setActiveTab('layout')}
+            className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
+              activeTab === 'layout'
+                ? 'text-text-primary bg-synapse-surface border-b-2 border-synapse-primary'
+                : 'text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover'
+            }`}
+          >
+            Layout
+          </button>
         </div>
       </div>
 
@@ -161,88 +172,31 @@ export function Inspector({ className = '' }: InspectorProps) {
       <div className="flex-1 overflow-y-auto min-h-0">
         {activeTab === 'properties' && (
           <>
-            {/* Clip metadata */}
-            <ClipMetadata item={selectedItem} asset={selectedAsset} />
-
-            {/* Educational Track Context */}
+            {/* Subtle hover tip for Code track (replaces bulky hint) */}
             {(() => {
               const track = getEducationalTrackByNumber(selectedItem.track);
-              if (track) {
+              if (track?.name === 'Code') {
+                const tip = 'Code Track Tips:\n• Use typing animation for step-by-step explanations\n• Enable line numbers for better reference\n• Choose a readable theme';
                 return (
-                  <div className="p-4 border-b border-border-subtle bg-background-tertiary">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div 
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-synapse-text-inverse text-sm font-bold"
-                        style={{ backgroundColor: track.color }}
-                      >
-                        {track.icon === 'code' && '💻'}
-                        {track.icon === 'monitor' && '🖥️'}
-                        {track.icon === 'mic' && '🎤'}
-                        {track.icon === 'user' && '👤'}
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-text-primary">{track.name} Track</h4>
-                        <p className="text-xs text-text-secondary">
-                          Optimized for {track.allowedContentTypes.join(', ')} content
-                        </p>
-                      </div>
-                    </div>
-                    
-                    {/* Educational tips based on track */}
-                    <div className="text-xs text-text-secondary bg-background-secondary/70 p-2 rounded border border-border-subtle">
-                      {track.name === 'Code' && (
-                        <div>
-                          <strong>💡 Code Track Tips:</strong>
-                          <ul className="mt-1 space-y-1 list-disc list-inside">
-                            <li>Use typing animation for step-by-step explanations</li>
-                            <li>Enable line numbers for better reference</li>
-                            <li>Choose appropriate themes for readability</li>
-                          </ul>
-                        </div>
-                      )}
-                      {track.name === 'Visual' && (
-                        <div>
-                          <strong>🖥️ Visual Track Tips:</strong>
-                          <ul className="mt-1 space-y-1 list-disc list-inside">
-                            <li>Perfect for screen recordings and demonstrations</li>
-                            <li>Use focus animations to highlight important areas</li>
-                            <li>Consider side-by-side layouts with code</li>
-                          </ul>
-                        </div>
-                      )}
-                      {track.name === 'Narration' && (
-                        <div>
-                          <strong>🎤 Narration Track Tips:</strong>
-                          <ul className="mt-1 space-y-1 list-disc list-inside">
-                            <li>Adjust volume levels for clear audio</li>
-                            <li>Use audio ducking for background music</li>
-                            <li>Sync timing with visual content</li>
-                          </ul>
-                        </div>
-                      )}
-                      {track.name === 'You' && (
-                        <div>
-                          <strong>👤 You Track Tips:</strong>
-                          <ul className="mt-1 space-y-1 list-disc list-inside">
-                            <li>Enable talking head mode for personal touch</li>
-                            <li>Position in corner to not obstruct content</li>
-                            <li>Consider background removal for cleaner look</li>
-                          </ul>
-                        </div>
-                      )}
-                    </div>
+                  <div className="px-4 py-2 border-b border-border-subtle text-xs text-text-secondary">
+                    <span role="img" aria-label="tip" title={tip} className="cursor-help">💡 Code track tips (hover)</span>
                   </div>
                 );
               }
               return null;
             })()}
-            
+
+            {/* Main properties (code, media, etc.) */}
             <ClipProperties
+              mode="properties"
               item={selectedItem}
               onUpdateProperties={(properties) =>
                 updateTimelineItem(selectedItem.id, { properties })
               }
             />
+
+            {/* Move Clip Information to bottom */}
+            <ClipMetadata item={selectedItem} asset={selectedAsset} />
           </>
         )}
         
@@ -271,6 +225,16 @@ export function Inspector({ className = '' }: InspectorProps) {
             item={selectedItem}
             onUpdateProperties={(properties) =>
               updateTimelineItem(selectedItem.id, { properties: { ...selectedItem.properties, ...properties } })
+            }
+          />
+        )}
+
+        {activeTab === 'layout' && (
+          <ClipProperties
+            mode="layout"
+            item={selectedItem}
+            onUpdateProperties={(properties) =>
+              updateTimelineItem(selectedItem.id, { properties })
             }
           />
         )}
@@ -457,10 +421,11 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
 
 interface ClipPropertiesProps {
   item: TimelineItem;
+  mode: 'properties' | 'layout';
   onUpdateProperties: (properties: ItemProperties) => void;
 }
 
-function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
+function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps) {
   const [localProperties, setLocalProperties] = useState<ItemProperties>(
     item.properties
   );
@@ -589,6 +554,32 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
 
   const renderCodeProperties = () => (
     <div className="space-y-3">
+      {/* Theme and font controls first */}
+      <ThemePicker
+        value={localProperties.theme ?? 'vscode-dark-plus'}
+        onChange={(value) => updateProperty('theme', value)}
+      />
+      <TextInput
+        label="Font Family"
+        value={
+          localProperties.fontFamily ??
+          'Monaco, Menlo, \"Ubuntu Mono\", monospace'
+        }
+        onChange={(value) => updateProperty('fontFamily', value)}
+        error={validationErrors.fontFamily}
+      />
+      <NumberInput
+        label="Font Size"
+        value={localProperties.fontSize ?? 14}
+        onChange={(value) => updateProperty('fontSize', value)}
+        error={validationErrors.fontSize}
+        min={8}
+        max={48}
+        step={1}
+        suffix="px"
+      />
+
+      {/* Code content */}
       <TextAreaWithFormat
         label="Code Content"
         value={localProperties.codeText ?? localProperties.text ?? ''}
@@ -650,29 +641,6 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
           🔍 Auto-Detect Language & Apply Defaults
         </button>
       </div>
-      <ThemePicker
-        value={localProperties.theme ?? 'vscode-dark-plus'}
-        onChange={(value) => updateProperty('theme', value)}
-      />
-      <TextInput
-        label="Font Family"
-        value={
-          localProperties.fontFamily ??
-          'Monaco, Menlo, "Ubuntu Mono", monospace'
-        }
-        onChange={(value) => updateProperty('fontFamily', value)}
-        error={validationErrors.fontFamily}
-      />
-      <NumberInput
-        label="Font Size"
-        value={localProperties.fontSize ?? 14}
-        onChange={(value) => updateProperty('fontSize', value)}
-        error={validationErrors.fontSize}
-        min={8}
-        max={48}
-        step={1}
-        suffix="px"
-      />
       <div className="space-y-2">
         <SelectInput
           label="Animation Mode"
@@ -1078,118 +1046,134 @@ function ClipProperties({ item, onUpdateProperties }: ClipPropertiesProps) {
   return (
     <div className="border-b border-border-subtle">
       <div className="p-4">
-        <h4 className="font-medium text-text-primary mb-3">Properties</h4>
+        <h4 className="font-medium text-text-primary mb-3">{mode === 'layout' ? 'Layout' : 'Properties'}</h4>
 
-        {/* If code, show Code properties first to avoid scrolling */}
-        {item.type === 'code' && (
-          <div className="mb-4">
-            <h5 className="text-sm font-medium text-text-secondary mb-2">
-              Code
-            </h5>
-            {renderCodeProperties()}
-            <div className="mt-4">
-              <h5 className="text-sm font-medium text-text-secondary mb-2">
-                Side by Side
-              </h5>
-              <SelectInput
-                label="Companion Asset"
-                value={localProperties.sideBySideAssetId ?? ''}
-                onChange={(value) =>
-                  updateProperty('sideBySideAssetId', value || undefined)
-                }
-                options={[
-                  { value: '', label: 'None' },
-                  ...getSideBySideOptions(),
-                ]}
-              />
-              <SelectInput
-                label="Layout"
-                value={localProperties.sideBySideLayout ?? 'left-right'}
-                onChange={(value) =>
-                  updateProperty('sideBySideLayout', value as any)
-                }
-                options={[
-                  { value: 'left-right', label: 'Left • Right' },
-                  { value: 'right-left', label: 'Right • Left' },
-                  { value: 'top-bottom', label: 'Top • Bottom' },
-                  { value: 'bottom-top', label: 'Bottom • Top' },
-                ]}
-              />
-              <NumberInput
-                label="Gap"
-                value={localProperties.sideBySideGap ?? 16}
-                onChange={(value) => updateProperty('sideBySideGap', value)}
-                min={0}
-                max={128}
-                step={1}
-                suffix="px"
-              />
-            </div>
-            <div className="mt-4">
-              <h5 className="text-sm font-medium text-text-secondary mb-2">
-                Focus (Ken Burns)
-              </h5>
-              <SelectInput
-                label="Auto Focus"
-                value={(localProperties.autoFocus ?? true) ? 'on' : 'off'}
-                onChange={(value) =>
-                  updateProperty('autoFocus', value === 'on')
-                }
-                options={[
-                  { value: 'off', label: 'Off' },
-                  { value: 'on', label: 'On' },
-                ]}
-              />
-              <NumberInput
-                label="Focus X"
-                value={localProperties.focusPointX ?? 0.5}
-                onChange={(value) => updateProperty('focusPointX', value)}
-                min={0}
-                max={1}
-                step={0.01}
-              />
-              <NumberInput
-                label="Focus Y"
-                value={localProperties.focusPointY ?? 0.5}
-                onChange={(value) => updateProperty('focusPointY', value)}
-                min={0}
-                max={1}
-                step={0.01}
-              />
-              <NumberInput
-                label="Focus Scale"
-                value={localProperties.focusScale ?? 1.2}
-                onChange={(value) => updateProperty('focusScale', value)}
-                min={1}
-                max={3}
-                step={0.05}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Transform Properties - Always shown */}
-        <div className="mb-4">
-          <h5 className="text-sm font-medium text-text-secondary mb-2">
-            Transform
-          </h5>
-          {renderTransformProperties()}
-        </div>
-
-        {/* Type-specific Properties */}
-        {(item.type === 'video' || item.type === 'audio') && (
-          <div className="mb-4">
-            <h5 className="text-sm font-medium text-text-secondary mb-2">
-              Media
-            </h5>
-            {renderVideoProperties()}
-          </div>
-        )}
-
-        {/* If not code, render Code properties in normal position */}
-        {item.type !== 'code' && (
+        {mode === 'properties' && (
           <>
-            {/* No-op here; non-code types won’t show Code section */}
+            {/* If code, show Code properties first to avoid scrolling (no layout sections here) */}
+            {item.type === 'code' && (
+              <div className="mb-4">
+                <h5 className="text-sm font-medium text-text-secondary mb-2">
+                  Code
+                </h5>
+                {renderCodeProperties()}
+              </div>
+            )}
+
+            {/* Type-specific Properties */}
+            {(item.type === 'video' || item.type === 'audio') && (
+              <div className="mb-4">
+                <h5 className="text-sm font-medium text-text-secondary mb-2">
+                  Media
+                </h5>
+                {renderVideoProperties()}
+              </div>
+            )}
+
+            {/* If not code, render Code properties in normal position */}
+            {item.type !== 'code' && <></>}
+
+            {item.type === 'title' && (
+              <div className="mb-4">
+                <h5 className="text-sm font-medium text-text-secondary mb-2">
+                  Text
+                </h5>
+        )}
+
+        {mode === 'layout' && (
+          <>
+            {/* Transform Properties */}
+            <div className="mb-4">
+              <h5 className="text-sm font-medium text-text-secondary mb-2">
+                Transform
+              </h5>
+              {renderTransformProperties()}
+            </div>
+
+            {/* Layout sections specific to code */}
+            {item.type === 'code' && (
+              <>
+                <div className="mb-4">
+                  <h5 className="text-sm font-medium text-text-secondary mb-2">
+                    Focus (Ken Burns)
+                  </h5>
+                  <SelectInput
+                    label="Auto Focus"
+                    value={(localProperties.autoFocus ?? true) ? 'on' : 'off'}
+                    onChange={(value) =>
+                      updateProperty('autoFocus', value === 'on')
+                    }
+                    options={[
+                      { value: 'off', label: 'Off' },
+                      { value: 'on', label: 'On' },
+                    ]}
+                  />
+                  <NumberInput
+                    label="Focus X"
+                    value={localProperties.focusPointX ?? 0.5}
+                    onChange={(value) => updateProperty('focusPointX', value)}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                  />
+                  <NumberInput
+                    label="Focus Y"
+                    value={localProperties.focusPointY ?? 0.5}
+                    onChange={(value) => updateProperty('focusPointY', value)}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                  />
+                  <NumberInput
+                    label="Focus Scale"
+                    value={localProperties.focusScale ?? 1.2}
+                    onChange={(value) => updateProperty('focusScale', value)}
+                    min={1}
+                    max={3}
+                    step={0.05}
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <h5 className="text-sm font-medium text-text-secondary mb-2">
+                    Side by Side
+                  </h5>
+                  <SelectInput
+                    label="Companion Asset"
+                    value={localProperties.sideBySideAssetId ?? ''}
+                    onChange={(value) =>
+                      updateProperty('sideBySideAssetId', value || undefined)
+                    }
+                    options={[
+                      { value: '', label: 'None' },
+                      ...getSideBySideOptions(),
+                    ]}
+                  />
+                  <SelectInput
+                    label="Layout"
+                    value={localProperties.sideBySideLayout ?? 'left-right'}
+                    onChange={(value) =>
+                      updateProperty('sideBySideLayout', value as any)
+                    }
+                    options={[
+                      { value: 'left-right', label: 'Left • Right' },
+                      { value: 'right-left', label: 'Right • Left' },
+                      { value: 'top-bottom', label: 'Top • Bottom' },
+                      { value: 'bottom-top', label: 'Bottom • Top' },
+                    ]}
+                  />
+                  <NumberInput
+                    label="Gap"
+                    value={localProperties.sideBySideGap ?? 16}
+                    onChange={(value) => updateProperty('sideBySideGap', value)}
+                    min={0}
+                    max={128}
+                    step={1}
+                    suffix="px"
+                  />
+                </div>
+              </>
+            )}
           </>
         )}
 
