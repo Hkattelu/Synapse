@@ -65,44 +65,89 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
         {talkingHead ? (
           <div style={style}>
             {asset.type === 'video' && (
-              <Video
-                src={asset.url}
-                volume={item.properties.volume ?? 1}
-                playbackRate={item.properties.playbackRate ?? 1}
-                muted={item.muted}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                }}
-              />
+              asset.url ? (
+                <Video
+                  src={asset.url}
+                  volume={item.properties.volume ?? 1}
+                  playbackRate={item.properties.playbackRate ?? 1}
+                  muted={item.muted}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  }}
+                />
+              ) : (
+                <AbsoluteFill
+                  style={{
+                    backgroundColor: 'rgba(0,0,0,0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '18px',
+                    color: 'white',
+                  }}
+                >
+                  ▶ {asset.name}
+                </AbsoluteFill>
+              )
             )}
           </div>
         ) : (
           <div style={style}>
             {asset.type === 'video' && (
-              <Video
-                src={asset.url}
-                volume={item.properties.volume ?? 1}
-                playbackRate={item.properties.playbackRate ?? 1}
-                muted={item.muted}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                }}
-              />
+              asset.url ? (
+                <Video
+                  src={asset.url}
+                  volume={item.properties.volume ?? 1}
+                  playbackRate={item.properties.playbackRate ?? 1}
+                  muted={item.muted}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                  }}
+                />
+              ) : (
+                <AbsoluteFill
+                  style={{
+                    backgroundColor: 'rgba(0,0,0,0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '18px',
+                    color: 'white',
+                  }}
+                >
+                  ▶ {asset.name}
+                </AbsoluteFill>
+              )
             )}
 
             {asset.type === 'image' && (
-              <Img
-                src={asset.url}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                }}
-              />
+              asset.url ? (
+                <Img
+                  src={asset.url}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                  }}
+                />
+              ) : (
+                <AbsoluteFill
+                  style={{
+                    backgroundColor: 'rgba(0,0,0,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '18px',
+                    color: 'white',
+                  }}
+                >
+                  🖼 {asset.name}
+                </AbsoluteFill>
+              )
             )}
 
             {asset.type === 'audio' && (
@@ -137,6 +182,7 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
                       Audio: React.ComponentType<AudioProps>;
                     }
                   ).Audio;
+                  if (!asset.url) return null;
                   return (
                     <AudioComp
                       src={asset.url}
