@@ -2,7 +2,10 @@
 
 import type { ThemeDefinition, ThemeCategory, ThemePreferences } from './types';
 import { BUILT_IN_THEMES, THEME_CATEGORIES } from './definitions';
-import { validateTheme, createFallbackTheme } from '../validation/themeValidation';
+import {
+  validateTheme,
+  createFallbackTheme,
+} from '../validation/themeValidation';
 
 export class ThemeManager {
   private themes: Map<string, ThemeDefinition> = new Map();
@@ -23,7 +26,7 @@ export class ThemeManager {
    * Initialize built-in themes
    */
   private initializeBuiltInThemes(): void {
-    BUILT_IN_THEMES.forEach(theme => {
+    BUILT_IN_THEMES.forEach((theme) => {
       this.themes.set(theme.id, theme);
     });
   }
@@ -59,7 +62,10 @@ export class ThemeManager {
    */
   private savePreferences(): void {
     try {
-      localStorage.setItem('synapse-theme-preferences', JSON.stringify(this.preferences));
+      localStorage.setItem(
+        'synapse-theme-preferences',
+        JSON.stringify(this.preferences)
+      );
     } catch (error) {
       console.warn('Failed to save theme preferences:', error);
     }
@@ -70,7 +76,7 @@ export class ThemeManager {
    */
   getTheme(id: string): ThemeDefinition | null {
     const theme = this.themes.get(id);
-    
+
     if (!theme) {
       return null;
     }
@@ -102,11 +108,11 @@ export class ThemeManager {
    * Get themes by category
    */
   getThemesByCategory(categoryId: string): ThemeDefinition[] {
-    const category = this.categories.find(cat => cat.id === categoryId);
+    const category = this.categories.find((cat) => cat.id === categoryId);
     if (!category) return [];
 
     return category.themes
-      .map(themeId => this.themes.get(themeId))
+      .map((themeId) => this.themes.get(themeId))
       .filter((theme): theme is ThemeDefinition => theme !== undefined);
   }
 
@@ -129,7 +135,7 @@ export class ThemeManager {
     this.themes.set(theme.id, theme);
 
     // Add to custom themes if not built-in
-    if (!BUILT_IN_THEMES.find(t => t.id === theme.id)) {
+    if (!BUILT_IN_THEMES.find((t) => t.id === theme.id)) {
       if (!this.preferences.customThemes.includes(theme.id)) {
         this.preferences.customThemes.push(theme.id);
         this.savePreferences();
@@ -142,16 +148,22 @@ export class ThemeManager {
    */
   removeTheme(themeId: string): boolean {
     // Don't allow removal of built-in themes
-    if (BUILT_IN_THEMES.find(t => t.id === themeId)) {
+    if (BUILT_IN_THEMES.find((t) => t.id === themeId)) {
       return false;
     }
 
     const removed = this.themes.delete(themeId);
     if (removed) {
       // Remove from preferences
-      this.preferences.customThemes = this.preferences.customThemes.filter(id => id !== themeId);
-      this.preferences.favoriteThemes = this.preferences.favoriteThemes.filter(id => id !== themeId);
-      this.preferences.recentThemes = this.preferences.recentThemes.filter(id => id !== themeId);
+      this.preferences.customThemes = this.preferences.customThemes.filter(
+        (id) => id !== themeId
+      );
+      this.preferences.favoriteThemes = this.preferences.favoriteThemes.filter(
+        (id) => id !== themeId
+      );
+      this.preferences.recentThemes = this.preferences.recentThemes.filter(
+        (id) => id !== themeId
+      );
       this.savePreferences();
     }
 
@@ -163,13 +175,15 @@ export class ThemeManager {
    */
   searchThemes(query: string): ThemeDefinition[] {
     const lowercaseQuery = query.toLowerCase();
-    return this.getAllThemes().filter(theme => {
+    return this.getAllThemes().filter((theme) => {
       const nameMatch = theme.name.toLowerCase().includes(lowercaseQuery);
-      const tagMatch = theme.metadata?.tags?.some(tag => 
-        tag.toLowerCase().includes(lowercaseQuery)
-      ) || false;
-      const authorMatch = theme.metadata?.author?.toLowerCase().includes(lowercaseQuery) || false;
-      
+      const tagMatch =
+        theme.metadata?.tags?.some((tag) =>
+          tag.toLowerCase().includes(lowercaseQuery)
+        ) || false;
+      const authorMatch =
+        theme.metadata?.author?.toLowerCase().includes(lowercaseQuery) || false;
+
       return nameMatch || tagMatch || authorMatch;
     });
   }
@@ -179,7 +193,7 @@ export class ThemeManager {
    */
   getFavoriteThemes(): ThemeDefinition[] {
     return this.preferences.favoriteThemes
-      .map(themeId => this.themes.get(themeId))
+      .map((themeId) => this.themes.get(themeId))
       .filter((theme): theme is ThemeDefinition => theme !== undefined);
   }
 
@@ -188,7 +202,7 @@ export class ThemeManager {
    */
   getRecentThemes(): ThemeDefinition[] {
     return this.preferences.recentThemes
-      .map(themeId => this.themes.get(themeId))
+      .map((themeId) => this.themes.get(themeId))
       .filter((theme): theme is ThemeDefinition => theme !== undefined);
   }
 
@@ -208,7 +222,9 @@ export class ThemeManager {
    * Remove theme from favorites
    */
   removeFromFavorites(themeId: string): void {
-    this.preferences.favoriteThemes = this.preferences.favoriteThemes.filter(id => id !== themeId);
+    this.preferences.favoriteThemes = this.preferences.favoriteThemes.filter(
+      (id) => id !== themeId
+    );
     this.savePreferences();
   }
 
@@ -234,14 +250,16 @@ export class ThemeManager {
     if (!this.themes.has(themeId)) return;
 
     // Remove from current position if exists
-    this.preferences.recentThemes = this.preferences.recentThemes.filter(id => id !== themeId);
-    
+    this.preferences.recentThemes = this.preferences.recentThemes.filter(
+      (id) => id !== themeId
+    );
+
     // Add to beginning
     this.preferences.recentThemes.unshift(themeId);
-    
+
     // Keep only last 10 recent themes
     this.preferences.recentThemes = this.preferences.recentThemes.slice(0, 10);
-    
+
     this.savePreferences();
   }
 
@@ -303,9 +321,9 @@ export class ThemeManager {
         strictColorValidation: true,
         checkContrast: false, // Don't fail on contrast issues, just warn
         requireAllColors: true,
-        allowCustomProperties: false
+        allowCustomProperties: false,
       });
-      
+
       if (!result.isValid) {
         console.warn('Theme validation failed:', result.errors);
         return false;
@@ -336,8 +354,16 @@ export class ThemeManager {
     }
 
     const requiredColors = [
-      'background', 'foreground', 'comment', 'keyword', 'string', 
-      'number', 'operator', 'punctuation', 'function', 'variable'
+      'background',
+      'foreground',
+      'comment',
+      'keyword',
+      'string',
+      'number',
+      'operator',
+      'punctuation',
+      'function',
+      'variable',
     ];
 
     for (const color of requiredColors) {
@@ -365,7 +391,7 @@ export class ThemeManager {
   importTheme(themeJson: string): ThemeDefinition | null {
     try {
       const theme = JSON.parse(themeJson) as ThemeDefinition;
-      
+
       if (!this.validateTheme(theme)) {
         throw new Error('Invalid theme format');
       }
@@ -437,7 +463,8 @@ export class ThemeManager {
         },
         metadata: {
           author: 'System',
-          description: 'Fallback theme used when the original theme fails validation',
+          description:
+            'Fallback theme used when the original theme fails validation',
           version: '1.0.0',
           tags: ['fallback'],
         },
@@ -457,7 +484,7 @@ export class ThemeManager {
     const themes = this.getAllThemes();
     const byCategory: Record<string, number> = {};
 
-    themes.forEach(theme => {
+    themes.forEach((theme) => {
       byCategory[theme.category] = (byCategory[theme.category] || 0) + 1;
     });
 

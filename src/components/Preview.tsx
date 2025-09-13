@@ -46,10 +46,13 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-
   // Local state for editable dimensions
-  const [dimWidth, setDimWidth] = useState<number>(() => project?.settings.width || 1920);
-  const [dimHeight, setDimHeight] = useState<number>(() => project?.settings.height || 1080);
+  const [dimWidth, setDimWidth] = useState<number>(
+    () => project?.settings.width || 1920
+  );
+  const [dimHeight, setDimHeight] = useState<number>(
+    () => project?.settings.height || 1080
+  );
 
   useEffect(() => {
     if (project?.settings) {
@@ -58,41 +61,56 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     }
   }, [project?.settings?.width, project?.settings?.height]);
 
-  const applyDimensions = useCallback((w: number, h: number) => {
-    if (!project) return;
-    const width = Math.max(256, Math.min(3840, Math.floor(w)));
-    const height = Math.max(256, Math.min(3840, Math.floor(h)));
-    setDimWidth(width);
-    setDimHeight(height);
-    updateProject({ settings: { ...project.settings, width, height } });
-  }, [project, updateProject]);
+  const applyDimensions = useCallback(
+    (w: number, h: number) => {
+      if (!project) return;
+      const width = Math.max(256, Math.min(3840, Math.floor(w)));
+      const height = Math.max(256, Math.min(3840, Math.floor(h)));
+      setDimWidth(width);
+      setDimHeight(height);
+      updateProject({ settings: { ...project.settings, width, height } });
+    },
+    [project, updateProject]
+  );
 
-  const applyAspectPreset = useCallback((preset: '16:9' | '9:16' | '1:1' | '720p' | '1080p' | 'vertical-720' | 'vertical-1080') => {
-    if (!project) return;
-    const fps = project.settings.fps;
-    switch (preset) {
-      case '16:9':
-      case '1080p':
-        applyDimensions(1920, 1080);
-        break;
-      case '720p':
-        applyDimensions(1280, 720);
-        break;
-      case '9:16':
-      case 'vertical-1080':
-        applyDimensions(1080, 1920);
-        break;
-      case 'vertical-720':
-        applyDimensions(720, 1280);
-        break;
-      case '1:1':
-        applyDimensions(1080, 1080);
-        break;
-      default:
-        applyDimensions(project.settings.width, project.settings.height);
-        break;
-    }
-  }, [project, applyDimensions]);
+  const applyAspectPreset = useCallback(
+    (
+      preset:
+        | '16:9'
+        | '9:16'
+        | '1:1'
+        | '720p'
+        | '1080p'
+        | 'vertical-720'
+        | 'vertical-1080'
+    ) => {
+      if (!project) return;
+      const fps = project.settings.fps;
+      switch (preset) {
+        case '16:9':
+        case '1080p':
+          applyDimensions(1920, 1080);
+          break;
+        case '720p':
+          applyDimensions(1280, 720);
+          break;
+        case '9:16':
+        case 'vertical-1080':
+          applyDimensions(1080, 1920);
+          break;
+        case 'vertical-720':
+          applyDimensions(720, 1280);
+          break;
+        case '1:1':
+          applyDimensions(1080, 1080);
+          break;
+        default:
+          applyDimensions(project.settings.width, project.settings.height);
+          break;
+      }
+    },
+    [project, applyDimensions]
+  );
 
   // Prepare composition props from project state
   const compositionProps: MainCompositionProps = useMemo(() => {
@@ -312,7 +330,6 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     },
     [setVolume]
   );
-
 
   // Handle frame-by-frame navigation
   const handleFrameBackward = useCallback(() => {
@@ -578,7 +595,6 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
         </div>
       </div>
 
-
       {/* Condensed Preview Controls (reduced height) */}
       <div className="bg-background-secondary/80 border-t border-border-subtle px-3 py-2">
         <div className="flex items-center justify-between">
@@ -589,8 +605,18 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               className="text-text-secondary hover:text-text-primary p-1.5 rounded hover:bg-neutral-700"
               title="Previous Frame"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"
+                />
               </svg>
             </button>
             <button
@@ -598,8 +624,18 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               className="text-text-secondary hover:text-text-primary p-1.5 rounded hover:bg-neutral-700"
               title="Next Frame"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 4v16l6-8-6-8zM11 4v16l6-8-6-8z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 4v16l6-8-6-8zM11 4v16l6-8-6-8z"
+                />
               </svg>
             </button>
           </div>
@@ -624,15 +660,24 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               {(() => {
                 const w = project?.settings.width || dimWidth;
                 const h = project?.settings.height || dimHeight;
-                const gcd = (a: number, b: number): number => (b === 0 ? Math.abs(a) : gcd(b, a % b));
+                const gcd = (a: number, b: number): number =>
+                  b === 0 ? Math.abs(a) : gcd(b, a % b);
                 const g = gcd(w, h) || 1;
                 const ratioLabel = `${Math.round(w / g)}/${Math.round(h / g)}`;
-                const isChecked = (val: '16/9' | '1/1' | '9/16') => ratioLabel === val;
-                const baseBtn = 'inline-flex items-center justify-center px-2.5 py-1 text-xs rounded-md';
-                const checkedCls = 'bg-background-primary text-text-primary shadow-sm';
-                const uncheckedCls = 'text-text-secondary hover:bg-background-primary/30';
+                const isChecked = (val: '16/9' | '1/1' | '9/16') =>
+                  ratioLabel === val;
+                const baseBtn =
+                  'inline-flex items-center justify-center px-2.5 py-1 text-xs rounded-md';
+                const checkedCls =
+                  'bg-background-primary text-text-primary shadow-sm';
+                const uncheckedCls =
+                  'text-text-secondary hover:bg-background-primary/30';
                 return (
-                  <div role="radiogroup" aria-label="Aspect ratio" className="inline-flex items-center bg-background-tertiary rounded-md p-0.5">
+                  <div
+                    role="radiogroup"
+                    aria-label="Aspect ratio"
+                    className="inline-flex items-center bg-background-tertiary rounded-md p-0.5"
+                  >
                     <button
                       type="button"
                       role="radio"
@@ -643,7 +688,18 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
                       value="16/9"
                       tabIndex={-1}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-3.5 w-3.5"
+                      >
                         <rect width="20" height="12" x="2" y="6" rx="2"></rect>
                       </svg>
                     </button>
@@ -657,7 +713,18 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
                       value="1/1"
                       tabIndex={-1}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-3.5 w-3.5"
+                      >
                         <rect width="18" height="18" x="3" y="3" rx="2"></rect>
                       </svg>
                     </button>
@@ -671,7 +738,18 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
                       value="9/16"
                       tabIndex={0}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-3.5 w-3.5"
+                      >
                         <rect width="12" height="20" x="6" y="2" rx="2"></rect>
                       </svg>
                     </button>
@@ -680,11 +758,18 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               })()}
             </div>
             <button
-              onClick={() => window.dispatchEvent(new CustomEvent('openRecorderDialog'))}
+              onClick={() =>
+                window.dispatchEvent(new CustomEvent('openRecorderDialog'))
+              }
               className="text-red-400 hover:text-red-300 p-1.5 rounded hover:bg-neutral-700"
               title="Record Narration"
             >
-              <svg className="w-4 h-4" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-4 h-4"
+                fill="currentColor"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <circle cx="12" cy="12" r="8" strokeWidth={0} />
               </svg>
             </button>

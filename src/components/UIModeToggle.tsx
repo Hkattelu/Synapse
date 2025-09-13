@@ -12,7 +12,7 @@ export function UIModeToggle({ className = '' }: UIModeToggleProps) {
 
   const handleModeChange = (mode: 'simplified' | 'advanced') => {
     setUIMode(mode);
-    
+
     // Persist user preference to localStorage
     try {
       localStorage.setItem('synapse-ui-mode', mode);
@@ -39,7 +39,7 @@ export function UIModeToggle({ className = '' }: UIModeToggleProps) {
             width: 'calc(50% - 2px)',
           }}
         />
-        
+
         <div className="relative flex">
           <button
             onClick={() => handleModeChange('simplified')}
@@ -53,7 +53,7 @@ export function UIModeToggle({ className = '' }: UIModeToggleProps) {
             <Layers className="w-4 h-4" />
             <span>Simplified</span>
           </button>
-          
+
           <button
             onClick={() => handleModeChange('advanced')}
             className={`relative z-10 flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${

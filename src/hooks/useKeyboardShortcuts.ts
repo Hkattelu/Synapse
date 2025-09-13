@@ -19,7 +19,10 @@ export function useKeyboardShortcuts({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't trigger shortcuts when typing in inputs
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
         return;
       }
 
@@ -96,5 +99,14 @@ export function useKeyboardShortcuts({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedItemId, playback, play, pause, seek, deleteClip, onToggleFullscreen, onShowShortcuts]);
+  }, [
+    selectedItemId,
+    playback,
+    play,
+    pause,
+    seek,
+    deleteClip,
+    onToggleFullscreen,
+    onShowShortcuts,
+  ]);
 }

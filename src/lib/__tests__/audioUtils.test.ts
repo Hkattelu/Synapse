@@ -16,7 +16,11 @@ class MockAudioBuffer implements AudioBuffer {
   sampleRate: number;
   numberOfChannels: number;
 
-  constructor(options: { length: number; sampleRate: number; numberOfChannels: number }) {
+  constructor(options: {
+    length: number;
+    sampleRate: number;
+    numberOfChannels: number;
+  }) {
     this.length = options.length;
     this.sampleRate = options.sampleRate;
     this.numberOfChannels = options.numberOfChannels;
@@ -82,7 +86,7 @@ describe('audioUtils', () => {
   describe('calculateAudioLevels', () => {
     it('calculates current, peak, and average levels', () => {
       const audioData = new Float32Array([0.1, 0.5, 0.3, 0.8, 0.2]);
-      
+
       const result = calculateAudioLevels(audioData);
 
       expect(result.currentLevel).toBeCloseTo(0.38, 2); // Average of absolute values
@@ -107,7 +111,7 @@ describe('audioUtils', () => {
 
     it('handles empty audio data', () => {
       const audioData = new Float32Array([]);
-      
+
       const result = calculateAudioLevels(audioData);
 
       expect(result.currentLevel).toBeNaN(); // Division by zero
@@ -128,27 +132,27 @@ describe('audioUtils', () => {
 
     it('returns full volume when ducking is disabled', () => {
       const disabledConfig = { ...mockDuckingConfig, enabled: false };
-      
+
       const result = calculateDuckingLevel(0.5, disabledConfig, 0);
-      
+
       expect(result).toBe(1.0);
     });
 
     it('applies ducking when narration level exceeds threshold', () => {
       const result = calculateDuckingLevel(0.3, mockDuckingConfig, 0);
-      
+
       expect(result).toBe(0.4); // 1.0 - 0.6 ratio
     });
 
     it('returns full volume when narration level is below threshold', () => {
       const result = calculateDuckingLevel(0.1, mockDuckingConfig, 0);
-      
+
       expect(result).toBe(1.0);
     });
 
     it('handles edge case at threshold', () => {
       const result = calculateDuckingLevel(0.2, mockDuckingConfig, 0);
-      
+
       expect(result).toBe(1.0); // Exactly at threshold, no ducking
     });
   });
@@ -178,9 +182,9 @@ describe('audioUtils', () => {
 
       expect(result).toBeInstanceOf(Array);
       expect(result.length).toBeGreaterThan(0);
-      
+
       // Check that sync points have required properties
-      result.forEach(syncPoint => {
+      result.forEach((syncPoint) => {
         expect(syncPoint).toHaveProperty('id');
         expect(syncPoint).toHaveProperty('time');
         expect(syncPoint).toHaveProperty('label');
@@ -212,9 +216,9 @@ describe('audioUtils', () => {
   describe('validateAudioForNarration', () => {
     it('validates supported audio file types', () => {
       const mp3File = new File([''], 'test.mp3', { type: 'audio/mp3' });
-      
+
       const result = validateAudioForNarration(mp3File);
-      
+
       expect(result.isValid).toBe(true);
       expect(result.warnings).toHaveLength(0);
       expect(result.recommendations).toHaveLength(0);
@@ -222,9 +226,9 @@ describe('audioUtils', () => {
 
     it('warns about unsupported file types', () => {
       const unknownFile = new File([''], 'test.xyz', { type: 'audio/xyz' });
-      
+
       const result = validateAudioForNarration(unknownFile);
-      
+
       expect(result.isValid).toBe(false);
       expect(result.warnings.length).toBeGreaterThan(0);
       expect(result.warnings[0]).toContain('may not be fully supported');
@@ -232,23 +236,29 @@ describe('audioUtils', () => {
     });
 
     it('warns about very small files', () => {
-      const smallFile = new File(['x'.repeat(100)], 'test.mp3', { type: 'audio/mpeg' });
-      
+      const smallFile = new File(['x'.repeat(100)], 'test.mp3', {
+        type: 'audio/mpeg',
+      });
+
       const result = validateAudioForNarration(smallFile);
-      
-      expect(result.warnings.some(w => w.includes('very small'))).toBe(true);
-      expect(result.recommendations.some(r => r.includes('higher quality'))).toBe(true);
+
+      expect(result.warnings.some((w) => w.includes('very small'))).toBe(true);
+      expect(
+        result.recommendations.some((r) => r.includes('higher quality'))
+      ).toBe(true);
     });
 
     it('warns about very large files', () => {
       // Create a mock file that appears to be 200MB
       const largeFile = new File([''], 'test.mp3', { type: 'audio/mpeg' });
       Object.defineProperty(largeFile, 'size', { value: 200 * 1024 * 1024 });
-      
+
       const result = validateAudioForNarration(largeFile);
-      
-      expect(result.warnings.some(w => w.includes('very large'))).toBe(true);
-      expect(result.recommendations.some(r => r.includes('compressing'))).toBe(true);
+
+      expect(result.warnings.some((w) => w.includes('very large'))).toBe(true);
+      expect(
+        result.recommendations.some((r) => r.includes('compressing'))
+      ).toBe(true);
     });
   });
 
@@ -283,7 +293,7 @@ describe('audioUtils', () => {
 
     it('has valid ducking configuration', () => {
       const ducking = DEFAULT_NARRATION_PROPERTIES.ducking;
-      
+
       expect(ducking.threshold).toBeGreaterThan(0);
       expect(ducking.threshold).toBeLessThan(1);
       expect(ducking.ratio).toBeGreaterThan(0);

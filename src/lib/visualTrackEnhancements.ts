@@ -47,7 +47,9 @@ export interface VisualAnimationPreset {
 }
 
 // Screen recording detection implementation
-export function analyzeScreenRecording(asset: MediaAsset): ScreenRecordingAnalysis {
+export function analyzeScreenRecording(
+  asset: MediaAsset
+): ScreenRecordingAnalysis {
   if (asset.type !== 'video') {
     return {
       isScreenRecording: false,
@@ -57,7 +59,7 @@ export function analyzeScreenRecording(asset: MediaAsset): ScreenRecordingAnalys
         hasCodeContent: false,
         hasMouseCursor: false,
         hasApplicationWindows: false,
-        aspectRatio: 16/9,
+        aspectRatio: 16 / 9,
         resolution: { width: 1920, height: 1080 },
       },
       optimizationSuggestions: [],
@@ -66,7 +68,7 @@ export function analyzeScreenRecording(asset: MediaAsset): ScreenRecordingAnalys
 
   const { width = 1920, height = 1080 } = asset.metadata;
   const aspectRatio = width / height;
-  
+
   // Screen recording detection heuristics
   let confidence = 0;
   const characteristics = {
@@ -79,11 +81,11 @@ export function analyzeScreenRecording(asset: MediaAsset): ScreenRecordingAnalys
   };
 
   // Common screen recording aspect ratios
-  const commonScreenRatios = [16/9, 16/10, 4/3, 21/9, 32/9];
-  const isCommonScreenRatio = commonScreenRatios.some(ratio => 
-    Math.abs(aspectRatio - ratio) < 0.1
+  const commonScreenRatios = [16 / 9, 16 / 10, 4 / 3, 21 / 9, 32 / 9];
+  const isCommonScreenRatio = commonScreenRatios.some(
+    (ratio) => Math.abs(aspectRatio - ratio) < 0.1
   );
-  
+
   if (isCommonScreenRatio) {
     confidence += 0.3;
   }
@@ -103,33 +105,49 @@ export function analyzeScreenRecording(asset: MediaAsset): ScreenRecordingAnalys
   // Check filename for screen recording indicators
   const filename = asset.name.toLowerCase();
   const screenRecordingKeywords = [
-    'screen', 'recording', 'capture', 'demo', 'tutorial', 
-    'walkthrough', 'presentation', 'desktop', 'monitor'
+    'screen',
+    'recording',
+    'capture',
+    'demo',
+    'tutorial',
+    'walkthrough',
+    'presentation',
+    'desktop',
+    'monitor',
   ];
-  
-  const hasScreenKeywords = screenRecordingKeywords.some(keyword => 
+
+  const hasScreenKeywords = screenRecordingKeywords.some((keyword) =>
     filename.includes(keyword)
   );
-  
+
   if (hasScreenKeywords) {
     confidence += 0.3;
     characteristics.hasUIElements = true;
   }
 
   // Code-related keywords suggest code content
-  const codeKeywords = ['code', 'coding', 'programming', 'dev', 'ide', 'editor'];
-  const hasCodeKeywords = codeKeywords.some(keyword => filename.includes(keyword));
-  
+  const codeKeywords = [
+    'code',
+    'coding',
+    'programming',
+    'dev',
+    'ide',
+    'editor',
+  ];
+  const hasCodeKeywords = codeKeywords.some((keyword) =>
+    filename.includes(keyword)
+  );
+
   if (hasCodeKeywords) {
     confidence += 0.2;
     characteristics.hasCodeContent = true;
   }
 
   const isScreenRecording = confidence > 0.5;
-  
+
   // Generate optimization suggestions
   const optimizationSuggestions: ScreenRecordingOptimization[] = [];
-  
+
   if (isScreenRecording) {
     if (characteristics.hasCodeContent) {
       optimizationSuggestions.push({
@@ -139,20 +157,21 @@ export function analyzeScreenRecording(asset: MediaAsset): ScreenRecordingAnalys
         confidence: 0.8,
       });
     }
-    
+
     if (aspectRatio > 2.0) {
       optimizationSuggestions.push({
         type: 'crop',
         description: 'Crop to main content area to improve focus',
-        parameters: { cropRatio: 16/9, position: 'center' },
+        parameters: { cropRatio: 16 / 9, position: 'center' },
         confidence: 0.7,
       });
     }
-    
+
     if (characteristics.hasUIElements) {
       optimizationSuggestions.push({
         type: 'highlight',
-        description: 'Add highlights to draw attention to important UI elements',
+        description:
+          'Add highlights to draw attention to important UI elements',
         parameters: { highlightStyle: 'glow', color: '#F59E0B' },
         confidence: 0.6,
       });
@@ -186,10 +205,10 @@ export function applySideBySideLayout(
   items: TimelineItem[],
   layout: SideBySideLayout
 ): TimelineItem[] {
-  return items.map(item => {
+  return items.map((item) => {
     const isCodeItem = item.type === 'code';
     const isVisualItem = item.type === 'video' || item.type === 'visual-asset';
-    
+
     if (!isCodeItem && !isVisualItem) {
       return item;
     }
@@ -205,11 +224,11 @@ export function applySideBySideLayout(
           updatedProperties.x = 0;
           updatedProperties.scale = layout.splitRatio;
         } else if (isVisualItem) {
-          updatedProperties.x = layout.splitRatio + (layout.gap / 1920); // Normalize gap
+          updatedProperties.x = layout.splitRatio + layout.gap / 1920; // Normalize gap
           updatedProperties.scale = 1 - layout.splitRatio;
         }
         break;
-        
+
       case 'right-left':
         if (isCodeItem) {
           updatedProperties.x = 1 - layout.splitRatio;
@@ -219,17 +238,17 @@ export function applySideBySideLayout(
           updatedProperties.scale = 1 - layout.splitRatio;
         }
         break;
-        
+
       case 'top-bottom':
         if (isCodeItem) {
           updatedProperties.y = 0;
           updatedProperties.scale = layout.splitRatio;
         } else if (isVisualItem) {
-          updatedProperties.y = layout.splitRatio + (layout.gap / 1080); // Normalize gap
+          updatedProperties.y = layout.splitRatio + layout.gap / 1080; // Normalize gap
           updatedProperties.scale = 1 - layout.splitRatio;
         }
         break;
-        
+
       case 'bottom-top':
         if (isCodeItem) {
           updatedProperties.y = 1 - layout.splitRatio;
@@ -384,7 +403,7 @@ export function applyVisualAnimationPreset(
   customParameters?: Record<string, unknown>
 ): TimelineItem {
   const parameters = { ...preset.parameters, ...customParameters };
-  
+
   const updatedProperties: Partial<ItemProperties> = {
     ...item.properties,
   };
@@ -394,23 +413,23 @@ export function applyVisualAnimationPreset(
       updatedProperties.strokeColor = parameters.glowColor as string;
       updatedProperties.strokeWidth = 3;
       break;
-      
+
     case 'zoom-focus':
       updatedProperties.autoFocus = true;
       updatedProperties.focusPointX = parameters.focusPointX as number;
       updatedProperties.focusPointY = parameters.focusPointY as number;
       updatedProperties.focusScale = parameters.zoomLevel as number;
       break;
-      
+
     case 'callout':
       // Callout animations will be handled by overlay components
       break;
-      
+
     case 'pan':
       updatedProperties.autoFocus = true;
       updatedProperties.focusScale = 1.2; // Slight zoom for better pan effect
       break;
-      
+
     case 'reveal':
       updatedProperties.animateIn = 'fade';
       break;
@@ -434,30 +453,30 @@ export function getRecommendedPresetsForContent(
   analysis?: ScreenRecordingAnalysis
 ): VisualAnimationPreset[] {
   const recommended: VisualAnimationPreset[] = [];
-  
+
   if (analysis?.isScreenRecording) {
     if (analysis.characteristics.hasCodeContent) {
       recommended.push(
-        VISUAL_ANIMATION_PRESETS.find(p => p.id === 'zoom-focus-center')!,
-        VISUAL_ANIMATION_PRESETS.find(p => p.id === 'highlight-glow')!,
-        VISUAL_ANIMATION_PRESETS.find(p => p.id === 'pan-left-right')!
+        VISUAL_ANIMATION_PRESETS.find((p) => p.id === 'zoom-focus-center')!,
+        VISUAL_ANIMATION_PRESETS.find((p) => p.id === 'highlight-glow')!,
+        VISUAL_ANIMATION_PRESETS.find((p) => p.id === 'pan-left-right')!
       );
     } else {
       recommended.push(
-        VISUAL_ANIMATION_PRESETS.find(p => p.id === 'zoom-focus-custom')!,
-        VISUAL_ANIMATION_PRESETS.find(p => p.id === 'callout-arrow')!,
-        VISUAL_ANIMATION_PRESETS.find(p => p.id === 'pan-top-bottom')!
+        VISUAL_ANIMATION_PRESETS.find((p) => p.id === 'zoom-focus-custom')!,
+        VISUAL_ANIMATION_PRESETS.find((p) => p.id === 'callout-arrow')!,
+        VISUAL_ANIMATION_PRESETS.find((p) => p.id === 'pan-top-bottom')!
       );
     }
   } else {
     // Regular video content
     recommended.push(
-      VISUAL_ANIMATION_PRESETS.find(p => p.id === 'reveal-wipe')!,
-      VISUAL_ANIMATION_PRESETS.find(p => p.id === 'zoom-focus-center')!,
-      VISUAL_ANIMATION_PRESETS.find(p => p.id === 'callout-circle')!
+      VISUAL_ANIMATION_PRESETS.find((p) => p.id === 'reveal-wipe')!,
+      VISUAL_ANIMATION_PRESETS.find((p) => p.id === 'zoom-focus-center')!,
+      VISUAL_ANIMATION_PRESETS.find((p) => p.id === 'callout-circle')!
     );
   }
-  
+
   return recommended.filter(Boolean);
 }
 
@@ -484,7 +503,7 @@ export function generateThumbnailUrl(
   if (asset.thumbnail) {
     return asset.thumbnail;
   }
-  
+
   // Generate placeholder thumbnail URL
   const { width, height } = options;
   return `https://via.placeholder.com/${width}x${height}/10B981/ffffff?text=Video`;
@@ -494,8 +513,9 @@ export function generateThumbnailUrl(
 export function getScreenRecordingIndicators(
   analysis: ScreenRecordingAnalysis
 ): Array<{ type: string; label: string; confidence: number }> {
-  const indicators: Array<{ type: string; label: string; confidence: number }> = [];
-  
+  const indicators: Array<{ type: string; label: string; confidence: number }> =
+    [];
+
   if (analysis.isScreenRecording) {
     indicators.push({
       type: 'screen-recording',
@@ -503,7 +523,7 @@ export function getScreenRecordingIndicators(
       confidence: analysis.confidence,
     });
   }
-  
+
   if (analysis.characteristics.hasCodeContent) {
     indicators.push({
       type: 'code-content',
@@ -511,7 +531,7 @@ export function getScreenRecordingIndicators(
       confidence: 0.8,
     });
   }
-  
+
   if (analysis.characteristics.hasUIElements) {
     indicators.push({
       type: 'ui-elements',
@@ -519,7 +539,7 @@ export function getScreenRecordingIndicators(
       confidence: 0.7,
     });
   }
-  
+
   if (analysis.characteristics.aspectRatio > 2.0) {
     indicators.push({
       type: 'ultrawide',
@@ -527,6 +547,6 @@ export function getScreenRecordingIndicators(
       confidence: 0.9,
     });
   }
-  
+
   return indicators;
 }

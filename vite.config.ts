@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react-swc';
 import prismjsPlugin from 'vite-plugin-prismjs';
 
 // https://vite.dev/config/
@@ -53,7 +53,7 @@ export default defineConfig({
       'zundo',
       'prismjs',
       'remotion',
-      '@remotion/player'
+      '@remotion/player',
     ],
     // Avoid trying to prebundle Node/Electron-side packages
     exclude: ['@remotion/bundler', '@remotion/renderer', '@remotion/cli'],

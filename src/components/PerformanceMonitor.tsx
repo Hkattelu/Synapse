@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { usePerformanceMonitor, TimelineCalculations } from '../lib/performanceOptimizations';
+import {
+  usePerformanceMonitor,
+  TimelineCalculations,
+} from '../lib/performanceOptimizations';
 
 interface PerformanceMonitorProps {
   enabled?: boolean;
@@ -15,9 +18,9 @@ interface PerformanceMetrics {
   totalItems: number;
 }
 
-export function PerformanceMonitor({ 
+export function PerformanceMonitor({
   enabled = process.env.NODE_ENV === 'development',
-  position = 'top-right' 
+  position = 'top-right',
 }: PerformanceMonitorProps) {
   const [metrics, setMetrics] = useState<PerformanceMetrics>({
     fps: 0,
@@ -42,20 +45,20 @@ export function PerformanceMonitor({
     const calculateFPS = () => {
       frameCount++;
       const currentTime = performance.now();
-      
+
       if (currentTime - lastTime >= 1000) {
         const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
-        
-        setMetrics(prev => ({
+
+        setMetrics((prev) => ({
           ...prev,
           fps,
           cacheSize: TimelineCalculations.getCacheSize(),
         }));
-        
+
         frameCount = 0;
         lastTime = currentTime;
       }
-      
+
       animationId = requestAnimationFrame(calculateFPS);
     };
 
@@ -73,7 +76,7 @@ export function PerformanceMonitor({
     const updateMemoryUsage = () => {
       const memory = (performance as any).memory;
       if (memory) {
-        setMetrics(prev => ({
+        setMetrics((prev) => ({
           ...prev,
           memoryUsage: Math.round(memory.usedJSHeapSize / 1024 / 1024),
         }));
@@ -85,12 +88,12 @@ export function PerformanceMonitor({
   }, [enabled]);
 
   const toggleVisibility = useCallback(() => {
-    setIsVisible(prev => !prev);
+    setIsVisible((prev) => !prev);
   }, []);
 
   const clearCache = useCallback(() => {
     TimelineCalculations.clearCache();
-    setMetrics(prev => ({ ...prev, cacheSize: 0 }));
+    setMetrics((prev) => ({ ...prev, cacheSize: 0 }));
   }, []);
 
   if (!enabled) return null;
@@ -129,30 +132,52 @@ export function PerformanceMonitor({
           <div className="space-y-1">
             <div className="flex justify-between">
               <span>FPS:</span>
-              <span className={metrics.fps < 30 ? 'text-red-400' : metrics.fps < 50 ? 'text-yellow-400' : 'text-green-400'}>
+              <span
+                className={
+                  metrics.fps < 30
+                    ? 'text-red-400'
+                    : metrics.fps < 50
+                      ? 'text-yellow-400'
+                      : 'text-green-400'
+                }
+              >
                 {metrics.fps}
               </span>
             </div>
 
             <div className="flex justify-between">
               <span>Memory:</span>
-              <span className={metrics.memoryUsage > 100 ? 'text-red-400' : metrics.memoryUsage > 50 ? 'text-yellow-400' : 'text-green-400'}>
+              <span
+                className={
+                  metrics.memoryUsage > 100
+                    ? 'text-red-400'
+                    : metrics.memoryUsage > 50
+                      ? 'text-yellow-400'
+                      : 'text-green-400'
+                }
+              >
                 {metrics.memoryUsage} MB
               </span>
             </div>
 
             <div className="flex justify-between">
               <span>Render Time:</span>
-              <span className={metrics.renderTime > 16 ? 'text-red-400' : metrics.renderTime > 8 ? 'text-yellow-400' : 'text-green-400'}>
+              <span
+                className={
+                  metrics.renderTime > 16
+                    ? 'text-red-400'
+                    : metrics.renderTime > 8
+                      ? 'text-yellow-400'
+                      : 'text-green-400'
+                }
+              >
                 {metrics.renderTime.toFixed(1)} ms
               </span>
             </div>
 
             <div className="flex justify-between">
               <span>Cache Size:</span>
-              <span className="text-blue-400">
-                {metrics.cacheSize}
-              </span>
+              <span className="text-blue-400">{metrics.cacheSize}</span>
             </div>
 
             <div className="flex justify-between">
@@ -164,9 +189,7 @@ export function PerformanceMonitor({
 
             <div className="flex justify-between">
               <span>Renders:</span>
-              <span className="text-purple-400">
-                #{renderCount}
-              </span>
+              <span className="text-purple-400">#{renderCount}</span>
             </div>
           </div>
 
@@ -212,10 +235,10 @@ export function useReportPerformanceMetrics(
 }
 
 // Performance warning component
-export function PerformanceWarning({ 
+export function PerformanceWarning({
   threshold = 16,
-  renderTime 
-}: { 
+  renderTime,
+}: {
   threshold?: number;
   renderTime: number;
 }) {

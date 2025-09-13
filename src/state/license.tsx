@@ -36,14 +36,20 @@ export const LicenseProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState<boolean>(false);
 
   const getPublicTestKey = (): string => {
-    const meta = (import.meta as unknown as { env?: Record<string, string | undefined> }) || undefined;
+    const meta =
+      (import.meta as unknown as {
+        env?: Record<string, string | undefined>;
+      }) || undefined;
     return (
-      (typeof import.meta !== 'undefined' && meta.env?.VITE_PUBLIC_TEST_LICENSE_KEY) ||
+      (typeof import.meta !== 'undefined' &&
+        meta.env?.VITE_PUBLIC_TEST_LICENSE_KEY) ||
       DEFAULT_PUBLIC_TEST_KEY
     );
   };
 
-  const isWebTestLicenseValid = (license: string | null | undefined): boolean => {
+  const isWebTestLicenseValid = (
+    license: string | null | undefined
+  ): boolean => {
     if (!license) return false;
     try {
       const expected = getPublicTestKey();
@@ -146,7 +152,10 @@ export const LicenseProvider: React.FC<{ children: React.ReactNode }> = ({
           licenseMasked: mask(license.trim()),
         });
       } else {
-        setStatus({ state: 'invalid', message: 'Invalid license for web test' });
+        setStatus({
+          state: 'invalid',
+          message: 'Invalid license for web test',
+        });
       }
     } finally {
       setLoading(false);
@@ -176,9 +185,16 @@ export const LicenseProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       })();
       if (isWebTestLicenseValid(stored)) {
-        setStatus({ state: 'valid', message: 'web test license', licenseMasked: mask(stored) });
+        setStatus({
+          state: 'valid',
+          message: 'web test license',
+          licenseMasked: mask(stored),
+        });
       } else {
-        setStatus({ state: 'unknown', message: 'license unavailable in web build' });
+        setStatus({
+          state: 'unknown',
+          message: 'license unavailable in web build',
+        });
       }
     } finally {
       setLoading(false);

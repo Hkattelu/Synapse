@@ -44,29 +44,29 @@ export function AudioLevelMeter({
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 256;
     analyser.smoothingTimeConstant = 0.8;
-    
+
     audioSource.connect(analyser);
     analyserRef.current = analyser;
 
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
-    
+
     const updateLevels = () => {
       if (!analyserRef.current) return;
-      
+
       analyserRef.current.getByteFrequencyData(dataArray);
-      
+
       // Convert to float array and calculate levels
       const floatArray = new Float32Array(dataArray.length);
       for (let i = 0; i < dataArray.length; i++) {
         floatArray[i] = dataArray[i] / 255;
       }
-      
+
       const newLevels = calculateAudioLevels(floatArray, levels);
       setLevels(newLevels);
-      
+
       animationFrameRef.current = requestAnimationFrame(updateLevels);
     };
-    
+
     updateLevels();
 
     return () => {
@@ -82,7 +82,7 @@ export function AudioLevelMeter({
   // Reset peak level periodically
   useEffect(() => {
     const interval = setInterval(() => {
-      setLevels(prev => ({
+      setLevels((prev) => ({
         ...prev,
         peakLevel: prev.peakLevel * 0.95, // Gradual decay
       }));
@@ -94,20 +94,68 @@ export function AudioLevelMeter({
   const renderMeter = () => {
     switch (style) {
       case 'bars':
-        return <BarMeter {...{ levels, width, height, color, backgroundColor, showPeak, showAverage, orientation }} />;
+        return (
+          <BarMeter
+            {...{
+              levels,
+              width,
+              height,
+              color,
+              backgroundColor,
+              showPeak,
+              showAverage,
+              orientation,
+            }}
+          />
+        );
       case 'circular':
-        return <CircularMeter {...{ levels, width: Math.min(width, height), color, backgroundColor, showPeak, showAverage }} />;
+        return (
+          <CircularMeter
+            {...{
+              levels,
+              width: Math.min(width, height),
+              color,
+              backgroundColor,
+              showPeak,
+              showAverage,
+            }}
+          />
+        );
       case 'linear':
-        return <LinearMeter {...{ levels, width, height, color, backgroundColor, showPeak, showAverage, orientation }} />;
+        return (
+          <LinearMeter
+            {...{
+              levels,
+              width,
+              height,
+              color,
+              backgroundColor,
+              showPeak,
+              showAverage,
+              orientation,
+            }}
+          />
+        );
       default:
-        return <LinearMeter {...{ levels, width, height, color, backgroundColor, showPeak, showAverage, orientation }} />;
+        return (
+          <LinearMeter
+            {...{
+              levels,
+              width,
+              height,
+              color,
+              backgroundColor,
+              showPeak,
+              showAverage,
+              orientation,
+            }}
+          />
+        );
     }
   };
 
   return (
-    <div className={`audio-level-meter ${className}`}>
-      {renderMeter()}
-    </div>
+    <div className={`audio-level-meter ${className}`}>{renderMeter()}</div>
   );
 }
 
@@ -131,14 +179,23 @@ function BarMeter({
   showAverage: boolean;
   orientation: 'horizontal' | 'vertical';
 }) {
-  const numBars = orientation === 'horizontal' ? Math.floor(width / 4) : Math.floor(height / 4);
+  const numBars =
+    orientation === 'horizontal'
+      ? Math.floor(width / 4)
+      : Math.floor(height / 4);
   const bars: JSX.Element[] = [];
 
   for (let i = 0; i < numBars; i++) {
     const threshold = i / numBars;
     const isActive = levels.currentLevel > threshold;
-    const isPeak = showPeak && levels.peakLevel > threshold && levels.peakLevel <= (i + 1) / numBars;
-    const isAverage = showAverage && levels.averageLevel > threshold && levels.averageLevel <= (i + 1) / numBars;
+    const isPeak =
+      showPeak &&
+      levels.peakLevel > threshold &&
+      levels.peakLevel <= (i + 1) / numBars;
+    const isAverage =
+      showAverage &&
+      levels.averageLevel > threshold &&
+      levels.averageLevel <= (i + 1) / numBars;
 
     let barColor = backgroundColor;
     if (isActive) {
@@ -156,23 +213,22 @@ function BarMeter({
       barColor = `${color}80`; // Semi-transparent average
     }
 
-    const barStyle: React.CSSProperties = orientation === 'horizontal'
-      ? {
-          width: `${100 / numBars}%`,
-          height: '100%',
-          backgroundColor: barColor,
-          marginRight: '1px',
-        }
-      : {
-          width: '100%',
-          height: `${100 / numBars}%`,
-          backgroundColor: barColor,
-          marginBottom: '1px',
-        };
+    const barStyle: React.CSSProperties =
+      orientation === 'horizontal'
+        ? {
+            width: `${100 / numBars}%`,
+            height: '100%',
+            backgroundColor: barColor,
+            marginRight: '1px',
+          }
+        : {
+            width: '100%',
+            height: `${100 / numBars}%`,
+            backgroundColor: barColor,
+            marginBottom: '1px',
+          };
 
-    bars.push(
-      <div key={i} style={barStyle} />
-    );
+    bars.push(<div key={i} style={barStyle} />);
   }
 
   return (
@@ -211,9 +267,11 @@ function CircularMeter({
   const startAngle = -Math.PI / 2; // Start at top
   const endAngle = startAngle + 2 * Math.PI * 0.75; // 3/4 circle
 
-  const currentAngle = startAngle + (endAngle - startAngle) * levels.currentLevel;
+  const currentAngle =
+    startAngle + (endAngle - startAngle) * levels.currentLevel;
   const peakAngle = startAngle + (endAngle - startAngle) * levels.peakLevel;
-  const averageAngle = startAngle + (endAngle - startAngle) * levels.averageLevel;
+  const averageAngle =
+    startAngle + (endAngle - startAngle) * levels.averageLevel;
 
   return (
     <svg width={width} height={width} className="transform -rotate-90">
@@ -225,7 +283,7 @@ function CircularMeter({
         strokeWidth="6"
         strokeLinecap="round"
       />
-      
+
       {/* Current level arc */}
       {levels.currentLevel > 0 && (
         <path
@@ -236,7 +294,7 @@ function CircularMeter({
           strokeLinecap="round"
         />
       )}
-      
+
       {/* Peak indicator */}
       {showPeak && levels.peakLevel > 0 && (
         <circle
@@ -246,7 +304,7 @@ function CircularMeter({
           fill="#F59E0B"
         />
       )}
-      
+
       {/* Average indicator */}
       {showAverage && levels.averageLevel > 0 && (
         <circle
@@ -281,17 +339,17 @@ function LinearMeter({
   orientation: 'horizontal' | 'vertical';
 }) {
   const isHorizontal = orientation === 'horizontal';
-  
-  const currentSize = isHorizontal 
-    ? width * levels.currentLevel 
+
+  const currentSize = isHorizontal
+    ? width * levels.currentLevel
     : height * levels.currentLevel;
-  
-  const peakPosition = isHorizontal 
-    ? width * levels.peakLevel 
+
+  const peakPosition = isHorizontal
+    ? width * levels.peakLevel
     : height * levels.peakLevel;
-    
-  const averagePosition = isHorizontal 
-    ? width * levels.averageLevel 
+
+  const averagePosition = isHorizontal
+    ? width * levels.averageLevel
     : height * levels.averageLevel;
 
   return (
@@ -323,7 +381,7 @@ function LinearMeter({
               }),
         }}
       />
-      
+
       {/* Peak indicator */}
       {showPeak && levels.peakLevel > 0 && (
         <div
@@ -345,7 +403,7 @@ function LinearMeter({
           }}
         />
       )}
-      
+
       {/* Average indicator */}
       {showAverage && levels.averageLevel > 0 && (
         <div

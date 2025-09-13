@@ -20,7 +20,8 @@ vi.mock('../../lib/backgrounds', () => {
   return {
     backgroundManager: {
       getAllWallpapers: () => mockWallpapers,
-      getWallpaperById: (id: string) => mockWallpapers.find(w => w.id === id) || null,
+      getWallpaperById: (id: string) =>
+        mockWallpapers.find((w) => w.id === id) || null,
       addCustomWallpaper: vi.fn(),
     },
   };
@@ -32,7 +33,9 @@ describe('WallpaperPicker - animated badges', () => {
     render(<WallpaperPicker value={undefined} onChange={onChange} />);
 
     // Expand
-    fireEvent.click(screen.getByText('Wallpaper').closest('div')!.querySelector('button')!);
+    fireEvent.click(
+      screen.getByText('Wallpaper').closest('div')!.querySelector('button')!
+    );
 
     // Verify badges present (case-insensitive, allow multiple matches)
     const animatedBadges = screen.getAllByText(/Animated/i);

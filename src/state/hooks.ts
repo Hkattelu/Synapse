@@ -105,7 +105,7 @@ export function useProject() {
 // Hook for timeline operations
 export function useTimeline() {
   const { state, dispatch } = useAppContext();
-  
+
   // Temporarily use the base store directly to avoid temporal issues
   const timeline = state.project?.timeline || [];
   const [currentTime, setCurrentTime] = useState(0);
@@ -120,7 +120,10 @@ export function useTimeline() {
         keyframes: item.keyframes || [],
       };
       // Use dispatch for now to avoid temporal store issues
-      dispatch({ type: 'UPDATE_PROJECT', payload: { timeline: [...timeline, newItem] } });
+      dispatch({
+        type: 'UPDATE_PROJECT',
+        payload: { timeline: [...timeline, newItem] },
+      });
       return newItem.id;
     },
     [dispatch, timeline]
@@ -138,7 +141,7 @@ export function useTimeline() {
   const updateTimelineItem = useCallback(
     (id: string, updates: Partial<TimelineItem>) => {
       // Use dispatch for now to avoid temporal store issues
-      const newTimeline = timeline.map((item) => 
+      const newTimeline = timeline.map((item) =>
         item.id === id ? { ...item, ...updates } : item
       );
       dispatch({ type: 'UPDATE_PROJECT', payload: { timeline: newTimeline } });
@@ -151,7 +154,7 @@ export function useTimeline() {
   const moveTimelineItem = useCallback(
     (id: string, startTime: number, track: number) => {
       // Use dispatch for now to avoid temporal store issues
-      const newTimeline = timeline.map((item) => 
+      const newTimeline = timeline.map((item) =>
         item.id === id ? { ...item, startTime, track } : item
       );
       dispatch({ type: 'UPDATE_PROJECT', payload: { timeline: newTimeline } });
@@ -162,8 +165,10 @@ export function useTimeline() {
   const resizeTimelineItem = useCallback(
     (id: string, duration: number) => {
       // Use dispatch for now to avoid temporal store issues
-      const newTimeline = timeline.map((item) => 
-        item.id === id ? { ...item, duration: Math.max(0.1, Number(duration) || 0) } : item
+      const newTimeline = timeline.map((item) =>
+        item.id === id
+          ? { ...item, duration: Math.max(0.1, Number(duration) || 0) }
+          : item
       );
       dispatch({ type: 'UPDATE_PROJECT', payload: { timeline: newTimeline } });
     },
@@ -269,7 +274,10 @@ export function useMediaAssets() {
         createdAt: new Date(),
       };
       const newMediaAssets = [...mediaAssets, newAsset];
-      dispatch({ type: 'UPDATE_PROJECT', payload: { mediaAssets: newMediaAssets } });
+      dispatch({
+        type: 'UPDATE_PROJECT',
+        payload: { mediaAssets: newMediaAssets },
+      });
       return newAsset.id;
     },
     [dispatch, mediaAssets]
@@ -278,18 +286,25 @@ export function useMediaAssets() {
   const removeMediaAsset = useCallback(
     (id: string) => {
       const newMediaAssets = mediaAssets.filter((asset) => asset.id !== id);
-      const newTimeline = state.project?.timeline?.filter((item) => item.assetId !== id) || [];
-      dispatch({ type: 'UPDATE_PROJECT', payload: { mediaAssets: newMediaAssets, timeline: newTimeline } });
+      const newTimeline =
+        state.project?.timeline?.filter((item) => item.assetId !== id) || [];
+      dispatch({
+        type: 'UPDATE_PROJECT',
+        payload: { mediaAssets: newMediaAssets, timeline: newTimeline },
+      });
     },
     [dispatch, mediaAssets, state.project?.timeline]
   );
 
   const updateMediaAsset = useCallback(
     (id: string, updates: Partial<MediaAsset>) => {
-      const newMediaAssets = mediaAssets.map((asset) => 
+      const newMediaAssets = mediaAssets.map((asset) =>
         asset.id === id ? { ...asset, ...updates } : asset
       );
-      dispatch({ type: 'UPDATE_PROJECT', payload: { mediaAssets: newMediaAssets } });
+      dispatch({
+        type: 'UPDATE_PROJECT',
+        payload: { mediaAssets: newMediaAssets },
+      });
     },
     [dispatch, mediaAssets]
   );

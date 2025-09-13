@@ -43,7 +43,11 @@ export function DashboardView() {
 
     // Build media assets from timeline entries (code/title become code assets)
     const mediaAssets: MediaAsset[] = [];
-    const makeCodeAsset = (displayName: string, code: string, language?: string): MediaAsset => {
+    const makeCodeAsset = (
+      displayName: string,
+      code: string,
+      language?: string
+    ): MediaAsset => {
       const asset: MediaAsset = {
         id: generateId(),
         name: displayName,
@@ -61,60 +65,68 @@ export function DashboardView() {
       return asset;
     };
 
-    const timeline: TimelineItem[] = (proposal.timeline || []).map((item: any, idx: number) => {
-      if (item.type === 'code') {
-        const codeText = String(item.properties?.code || '');
-        const lang = item.properties?.language || 'plaintext';
-        const asset = makeCodeAsset(item.properties?.codePath ? `Code: ${item.properties.codePath}` : `Code Snippet ${idx + 1}`, codeText, lang);
+    const timeline: TimelineItem[] = (proposal.timeline || []).map(
+      (item: any, idx: number) => {
+        if (item.type === 'code') {
+          const codeText = String(item.properties?.code || '');
+          const lang = item.properties?.language || 'plaintext';
+          const asset = makeCodeAsset(
+            item.properties?.codePath
+              ? `Code: ${item.properties.codePath}`
+              : `Code Snippet ${idx + 1}`,
+            codeText,
+            lang
+          );
+          return {
+            id: generateId(),
+            assetId: asset.id,
+            startTime: Number(item.startTime || 0),
+            duration: Number(item.duration || 10),
+            track: 0,
+            type: 'code',
+            properties: {
+              language: lang,
+              codeText: codeText,
+              text: codeText,
+            },
+            animations: [],
+            keyframes: [],
+          };
+        }
+        if (item.type === 'title') {
+          const text = String(item.properties?.text || 'Title');
+          const asset = makeCodeAsset('Title', text, 'text');
+          return {
+            id: generateId(),
+            assetId: asset.id,
+            startTime: Number(item.startTime || 0),
+            duration: Number(item.duration || 4),
+            track: 1,
+            type: 'title',
+            properties: {
+              text,
+              color: '#ffffff',
+            },
+            animations: [],
+            keyframes: [],
+          };
+        }
+        // Fallback: treat unknown as title text
+        const text = `Segment ${idx + 1}`;
+        const asset = makeCodeAsset('Segment', text, 'text');
         return {
           id: generateId(),
           assetId: asset.id,
           startTime: Number(item.startTime || 0),
-          duration: Number(item.duration || 10),
-          track: 0,
-          type: 'code',
-          properties: {
-            language: lang,
-            codeText: codeText,
-            text: codeText,
-          },
-          animations: [],
-          keyframes: [],
-        };
-      }
-      if (item.type === 'title') {
-        const text = String(item.properties?.text || 'Title');
-        const asset = makeCodeAsset('Title', text, 'text');
-        return {
-          id: generateId(),
-          assetId: asset.id,
-          startTime: Number(item.startTime || 0),
-          duration: Number(item.duration || 4),
-          track: 1,
+          duration: Number(item.duration || 5),
+          track: 2,
           type: 'title',
-          properties: {
-            text,
-            color: '#ffffff',
-          },
+          properties: { text },
           animations: [],
           keyframes: [],
         };
       }
-      // Fallback: treat unknown as title text
-      const text = `Segment ${idx + 1}`;
-      const asset = makeCodeAsset('Segment', text, 'text');
-      return {
-        id: generateId(),
-        assetId: asset.id,
-        startTime: Number(item.startTime || 0),
-        duration: Number(item.duration || 5),
-        track: 2,
-        type: 'title',
-        properties: { text },
-        animations: [],
-        keyframes: [],
-      };
-    });
+    );
 
     const project: Project = {
       id: generateId(),
@@ -128,7 +140,9 @@ export function DashboardView() {
         height: Number(proposal.settings?.height || 1080),
         fps: Number(proposal.settings?.fps || 30),
         duration: Number(proposal.settings?.duration || 60),
-        backgroundColor: String(proposal.settings?.backgroundColor || '#000000'),
+        backgroundColor: String(
+          proposal.settings?.backgroundColor || '#000000'
+        ),
         audioSampleRate: 48000,
       },
       version: '1.0.0',
@@ -145,8 +159,13 @@ export function DashboardView() {
     }
     setRepoLoading(true);
     try {
-      const proposal = await api.aiGenerateFromRepo({ repoUrl, branch: branch || 'main' });
-      const projectName = proposal?.projectName || `Repo Video - ${new URL(repoUrl).pathname.split('/').slice(-1)[0]}`;
+      const proposal = await api.aiGenerateFromRepo({
+        repoUrl,
+        branch: branch || 'main',
+      });
+      const projectName =
+        proposal?.projectName ||
+        `Repo Video - ${new URL(repoUrl).pathname.split('/').slice(-1)[0]}`;
       const project: Project = buildProjectFromProposal(projectName, proposal);
       // Import into state
       importProject(project);
@@ -173,7 +192,11 @@ export function DashboardView() {
               onClick={() => navigate('/')}
               className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
             >
-              <img src="/branding/logo.svg" alt="Synapse Studio" className="h-8 w-auto" />
+              <img
+                src="/branding/logo.svg"
+                alt="Synapse Studio"
+                className="h-8 w-auto"
+              />
               <span className="sr-only">Synapse Studio</span>
             </button>
             <div></div>
@@ -264,7 +287,9 @@ export function DashboardView() {
                   <span>New from Repo</span>
                 </button>
                 <p className="text-sm text-text-tertiary max-w-2xl">
-                  Tip: We clone the repo (depth 1), scan for code and docs, and propose a short timeline (titles and code segments). You can edit everything afterward.
+                  Tip: We clone the repo (depth 1), scan for code and docs, and
+                  propose a short timeline (titles and code segments). You can
+                  edit everything afterward.
                 </p>
               </div>
             )}
@@ -304,13 +329,17 @@ export function DashboardView() {
                   <div className="text-2xl font-bold text-text-primary mb-1">
                     {project.timeline.length}
                   </div>
-                  <div className="text-sm text-text-secondary">Timeline Items</div>
+                  <div className="text-sm text-text-secondary">
+                    Timeline Items
+                  </div>
                 </div>
                 <div className="bg-synapse-surface rounded-lg p-4">
                   <div className="text-2xl font-bold text-text-primary mb-1">
                     {project.mediaAssets.length}
                   </div>
-                  <div className="text-sm text-text-secondary">Media Assets</div>
+                  <div className="text-sm text-text-secondary">
+                    Media Assets
+                  </div>
                 </div>
                 <div className="bg-synapse-surface rounded-lg p-4">
                   <div className="text-2xl font-bold text-text-primary mb-1">
@@ -326,25 +355,47 @@ export function DashboardView() {
 
       {/* New from Repo Modal */}
       {showRepoModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => !repoLoading && setShowRepoModal(false)}>
-          <div className="bg-synapse-surface rounded-xl shadow-synapse-lg w-full max-w-lg p-6" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => !repoLoading && setShowRepoModal(false)}
+        >
+          <div
+            className="bg-synapse-surface rounded-xl shadow-synapse-lg w-full max-w-lg p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-text-primary">New Project from Git Repo</h3>
+              <h3 className="text-lg font-semibold text-text-primary">
+                New Project from Git Repo
+              </h3>
               <button
                 className="text-text-secondary hover:text-text-primary"
                 onClick={() => !repoLoading && setShowRepoModal(false)}
                 aria-label="Close"
               >
-                <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 10-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/></svg>
+                <svg
+                  className="w-5 h-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 10-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
               </button>
             </div>
 
             <div className="space-y-4">
               <div className="text-sm text-text-secondary">
-                Generate a starter project from a public Git repository. We don’t execute code; we only read files to assemble an initial timeline you can refine.
+                Generate a starter project from a public Git repository. We
+                don’t execute code; we only read files to assemble an initial
+                timeline you can refine.
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-secondary">Repository URL</label>
+                <label className="block text-sm font-medium text-text-secondary">
+                  Repository URL
+                </label>
                 <input
                   type="url"
                   value={repoUrl}
@@ -354,7 +405,9 @@ export function DashboardView() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-secondary">Branch (optional)</label>
+                <label className="block text-sm font-medium text-text-secondary">
+                  Branch (optional)
+                </label>
                 <input
                   type="text"
                   value={branch}

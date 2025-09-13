@@ -1,15 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Sparkles, 
-  Download, 
-  Monitor, 
-  Smartphone, 
-  Globe, 
-  CheckCircle, 
-  ExternalLink, 
-  Github 
+import {
+  Sparkles,
+  Download,
+  Monitor,
+  Smartphone,
+  Globe,
+  CheckCircle,
+  ExternalLink,
+  Github,
 } from 'lucide-react';
 
 interface DownloadOption {
@@ -34,7 +34,9 @@ const Navigation: React.FC = () => {
             <div className="w-8 h-8 bg-synapse-primary rounded-lg flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-synapse-text-inverse" />
             </div>
-            <h1 className="text-xl font-bold text-text-primary">Synapse Studio</h1>
+            <h1 className="text-xl font-bold text-text-primary">
+              Synapse Studio
+            </h1>
           </div>
 
           <div className="flex items-center space-x-6">
@@ -99,7 +101,9 @@ const DownloadCard: React.FC<{ option: DownloadOption }> = ({ option }) => {
             <h3 className="text-xl font-bold text-text-primary">
               {option.platform}
             </h3>
-            <p className="text-sm text-text-secondary">Version {option.version}</p>
+            <p className="text-sm text-text-secondary">
+              Version {option.version}
+            </p>
           </div>
         </div>
         <span className="text-sm text-text-secondary bg-background-tertiary px-2 py-1 rounded">

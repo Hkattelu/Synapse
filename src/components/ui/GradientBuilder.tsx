@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { 
-  GradientBuilder as GradientBuilderClass, 
-  gradientPresets, 
+import {
+  GradientBuilder as GradientBuilderClass,
+  gradientPresets,
   generateGradientCSS,
   type GradientPreset,
-  type GradientColorStop 
+  type GradientColorStop,
 } from '../../lib/backgrounds';
 import type { GradientConfig } from '../../lib/types';
 
@@ -14,11 +14,15 @@ interface GradientBuilderProps {
   className?: string;
 }
 
-export function GradientBuilder({ value, onChange, className = '' }: GradientBuilderProps) {
+export function GradientBuilder({
+  value,
+  onChange,
+  className = '',
+}: GradientBuilderProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  
+
   // Initialize gradient builder
   const gradientBuilder = useMemo(() => {
     return new GradientBuilderClass(value);
@@ -32,7 +36,9 @@ export function GradientBuilder({ value, onChange, className = '' }: GradientBui
     if (selectedCategory === 'all') {
       return gradientPresets;
     }
-    return gradientPresets.filter(preset => preset.category === selectedCategory);
+    return gradientPresets.filter(
+      (preset) => preset.category === selectedCategory
+    );
   }, [selectedCategory]);
 
   // Generate CSS for preview
@@ -43,42 +49,62 @@ export function GradientBuilder({ value, onChange, className = '' }: GradientBui
     return generateGradientCSS(currentGradient);
   }, [currentGradient]);
 
-  const handlePresetSelect = useCallback((preset: GradientPreset) => {
-    setSelectedPreset(preset.id);
-    onChange(preset.gradient);
-    setIsExpanded(false);
-  }, [onChange]);
+  const handlePresetSelect = useCallback(
+    (preset: GradientPreset) => {
+      setSelectedPreset(preset.id);
+      onChange(preset.gradient);
+      setIsExpanded(false);
+    },
+    [onChange]
+  );
 
-  const handleTypeChange = useCallback((type: 'linear' | 'radial') => {
-    const newBuilder = gradientBuilder.clone().setType(type);
-    onChange(newBuilder.build());
-  }, [gradientBuilder, onChange]);
+  const handleTypeChange = useCallback(
+    (type: 'linear' | 'radial') => {
+      const newBuilder = gradientBuilder.clone().setType(type);
+      onChange(newBuilder.build());
+    },
+    [gradientBuilder, onChange]
+  );
 
-  const handleAngleChange = useCallback((angle: number) => {
-    const newBuilder = gradientBuilder.clone().setAngle(angle);
-    onChange(newBuilder.build());
-  }, [gradientBuilder, onChange]);
+  const handleAngleChange = useCallback(
+    (angle: number) => {
+      const newBuilder = gradientBuilder.clone().setAngle(angle);
+      onChange(newBuilder.build());
+    },
+    [gradientBuilder, onChange]
+  );
 
-  const handleCenterChange = useCallback((x: number, y: number) => {
-    const newBuilder = gradientBuilder.clone().setCenter(x, y);
-    onChange(newBuilder.build());
-  }, [gradientBuilder, onChange]);
+  const handleCenterChange = useCallback(
+    (x: number, y: number) => {
+      const newBuilder = gradientBuilder.clone().setCenter(x, y);
+      onChange(newBuilder.build());
+    },
+    [gradientBuilder, onChange]
+  );
 
-  const handleColorStopChange = useCallback((index: number, updates: Partial<GradientColorStop>) => {
-    const newBuilder = gradientBuilder.clone().updateColorStop(index, updates);
-    onChange(newBuilder.build());
-  }, [gradientBuilder, onChange]);
+  const handleColorStopChange = useCallback(
+    (index: number, updates: Partial<GradientColorStop>) => {
+      const newBuilder = gradientBuilder
+        .clone()
+        .updateColorStop(index, updates);
+      onChange(newBuilder.build());
+    },
+    [gradientBuilder, onChange]
+  );
 
   const handleAddColorStop = useCallback(() => {
     const newBuilder = gradientBuilder.clone().addColorStop('#ffffff', 0.5);
     onChange(newBuilder.build());
   }, [gradientBuilder, onChange]);
 
-  const handleRemoveColorStop = useCallback((index: number) => {
-    if (currentGradient.colors.length <= 2) return; // Minimum 2 colors required
-    const newBuilder = gradientBuilder.clone().removeColorStop(index);
-    onChange(newBuilder.build());
-  }, [gradientBuilder, onChange, currentGradient.colors.length]);
+  const handleRemoveColorStop = useCallback(
+    (index: number) => {
+      if (currentGradient.colors.length <= 2) return; // Minimum 2 colors required
+      const newBuilder = gradientBuilder.clone().removeColorStop(index);
+      onChange(newBuilder.build());
+    },
+    [gradientBuilder, onChange, currentGradient.colors.length]
+  );
 
   const handleClear = useCallback(() => {
     onChange(null);
@@ -97,7 +123,7 @@ export function GradientBuilder({ value, onChange, className = '' }: GradientBui
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div 
+              <div
                 className="w-4 h-4 rounded border border-border-subtle"
                 style={{ background: previewCSS }}
               />
@@ -110,8 +136,18 @@ export function GradientBuilder({ value, onChange, className = '' }: GradientBui
                 </span>
               )}
             </div>
-            <svg className="w-4 h-4 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg
+              className="w-4 h-4 text-text-secondary"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </div>
         </button>
@@ -129,15 +165,25 @@ export function GradientBuilder({ value, onChange, className = '' }: GradientBui
           onClick={() => setIsExpanded(false)}
           className="text-text-secondary hover:text-text-primary p-1"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
 
       {/* Preview */}
       <div className="mb-3">
-        <div 
+        <div
           className="w-full h-16 rounded border border-border-subtle"
           style={{ background: previewCSS }}
         />
@@ -168,13 +214,13 @@ export function GradientBuilder({ value, onChange, className = '' }: GradientBui
       {/* Preset Grid */}
       <div className="max-h-32 overflow-y-auto mb-3">
         <div className="grid grid-cols-3 gap-1">
-          {filteredPresets.map(preset => (
+          {filteredPresets.map((preset) => (
             <button
               key={preset.id}
               onClick={() => handlePresetSelect(preset)}
               className={`aspect-square rounded border transition-all hover:border-primary-500 ${
-                selectedPreset === preset.id 
-                  ? 'border-primary-500 ring-1 ring-primary-500' 
+                selectedPreset === preset.id
+                  ? 'border-primary-500 ring-1 ring-primary-500'
                   : 'border-border-subtle'
               }`}
               style={{ background: generateGradientCSS(preset.gradient) }}
@@ -235,7 +281,8 @@ export function GradientBuilder({ value, onChange, className = '' }: GradientBui
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs font-medium text-text-secondary mb-1">
-                  Center X: {((currentGradient.centerX || 0.5) * 100).toFixed(0)}%
+                  Center X:{' '}
+                  {((currentGradient.centerX || 0.5) * 100).toFixed(0)}%
                 </label>
                 <input
                   type="range"
@@ -243,13 +290,19 @@ export function GradientBuilder({ value, onChange, className = '' }: GradientBui
                   max="1"
                   step="0.01"
                   value={currentGradient.centerX || 0.5}
-                  onChange={(e) => handleCenterChange(parseFloat(e.target.value), currentGradient.centerY || 0.5)}
+                  onChange={(e) =>
+                    handleCenterChange(
+                      parseFloat(e.target.value),
+                      currentGradient.centerY || 0.5
+                    )
+                  }
                   className="w-full"
                 />
               </div>
               <div>
                 <label className="block text-xs font-medium text-text-secondary mb-1">
-                  Center Y: {((currentGradient.centerY || 0.5) * 100).toFixed(0)}%
+                  Center Y:{' '}
+                  {((currentGradient.centerY || 0.5) * 100).toFixed(0)}%
                 </label>
                 <input
                   type="range"
@@ -257,7 +310,12 @@ export function GradientBuilder({ value, onChange, className = '' }: GradientBui
                   max="1"
                   step="0.01"
                   value={currentGradient.centerY || 0.5}
-                  onChange={(e) => handleCenterChange(currentGradient.centerX || 0.5, parseFloat(e.target.value))}
+                  onChange={(e) =>
+                    handleCenterChange(
+                      currentGradient.centerX || 0.5,
+                      parseFloat(e.target.value)
+                    )
+                  }
                   className="w-full"
                 />
               </div>
@@ -277,14 +335,16 @@ export function GradientBuilder({ value, onChange, className = '' }: GradientBui
                 + Add Color
               </button>
             </div>
-            
+
             <div className="space-y-2 max-h-24 overflow-y-auto">
               {currentGradient.colors.map((colorStop, index) => (
                 <div key={index} className="flex items-center space-x-2">
                   <input
                     type="color"
                     value={colorStop.color}
-                    onChange={(e) => handleColorStopChange(index, { color: e.target.value })}
+                    onChange={(e) =>
+                      handleColorStopChange(index, { color: e.target.value })
+                    }
                     className="w-6 h-6 rounded border border-border-subtle"
                   />
                   <input
@@ -293,7 +353,11 @@ export function GradientBuilder({ value, onChange, className = '' }: GradientBui
                     max="1"
                     step="0.01"
                     value={colorStop.position}
-                    onChange={(e) => handleColorStopChange(index, { position: parseFloat(e.target.value) })}
+                    onChange={(e) =>
+                      handleColorStopChange(index, {
+                        position: parseFloat(e.target.value),
+                      })
+                    }
                     className="flex-1"
                   />
                   <span className="text-xs text-text-tertiary w-8">

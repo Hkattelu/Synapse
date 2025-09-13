@@ -1,9 +1,19 @@
 // Demo component showcasing Code track specialized features
 
 import React, { useState } from 'react';
-import { CodeSyntaxPreview, LanguageIndicator, AnimationModeIndicator } from './CodeSyntaxPreview';
-import { detectLanguageFromCode, getCodeLanguageDefaults } from '../lib/educationalTypes';
-import { getApplicablePresets, getRecommendedPresetsFor } from '../remotion/animations/presets';
+import {
+  CodeSyntaxPreview,
+  LanguageIndicator,
+  AnimationModeIndicator,
+} from './CodeSyntaxPreview';
+import {
+  detectLanguageFromCode,
+  getCodeLanguageDefaults,
+} from '../lib/educationalTypes';
+import {
+  getApplicablePresets,
+  getRecommendedPresetsFor,
+} from '../remotion/animations/presets';
 import type { TimelineItem } from '../lib/types';
 
 export function CodeTrackDemo() {
@@ -111,7 +121,7 @@ func _ready():
           Code Track Specialized Features Demo
         </h1>
         <p className="text-text-secondary">
-          Showcasing educational code features including language detection, 
+          Showcasing educational code features including language detection,
           syntax highlighting, and educational animation presets.
         </p>
       </div>
@@ -121,7 +131,7 @@ func _ready():
         <h2 className="text-lg font-semibold text-text-primary mb-3">
           Language Detection & Selection
         </h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">
@@ -132,14 +142,14 @@ func _ready():
               onChange={(e) => handleLanguageChange(e.target.value)}
               className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary"
             >
-              {Object.keys(sampleCodes).map(lang => (
+              {Object.keys(sampleCodes).map((lang) => (
                 <option key={lang} value={lang}>
                   {lang.charAt(0).toUpperCase() + lang.slice(1)}
                 </option>
               ))}
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">
               Quick Sample:
@@ -148,7 +158,10 @@ func _ready():
               onClick={() => setCodeContent(sampleCodes[selectedLanguage])}
               className="w-full px-3 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors"
             >
-              Load {selectedLanguage.charAt(0).toUpperCase() + selectedLanguage.slice(1)} Sample
+              Load{' '}
+              {selectedLanguage.charAt(0).toUpperCase() +
+                selectedLanguage.slice(1)}{' '}
+              Sample
             </button>
           </div>
         </div>
@@ -172,10 +185,12 @@ func _ready():
           >
             🔍 Auto-Detect Language
           </button>
-          
+
           <div className="flex items-center gap-2">
             <LanguageIndicator language={selectedLanguage} />
-            <AnimationModeIndicator mode={mockItem.properties.animationMode || 'typing'} />
+            <AnimationModeIndicator
+              mode={mockItem.properties.animationMode || 'typing'}
+            />
           </div>
         </div>
       </div>
@@ -185,24 +200,24 @@ func _ready():
         <h2 className="text-lg font-semibold text-text-primary mb-3">
           Syntax Highlighting Preview
         </h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <h3 className="text-sm font-medium text-text-secondary mb-2">
               Timeline Preview (2 lines):
             </h3>
-            <CodeSyntaxPreview 
+            <CodeSyntaxPreview
               item={mockItem}
               maxLines={2}
               showLanguage={true}
             />
           </div>
-          
+
           <div>
             <h3 className="text-sm font-medium text-text-secondary mb-2">
               Full Preview:
             </h3>
-            <CodeSyntaxPreview 
+            <CodeSyntaxPreview
               item={mockItem}
               maxLines={10}
               showLanguage={true}
@@ -216,41 +231,50 @@ func _ready():
         <h2 className="text-lg font-semibold text-text-primary mb-3">
           Educational Animation Presets
         </h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <h3 className="text-sm font-medium text-text-secondary mb-2">
               All Available Presets:
             </h3>
             <div className="space-y-1">
-              {applicablePresets.map(preset => (
-                <div key={preset.id} className="text-sm text-text-primary bg-background-tertiary px-2 py-1 rounded">
+              {applicablePresets.map((preset) => (
+                <div
+                  key={preset.id}
+                  className="text-sm text-text-primary bg-background-tertiary px-2 py-1 rounded"
+                >
                   {preset.title}
                 </div>
               ))}
             </div>
           </div>
-          
+
           <div>
             <h3 className="text-sm font-medium text-text-secondary mb-2">
               Beginner Recommended:
             </h3>
             <div className="space-y-1">
-              {beginnerPresets.map(preset => (
-                <div key={preset.id} className="text-sm text-text-primary bg-green-100 text-green-800 px-2 py-1 rounded">
+              {beginnerPresets.map((preset) => (
+                <div
+                  key={preset.id}
+                  className="text-sm text-text-primary bg-green-100 text-green-800 px-2 py-1 rounded"
+                >
                   {preset.title}
                 </div>
               ))}
             </div>
           </div>
-          
+
           <div>
             <h3 className="text-sm font-medium text-text-secondary mb-2">
               Refactoring Recommended:
             </h3>
             <div className="space-y-1">
-              {refactoringPresets.map(preset => (
-                <div key={preset.id} className="text-sm text-text-primary bg-blue-100 text-blue-800 px-2 py-1 rounded">
+              {refactoringPresets.map((preset) => (
+                <div
+                  key={preset.id}
+                  className="text-sm text-text-primary bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                >
                   {preset.title}
                 </div>
               ))}
@@ -264,9 +288,9 @@ func _ready():
         <h2 className="text-lg font-semibold text-text-primary mb-3">
           Language-Specific Defaults
         </h2>
-        
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Object.keys(sampleCodes).map(lang => {
+          {Object.keys(sampleCodes).map((lang) => {
             const defaults = getCodeLanguageDefaults(lang);
             return (
               <div key={lang} className="bg-background-tertiary p-3 rounded">
@@ -276,7 +300,9 @@ func _ready():
                 <div className="text-xs text-text-secondary space-y-1">
                   <div>Theme: {defaults.theme}</div>
                   <div>Animation: {defaults.animationMode}</div>
-                  <div>Speed: {defaults.typingSpeedCps || defaults.lineRevealIntervalMs}
+                  <div>
+                    Speed:{' '}
+                    {defaults.typingSpeedCps || defaults.lineRevealIntervalMs}
                     {defaults.typingSpeedCps ? ' cps' : ' ms'}
                   </div>
                   <div>Line #: {defaults.showLineNumbers ? 'Yes' : 'No'}</div>
@@ -292,24 +318,42 @@ func _ready():
         <h2 className="text-lg font-semibold text-text-primary mb-3">
           Educational Usage Tips
         </h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-text-secondary">
           <div>
-            <h3 className="font-medium text-text-primary mb-2">Animation Speeds:</h3>
+            <h3 className="font-medium text-text-primary mb-2">
+              Animation Speeds:
+            </h3>
             <ul className="space-y-1">
-              <li>• <strong>Slow (10-15 cps):</strong> Perfect for beginners</li>
-              <li>• <strong>Medium (20-25 cps):</strong> Good for most tutorials</li>
-              <li>• <strong>Fast (30+ cps):</strong> Advanced users only</li>
+              <li>
+                • <strong>Slow (10-15 cps):</strong> Perfect for beginners
+              </li>
+              <li>
+                • <strong>Medium (20-25 cps):</strong> Good for most tutorials
+              </li>
+              <li>
+                • <strong>Fast (30+ cps):</strong> Advanced users only
+              </li>
             </ul>
           </div>
-          
+
           <div>
-            <h3 className="font-medium text-text-primary mb-2">Animation Types:</h3>
+            <h3 className="font-medium text-text-primary mb-2">
+              Animation Types:
+            </h3>
             <ul className="space-y-1">
-              <li>• <strong>Typing:</strong> Character-by-character reveal</li>
-              <li>• <strong>Line Focus:</strong> Highlight specific lines</li>
-              <li>• <strong>Diff:</strong> Show code changes</li>
-              <li>• <strong>Line-by-line:</strong> Reveal one line at a time</li>
+              <li>
+                • <strong>Typing:</strong> Character-by-character reveal
+              </li>
+              <li>
+                • <strong>Line Focus:</strong> Highlight specific lines
+              </li>
+              <li>
+                • <strong>Diff:</strong> Show code changes
+              </li>
+              <li>
+                • <strong>Line-by-line:</strong> Reveal one line at a time
+              </li>
             </ul>
           </div>
         </div>

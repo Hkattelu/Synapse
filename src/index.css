@@ -52,7 +52,9 @@
   /* Interface Colors */
   /* Darken backgrounds slightly for higher contrast */
   --synapse-background: var(--synapse-mantle); /* was var(--synapse-base) */
-  --synapse-background-alt: var(--synapse-crust); /* was var(--synapse-mantle) */
+  --synapse-background-alt: var(
+    --synapse-crust
+  ); /* was var(--synapse-mantle) */
   --synapse-surface: var(--synapse-surface0);
   --synapse-surface-hover: var(--synapse-surface1);
   --synapse-surface-active: var(--synapse-surface2);
@@ -245,13 +247,27 @@ body {
 
 /* ===== UTILITY CLASSES ===== */
 /* Map semantic utility classes used across components to CSS variables */
-.bg-background-primary { background-color: var(--synapse-background); }
-.bg-background-secondary { background-color: var(--synapse-surface); }
-.bg-background-tertiary { background-color: var(--synapse-surface-hover); }
-.text-text-primary { color: var(--synapse-text-primary); }
-.text-text-secondary { color: var(--synapse-text-secondary); }
-.text-text-tertiary { color: var(--synapse-text-muted); }
-.border-border-subtle { border-color: var(--synapse-border); }
+.bg-background-primary {
+  background-color: var(--synapse-background);
+}
+.bg-background-secondary {
+  background-color: var(--synapse-surface);
+}
+.bg-background-tertiary {
+  background-color: var(--synapse-surface-hover);
+}
+.text-text-primary {
+  color: var(--synapse-text-primary);
+}
+.text-text-secondary {
+  color: var(--synapse-text-secondary);
+}
+.text-text-tertiary {
+  color: var(--synapse-text-muted);
+}
+.border-border-subtle {
+  border-color: var(--synapse-border);
+}
 
 .synapse-glass {
   background: rgba(54, 58, 79, 0.8);
@@ -371,7 +387,11 @@ body {
 
 /* Educational track indicators */
 .educational-track-indicator {
-  background: linear-gradient(135deg, var(--track-color), var(--track-color-light));
+  background: linear-gradient(
+    135deg,
+    var(--track-color),
+    var(--track-color-light)
+  );
   padding: 12px 16px;
   border-radius: 8px 8px 0 0;
   display: flex;

@@ -51,9 +51,11 @@ Do not commit secrets. Supply values via provider dashboards or GitHub environme
 ### If choosing Firebase Authentication (optional alternative)
 
 Client (webapp):
+
 - `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID` — standard Firebase web config values.
 
 Server (token verification):
+
 - `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` — used by Firebase Admin SDK to verify ID tokens.
 
 > These Firebase variables are listed for planning. No Firebase SDK is wired in yet; see `docs/production/auth.md` for options and required decisions.
@@ -77,6 +79,7 @@ Server (token verification):
 ```
 
 Key flows:
+
 - Auth: Browser POSTs to API auth endpoints; API replies and (in current code) sets a `token` cookie. For cross‑origin deployments, secure/sameSite cookie attributes and/or bearer tokens must be decided. See `docs/production/auth.md`.
 - CORS: API allows only origins listed in `CORS_ORIGIN`.
 - Rendering: Jobs are queued in‑process and write to `RENDER_OUTPUT_DIR`; downloads are served from `/downloads/*`.

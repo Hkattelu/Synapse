@@ -25,11 +25,11 @@ export interface TalkingHeadOptimization {
 }
 
 // Picture-in-picture positioning and sizing
-export type PiPPosition = 
-  | 'top-left' 
-  | 'top-right' 
-  | 'bottom-left' 
-  | 'bottom-right' 
+export type PiPPosition =
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right'
   | 'center'
   | 'custom';
 
@@ -102,19 +102,21 @@ export interface TemplateAnimation {
 }
 
 // Talking head detection (simplified implementation)
-export function detectTalkingHead(videoElement: HTMLVideoElement): Promise<TalkingHeadDetectionResult> {
+export function detectTalkingHead(
+  videoElement: HTMLVideoElement
+): Promise<TalkingHeadDetectionResult> {
   return new Promise((resolve) => {
     // Simplified face detection - in a real implementation, this would use
     // computer vision libraries like MediaPipe or TensorFlow.js
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    
+
     if (!ctx) {
       resolve({
         hasFace: false,
         faceConfidence: 0,
         isOptimal: false,
-        suggestions: ['Unable to analyze video - canvas not supported']
+        suggestions: ['Unable to analyze video - canvas not supported'],
       });
       return;
     }
@@ -126,54 +128,66 @@ export function detectTalkingHead(videoElement: HTMLVideoElement): Promise<Talki
     // Simple heuristic-based detection
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
-    
+
     // Look for skin tone pixels in the upper portion of the video
     let skinPixels = 0;
     const upperHalf = Math.floor(canvas.height / 2);
-    
+
     for (let y = 0; y < upperHalf; y++) {
       for (let x = 0; x < canvas.width; x++) {
         const i = (y * canvas.width + x) * 4;
         const r = data[i];
         const g = data[i + 1];
         const b = data[i + 2];
-        
+
         // Simple skin tone detection
-        if (r > 95 && g > 40 && b > 20 && 
-            Math.max(r, g, b) - Math.min(r, g, b) > 15 &&
-            Math.abs(r - g) > 15 && r > g && r > b) {
+        if (
+          r > 95 &&
+          g > 40 &&
+          b > 20 &&
+          Math.max(r, g, b) - Math.min(r, g, b) > 15 &&
+          Math.abs(r - g) > 15 &&
+          r > g &&
+          r > b
+        ) {
           skinPixels++;
         }
       }
     }
-    
+
     const skinRatio = skinPixels / (canvas.width * upperHalf);
     const hasFace = skinRatio > 0.02; // 2% skin tone pixels
     const faceConfidence = Math.min(skinRatio * 50, 100);
-    
+
     const suggestions: string[] = [];
     if (!hasFace) {
-      suggestions.push('No face detected - ensure you are visible in the video');
+      suggestions.push(
+        'No face detected - ensure you are visible in the video'
+      );
     } else if (faceConfidence < 30) {
       suggestions.push('Face detection confidence is low - improve lighting');
       suggestions.push('Move closer to the camera');
     }
-    
+
     if (canvas.width < 1280) {
-      suggestions.push('Video resolution is low - use at least 720p for better quality');
+      suggestions.push(
+        'Video resolution is low - use at least 720p for better quality'
+      );
     }
 
     resolve({
       hasFace,
       faceConfidence,
-      faceBounds: hasFace ? {
-        x: Math.floor(canvas.width * 0.3),
-        y: Math.floor(canvas.height * 0.1),
-        width: Math.floor(canvas.width * 0.4),
-        height: Math.floor(canvas.height * 0.6)
-      } : undefined,
+      faceBounds: hasFace
+        ? {
+            x: Math.floor(canvas.width * 0.3),
+            y: Math.floor(canvas.height * 0.1),
+            width: Math.floor(canvas.width * 0.4),
+            height: Math.floor(canvas.height * 0.6),
+          }
+        : undefined,
       isOptimal: hasFace && faceConfidence > 60,
-      suggestions
+      suggestions,
     });
   });
 }
@@ -188,17 +202,18 @@ export function optimizeTalkingHeadSettings(
   if (detectionResult.hasFace && detectionResult.faceBounds) {
     // Enable talking head mode
     optimized.talkingHeadEnabled = true;
-    
+
     // Set optimal PiP configuration
     optimized.talkingHeadCorner = 'bottom-right';
-    optimized.talkingHeadSize = detectionResult.faceConfidence > 70 ? 'md' : 'lg';
-    
+    optimized.talkingHeadSize =
+      detectionResult.faceConfidence > 70 ? 'md' : 'lg';
+
     // Enable background removal if face confidence is high
     if (detectionResult.faceConfidence > 60) {
       optimized.backgroundRemoval = true;
       optimized.backgroundBlur = 0.8;
     }
-    
+
     // Adjust audio settings for talking head content
     optimized.volume = 0.9;
     optimized.audioEnhancement = true;
@@ -214,7 +229,7 @@ export function getPiPPositionCoordinates(
   pipSize: { width: number; height: number }
 ): { x: number; y: number } {
   const margin = 20; // Margin from edges
-  
+
   switch (position) {
     case 'top-left':
       return { x: margin, y: margin };
@@ -223,11 +238,14 @@ export function getPiPPositionCoordinates(
     case 'bottom-left':
       return { x: margin, y: containerSize.height - pipSize.height - margin };
     case 'bottom-right':
-      return { x: containerSize.width - pipSize.width - margin, y: containerSize.height - pipSize.height - margin };
+      return {
+        x: containerSize.width - pipSize.width - margin,
+        y: containerSize.height - pipSize.height - margin,
+      };
     case 'center':
-      return { 
-        x: (containerSize.width - pipSize.width) / 2, 
-        y: (containerSize.height - pipSize.height) / 2 
+      return {
+        x: (containerSize.width - pipSize.width) / 2,
+        y: (containerSize.height - pipSize.height) / 2,
       };
     default:
       return { x: margin, y: margin };
@@ -240,20 +258,32 @@ export function getPiPSizeDimensions(
   containerSize: { width: number; height: number }
 ): { width: number; height: number } {
   const aspectRatio = 16 / 9; // Assume 16:9 aspect ratio for talking head videos
-  
+
   switch (size) {
     case 'small':
       const smallWidth = Math.floor(containerSize.width * 0.2);
-      return { width: smallWidth, height: Math.floor(smallWidth / aspectRatio) };
+      return {
+        width: smallWidth,
+        height: Math.floor(smallWidth / aspectRatio),
+      };
     case 'medium':
       const mediumWidth = Math.floor(containerSize.width * 0.3);
-      return { width: mediumWidth, height: Math.floor(mediumWidth / aspectRatio) };
+      return {
+        width: mediumWidth,
+        height: Math.floor(mediumWidth / aspectRatio),
+      };
     case 'large':
       const largeWidth = Math.floor(containerSize.width * 0.4);
-      return { width: largeWidth, height: Math.floor(largeWidth / aspectRatio) };
+      return {
+        width: largeWidth,
+        height: Math.floor(largeWidth / aspectRatio),
+      };
     default:
       const defaultWidth = Math.floor(containerSize.width * 0.25);
-      return { width: defaultWidth, height: Math.floor(defaultWidth / aspectRatio) };
+      return {
+        width: defaultWidth,
+        height: Math.floor(defaultWidth / aspectRatio),
+      };
   }
 }
 
@@ -271,11 +301,11 @@ export const PRESENTATION_TEMPLATES: PresentationTemplate[] = [
       borderWidth: 2,
       borderColor: '#ffffff',
       shadow: true,
-      opacity: 1
+      opacity: 1,
     },
     backgroundOptions: {
       type: 'blur',
-      blurAmount: 0.6
+      blurAmount: 0.6,
     },
     overlays: [
       {
@@ -290,16 +320,16 @@ export const PRESENTATION_TEMPLATES: PresentationTemplate[] = [
           color: '#ffffff',
           backgroundColor: 'rgba(0, 0, 0, 0.7)',
           borderRadius: 8,
-          padding: 16
+          padding: 16,
         },
         animation: {
           entrance: 'fadeIn',
           exit: 'fadeOut',
-          duration: 0.5
-        }
-      }
+          duration: 0.5,
+        },
+      },
     ],
-    animations: []
+    animations: [],
   },
   {
     id: 'center-stage',
@@ -313,10 +343,10 @@ export const PRESENTATION_TEMPLATES: PresentationTemplate[] = [
       borderWidth: 0,
       borderColor: 'transparent',
       shadow: true,
-      opacity: 1
+      opacity: 1,
     },
     backgroundOptions: {
-      type: 'remove'
+      type: 'remove',
     },
     overlays: [
       {
@@ -331,11 +361,11 @@ export const PRESENTATION_TEMPLATES: PresentationTemplate[] = [
           color: '#ffffff',
           backgroundColor: 'rgba(59, 130, 246, 0.9)',
           borderRadius: 20,
-          padding: 8
-        }
-      }
+          padding: 8,
+        },
+      },
     ],
-    animations: []
+    animations: [],
   },
   {
     id: 'split-screen',
@@ -351,13 +381,13 @@ export const PRESENTATION_TEMPLATES: PresentationTemplate[] = [
       borderWidth: 0,
       borderColor: 'transparent',
       shadow: false,
-      opacity: 1
+      opacity: 1,
     },
     backgroundOptions: {
-      type: 'none'
+      type: 'none',
     },
     overlays: [],
-    animations: []
+    animations: [],
   },
   {
     id: 'picture-frame',
@@ -371,11 +401,11 @@ export const PRESENTATION_TEMPLATES: PresentationTemplate[] = [
       borderWidth: 4,
       borderColor: '#d4af37',
       shadow: true,
-      opacity: 1
+      opacity: 1,
     },
     backgroundOptions: {
       type: 'blur',
-      blurAmount: 0.8
+      blurAmount: 0.8,
     },
     overlays: [
       {
@@ -386,12 +416,12 @@ export const PRESENTATION_TEMPLATES: PresentationTemplate[] = [
         content: '',
         style: {
           backgroundColor: 'transparent',
-          borderRadius: 20
-        }
-      }
+          borderRadius: 20,
+        },
+      },
     ],
-    animations: []
-  }
+    animations: [],
+  },
 ];
 
 // Apply presentation template to timeline item
@@ -402,28 +432,40 @@ export function applyPresentationTemplate(
   const properties: Partial<ItemProperties> = {
     // PiP configuration
     talkingHeadEnabled: true,
-    talkingHeadCorner: template.pipConfig.position === 'bottom-right' ? 'bottom-right' :
-                      template.pipConfig.position === 'bottom-left' ? 'bottom-left' :
-                      template.pipConfig.position === 'top-right' ? 'top-right' :
-                      template.pipConfig.position === 'top-left' ? 'top-left' : 'bottom-right',
-    talkingHeadSize: template.pipConfig.size === 'small' ? 'sm' :
-                     template.pipConfig.size === 'large' ? 'lg' : 'md',
-    
+    talkingHeadCorner:
+      template.pipConfig.position === 'bottom-right'
+        ? 'bottom-right'
+        : template.pipConfig.position === 'bottom-left'
+          ? 'bottom-left'
+          : template.pipConfig.position === 'top-right'
+            ? 'top-right'
+            : template.pipConfig.position === 'top-left'
+              ? 'top-left'
+              : 'bottom-right',
+    talkingHeadSize:
+      template.pipConfig.size === 'small'
+        ? 'sm'
+        : template.pipConfig.size === 'large'
+          ? 'lg'
+          : 'md',
+
     // Background options
     backgroundRemoval: template.backgroundOptions.type === 'remove',
-    backgroundBlur: template.backgroundOptions.type === 'blur' ? 
-                   (template.backgroundOptions.blurAmount || 0.5) : 0,
-    
+    backgroundBlur:
+      template.backgroundOptions.type === 'blur'
+        ? template.backgroundOptions.blurAmount || 0.5
+        : 0,
+
     // Visual styling
     borderRadius: template.pipConfig.borderRadius,
     borderWidth: template.pipConfig.borderWidth,
     borderColor: template.pipConfig.borderColor,
     shadow: template.pipConfig.shadow,
     opacity: template.pipConfig.opacity,
-    
+
     // Template metadata
     presentationTemplate: template.id,
-    templateOverlays: template.overlays
+    templateOverlays: template.overlays,
   };
 
   return properties;
@@ -437,35 +479,37 @@ export function validateYouTrackContent(item: TimelineItem): {
 } {
   const warnings: string[] = [];
   const suggestions: string[] = [];
-  
+
   // Check if it's video content
   if (item.type !== 'video') {
     warnings.push('You track is optimized for video content');
     suggestions.push('Consider moving non-video content to appropriate tracks');
   }
-  
+
   // Check video properties if available
   if (item.properties) {
     if (!item.properties.talkingHeadEnabled) {
-      suggestions.push('Enable talking head mode for better personal video presentation');
+      suggestions.push(
+        'Enable talking head mode for better personal video presentation'
+      );
     }
-    
+
     if (item.properties.volume && item.properties.volume < 0.7) {
-      suggestions.push('Consider increasing audio volume for better narration clarity');
+      suggestions.push(
+        'Consider increasing audio volume for better narration clarity'
+      );
     }
   }
-  
+
   return {
     isValid: warnings.length === 0,
     warnings,
-    suggestions
+    suggestions,
   };
 }
 
 // Generate smooth transitions between personal video segments
-export function generatePersonalVideoTransitions(
-  items: TimelineItem[]
-): Array<{
+export function generatePersonalVideoTransitions(items: TimelineItem[]): Array<{
   fromItem: string;
   toItem: string;
   transition: {
@@ -477,34 +521,41 @@ export function generatePersonalVideoTransitions(
   const transitions: Array<{
     fromItem: string;
     toItem: string;
-    transition: { type: 'crossfade' | 'slide' | 'zoom' | 'flip'; duration: number; easing: string };
+    transition: {
+      type: 'crossfade' | 'slide' | 'zoom' | 'flip';
+      duration: number;
+      easing: string;
+    };
   }> = [];
-  
+
   for (let i = 0; i < items.length - 1; i++) {
     const currentItem = items[i];
     const nextItem = items[i + 1];
-    
+
     // Determine best transition based on content similarity
     let transitionType: 'crossfade' | 'slide' | 'zoom' | 'flip' = 'crossfade';
-    
+
     // If both items have similar PiP positions, use crossfade
-    if (currentItem.properties?.talkingHeadCorner === nextItem.properties?.talkingHeadCorner) {
+    if (
+      currentItem.properties?.talkingHeadCorner ===
+      nextItem.properties?.talkingHeadCorner
+    ) {
       transitionType = 'crossfade';
     } else {
       // Different positions, use slide
       transitionType = 'slide';
     }
-    
+
     transitions.push({
       fromItem: currentItem.id,
       toItem: nextItem.id,
       transition: {
         type: transitionType,
         duration: 0.5,
-        easing: 'ease-in-out'
-      }
+        easing: 'ease-in-out',
+      },
     });
   }
-  
+
   return transitions;
 }

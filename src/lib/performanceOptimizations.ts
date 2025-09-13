@@ -44,7 +44,10 @@ export function useVirtualization(
   const [scrollLeft, setScrollLeft] = useState(0);
 
   const visibleRange = useMemo(() => {
-    const startIndex = Math.max(0, Math.floor(scrollLeft / itemWidth) - overscan);
+    const startIndex = Math.max(
+      0,
+      Math.floor(scrollLeft / itemWidth) - overscan
+    );
     const endIndex = Math.min(
       items.length - 1,
       Math.ceil((scrollLeft + containerWidth) / itemWidth) + overscan
@@ -107,9 +110,9 @@ export function useMemoizedTrackContent(
   dependencies: any[] = []
 ) {
   return useMemo(() => {
-    const trackItems = items.filter(item => item.track === track.trackNumber);
-    
-    return trackItems.map(item => {
+    const trackItems = items.filter((item) => item.track === track.trackNumber);
+
+    return trackItems.map((item) => {
       const asset = assets.get(item.assetId);
       return {
         item,
@@ -141,11 +144,14 @@ export function useThrottledScroll(
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
-        
-        timeoutRef.current = setTimeout(() => {
-          callback(scrollLeft, scrollTop);
-          lastCallTime.current = Date.now();
-        }, delay - (now - lastCallTime.current));
+
+        timeoutRef.current = setTimeout(
+          () => {
+            callback(scrollLeft, scrollTop);
+            lastCallTime.current = Date.now();
+          },
+          delay - (now - lastCallTime.current)
+        );
       }
     },
     [callback, delay]
@@ -165,17 +171,17 @@ export function useLazyImage(src: string | undefined, placeholder?: string) {
     setError(null);
 
     const img = new Image();
-    
+
     img.onload = () => {
       setImageSrc(src);
       setIsLoading(false);
     };
-    
+
     img.onerror = () => {
       setError('Failed to load image');
       setIsLoading(false);
     };
-    
+
     img.src = src;
 
     return () => {
@@ -198,7 +204,9 @@ export function usePerformanceMonitor(componentName: string) {
     const renderTime = endTime - startTime.current;
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`${componentName} render #${renderCount.current}: ${renderTime.toFixed(2)}ms`);
+      console.log(
+        `${componentName} render #${renderCount.current}: ${renderTime.toFixed(2)}ms`
+      );
     }
 
     startTime.current = performance.now();
@@ -209,7 +217,9 @@ export function usePerformanceMonitor(componentName: string) {
 
 // Responsive breakpoint hook
 export function useResponsiveBreakpoint() {
-  const [breakpoint, setBreakpoint] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+  const [breakpoint, setBreakpoint] = useState<'mobile' | 'tablet' | 'desktop'>(
+    'desktop'
+  );
 
   useEffect(() => {
     const updateBreakpoint = () => {
@@ -244,7 +254,12 @@ export class TimelineCalculations {
   ): number {
     if (cacheKey) {
       const cached = this.cache.get(`timeToPixels-${cacheKey}`);
-      if (cached && cached.time === time && cached.pixelsPerSecond === pixelsPerSecond && cached.zoom === zoom) {
+      if (
+        cached &&
+        cached.time === time &&
+        cached.pixelsPerSecond === pixelsPerSecond &&
+        cached.zoom === zoom
+      ) {
         return cached.result;
       }
     }
@@ -271,7 +286,12 @@ export class TimelineCalculations {
   ): number {
     if (cacheKey) {
       const cached = this.cache.get(`pixelsToTime-${cacheKey}`);
-      if (cached && cached.pixels === pixels && cached.pixelsPerSecond === pixelsPerSecond && cached.zoom === zoom) {
+      if (
+        cached &&
+        cached.pixels === pixels &&
+        cached.pixelsPerSecond === pixelsPerSecond &&
+        cached.zoom === zoom
+      ) {
         return cached.result;
       }
     }
@@ -312,7 +332,10 @@ export function useOptimizedTrackPreview(
       case 'code':
         return {
           type: 'code',
-          language: item.properties.language || asset.metadata?.language || 'javascript',
+          language:
+            item.properties.language ||
+            asset.metadata?.language ||
+            'javascript',
           preview: asset.metadata?.codeContent?.slice(0, 100) || '',
           animationMode: item.properties.animationMode || 'typing',
         };
@@ -321,9 +344,10 @@ export function useOptimizedTrackPreview(
         return {
           type: 'visual',
           thumbnail: asset.thumbnail,
-          dimensions: asset.metadata?.width && asset.metadata?.height 
-            ? `${asset.metadata.width}×${asset.metadata.height}`
-            : null,
+          dimensions:
+            asset.metadata?.width && asset.metadata?.height
+              ? `${asset.metadata.width}×${asset.metadata.height}`
+              : null,
           isVideo: asset.type === 'video',
         };
 
@@ -374,7 +398,7 @@ export class BatchUpdater {
 
   private flush(): void {
     const updates = this.updates.splice(0);
-    updates.forEach(update => update());
+    updates.forEach((update) => update());
     this.timeoutId = null;
   }
 

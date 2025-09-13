@@ -313,7 +313,8 @@ const simpleProject: Project = {
             { color: '#0b1324', position: 1 },
           ],
         },
-        codeText: "import React from 'react';\n\nexport function Hello() {\n  return <h1>Hello Synapse 👋</h1>;\n}",
+        codeText:
+          "import React from 'react';\n\nexport function Hello() {\n  return <h1>Hello Synapse 👋</h1>;\n}",
       },
       animations: [],
       keyframes: [],
@@ -385,7 +386,8 @@ const simpleProject: Project = {
       metadata: {
         fileSize: 320,
         mimeType: 'text/plain',
-        codeContent: "import React from 'react';\n\nexport function Hello() {\n  return <h1>Hello Synapse 👋</h1>;\n}",
+        codeContent:
+          "import React from 'react';\n\nexport function Hello() {\n  return <h1>Hello Synapse 👋</h1>;\n}",
         language: 'typescript',
       },
       createdAt: new Date('2025-01-01T00:00:00Z'),

@@ -28,19 +28,23 @@ Tip: Close any other processes using ports 5173 (Vite) or 8787 (API) before star
    ```powershell
    npm run server
    ```
+
    - Expected: API listens on http://localhost:8787
 3. Start the frontend (Terminal B)
    ```powershell
    npm run dev
    ```
+
    - Expected: App available at http://localhost:5173
 4. Health check the API (optional)
    ```powershell
    Invoke-RestMethod http://localhost:8787/api/health
    ```
+
    - Expected: JSON { ok: true } or similar
 
 Troubleshooting:
+
 - If the app can’t reach the API, confirm the Vite proxy is forwarding /api to :8787 and that CORS_ORIGIN permits http://localhost:5173.
 
 ---
@@ -50,6 +54,7 @@ Troubleshooting:
 Goal: Verify sign up, login, session persistence, and logout.
 
 Steps:
+
 1. Open http://localhost:5173
 2. Navigate to Account/Sign In within the app.
 3. Sign up with a new email and password.
@@ -60,6 +65,7 @@ Steps:
    - Expected: You are signed out; protected actions prompt sign in.
 
 API spot checks (optional):
+
 ```powershell
 # After login, should return authenticated session info
 Invoke-RestMethod http://localhost:8787/api/auth/session -Method GET -WebSession (New-Object Microsoft.PowerShell.Commands.WebRequestSession)
@@ -72,6 +78,7 @@ Invoke-RestMethod http://localhost:8787/api/auth/session -Method GET -WebSession
 Goal: Ensure exports are gated by active membership and cannot be bypassed.
 
 Steps:
+
 1. While signed OUT: open Export dialog from any project.
    - Expected: Inline sign-in / sign-up UI; Start Export is not available.
 2. Sign in (if not already).
@@ -85,6 +92,7 @@ Steps:
    - Expected: Video downloads successfully; file plays.
 
 Authorization checks (server):
+
 - Unauthenticated export POST → HTTP 401
 - Authenticated but ineligible → HTTP 402 (Payment Required)
 
@@ -95,6 +103,7 @@ Authorization checks (server):
 Goal: Validate basic editing and smart placement.
 
 Steps:
+
 1. Create a new blank project.
 2. Add media to the Media Bin (drag & drop or upload):
    - A short screen recording (mp4)
@@ -112,6 +121,7 @@ Steps:
 Goal: Verify code clip editing, language highlighting, and animation modes.
 
 Steps:
+
 1. Add a Code clip to the timeline.
 2. In the Inspector:
    - Paste a small code snippet (e.g., JavaScript or Python).
@@ -124,6 +134,7 @@ Steps:
    - Expected: Preview animates per selection; typing speed / intervals honored.
 
 Optional spot checks for special languages:
+
 - GLSL snippet (vertex/fragment) → highlighted
 - GDScript snippet → highlighted
 
@@ -134,6 +145,7 @@ Optional spot checks for special languages:
 Goal: Verify backgrounds (color/gradient/image), subtle motion, and Reduce Motion behavior.
 
 Steps:
+
 1. Open Inspector → Visual → Backgrounds.
 2. Try each background type:
    - Color
@@ -145,6 +157,7 @@ Steps:
    - Expected: Gradient rotation stops; image pan/zoom stops; animated GIFs display static fallback/thumbnail.
 
 Performance guidance:
+
 - Keep GIFs small to avoid heavy previews.
 
 ---
@@ -154,6 +167,7 @@ Performance guidance:
 Goal: Confirm mode switch and persistence.
 
 Steps:
+
 1. Use the UI Mode Toggle (top-right) to switch between Simplified and Advanced.
 2. Reload the page.
    - Expected: Previously selected mode is restored.
@@ -165,6 +179,7 @@ Steps:
 Goal: Verify track-aware overlay during playback.
 
 Steps:
+
 1. Press Play in the preview.
 2. Confirm overlay lists currently active tracks and playing item names.
 
@@ -175,6 +190,7 @@ Steps:
 Goal: Validate the AI-assisted “New from Repo” flow.
 
 Steps:
+
 1. Go to Projects (Dashboard) → New from Repo.
 2. Enter a small public Git repo URL (choose a lightweight repo to keep it quick; e.g., https://github.com/sindresorhus/slugify).
 3. Optionally set a branch; leave default otherwise.
@@ -184,6 +200,7 @@ Steps:
 6. Review and make small edits; ensure the generated items load in the timeline.
 
 Notes:
+
 - No repo code is executed.
 
 ---
@@ -193,12 +210,14 @@ Notes:
 Goal: Confirm end‑to‑end export pipeline.
 
 Steps:
+
 1. Ensure membership is active (see Section 3).
 2. Start an export from a small timeline.
 3. Observe progress UI; wait until completion.
 4. Download and play the output.
 
 Expected:
+
 - File is written to server/output and downloadable via the app.
 
 ---
@@ -208,10 +227,12 @@ Expected:
 Goal: Validate desktop packaging basics and secure preload bridge.
 
 Steps:
+
 1. Dev mode pointing at Vite:
    ```powershell
    npm run desktop:dev
    ```
+
    - Expected: Electron window loads the dev server; only a frozen, namespaced API (window.SynapseFS) is exposed.
 2. Start packaged app from built web bundle:
    ```powershell
@@ -224,6 +245,7 @@ Steps:
    - Confirm external links open in system browser; in‑window http/https navigations are blocked.
 
 Security posture:
+
 - contextIsolation: true; nodeIntegration: false; sandbox: true.
 
 ---
@@ -231,6 +253,7 @@ Security posture:
 ## 12) API Smoke Tests (Optional)
 
 Run these after starting the server to double-check:
+
 ```powershell
 # Health
 Invoke-RestMethod http://localhost:8787/api/health
@@ -247,11 +270,13 @@ Invoke-RestMethod http://localhost:8787/api/render/invalid/status
 ## 13) Automated Tests
 
 Run unit/UI tests:
+
 ```powershell
 npm test
 ```
 
 Expected:
+
 - Tests pass (or known flakes documented).
 
 ---
@@ -259,6 +284,7 @@ Expected:
 ## 14) Staging (Optional)
 
 If you need to verify staging with Docker Compose, see docs/server/STAGING.md. Quick outline:
+
 ```powershell
 # On staging host (or local with Docker Desktop)
 # Copy env and bring up the API
@@ -270,6 +296,7 @@ If you need to verify staging with Docker Compose, see docs/server/STAGING.md. Q
 ## 15) Pre‑Launch Checklist (PH)
 
 Before shipping to Product Hunt, confirm:
+
 - [ ] Install, login, and membership activation flow
 - [ ] Create/edit timeline with code + media + audio
 - [ ] Backgrounds and Reduce Motion behave as expected
@@ -307,4 +334,3 @@ See docs/PRODUCT_HUNT_LAUNCH.md for the full launch plan and on‑page checklist
 - Use this TESTING guide for a fast local validation pass
 - Server config and endpoints: docs/server/README.md
 - Launch process: docs/PRODUCT_HUNT_LAUNCH.md
-

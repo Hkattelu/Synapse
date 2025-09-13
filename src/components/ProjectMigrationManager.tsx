@@ -2,7 +2,10 @@
 
 import React, { useState, useCallback } from 'react';
 import type { Project } from '../lib/types';
-import type { MigrationConflict, MigrationDecision } from '../lib/educationalTypes';
+import type {
+  MigrationConflict,
+  MigrationDecision,
+} from '../lib/educationalTypes';
 import {
   migrateProjectToEducationalTracks,
   rollbackProjectMigration,
@@ -10,9 +13,12 @@ import {
   validateProjectForMigration,
   previewProjectMigration,
   isProjectMigrated,
-  getMigrationStatistics
+  getMigrationStatistics,
 } from '../lib/trackMigration';
-import { MigrationConflictDialog, MigrationPreviewDialog } from './MigrationConflictDialog';
+import {
+  MigrationConflictDialog,
+  MigrationPreviewDialog,
+} from './MigrationConflictDialog';
 
 interface ProjectMigrationManagerProps {
   project: Project;
@@ -20,7 +26,13 @@ interface ProjectMigrationManagerProps {
   onMigrationComplete: (success: boolean, message: string) => void;
 }
 
-type MigrationStep = 'idle' | 'preview' | 'conflicts' | 'migrating' | 'complete' | 'error';
+type MigrationStep =
+  | 'idle'
+  | 'preview'
+  | 'conflicts'
+  | 'migrating'
+  | 'complete'
+  | 'error';
 
 interface MigrationState {
   step: MigrationStep;
@@ -33,14 +45,14 @@ interface MigrationState {
 export function ProjectMigrationManager({
   project,
   onProjectUpdate,
-  onMigrationComplete
+  onMigrationComplete,
 }: ProjectMigrationManagerProps) {
   const [migrationState, setMigrationState] = useState<MigrationState>({
     step: 'idle',
     conflicts: [],
     statistics: null,
     errorMessage: null,
-    migrationId: null
+    migrationId: null,
   });
 
   const [showPreview, setShowPreview] = useState(false);
@@ -59,7 +71,7 @@ export function ProjectMigrationManager({
         conflicts: [],
         statistics: null,
         errorMessage: `Cannot migrate project: ${validation.issues.join(', ')}`,
-        migrationId: null
+        migrationId: null,
       });
       return;
     }
@@ -73,7 +85,7 @@ export function ProjectMigrationManager({
       conflicts: preview.conflicts,
       statistics,
       errorMessage: null,
-      migrationId: null
+      migrationId: null,
     });
 
     setShowPreview(true);
@@ -85,7 +97,7 @@ export function ProjectMigrationManager({
 
     // If there are conflicts, show conflict resolution dialog
     if (migrationState.conflicts.length > 0) {
-      setMigrationState(prev => ({ ...prev, step: 'conflicts' }));
+      setMigrationState((prev) => ({ ...prev, step: 'conflicts' }));
       setShowConflicts(true);
       return;
     }
@@ -95,59 +107,72 @@ export function ProjectMigrationManager({
   }, [migrationState.conflicts]);
 
   // Perform the actual migration
-  const performMigration = useCallback((userDecisions: MigrationDecision[] = []) => {
-    setShowConflicts(false);
-    setMigrationState(prev => ({ ...prev, step: 'migrating' }));
+  const performMigration = useCallback(
+    (userDecisions: MigrationDecision[] = []) => {
+      setShowConflicts(false);
+      setMigrationState((prev) => ({ ...prev, step: 'migrating' }));
 
-    try {
-      // Create a copy of the project to migrate
-      const projectCopy = JSON.parse(JSON.stringify(project));
-      
-      const result = migrateProjectToEducationalTracks(
-        projectCopy,
-        { preserveOriginal: true },
-        userDecisions
-      );
+      try {
+        // Create a copy of the project to migrate
+        const projectCopy = JSON.parse(JSON.stringify(project));
 
-      if (result.success) {
-        setMigrationState({
-          step: 'complete',
-          conflicts: [],
-          statistics: migrationState.statistics,
-          errorMessage: null,
-          migrationId: null // Would be returned from migration function in real implementation
-        });
+        const result = migrateProjectToEducationalTracks(
+          projectCopy,
+          { preserveOriginal: true },
+          userDecisions
+        );
 
-        // Update the project
-        onProjectUpdate(projectCopy);
-        onMigrationComplete(true, `Successfully migrated ${result.migratedItems} timeline items to educational tracks`);
-      } else {
+        if (result.success) {
+          setMigrationState({
+            step: 'complete',
+            conflicts: [],
+            statistics: migrationState.statistics,
+            errorMessage: null,
+            migrationId: null, // Would be returned from migration function in real implementation
+          });
+
+          // Update the project
+          onProjectUpdate(projectCopy);
+          onMigrationComplete(
+            true,
+            `Successfully migrated ${result.migratedItems} timeline items to educational tracks`
+          );
+        } else {
+          setMigrationState({
+            step: 'error',
+            conflicts: result.conflicts,
+            statistics: migrationState.statistics,
+            errorMessage: result.warnings.join(', '),
+            migrationId: null,
+          });
+          onMigrationComplete(
+            false,
+            `Migration failed: ${result.warnings.join(', ')}`
+          );
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error occurred';
         setMigrationState({
           step: 'error',
-          conflicts: result.conflicts,
+          conflicts: [],
           statistics: migrationState.statistics,
-          errorMessage: result.warnings.join(', '),
-          migrationId: null
+          errorMessage,
+          migrationId: null,
         });
-        onMigrationComplete(false, `Migration failed: ${result.warnings.join(', ')}`);
+        onMigrationComplete(false, `Migration failed: ${errorMessage}`);
       }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      setMigrationState({
-        step: 'error',
-        conflicts: [],
-        statistics: migrationState.statistics,
-        errorMessage,
-        migrationId: null
-      });
-      onMigrationComplete(false, `Migration failed: ${errorMessage}`);
-    }
-  }, [project, migrationState.statistics, onProjectUpdate, onMigrationComplete]);
+    },
+    [project, migrationState.statistics, onProjectUpdate, onMigrationComplete]
+  );
 
   // Handle conflict resolution
-  const handleConflictResolution = useCallback((decisions: MigrationDecision[]) => {
-    performMigration(decisions);
-  }, [performMigration]);
+  const handleConflictResolution = useCallback(
+    (decisions: MigrationDecision[]) => {
+      performMigration(decisions);
+    },
+    [performMigration]
+  );
 
   // Cancel migration
   const cancelMigration = useCallback(() => {
@@ -158,7 +183,7 @@ export function ProjectMigrationManager({
       conflicts: [],
       statistics: null,
       errorMessage: null,
-      migrationId: null
+      migrationId: null,
     });
   }, []);
 
@@ -167,20 +192,26 @@ export function ProjectMigrationManager({
     if (!migrationState.migrationId) return;
 
     try {
-      const rolledBackProject = rollbackProjectMigration(migrationState.migrationId);
+      const rolledBackProject = rollbackProjectMigration(
+        migrationState.migrationId
+      );
       if (rolledBackProject) {
         onProjectUpdate(rolledBackProject);
-        onMigrationComplete(true, 'Project successfully rolled back to pre-migration state');
+        onMigrationComplete(
+          true,
+          'Project successfully rolled back to pre-migration state'
+        );
         setMigrationState({
           step: 'idle',
           conflicts: [],
           statistics: null,
           errorMessage: null,
-          migrationId: null
+          migrationId: null,
         });
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Rollback failed';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Rollback failed';
       onMigrationComplete(false, errorMessage);
     }
   }, [migrationState.migrationId, onProjectUpdate, onMigrationComplete]);
@@ -202,7 +233,7 @@ export function ProjectMigrationManager({
         <div className="text-sm text-green-700 mt-1">
           This project has already been migrated to use educational tracks.
         </div>
-        
+
         {getAvailableBackups().length > 0 && (
           <div className="mt-3">
             <button
@@ -274,10 +305,22 @@ export function ProjectMigrationManager({
             Benefits of Educational Tracks
           </h3>
           <ul className="text-sm text-gray-700 space-y-1">
-            <li>• <strong>Code Track:</strong> Optimized for programming content with syntax highlighting</li>
-            <li>• <strong>Visual Track:</strong> Perfect for screen recordings and visual demonstrations</li>
-            <li>• <strong>Narration Track:</strong> Dedicated audio track with waveform visualization</li>
-            <li>• <strong>You Track:</strong> Personal video content with talking head features</li>
+            <li>
+              • <strong>Code Track:</strong> Optimized for programming content
+              with syntax highlighting
+            </li>
+            <li>
+              • <strong>Visual Track:</strong> Perfect for screen recordings and
+              visual demonstrations
+            </li>
+            <li>
+              • <strong>Narration Track:</strong> Dedicated audio track with
+              waveform visualization
+            </li>
+            <li>
+              • <strong>You Track:</strong> Personal video content with talking
+              head features
+            </li>
           </ul>
         </div>
       </div>
@@ -325,35 +368,39 @@ export function useMigrationManager(project: Project) {
     return isProjectMigrated(project);
   }, [project]);
 
-  const performMigration = useCallback(async (userDecisions: MigrationDecision[] = []) => {
-    setIsLoading(true);
-    setError(null);
+  const performMigration = useCallback(
+    async (userDecisions: MigrationDecision[] = []) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const result = migrateProjectToEducationalTracks(
-        project,
-        { preserveOriginal: true },
-        userDecisions
-      );
+      try {
+        const result = migrateProjectToEducationalTracks(
+          project,
+          { preserveOriginal: true },
+          userDecisions
+        );
 
-      if (!result.success) {
-        setError(result.warnings.join(', '));
+        if (!result.success) {
+          setError(result.warnings.join(', '));
+        }
+
+        return result;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Migration failed';
+        setError(errorMessage);
+        return {
+          success: false,
+          migratedItems: 0,
+          conflicts: [],
+          warnings: [errorMessage],
+        };
+      } finally {
+        setIsLoading(false);
       }
-
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Migration failed';
-      setError(errorMessage);
-      return {
-        success: false,
-        migratedItems: 0,
-        conflicts: [],
-        warnings: [errorMessage]
-      };
-    } finally {
-      setIsLoading(false);
-    }
-  }, [project]);
+    },
+    [project]
+  );
 
   return {
     isLoading,
@@ -362,6 +409,6 @@ export function useMigrationManager(project: Project) {
     previewMigration,
     getStatistics,
     checkMigrationStatus,
-    performMigration
+    performMigration,
   };
 }

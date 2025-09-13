@@ -30,16 +30,16 @@ export function EducationalAnimationPreview({
       const animate = () => {
         const elapsed = Date.now() - startTimeRef.current!;
         const progress = Math.min(elapsed / (preset.duration * 1000), 1);
-        
+
         setAnimationProgress(progress);
-        
+
         if (progress < 1) {
           animationRef.current = requestAnimationFrame(animate);
         } else {
           onPlayComplete?.();
         }
       };
-      
+
       animationRef.current = requestAnimationFrame(animate);
     } else {
       setAnimationProgress(0);
@@ -62,8 +62,8 @@ export function EducationalAnimationPreview({
       case 'easeOut':
         return 1 - Math.pow(1 - progress, 2);
       case 'easeInOut':
-        return progress < 0.5 
-          ? 2 * progress * progress 
+        return progress < 0.5
+          ? 2 * progress * progress
           : 1 - Math.pow(-2 * progress + 2, 2) / 2;
       case 'bounce':
         const n1 = 7.5625;
@@ -89,12 +89,12 @@ export function EducationalAnimationPreview({
     <div className={`educational-animation-preview ${className}`}>
       <div className="preview-container border-2 border-gray-200 rounded-lg p-4 bg-white min-h-[120px] flex items-center justify-center relative overflow-hidden">
         {renderPreviewContent(preset, easedProgress, isPlaying)}
-        
+
         {/* Progress indicator */}
         {isPlaying && (
           <div className="absolute bottom-2 left-2 right-2">
             <div className="w-full bg-gray-200 rounded-full h-1">
-              <div 
+              <div
                 className="bg-purple-600 h-1 rounded-full transition-all duration-100"
                 style={{ width: `${animationProgress * 100}%` }}
               />
@@ -102,19 +102,21 @@ export function EducationalAnimationPreview({
           </div>
         )}
       </div>
-      
+
       {/* Animation info */}
       <div className="mt-2 text-xs text-gray-600 flex justify-between">
         <span>{preset.name}</span>
-        <span>{preset.duration}s • {preset.easing}</span>
+        <span>
+          {preset.duration}s • {preset.easing}
+        </span>
       </div>
     </div>
   );
 }
 
 function renderPreviewContent(
-  preset: EducationalAnimationPreset, 
-  progress: number, 
+  preset: EducationalAnimationPreset,
+  progress: number,
   isPlaying: boolean
 ): React.ReactNode {
   switch (preset.trackType) {
@@ -131,7 +133,11 @@ function renderPreviewContent(
   }
 }
 
-function renderCodePreview(preset: EducationalAnimationPreset, progress: number, isPlaying: boolean): React.ReactNode {
+function renderCodePreview(
+  preset: EducationalAnimationPreset,
+  progress: number,
+  isPlaying: boolean
+): React.ReactNode {
   const sampleCode = `function fibonacci(n) {
   if (n <= 1) return n;
   return fibonacci(n-1) + fibonacci(n-2);
@@ -144,7 +150,7 @@ function renderCodePreview(preset: EducationalAnimationPreset, progress: number,
       const totalChars = sampleCode.length;
       const visibleChars = Math.floor(progress * totalChars);
       const visibleText = sampleCode.substring(0, visibleChars);
-      
+
       return (
         <div className="bg-gray-900 text-green-400 p-3 rounded font-mono text-xs w-full max-w-sm">
           <pre className="whitespace-pre-wrap">
@@ -158,15 +164,15 @@ function renderCodePreview(preset: EducationalAnimationPreset, progress: number,
 
     case 'line-by-line-reveal':
       const visibleLines = Math.floor(progress * lines.length);
-      
+
       return (
         <div className="bg-gray-900 text-green-400 p-3 rounded font-mono text-xs w-full max-w-sm">
           {lines.map((line, index) => (
-            <div 
+            <div
               key={index}
               className={`transition-all duration-300 ${
-                index <= visibleLines 
-                  ? 'opacity-100 transform translate-y-0' 
+                index <= visibleLines
+                  ? 'opacity-100 transform translate-y-0'
                   : 'opacity-0 transform translate-y-2'
               } ${index === visibleLines ? 'bg-blue-900 bg-opacity-50' : ''}`}
             >
@@ -179,7 +185,9 @@ function renderCodePreview(preset: EducationalAnimationPreset, progress: number,
     default:
       return (
         <div className="bg-gray-900 text-green-400 p-3 rounded font-mono text-xs">
-          <div className={`transition-opacity duration-1000 ${isPlaying ? 'opacity-100' : 'opacity-50'}`}>
+          <div
+            className={`transition-opacity duration-1000 ${isPlaying ? 'opacity-100' : 'opacity-50'}`}
+          >
             {sampleCode}
           </div>
         </div>
@@ -187,14 +195,18 @@ function renderCodePreview(preset: EducationalAnimationPreset, progress: number,
   }
 }
 
-function renderVisualPreview(preset: EducationalAnimationPreset, progress: number, isPlaying: boolean): React.ReactNode {
+function renderVisualPreview(
+  preset: EducationalAnimationPreset,
+  progress: number,
+  isPlaying: boolean
+): React.ReactNode {
   switch (preset.id) {
     case 'screen-focus-zoom':
-      const zoomScale = 1 + (progress * 0.8); // Zoom from 1x to 1.8x
-      
+      const zoomScale = 1 + progress * 0.8; // Zoom from 1x to 1.8x
+
       return (
         <div className="bg-blue-100 border-2 border-blue-300 rounded p-4 relative overflow-hidden w-32 h-20">
-          <div 
+          <div
             className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400 rounded transition-transform duration-100"
             style={{ transform: `scale(${zoomScale})` }}
           >
@@ -207,15 +219,21 @@ function renderVisualPreview(preset: EducationalAnimationPreset, progress: numbe
     default:
       return (
         <div className="bg-blue-100 border-2 border-blue-300 rounded p-4 relative overflow-hidden">
-          <div className={`w-8 h-8 bg-blue-500 rounded transition-all duration-1000 ${
-            isPlaying ? 'transform scale-110 shadow-lg' : ''
-          }`} />
+          <div
+            className={`w-8 h-8 bg-blue-500 rounded transition-all duration-1000 ${
+              isPlaying ? 'transform scale-110 shadow-lg' : ''
+            }`}
+          />
         </div>
       );
   }
 }
 
-function renderNarrationPreview(preset: EducationalAnimationPreset, progress: number, isPlaying: boolean): React.ReactNode {
+function renderNarrationPreview(
+  preset: EducationalAnimationPreset,
+  progress: number,
+  isPlaying: boolean
+): React.ReactNode {
   return (
     <div className="bg-amber-100 p-3 rounded flex items-center justify-center">
       <div className="flex space-x-1">
@@ -233,12 +251,18 @@ function renderNarrationPreview(preset: EducationalAnimationPreset, progress: nu
   );
 }
 
-function renderYouPreview(preset: EducationalAnimationPreset, progress: number, isPlaying: boolean): React.ReactNode {
+function renderYouPreview(
+  preset: EducationalAnimationPreset,
+  progress: number,
+  isPlaying: boolean
+): React.ReactNode {
   return (
     <div className="bg-red-100 border-2 border-red-300 rounded-full w-16 h-16 flex items-center justify-center relative">
-      <div className={`w-8 h-8 bg-red-500 rounded-full transition-all duration-1000 ${
-        isPlaying ? 'transform scale-110' : ''
-      }`} />
+      <div
+        className={`w-8 h-8 bg-red-500 rounded-full transition-all duration-1000 ${
+          isPlaying ? 'transform scale-110' : ''
+        }`}
+      />
     </div>
   );
 }

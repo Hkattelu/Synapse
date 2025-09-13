@@ -64,8 +64,8 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
       <AbsoluteFill>
         {talkingHead ? (
           <div style={style}>
-            {asset.type === 'video' && (
-              asset.url ? (
+            {asset.type === 'video' &&
+              (asset.url ? (
                 <Video
                   src={asset.url}
                   volume={item.properties.volume ?? 1}
@@ -90,13 +90,12 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
                 >
                   ▶ {asset.name}
                 </AbsoluteFill>
-              )
-            )}
+              ))}
           </div>
         ) : (
           <div style={style}>
-            {asset.type === 'video' && (
-              asset.url ? (
+            {asset.type === 'video' &&
+              (asset.url ? (
                 <Video
                   src={asset.url}
                   volume={item.properties.volume ?? 1}
@@ -121,11 +120,10 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
                 >
                   ▶ {asset.name}
                 </AbsoluteFill>
-              )
-            )}
+              ))}
 
-            {asset.type === 'image' && (
-              asset.url ? (
+            {asset.type === 'image' &&
+              (asset.url ? (
                 <Img
                   src={asset.url}
                   style={{
@@ -147,8 +145,7 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
                 >
                   🖼 {asset.name}
                 </AbsoluteFill>
-              )
-            )}
+              ))}
 
             {asset.type === 'audio' && (
               <>

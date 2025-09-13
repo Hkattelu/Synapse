@@ -42,7 +42,7 @@ Why: the repo already includes a Dockerfile for the API. Cloud Run runs that con
   - Max instances: `1–3` (to cap costs for MVP)
   - Region: choose close to majority of users (e.g., `us-central1`)
 - Environment variables
-  - Set all listed in `docs/production/overview.md` (JWT_SECRET, CORS_ORIGIN, SMTP_*, EMAIL_*, REMOTION_*, etc.)
+  - Set all listed in `docs/production/overview.md` (JWT*SECRET, CORS_ORIGIN, SMTP*_, EMAIL\__, REMOTION\_\*, etc.)
   - Ensure `CORS_ORIGIN` includes the exact Vercel domain(s)
 - Networking / ingress
   - Allow unauthenticated invocations (public HTTPS) or front with Firebase Hosting/CDN if desired

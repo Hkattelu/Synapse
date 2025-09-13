@@ -37,7 +37,9 @@ describe('Export Validation', () => {
 
       const result = validateExportSettings(settings);
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Codec vp9 is not supported by format mp4');
+      expect(result.errors).toContain(
+        'Codec vp9 is not supported by format mp4'
+      );
     });
 
     it('should detect incompatible audio codec combinations', () => {
@@ -50,7 +52,9 @@ describe('Export Validation', () => {
 
       const result = validateExportSettings(settings);
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Audio codec aac is not supported by format webm');
+      expect(result.errors).toContain(
+        'Audio codec aac is not supported by format webm'
+      );
     });
 
     it('should validate transparency settings', () => {
@@ -64,7 +68,9 @@ describe('Export Validation', () => {
 
       const result = validateExportSettings(settings);
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Format mp4 does not support transparent backgrounds');
+      expect(result.errors).toContain(
+        'Format mp4 does not support transparent backgrounds'
+      );
     });
 
     it('should warn about high resolution settings', () => {
@@ -93,7 +99,9 @@ describe('Export Validation', () => {
 
       const result = validateExportSettings(settings);
       expect(result.isValid).toBe(true);
-      expect(result.recommendations).toContain('WebM with VP9 codec provides excellent transparency support and compression');
+      expect(result.recommendations).toContain(
+        'WebM with VP9 codec provides excellent transparency support and compression'
+      );
     });
   });
 
@@ -186,7 +194,9 @@ describe('Export Validation', () => {
       };
 
       const result = validateTransparencySettings(settings);
-      expect(result.warnings).toContain('WebM with transparency is not supported in Safari browsers');
+      expect(result.warnings).toContain(
+        'WebM with transparency is not supported in Safari browsers'
+      );
     });
   });
 
@@ -217,7 +227,7 @@ describe('Export Validation', () => {
       });
 
       expect(recommendations.length).toBeGreaterThan(0);
-      const formats = recommendations.map(r => r.format);
+      const formats = recommendations.map((r) => r.format);
       expect(formats).toContain('webm');
     });
   });
@@ -225,7 +235,7 @@ describe('Export Validation', () => {
   describe('getRecommendedSettings', () => {
     it('should return web-optimized settings', () => {
       const settings = getRecommendedSettings('web');
-      
+
       expect(settings.format).toBe('mp4');
       expect(settings.codec).toBe('h264');
       expect(settings.width).toBe(1920);
@@ -234,7 +244,7 @@ describe('Export Validation', () => {
 
     it('should return social media optimized settings', () => {
       const settings = getRecommendedSettings('social');
-      
+
       expect(settings.format).toBe('mp4');
       expect(settings.codec).toBe('h264');
       expect(settings.width).toBe(1080);
@@ -243,7 +253,7 @@ describe('Export Validation', () => {
 
     it('should return broadcast quality settings', () => {
       const settings = getRecommendedSettings('broadcast');
-      
+
       expect(settings.format).toBe('mov');
       expect(settings.quality).toBe('ultra');
       expect(settings.bitrate).toBeGreaterThan(20000);
@@ -251,7 +261,7 @@ describe('Export Validation', () => {
 
     it('should return archive quality settings', () => {
       const settings = getRecommendedSettings('archive');
-      
+
       expect(settings.format).toBe('mov');
       expect(settings.codec).toBe('h265');
       expect(settings.quality).toBe('ultra');

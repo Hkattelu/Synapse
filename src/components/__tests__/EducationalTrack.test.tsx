@@ -61,7 +61,7 @@ describe('EducationalTrack', () => {
 
   it('renders track header with correct name and icon', () => {
     render(<EducationalTrack {...defaultProps} />);
-    
+
     expect(screen.getByText('Code')).toBeInTheDocument();
     expect(screen.getByText('Track 1')).toBeInTheDocument();
   });
@@ -73,7 +73,7 @@ describe('EducationalTrack', () => {
     };
 
     render(<EducationalTrack {...props} />);
-    
+
     expect(screen.getByText('Test Asset test-asset-1')).toBeInTheDocument();
     expect(screen.getByText('5s')).toBeInTheDocument();
   });
@@ -85,18 +85,19 @@ describe('EducationalTrack', () => {
     };
 
     render(<EducationalTrack {...props} />);
-    
+
     expect(screen.getByText(/javascript/i)).toBeInTheDocument();
     // Code preview is tokenized; check textContent contains the expected snippet
     expect(
-      screen.getAllByText((content, element) =>
-        element?.textContent?.includes('console.log("Hello World")') ?? false
+      screen.getAllByText(
+        (content, element) =>
+          element?.textContent?.includes('console.log("Hello World")') ?? false
       ).length
     ).toBeGreaterThan(0);
   });
 
   it('renders visual track with correct styling', () => {
-    const visualTrack = EDUCATIONAL_TRACKS.find(t => t.id === 'visual')!;
+    const visualTrack = EDUCATIONAL_TRACKS.find((t) => t.id === 'visual')!;
     const visualItem: TimelineItem = {
       ...mockTimelineItem,
       id: 'visual-item',
@@ -111,13 +112,15 @@ describe('EducationalTrack', () => {
     };
 
     render(<EducationalTrack {...props} />);
-    
+
     expect(screen.getByText('Visual')).toBeInTheDocument();
     expect(screen.getByText('Track 2')).toBeInTheDocument();
   });
 
   it('renders narration track with audio preview', () => {
-    const narrationTrack = EDUCATIONAL_TRACKS.find(t => t.id === 'narration')!;
+    const narrationTrack = EDUCATIONAL_TRACKS.find(
+      (t) => t.id === 'narration'
+    )!;
     const audioItem: TimelineItem = {
       ...mockTimelineItem,
       id: 'audio-item',
@@ -135,13 +138,13 @@ describe('EducationalTrack', () => {
     };
 
     render(<EducationalTrack {...props} />);
-    
+
     expect(screen.getByText('Narration')).toBeInTheDocument();
     expect(screen.getByText('Audio • 80% vol')).toBeInTheDocument();
   });
 
   it('renders you track with talking head preview', () => {
-    const youTrack = EDUCATIONAL_TRACKS.find(t => t.id === 'you')!;
+    const youTrack = EDUCATIONAL_TRACKS.find((t) => t.id === 'you')!;
     const personalVideoItem: TimelineItem = {
       ...mockTimelineItem,
       id: 'personal-video-item',
@@ -160,12 +163,14 @@ describe('EducationalTrack', () => {
     };
 
     render(<EducationalTrack {...props} />);
-    
+
     expect(screen.getByText('You')).toBeInTheDocument();
     expect(screen.getByText('Talking Head')).toBeInTheDocument();
-    expect(screen.getByText((content, element) => {
-      return element?.textContent === '• bottom-right';
-    })).toBeInTheDocument();
+    expect(
+      screen.getByText((content, element) => {
+        return element?.textContent === '• bottom-right';
+      })
+    ).toBeInTheDocument();
   });
 
   it('highlights selected items', () => {
@@ -176,9 +181,11 @@ describe('EducationalTrack', () => {
     };
 
     render(<EducationalTrack {...props} />);
-    
+
     // Find the timeline clip container (the one with the border styling)
-    const clipElement = screen.getByText('Test Asset test-asset-1').closest('.absolute.rounded.cursor-move');
+    const clipElement = screen
+      .getByText('Test Asset test-asset-1')
+      .closest('.absolute.rounded.cursor-move');
     expect(clipElement).toHaveClass('border-accent-yellow');
   });
 
@@ -193,15 +200,17 @@ describe('EducationalTrack', () => {
     };
 
     render(<EducationalTrack {...props} />);
-    
+
     // Find the timeline clip container (the one with the border styling)
-    const clipElement = screen.getByText('Test Asset test-asset-1').closest('.absolute.rounded.cursor-move');
+    const clipElement = screen
+      .getByText('Test Asset test-asset-1')
+      .closest('.absolute.rounded.cursor-move');
     expect(clipElement).toHaveClass('opacity-75');
   });
 
   it('applies correct track colors', () => {
     render(<EducationalTrack {...defaultProps} />);
-    
+
     const trackHeader = screen.getByText('Code').closest('div');
     expect(trackHeader).toHaveStyle({
       background: 'linear-gradient(135deg, #8B5CF6, #8B5CF6CC)',

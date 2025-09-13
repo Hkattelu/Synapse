@@ -156,7 +156,14 @@ export function getEducationalCodePresets(): Applicable[] {
 }
 
 // Get recommended presets based on educational purpose
-export function getRecommendedPresetsFor(purpose: 'beginner' | 'intermediate' | 'advanced' | 'debugging' | 'refactoring'): Applicable[] {
+export function getRecommendedPresetsFor(
+  purpose:
+    | 'beginner'
+    | 'intermediate'
+    | 'advanced'
+    | 'debugging'
+    | 'refactoring'
+): Applicable[] {
   const recommendations: Record<string, string[]> = {
     beginner: ['typewriter', 'lineFocus'],
     intermediate: ['typewriter', 'lineFocus', 'diffHighlight'],
@@ -166,7 +173,7 @@ export function getRecommendedPresetsFor(purpose: 'beginner' | 'intermediate' | 
   };
 
   const recommendedIds = recommendations[purpose] || [];
-  return PRESET_REGISTRY.filter(preset => recommendedIds.includes(preset.id));
+  return PRESET_REGISTRY.filter((preset) => recommendedIds.includes(preset.id));
 }
 
 export function getApplicablePresets(

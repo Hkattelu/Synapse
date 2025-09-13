@@ -34,6 +34,7 @@ This checklist consolidates all items that require repository owner access/decis
 ## Secrets and environment variables (must be provisioned by owner)
 
 API (Express):
+
 - [ ] `JWT_SECRET` — REQUIRED. Value: `TODO`
 - [ ] `CORS_ORIGIN` — REQUIRED. Value(s): `TODO`
 - [ ] `REMOTION_COMPOSITION_ID` — Value: `TODO` (default `MainComposition`)
@@ -43,13 +44,16 @@ API (Express):
 - [ ] SMTP/Email (optional): `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`, `EMAIL_TO`
 
 Webapp (Vite):
+
 - [ ] `VITE_ALLOW_WEB_NO_LICENSE` — Decision: `true` for open beta or `false` to enforce license gate in web build
 
 If using Firebase Auth:
+
 - [ ] Web: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID`
 - [ ] API: `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`
 
 CI/CD secrets (in GitHub):
+
 - [ ] Vercel: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
 - [ ] Google Cloud: `GCP_PROJECT_ID`, `GCP_REGION`, `GCP_SA_KEY` (JSON)
 

@@ -14,7 +14,11 @@ vi.mock('remotion', () => ({
     </div>
   ),
   Sequence: ({ children, from, durationInFrames }: any) => (
-    <div data-testid="sequence" data-from={from} data-duration={durationInFrames}>
+    <div
+      data-testid="sequence"
+      data-from={from}
+      data-duration={durationInFrames}
+    >
       {children}
     </div>
   ),
@@ -26,7 +30,11 @@ vi.mock('remotion', () => ({
 // Mock BackgroundRenderer
 vi.mock('../components/BackgroundRenderer', () => ({
   BackgroundRenderer: ({ config, style }: any) => (
-    <div data-testid="background-renderer" data-config={JSON.stringify(config)} style={style} />
+    <div
+      data-testid="background-renderer"
+      data-config={JSON.stringify(config)}
+      style={style}
+    />
   ),
 }));
 
@@ -150,9 +158,13 @@ describe('Transparent Background Export', () => {
       };
 
       const { container } = render(<MainComposition {...props} />);
-      
-      const absoluteFill = container.querySelector('[data-testid="absolute-fill"]');
-      expect(absoluteFill).toHaveStyle({ 'background-color': 'rgba(0, 0, 0, 0)' });
+
+      const absoluteFill = container.querySelector(
+        '[data-testid="absolute-fill"]'
+      );
+      expect(absoluteFill).toHaveStyle({
+        'background-color': 'rgba(0, 0, 0, 0)',
+      });
     });
 
     it('should use normal background when transparent export is disabled', () => {
@@ -178,8 +190,10 @@ describe('Transparent Background Export', () => {
       };
 
       const { container } = render(<MainComposition {...props} />);
-      
-      const absoluteFill = container.querySelector('[data-testid="absolute-fill"]');
+
+      const absoluteFill = container.querySelector(
+        '[data-testid="absolute-fill"]'
+      );
       expect(absoluteFill).toHaveStyle({ backgroundColor: '#123456' });
     });
   });
@@ -204,9 +218,11 @@ describe('Transparent Background Export', () => {
       };
 
       const { container } = render(<CodeSequence {...props} />);
-      
+
       // Should not render background when gradient is excluded
-      const backgroundRenderer = container.querySelector('[data-testid="background-renderer"]');
+      const backgroundRenderer = container.querySelector(
+        '[data-testid="background-renderer"]'
+      );
       expect(backgroundRenderer).not.toBeInTheDocument();
     });
 
@@ -229,9 +245,11 @@ describe('Transparent Background Export', () => {
       };
 
       const { container } = render(<CodeSequence {...props} />);
-      
+
       // Should render background when gradient is included
-      const backgroundRenderer = container.querySelector('[data-testid="background-renderer"]');
+      const backgroundRenderer = container.querySelector(
+        '[data-testid="background-renderer"]'
+      );
       expect(backgroundRenderer).toBeInTheDocument();
     });
 
@@ -263,9 +281,11 @@ describe('Transparent Background Export', () => {
       };
 
       const { container } = render(<CodeSequence {...props} />);
-      
+
       // Should not render background when wallpaper is excluded
-      const backgroundRenderer = container.querySelector('[data-testid="background-renderer"]');
+      const backgroundRenderer = container.querySelector(
+        '[data-testid="background-renderer"]'
+      );
       expect(backgroundRenderer).not.toBeInTheDocument();
     });
 
@@ -288,10 +308,14 @@ describe('Transparent Background Export', () => {
       };
 
       const { container } = render(<CodeSequence {...props} />);
-      
+
       // The container should have transparent background
-      const absoluteFill = container.querySelector('[data-testid="absolute-fill"]');
-      expect(absoluteFill).toHaveStyle({ 'background-color': 'rgba(0, 0, 0, 0)' });
+      const absoluteFill = container.querySelector(
+        '[data-testid="absolute-fill"]'
+      );
+      expect(absoluteFill).toHaveStyle({
+        'background-color': 'rgba(0, 0, 0, 0)',
+      });
     });
 
     it('should render normally when no export settings provided', () => {
@@ -302,9 +326,11 @@ describe('Transparent Background Export', () => {
       };
 
       const { container } = render(<CodeSequence {...props} />);
-      
+
       // Should render background normally when no export settings
-      const backgroundRenderer = container.querySelector('[data-testid="background-renderer"]');
+      const backgroundRenderer = container.querySelector(
+        '[data-testid="background-renderer"]'
+      );
       expect(backgroundRenderer).toBeInTheDocument();
     });
   });

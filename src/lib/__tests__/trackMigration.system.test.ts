@@ -27,20 +27,38 @@ function project(init?: Partial<Project>): Project {
   };
 }
 
-function asset(id: string, type: MediaAsset['type'], name: string, extra?: Partial<MediaAsset>): MediaAsset {
+function asset(
+  id: string,
+  type: MediaAsset['type'],
+  name: string,
+  extra?: Partial<MediaAsset>
+): MediaAsset {
   return {
     id,
     name,
     type,
     url: '',
     duration: type === 'image' ? undefined : 10,
-    metadata: { fileSize: 1234, mimeType: type === 'audio' ? 'audio/wav' : type === 'video' ? 'video/mp4' : 'text/plain' },
+    metadata: {
+      fileSize: 1234,
+      mimeType:
+        type === 'audio'
+          ? 'audio/wav'
+          : type === 'video'
+            ? 'video/mp4'
+            : 'text/plain',
+    },
     createdAt: new Date('2024-01-01'),
     ...extra,
   };
 }
 
-function item(id: string, assetId: string, type: TimelineItem['type'], track = 0): TimelineItem {
+function item(
+  id: string,
+  assetId: string,
+  type: TimelineItem['type'],
+  track = 0
+): TimelineItem {
   return {
     id,
     assetId,
@@ -60,7 +78,13 @@ describe('Educational migration (system)', () => {
   it('previews, migrates, and reports stats for a mixed project', () => {
     const proj = project();
     proj.mediaAssets = [
-      asset('a-code', 'code', 'index.ts', { metadata: { fileSize: 1, mimeType: 'text/plain', language: 'typescript' } as any }),
+      asset('a-code', 'code', 'index.ts', {
+        metadata: {
+          fileSize: 1,
+          mimeType: 'text/plain',
+          language: 'typescript',
+        } as any,
+      }),
       asset('a-video', 'video', 'screen-recording.mp4'),
       asset('a-audio', 'audio', 'voiceover.wav'),
     ];
@@ -73,17 +97,21 @@ describe('Educational migration (system)', () => {
 
     const preview = previewProjectMigration(proj);
     expect(preview.conflicts.length).toBeGreaterThan(0);
-    expect(preview.trackAssignments.map((a) => a.suggestedTrack.name).sort()).toEqual(
-      expect.arrayContaining(['Code', 'Visual', 'Narration'])
-    );
+    expect(
+      preview.trackAssignments.map((a) => a.suggestedTrack.name).sort()
+    ).toEqual(expect.arrayContaining(['Code', 'Visual', 'Narration']));
 
     // Attempt migration with auto resolution disabled -> should return conflicts
-    let result = migrateProjectToEducationalTracks(proj, { autoResolveConflicts: false });
+    let result = migrateProjectToEducationalTracks(proj, {
+      autoResolveConflicts: false,
+    });
     expect(result.success).toBe(false);
     expect(result.conflicts.length).toBeGreaterThan(0);
 
     // Now migrate with auto resolution (simulate user decisions via auto-analysis path)
-    result = migrateProjectToEducationalTracks(proj, { autoResolveConflicts: true });
+    result = migrateProjectToEducationalTracks(proj, {
+      autoResolveConflicts: true,
+    });
     expect(result.success).toBe(true);
     expect(result.migratedItems).toBe(3);
     // Items moved to their educational tracks (assert by identity instead of indices)
@@ -123,7 +151,9 @@ describe('Educational migration (system)', () => {
       mediaAssets: [], // none
       timeline: [item('i1', 'n/a', 'video', 0), item('i2', 'n/a', 'code', 0)],
     });
-    const result = migrateProjectToEducationalTracks(proj, { autoResolveConflicts: true });
+    const result = migrateProjectToEducationalTracks(proj, {
+      autoResolveConflicts: true,
+    });
     expect(result.success).toBe(true);
     expect(result.warnings.length).toBeGreaterThan(0);
     // Fallback places video on Visual and code on Code

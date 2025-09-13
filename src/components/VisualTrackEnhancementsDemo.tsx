@@ -28,7 +28,8 @@ const mockScreenRecordingAsset: MediaAsset = {
     fileSize: 120000000,
     mimeType: 'video/mp4',
   },
-  thumbnail: 'https://via.placeholder.com/320x180/10B981/ffffff?text=Screen+Recording',
+  thumbnail:
+    'https://via.placeholder.com/320x180/10B981/ffffff?text=Screen+Recording',
   createdAt: new Date(),
 };
 
@@ -45,7 +46,8 @@ const mockRegularVideoAsset: MediaAsset = {
     fileSize: 80000000,
     mimeType: 'video/mp4',
   },
-  thumbnail: 'https://via.placeholder.com/320x180/3B82F6/ffffff?text=Product+Demo',
+  thumbnail:
+    'https://via.placeholder.com/320x180/3B82F6/ffffff?text=Product+Demo',
   createdAt: new Date(),
 };
 
@@ -94,16 +96,21 @@ const mockTimelineItems: TimelineItem[] = [
   },
 ];
 
-const visualTrack = EDUCATIONAL_TRACKS.find(t => t.id === 'visual')!;
+const visualTrack = EDUCATIONAL_TRACKS.find((t) => t.id === 'visual')!;
 
 export function VisualTrackEnhancementsDemo() {
-  const [selectedAsset, setSelectedAsset] = useState<MediaAsset>(mockScreenRecordingAsset);
-  const [currentLayout, setCurrentLayout] = useState<SideBySideLayout | undefined>();
-  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>(mockTimelineItems);
+  const [selectedAsset, setSelectedAsset] = useState<MediaAsset>(
+    mockScreenRecordingAsset
+  );
+  const [currentLayout, setCurrentLayout] = useState<
+    SideBySideLayout | undefined
+  >();
+  const [timelineItems, setTimelineItems] =
+    useState<TimelineItem[]>(mockTimelineItems);
 
   const handleItemUpdate = (updatedItem: TimelineItem) => {
-    setTimelineItems(items => 
-      items.map(item => item.id === updatedItem.id ? updatedItem : item)
+    setTimelineItems((items) =>
+      items.map((item) => (item.id === updatedItem.id ? updatedItem : item))
     );
   };
 
@@ -117,8 +124,8 @@ export function VisualTrackEnhancementsDemo() {
   };
 
   const screenRecordingAnalysis = analyzeScreenRecording(selectedAsset);
-  const codeItems = timelineItems.filter(item => item.type === 'code');
-  const visualItems = timelineItems.filter(item => item.type === 'video');
+  const codeItems = timelineItems.filter((item) => item.type === 'code');
+  const visualItems = timelineItems.filter((item) => item.type === 'video');
 
   return (
     <div className="p-8 bg-bg-primary min-h-screen">
@@ -129,16 +136,23 @@ export function VisualTrackEnhancementsDemo() {
             Visual Track Enhancements Demo
           </h1>
           <p className="text-text-secondary max-w-2xl mx-auto">
-            Explore the enhanced Visual track features including screen recording detection, 
-            animation presets, side-by-side layouts, and optimization suggestions.
+            Explore the enhanced Visual track features including screen
+            recording detection, animation presets, side-by-side layouts, and
+            optimization suggestions.
           </p>
         </div>
 
         {/* Asset Selection */}
         <div className="bg-bg-secondary rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-text-primary mb-4">Asset Selection</h2>
+          <h2 className="text-xl font-semibold text-text-primary mb-4">
+            Asset Selection
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[mockScreenRecordingAsset, mockRegularVideoAsset, mockUltrawideAsset].map((asset) => (
+            {[
+              mockScreenRecordingAsset,
+              mockRegularVideoAsset,
+              mockUltrawideAsset,
+            ].map((asset) => (
               <button
                 key={asset.id}
                 className={`p-4 rounded-lg border-2 transition-all ${
@@ -148,8 +162,8 @@ export function VisualTrackEnhancementsDemo() {
                 }`}
                 onClick={() => setSelectedAsset(asset)}
               >
-                <EnhancedThumbnail 
-                  asset={asset} 
+                <EnhancedThumbnail
+                  asset={asset}
                   className="w-full h-24 mb-3"
                   showIndicators={true}
                 />
@@ -157,7 +171,8 @@ export function VisualTrackEnhancementsDemo() {
                   {asset.name}
                 </div>
                 <div className="text-xs text-text-secondary mt-1">
-                  {asset.metadata.width}×{asset.metadata.height} • {asset.duration}s
+                  {asset.metadata.width}×{asset.metadata.height} •{' '}
+                  {asset.duration}s
                 </div>
               </button>
             ))}
@@ -166,8 +181,13 @@ export function VisualTrackEnhancementsDemo() {
 
         {/* Visual Track Clip Demo */}
         <div className="bg-bg-secondary rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-text-primary mb-4">Enhanced Visual Track Clip</h2>
-          <div className="relative bg-bg-primary rounded border border-border-subtle p-4" style={{ height: '120px' }}>
+          <h2 className="text-xl font-semibold text-text-primary mb-4">
+            Enhanced Visual Track Clip
+          </h2>
+          <div
+            className="relative bg-bg-primary rounded border border-border-subtle p-4"
+            style={{ height: '120px' }}
+          >
             <VisualTrackClip
               item={{
                 ...timelineItems[0],
@@ -186,20 +206,29 @@ export function VisualTrackEnhancementsDemo() {
             />
           </div>
           <div className="mt-4 text-sm text-text-secondary">
-            Click the lightning bolt icon on the clip to see animation presets based on content analysis.
+            Click the lightning bolt icon on the clip to see animation presets
+            based on content analysis.
           </div>
         </div>
 
         {/* Screen Recording Analysis */}
         <div className="bg-bg-secondary rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-text-primary mb-4">Screen Recording Analysis</h2>
+          <h2 className="text-xl font-semibold text-text-primary mb-4">
+            Screen Recording Analysis
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h3 className="font-medium text-text-primary mb-3">Detection Results</h3>
+              <h3 className="font-medium text-text-primary mb-3">
+                Detection Results
+              </h3>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-text-secondary">Is Screen Recording:</span>
-                  <span className={`font-medium ${screenRecordingAnalysis.isScreenRecording ? 'text-green-500' : 'text-red-500'}`}>
+                  <span className="text-text-secondary">
+                    Is Screen Recording:
+                  </span>
+                  <span
+                    className={`font-medium ${screenRecordingAnalysis.isScreenRecording ? 'text-green-500' : 'text-red-500'}`}
+                  >
                     {screenRecordingAnalysis.isScreenRecording ? 'Yes' : 'No'}
                   </span>
                 </div>
@@ -212,25 +241,37 @@ export function VisualTrackEnhancementsDemo() {
                 <div className="flex justify-between">
                   <span className="text-text-secondary">Aspect Ratio:</span>
                   <span className="font-medium text-text-primary">
-                    {screenRecordingAnalysis.characteristics.aspectRatio.toFixed(2)}
+                    {screenRecordingAnalysis.characteristics.aspectRatio.toFixed(
+                      2
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-secondary">Has Code Content:</span>
-                  <span className={`font-medium ${screenRecordingAnalysis.characteristics.hasCodeContent ? 'text-green-500' : 'text-gray-500'}`}>
-                    {screenRecordingAnalysis.characteristics.hasCodeContent ? 'Yes' : 'No'}
+                  <span
+                    className={`font-medium ${screenRecordingAnalysis.characteristics.hasCodeContent ? 'text-green-500' : 'text-gray-500'}`}
+                  >
+                    {screenRecordingAnalysis.characteristics.hasCodeContent
+                      ? 'Yes'
+                      : 'No'}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-secondary">Has UI Elements:</span>
-                  <span className={`font-medium ${screenRecordingAnalysis.characteristics.hasUIElements ? 'text-green-500' : 'text-gray-500'}`}>
-                    {screenRecordingAnalysis.characteristics.hasUIElements ? 'Yes' : 'No'}
+                  <span
+                    className={`font-medium ${screenRecordingAnalysis.characteristics.hasUIElements ? 'text-green-500' : 'text-gray-500'}`}
+                  >
+                    {screenRecordingAnalysis.characteristics.hasUIElements
+                      ? 'Yes'
+                      : 'No'}
                   </span>
                 </div>
               </div>
             </div>
             <div>
-              <h3 className="font-medium text-text-primary mb-3">Optimization Suggestions</h3>
+              <h3 className="font-medium text-text-primary mb-3">
+                Optimization Suggestions
+              </h3>
               <OptimizationSuggestions
                 analysis={screenRecordingAnalysis}
                 onApplyOptimization={handleApplyOptimization}
@@ -241,7 +282,9 @@ export function VisualTrackEnhancementsDemo() {
 
         {/* Side-by-Side Layout Controls */}
         <div className="bg-bg-secondary rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-text-primary mb-4">Side-by-Side Layout Controls</h2>
+          <h2 className="text-xl font-semibold text-text-primary mb-4">
+            Side-by-Side Layout Controls
+          </h2>
           <div className="flex flex-col space-y-4">
             <SideBySideLayoutControls
               currentLayout={currentLayout}
@@ -251,23 +294,35 @@ export function VisualTrackEnhancementsDemo() {
             />
             {currentLayout && (
               <div className="bg-bg-primary rounded p-4 border border-border-subtle">
-                <h3 className="font-medium text-text-primary mb-2">Current Layout</h3>
+                <h3 className="font-medium text-text-primary mb-2">
+                  Current Layout
+                </h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-text-secondary">Type:</span>
-                    <span className="ml-2 font-medium text-text-primary">{currentLayout.type}</span>
+                    <span className="ml-2 font-medium text-text-primary">
+                      {currentLayout.type}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary">Primary Content:</span>
-                    <span className="ml-2 font-medium text-text-primary">{currentLayout.primaryContent}</span>
+                    <span className="text-text-secondary">
+                      Primary Content:
+                    </span>
+                    <span className="ml-2 font-medium text-text-primary">
+                      {currentLayout.primaryContent}
+                    </span>
                   </div>
                   <div>
                     <span className="text-text-secondary">Split Ratio:</span>
-                    <span className="ml-2 font-medium text-text-primary">{currentLayout.splitRatio}</span>
+                    <span className="ml-2 font-medium text-text-primary">
+                      {currentLayout.splitRatio}
+                    </span>
                   </div>
                   <div>
                     <span className="text-text-secondary">Gap:</span>
-                    <span className="ml-2 font-medium text-text-primary">{currentLayout.gap}px</span>
+                    <span className="ml-2 font-medium text-text-primary">
+                      {currentLayout.gap}px
+                    </span>
                   </div>
                 </div>
               </div>
@@ -277,7 +332,9 @@ export function VisualTrackEnhancementsDemo() {
 
         {/* Animation Presets */}
         <div className="bg-bg-secondary rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-text-primary mb-4">Available Animation Presets</h2>
+          <h2 className="text-xl font-semibold text-text-primary mb-4">
+            Available Animation Presets
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {VISUAL_ANIMATION_PRESETS.map((preset) => (
               <div
@@ -285,12 +342,16 @@ export function VisualTrackEnhancementsDemo() {
                 className="bg-bg-primary rounded-lg p-4 border border-border-subtle"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium text-text-primary">{preset.name}</h3>
+                  <h3 className="font-medium text-text-primary">
+                    {preset.name}
+                  </h3>
                   <span className="text-xs bg-accent-yellow text-bg-primary px-2 py-1 rounded">
                     {preset.type}
                   </span>
                 </div>
-                <p className="text-sm text-text-secondary mb-3">{preset.description}</p>
+                <p className="text-sm text-text-secondary mb-3">
+                  {preset.description}
+                </p>
                 <div className="flex justify-between text-xs text-text-secondary">
                   <span>Duration: {preset.duration}s</span>
                   <span>Easing: {preset.easing}</span>
@@ -302,35 +363,49 @@ export function VisualTrackEnhancementsDemo() {
 
         {/* Enhanced Thumbnails */}
         <div className="bg-bg-secondary rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-text-primary mb-4">Enhanced Thumbnails</h2>
+          <h2 className="text-xl font-semibold text-text-primary mb-4">
+            Enhanced Thumbnails
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[mockScreenRecordingAsset, mockRegularVideoAsset, mockUltrawideAsset].map((asset) => (
+            {[
+              mockScreenRecordingAsset,
+              mockRegularVideoAsset,
+              mockUltrawideAsset,
+            ].map((asset) => (
               <div key={asset.id} className="space-y-3">
-                <EnhancedThumbnail 
-                  asset={asset} 
+                <EnhancedThumbnail
+                  asset={asset}
                   className="w-full h-32"
                   showIndicators={true}
                 />
                 <div className="text-sm">
-                  <div className="font-medium text-text-primary truncate">{asset.name}</div>
+                  <div className="font-medium text-text-primary truncate">
+                    {asset.name}
+                  </div>
                   <div className="text-text-secondary">
-                    {asset.metadata.width}×{asset.metadata.height} • {asset.duration}s
+                    {asset.metadata.width}×{asset.metadata.height} •{' '}
+                    {asset.duration}s
                   </div>
                 </div>
               </div>
             ))}
           </div>
           <div className="mt-4 text-sm text-text-secondary">
-            Thumbnails automatically detect screen recordings and show relevant indicators.
+            Thumbnails automatically detect screen recordings and show relevant
+            indicators.
           </div>
         </div>
 
         {/* Feature Summary */}
         <div className="bg-bg-secondary rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-text-primary mb-4">Visual Track Enhancement Features</h2>
+          <h2 className="text-xl font-semibold text-text-primary mb-4">
+            Visual Track Enhancement Features
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h3 className="font-medium text-text-primary mb-3">🎯 Screen Recording Detection</h3>
+              <h3 className="font-medium text-text-primary mb-3">
+                🎯 Screen Recording Detection
+              </h3>
               <ul className="space-y-2 text-sm text-text-secondary">
                 <li>• Automatic detection based on filename and dimensions</li>
                 <li>• Confidence scoring for detection accuracy</li>
@@ -339,16 +414,22 @@ export function VisualTrackEnhancementsDemo() {
               </ul>
             </div>
             <div>
-              <h3 className="font-medium text-text-primary mb-3">⚡ Animation Presets</h3>
+              <h3 className="font-medium text-text-primary mb-3">
+                ⚡ Animation Presets
+              </h3>
               <ul className="space-y-2 text-sm text-text-secondary">
                 <li>• Content-aware preset recommendations</li>
-                <li>• Highlight, zoom-focus, callout, pan, and reveal effects</li>
+                <li>
+                  • Highlight, zoom-focus, callout, pan, and reveal effects
+                </li>
                 <li>• Customizable parameters for each preset</li>
                 <li>• Easy application through timeline interface</li>
               </ul>
             </div>
             <div>
-              <h3 className="font-medium text-text-primary mb-3">📐 Side-by-Side Layouts</h3>
+              <h3 className="font-medium text-text-primary mb-3">
+                📐 Side-by-Side Layouts
+              </h3>
               <ul className="space-y-2 text-sm text-text-secondary">
                 <li>• Multiple layout options (left-right, top-bottom)</li>
                 <li>• Automatic positioning and scaling</li>
@@ -357,7 +438,9 @@ export function VisualTrackEnhancementsDemo() {
               </ul>
             </div>
             <div>
-              <h3 className="font-medium text-text-primary mb-3">🔧 Optimization Suggestions</h3>
+              <h3 className="font-medium text-text-primary mb-3">
+                🔧 Optimization Suggestions
+              </h3>
               <ul className="space-y-2 text-sm text-text-secondary">
                 <li>• Smart cropping for ultrawide content</li>
                 <li>• Focus recommendations for code content</li>

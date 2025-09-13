@@ -11,11 +11,11 @@ interface ModeAwareComponentProps {
 /**
  * Component that conditionally renders children based on the current UI mode
  */
-export function ModeAwareComponent({ 
-  children, 
-  mode = 'both', 
+export function ModeAwareComponent({
+  children,
+  mode = 'both',
   fallback = null,
-  className = ''
+  className = '',
 }: ModeAwareComponentProps) {
   const { ui } = useUI();
 
@@ -31,9 +31,11 @@ export function ModeAwareComponent({
 /**
  * Hook to check if a feature should be visible in the current mode
  */
-export function useFeatureVisibility(feature: 'simplified' | 'advanced' | 'both' = 'both'): boolean {
+export function useFeatureVisibility(
+  feature: 'simplified' | 'advanced' | 'both' = 'both'
+): boolean {
   const { ui } = useUI();
-  
+
   if (feature === 'both') return true;
   return ui.mode === feature;
 }
@@ -41,8 +43,11 @@ export function useFeatureVisibility(feature: 'simplified' | 'advanced' | 'both'
 /**
  * Hook to get mode-specific CSS classes
  */
-export function useModeClasses(simplifiedClasses: string = '', advancedClasses: string = ''): string {
+export function useModeClasses(
+  simplifiedClasses: string = '',
+  advancedClasses: string = ''
+): string {
   const { ui } = useUI();
-  
+
   return ui.mode === 'simplified' ? simplifiedClasses : advancedClasses;
 }

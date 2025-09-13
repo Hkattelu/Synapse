@@ -12,7 +12,7 @@ export const UndoButton: React.FC<Props> = ({
 }) => {
   let temporal;
   let canUndo = false;
-  
+
   try {
     temporal = useProjectTemporal();
     canUndo = (temporal?.pastStates?.length ?? 0) > 0;

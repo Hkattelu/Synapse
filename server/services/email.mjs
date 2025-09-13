@@ -16,7 +16,8 @@ const getTransporter = () => {
 };
 
 export const sendContactEmail = async ({ name, email, message }) => {
-  if (!name || !email || !message) throw new Error('name, email, message required');
+  if (!name || !email || !message)
+    throw new Error('name, email, message required');
   const tx = getTransporter();
   const subject = `[Synapse] Contact from ${name}`;
   const html = `<p><b>Name:</b> ${escapeHtml(name)}</p><p><b>Email:</b> ${escapeHtml(email)}</p><p>${escapeHtml(message)}</p>`;
@@ -24,7 +25,12 @@ export const sendContactEmail = async ({ name, email, message }) => {
   if (!tx) {
     // Fallback: log to server if SMTP not configured
     console.warn('SMTP not configured. Logging email instead.');
-    console.log({ subject, to: config.smtp.to, from: config.smtp.from || config.smtp.user, html });
+    console.log({
+      subject,
+      to: config.smtp.to,
+      from: config.smtp.from || config.smtp.user,
+      html,
+    });
     return { queued: true, simulated: true };
   }
 
@@ -38,4 +44,7 @@ export const sendContactEmail = async ({ name, email, message }) => {
 };
 
 const escapeHtml = (s) =>
-  String(s).replace(/[&<>"]+/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  String(s).replace(
+    /[&<>"]+/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]
+  );

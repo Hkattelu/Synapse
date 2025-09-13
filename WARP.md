@@ -5,6 +5,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 Repository: Synapse Studio (React + Vite + TypeScript + Tailwind + Vitest) with optional Electron desktop shell.
 
 Common commands (PowerShell-friendly)
+
 - Install deps: npm install
 - Dev server (web): npm run dev
 - Backend server (API): npm run server
@@ -26,9 +27,11 @@ Common commands (PowerShell-friendly)
 - Generate launch OG image assets: npm run generate:launch-og
 
 Notes for Windows PowerShell
+
 - You can override the Electron dev URL if needed: $env:SYNAPSE_ELECTRON_DEV_URL = 'http://localhost:5173'; npm run desktop:dev
 
 High-level architecture
+
 - Frontend (src/)
   - components/ and components/ui/: React presentation layer and reusable UI.
   - state/: App state via React Context + Zustand (e.g., projectStore, reducers, persistence). Central place for timelines, projects, notifications.
@@ -36,7 +39,7 @@ High-level architecture
     - exportManager(.ts)/exportManagerClient(.ts): export pipeline and client coordination.
     - backgrounds/, themes/, validation/: configuration, schema/validation, theme definitions, and background assets management.
     - api.ts, format.ts, keyframes.ts, utils.ts: cross-cutting helpers.
-  - remotion/: Programmatic video compositions and sequences using Remotion (@remotion/*). Contains compositions (MainComposition, TitleSequence, VideoSequence, CodeSequence), helpers, and preset animations.
+  - remotion/: Programmatic video compositions and sequences using Remotion (@remotion/\*). Contains compositions (MainComposition, TitleSequence, VideoSequence, CodeSequence), helpers, and preset animations.
   - hooks/: Custom React hooks including keyboard shortcuts and state accessors.
   - test/: TestProviders and setup.ts for test environment wiring.
 - Backend (server/)
@@ -61,12 +64,13 @@ High-level architecture
   - Packaging: electron-builder (electron/packaging/electron-builder.yml); outputs to release/.
 
 What to know from README and docs
+
 - Tech stack highlights: React 19, Vite, Tailwind CSS, Remotion, ESLint + Prettier, optional Electron shell.
 - docs/electron/outline.md covers desktop architecture, IPC, and security.
 
 Conventions and tips specific to this repo
+
 - Use the Vitest arguments passthrough after -- to target single files or test names.
 - Keep to the alias import style (import ... from '@/lib/...').
 - If working on Electron, build the electron TS once before launching: npm run electron:build.
 - Dev flow: run both npm run dev (frontend) and npm run server (backend). Vite proxies /api to the backend on port 8787.
-

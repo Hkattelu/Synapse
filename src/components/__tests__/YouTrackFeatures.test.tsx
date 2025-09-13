@@ -14,8 +14,8 @@ vi.mock('../../lib/youTrackFeatures', async () => {
       faceConfidence: 85,
       faceBounds: { x: 100, y: 50, width: 200, height: 300 },
       isOptimal: true,
-      suggestions: ['Good lighting detected', 'Face is well-centered']
-    })
+      suggestions: ['Good lighting detected', 'Face is well-centered'],
+    }),
   };
 });
 
@@ -32,8 +32,8 @@ describe('YouTrackFeatures', () => {
       talkingHeadSize: 'md',
       backgroundRemoval: false,
       backgroundBlur: 0,
-      volume: 0.8
-    }
+      volume: 0.8,
+    },
   };
 
   const mockOnUpdateProperties = vi.fn();
@@ -82,7 +82,7 @@ describe('YouTrackFeatures', () => {
     expect(mockOnUpdateProperties).toHaveBeenCalledWith(
       expect.objectContaining({
         talkingHeadEnabled: true,
-        talkingHeadCorner: 'top-left'
+        talkingHeadCorner: 'top-left',
       })
     );
   });
@@ -101,7 +101,7 @@ describe('YouTrackFeatures', () => {
     expect(mockOnUpdateProperties).toHaveBeenCalledWith(
       expect.objectContaining({
         talkingHeadEnabled: true,
-        talkingHeadSize: 'lg'
+        talkingHeadSize: 'lg',
       })
     );
   });
@@ -134,7 +134,7 @@ describe('YouTrackFeatures', () => {
     expect(mockOnUpdateProperties).toHaveBeenCalledWith(
       expect.objectContaining({
         backgroundRemoval: false,
-        backgroundBlur: 0.5
+        backgroundBlur: 0.5,
       })
     );
   });
@@ -153,7 +153,7 @@ describe('YouTrackFeatures', () => {
     expect(mockOnUpdateProperties).toHaveBeenCalledWith(
       expect.objectContaining({
         backgroundRemoval: true,
-        backgroundBlur: 0
+        backgroundBlur: 0,
       })
     );
   });
@@ -197,7 +197,9 @@ describe('YouTrackFeatures', () => {
       />
     );
 
-    const professionalCornerTemplate = screen.getByText('Professional Corner').closest('div');
+    const professionalCornerTemplate = screen
+      .getByText('Professional Corner')
+      .closest('div');
     if (professionalCornerTemplate) {
       fireEvent.click(professionalCornerTemplate);
     }
@@ -205,7 +207,7 @@ describe('YouTrackFeatures', () => {
     expect(mockOnUpdateProperties).toHaveBeenCalledWith(
       expect.objectContaining({
         talkingHeadEnabled: true,
-        presentationTemplate: 'professional-corner'
+        presentationTemplate: 'professional-corner',
       })
     );
   });
@@ -213,7 +215,7 @@ describe('YouTrackFeatures', () => {
   it('shows validation warnings for non-video content', () => {
     const nonVideoItem: TimelineItem = {
       ...mockItem,
-      type: 'audio'
+      type: 'audio',
     };
 
     render(
@@ -224,7 +226,9 @@ describe('YouTrackFeatures', () => {
     );
 
     expect(screen.getByText('Recommendations')).toBeInTheDocument();
-    expect(screen.getByText(/You track is optimized for video content/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/You track is optimized for video content/)
+    ).toBeInTheDocument();
   });
 
   it('shows suggestions when talking head is not enabled', () => {
@@ -251,7 +255,7 @@ describe('YouTrackFeatures', () => {
 
     expect(mockOnUpdateProperties).toHaveBeenCalledWith(
       expect.objectContaining({
-        borderRadius: 12
+        borderRadius: 12,
       })
     );
   });
@@ -269,7 +273,7 @@ describe('YouTrackFeatures', () => {
 
     expect(mockOnUpdateProperties).toHaveBeenCalledWith(
       expect.objectContaining({
-        opacity: 0.8
+        opacity: 0.8,
       })
     );
   });
@@ -282,15 +286,17 @@ describe('YouTrackFeatures', () => {
       />
     );
 
-    const shadowCheckbox = screen.getByRole('checkbox', { name: /drop shadow/i });
-    
+    const shadowCheckbox = screen.getByRole('checkbox', {
+      name: /drop shadow/i,
+    });
+
     // The checkbox starts as checked (true), so clicking it should make it false
     // But the component logic should toggle it to true
     fireEvent.click(shadowCheckbox);
 
     expect(mockOnUpdateProperties).toHaveBeenCalledWith(
       expect.objectContaining({
-        shadow: false // The checkbox was initially checked, so clicking unchecks it
+        shadow: false, // The checkbox was initially checked, so clicking unchecks it
       })
     );
   });
@@ -308,7 +314,7 @@ describe('YouTrackFeatures', () => {
 
     expect(mockOnUpdateProperties).toHaveBeenCalledWith(
       expect.objectContaining({
-        borderColor: '#ff0000'
+        borderColor: '#ff0000',
       })
     );
   });
@@ -321,7 +327,9 @@ describe('YouTrackFeatures', () => {
       />
     );
 
-    const greenScreenButton = screen.getByRole('button', { name: /green screen/i });
+    const greenScreenButton = screen.getByRole('button', {
+      name: /green screen/i,
+    });
     fireEvent.click(greenScreenButton);
 
     expect(screen.getByText('Chroma Key Color')).toBeInTheDocument();
@@ -338,7 +346,7 @@ describe('YouTrackFeatures', () => {
 
     const previews = screen.getAllByText('Preview');
     expect(previews.length).toBeGreaterThan(0);
-    
+
     // The preview should show the PiP element
     const pipElement = screen.getByText('You');
     expect(pipElement).toBeInTheDocument();
@@ -346,7 +354,7 @@ describe('YouTrackFeatures', () => {
 
   it('handles video load event for talking head detection', async () => {
     const { detectTalkingHead } = await import('../../lib/youTrackFeatures');
-    
+
     render(
       <YouTrackFeatures
         item={mockItem}
@@ -356,7 +364,7 @@ describe('YouTrackFeatures', () => {
 
     const video = document.querySelector('video');
     expect(video).toBeInTheDocument();
-    
+
     if (video) {
       fireEvent.loadedData(video);
 
@@ -398,7 +406,9 @@ describe('YouTrackFeatures', () => {
       fireEvent.loadedData(video);
 
       await waitFor(() => {
-        const optimizeButton = screen.getByRole('button', { name: /apply optimizations/i });
+        const optimizeButton = screen.getByRole('button', {
+          name: /apply optimizations/i,
+        });
         expect(optimizeButton).toBeInTheDocument();
       });
     }
@@ -417,14 +427,16 @@ describe('YouTrackFeatures', () => {
       fireEvent.loadedData(video);
 
       await waitFor(() => {
-        const optimizeButton = screen.getByRole('button', { name: /apply optimizations/i });
+        const optimizeButton = screen.getByRole('button', {
+          name: /apply optimizations/i,
+        });
         fireEvent.click(optimizeButton);
       });
 
       expect(mockOnUpdateProperties).toHaveBeenCalledWith(
         expect.objectContaining({
           talkingHeadEnabled: true,
-          backgroundRemoval: true
+          backgroundRemoval: true,
         })
       );
     }

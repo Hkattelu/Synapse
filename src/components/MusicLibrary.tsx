@@ -8,7 +8,10 @@ interface MusicLibraryProps {
   searchQuery?: string;
 }
 
-export function MusicLibrary({ className = '', searchQuery = '' }: MusicLibraryProps) {
+export function MusicLibrary({
+  className = '',
+  searchQuery = '',
+}: MusicLibraryProps) {
   const {
     ui: {
       musicLibrary: { tracks },
@@ -96,7 +99,12 @@ export function MusicLibrary({ className = '', searchQuery = '' }: MusicLibraryP
     const q = searchQuery.trim().toLowerCase();
     const map = new Map<string, MusicTrack[]>();
     for (const t of tracks) {
-      if (q && !t.title.toLowerCase().includes(q) && !t.genre.toLowerCase().includes(q)) continue;
+      if (
+        q &&
+        !t.title.toLowerCase().includes(q) &&
+        !t.genre.toLowerCase().includes(q)
+      )
+        continue;
       if (!map.has(t.genre)) map.set(t.genre, []);
       map.get(t.genre)!.push(t);
     }
@@ -109,17 +117,19 @@ export function MusicLibrary({ className = '', searchQuery = '' }: MusicLibraryP
   // Derive sections: your recordings, uploaded music, default music
   const defaultUrls = new Set(tracks.map((t) => t.url));
   const audioAssets = mediaAssets.filter((a) => a.type === 'audio');
-  const recordings: MediaAsset[] = audioAssets.filter((a) =>
-    (a.metadata?.mimeType || '').includes('webm') || (a.metadata?.mimeType || '').includes('wav')
+  const recordings: MediaAsset[] = audioAssets.filter(
+    (a) =>
+      (a.metadata?.mimeType || '').includes('webm') ||
+      (a.metadata?.mimeType || '').includes('wav')
   );
   const filterAssetByQuery = (a: MediaAsset) => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return true;
     return a.name.toLowerCase().includes(q);
   };
-  const uploaded: MediaAsset[] = audioAssets.filter(
-    (a) => !defaultUrls.has(a.url) && !recordings.includes(a)
-  ).filter(filterAssetByQuery);
+  const uploaded: MediaAsset[] = audioAssets
+    .filter((a) => !defaultUrls.has(a.url) && !recordings.includes(a))
+    .filter(filterAssetByQuery);
 
   return (
     <div className={`flex flex-col h-full ${className}`}>
@@ -129,7 +139,8 @@ export function MusicLibrary({ className = '', searchQuery = '' }: MusicLibraryP
             Audio
           </h4>
           <span className="text-xs text-text-tertiary">
-            {tracks.length} default • {uploaded.length} uploads • {recordings.length} recordings
+            {tracks.length} default • {uploaded.length} uploads •{' '}
+            {recordings.length} recordings
           </span>
         </div>
         <p className="text-xs text-text-tertiary mt-1">
@@ -141,11 +152,15 @@ export function MusicLibrary({ className = '', searchQuery = '' }: MusicLibraryP
         {/* Your Recordings */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <div className="text-xs uppercase text-text-tertiary">Your recordings</div>
+            <div className="text-xs uppercase text-text-tertiary">
+              Your recordings
+            </div>
             <button
               className="text-xs px-2 py-1 rounded bg-primary-600 hover:bg-primary-700 text-white"
               onClick={() => {
-                try { window.dispatchEvent(new CustomEvent('openRecorderDialog')); } catch {}
+                try {
+                  window.dispatchEvent(new CustomEvent('openRecorderDialog'));
+                } catch {}
               }}
             >
               Record
@@ -156,23 +171,30 @@ export function MusicLibrary({ className = '', searchQuery = '' }: MusicLibraryP
           ) : (
             <div className="divide-y divide-border-subtle border border-border-subtle rounded-md overflow-hidden">
               {recordings.map((a) => (
-                <div key={a.id} className="flex items-center justify-between bg-background-tertiary px-3 py-2">
+                <div
+                  key={a.id}
+                  className="flex items-center justify-between bg-background-tertiary px-3 py-2"
+                >
                   <div className="min-w-0 flex-1 mr-2">
-                    <div className="text-sm text-text-primary truncate">{a.name}</div>
+                    <div className="text-sm text-text-primary truncate">
+                      {a.name}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       className="px-2 py-1 rounded text-xs bg-primary-600 hover:bg-primary-700 text-white"
-                      onClick={() => addTimelineItem({
-                        assetId: a.id,
-                        startTime: 0,
-                        duration: a.duration || 5,
-                        track: 0,
-                        type: 'audio',
-                        properties: { volume: 1 },
-                        animations: [],
-                        keyframes: [],
-                      })}
+                      onClick={() =>
+                        addTimelineItem({
+                          assetId: a.id,
+                          startTime: 0,
+                          duration: a.duration || 5,
+                          track: 0,
+                          type: 'audio',
+                          properties: { volume: 1 },
+                          animations: [],
+                          keyframes: [],
+                        })
+                      }
                     >
                       Add
                     </button>
@@ -185,10 +207,14 @@ export function MusicLibrary({ className = '', searchQuery = '' }: MusicLibraryP
 
         {/* Default Music */}
         <div>
-          <div className="text-xs uppercase text-text-tertiary mb-1">Default music</div>
+          <div className="text-xs uppercase text-text-tertiary mb-1">
+            Default music
+          </div>
           {byGenre.map(([genre, list]) => (
             <div key={genre} className="mb-3">
-              <div className="text-[11px] uppercase text-text-tertiary mb-1">{genre}</div>
+              <div className="text-[11px] uppercase text-text-tertiary mb-1">
+                {genre}
+              </div>
               <div className="divide-y divide-border-subtle border border-border-subtle rounded-md overflow-hidden">
                 {list.map((t) => (
                   <div
@@ -228,15 +254,24 @@ export function MusicLibrary({ className = '', searchQuery = '' }: MusicLibraryP
 
         {/* Uploaded Music */}
         <div>
-          <div className="text-xs uppercase text-text-tertiary mb-1">Uploaded music</div>
+          <div className="text-xs uppercase text-text-tertiary mb-1">
+            Uploaded music
+          </div>
           {uploaded.length === 0 ? (
-            <div className="text-xs text-text-tertiary">No uploaded audio yet.</div>
+            <div className="text-xs text-text-tertiary">
+              No uploaded audio yet.
+            </div>
           ) : (
             <div className="divide-y divide-border-subtle border border-border-subtle rounded-md overflow-hidden">
               {uploaded.map((a) => (
-                <div key={a.id} className="flex items-center justify-between bg-background-tertiary px-3 py-2">
+                <div
+                  key={a.id}
+                  className="flex items-center justify-between bg-background-tertiary px-3 py-2"
+                >
                   <div className="min-w-0 flex-1 mr-2">
-                    <div className="text-sm text-text-primary truncate">{a.name}</div>
+                    <div className="text-sm text-text-primary truncate">
+                      {a.name}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -259,16 +294,18 @@ export function MusicLibrary({ className = '', searchQuery = '' }: MusicLibraryP
                     </button>
                     <button
                       className="px-2 py-1 rounded text-xs bg-primary-600 hover:bg-primary-700 text-white"
-                      onClick={() => addTimelineItem({
-                        assetId: a.id,
-                        startTime: 0,
-                        duration: a.duration || 5,
-                        track: 0,
-                        type: 'audio',
-                        properties: { volume: 1 },
-                        animations: [],
-                        keyframes: [],
-                      })}
+                      onClick={() =>
+                        addTimelineItem({
+                          assetId: a.id,
+                          startTime: 0,
+                          duration: a.duration || 5,
+                          track: 0,
+                          type: 'audio',
+                          properties: { volume: 1 },
+                          animations: [],
+                          keyframes: [],
+                        })
+                      }
                     >
                       Add
                     </button>

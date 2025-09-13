@@ -43,7 +43,7 @@ describe('Export Transparency Functions', () => {
         audioCodec: 'aac',
         transparentBackground: false,
       };
-      
+
       expect(getTransparencyCompatibilityWarning(settings)).toBeNull();
     });
 
@@ -55,7 +55,7 @@ describe('Export Transparency Functions', () => {
         audioCodec: 'aac',
         transparentBackground: true,
       };
-      
+
       expect(getTransparencyCompatibilityWarning(settings)).toBeNull();
     });
 
@@ -67,7 +67,7 @@ describe('Export Transparency Functions', () => {
         audioCodec: 'aac',
         transparentBackground: true,
       };
-      
+
       const warning = getTransparencyCompatibilityWarning(settings);
       expect(warning).toContain('Transparent backgrounds are not supported');
       expect(warning).toContain('MP4 + H264');
@@ -77,7 +77,7 @@ describe('Export Transparency Functions', () => {
   describe('getRecommendedTransparencySettings', () => {
     it('should return recommended settings for transparency', () => {
       const recommended = getRecommendedTransparencySettings();
-      
+
       expect(recommended.format).toBe('mov');
       expect(recommended.codec).toBe('h264');
       expect(recommended.transparentBackground).toBe(true);
@@ -97,7 +97,7 @@ describe('Export Transparency Functions', () => {
         includeWallpaper: false,
         includeGradient: false,
       };
-      
+
       const result = validateTransparencySettings(settings);
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
@@ -111,7 +111,7 @@ describe('Export Transparency Functions', () => {
         audioCodec: 'aac',
         transparentBackground: true,
       };
-      
+
       const result = validateTransparencySettings(settings);
       expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(1);
@@ -128,7 +128,7 @@ describe('Export Transparency Functions', () => {
         includeWallpaper: true,
         includeGradient: true,
       };
-      
+
       const result = validateTransparencySettings(settings);
       expect(result.isValid).toBe(true);
       expect(result.warnings).toHaveLength(1);
@@ -143,11 +143,13 @@ describe('Export Transparency Functions', () => {
         audioCodec: 'aac',
         transparentBackground: true,
       };
-      
+
       const result = validateTransparencySettings(settings);
       expect(result.isValid).toBe(true);
       expect(result.warnings).toHaveLength(1);
-      expect(result.warnings[0]).toContain('Low quality settings may affect alpha channel');
+      expect(result.warnings[0]).toContain(
+        'Low quality settings may affect alpha channel'
+      );
     });
 
     it('should not validate when transparency is disabled', () => {
@@ -158,7 +160,7 @@ describe('Export Transparency Functions', () => {
         audioCodec: 'aac',
         transparentBackground: false,
       };
-      
+
       const result = validateTransparencySettings(settings);
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);

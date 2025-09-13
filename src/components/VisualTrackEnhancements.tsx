@@ -16,15 +16,15 @@ import {
   type VisualAnimationPreset,
   type SideBySideLayout,
 } from '../lib/visualTrackEnhancements';
-import { 
-  Monitor, 
-  Play, 
-  Code, 
-  MousePointer, 
-  Maximize, 
-  Zap, 
-  Eye, 
-  ArrowRight 
+import {
+  Monitor,
+  Play,
+  Code,
+  MousePointer,
+  Maximize,
+  Zap,
+  Eye,
+  ArrowRight,
 } from 'lucide-react';
 
 interface VisualTrackClipProps {
@@ -51,25 +51,35 @@ export function VisualTrackClip({
   isDragging,
 }: VisualTrackClipProps) {
   const [showAnimationMenu, setShowAnimationMenu] = useState(false);
-  
+
   // Analyze screen recording if it's a video asset
   const screenRecordingAnalysis = useMemo(() => {
     return asset ? analyzeScreenRecording(asset) : null;
   }, [asset]);
 
   const indicators = useMemo(() => {
-    return screenRecordingAnalysis ? getScreenRecordingIndicators(screenRecordingAnalysis) : [];
+    return screenRecordingAnalysis
+      ? getScreenRecordingIndicators(screenRecordingAnalysis)
+      : [];
   }, [screenRecordingAnalysis]);
 
   const recommendedPresets = useMemo(() => {
-    return asset ? getRecommendedPresetsForContent(asset, screenRecordingAnalysis || undefined) : [];
+    return asset
+      ? getRecommendedPresetsForContent(
+          asset,
+          screenRecordingAnalysis || undefined
+        )
+      : [];
   }, [asset, screenRecordingAnalysis]);
 
-  const handleApplyPreset = useCallback((preset: VisualAnimationPreset) => {
-    const updatedItem = applyVisualAnimationPreset(item, preset);
-    onItemUpdate(updatedItem);
-    setShowAnimationMenu(false);
-  }, [item, onItemUpdate]);
+  const handleApplyPreset = useCallback(
+    (preset: VisualAnimationPreset) => {
+      const updatedItem = applyVisualAnimationPreset(item, preset);
+      onItemUpdate(updatedItem);
+      setShowAnimationMenu(false);
+    },
+    [item, onItemUpdate]
+  );
 
   const thumbnailUrl = useMemo(() => {
     return asset ? generateThumbnailUrl(asset) : null;
@@ -93,7 +103,7 @@ export function VisualTrackClip({
     >
       {/* Thumbnail Preview */}
       {thumbnailUrl && (
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-20 group-hover:opacity-30 transition-opacity"
           style={{ backgroundImage: `url(${thumbnailUrl})` }}
         />
@@ -106,9 +116,11 @@ export function VisualTrackClip({
           <div className="flex-1 min-w-0">
             <div className="font-medium text-text-primary truncate flex items-center gap-1 mb-1">
               <Monitor className="w-3 h-3 flex-shrink-0" />
-              <span className="truncate">{asset?.name || 'Visual Content'}</span>
+              <span className="truncate">
+                {asset?.name || 'Visual Content'}
+              </span>
             </div>
-            
+
             {/* Screen Recording Indicators */}
             <div className="flex flex-wrap gap-1 mb-1">
               {indicators.map((indicator) => (
@@ -173,7 +185,11 @@ interface ScreenRecordingIndicatorProps {
   confidence: number;
 }
 
-function ScreenRecordingIndicator({ type, label, confidence }: ScreenRecordingIndicatorProps) {
+function ScreenRecordingIndicator({
+  type,
+  label,
+  confidence,
+}: ScreenRecordingIndicatorProps) {
   const getIndicatorIcon = () => {
     switch (type) {
       case 'screen-recording':
@@ -196,7 +212,7 @@ function ScreenRecordingIndicator({ type, label, confidence }: ScreenRecordingIn
   };
 
   return (
-    <div 
+    <div
       className={`
         inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs text-white
         ${getIndicatorColor()}
@@ -215,12 +231,18 @@ interface AnimationPresetsMenuProps {
   onClose: () => void;
 }
 
-function AnimationPresetsMenu({ presets, onApplyPreset, onClose }: AnimationPresetsMenuProps) {
+function AnimationPresetsMenu({
+  presets,
+  onApplyPreset,
+  onClose,
+}: AnimationPresetsMenuProps) {
   return (
     <div className="absolute top-full left-0 mt-1 bg-bg-primary border border-border-subtle rounded-lg shadow-lg z-50 min-w-48">
       <div className="p-2">
-        <div className="text-xs font-medium text-text-primary mb-2">Animation Presets</div>
-        
+        <div className="text-xs font-medium text-text-primary mb-2">
+          Animation Presets
+        </div>
+
         {presets.length > 0 ? (
           <div className="space-y-1">
             {presets.map((preset) => (
@@ -230,8 +252,12 @@ function AnimationPresetsMenu({ presets, onApplyPreset, onClose }: AnimationPres
                 onClick={() => onApplyPreset(preset)}
               >
                 <div className="flex-1">
-                  <div className="font-medium text-text-primary">{preset.name}</div>
-                  <div className="text-text-secondary text-opacity-75">{preset.description}</div>
+                  <div className="font-medium text-text-primary">
+                    {preset.name}
+                  </div>
+                  <div className="text-text-secondary text-opacity-75">
+                    {preset.description}
+                  </div>
                 </div>
                 <ArrowRight className="w-3 h-3 text-text-secondary" />
               </button>
@@ -242,7 +268,7 @@ function AnimationPresetsMenu({ presets, onApplyPreset, onClose }: AnimationPres
             No recommended presets for this content
           </div>
         )}
-        
+
         <div className="border-t border-border-subtle mt-2 pt-2">
           <button
             className="w-full text-left px-2 py-1 text-xs text-text-secondary hover:text-text-primary"
@@ -299,18 +325,21 @@ export function SideBySideLayoutControls({
     },
   ];
 
-  const handleLayoutSelect = useCallback((type: SideBySideLayout['type']) => {
-    const newLayout: SideBySideLayout = {
-      type,
-      primaryContent: 'code', // Default to code as primary for consistency
-      splitRatio: 0.5,
-      gap: 16,
-      alignment: 'start',
-    };
-    
-    onLayoutChange(newLayout);
-    setIsOpen(false);
-  }, [onLayoutChange]);
+  const handleLayoutSelect = useCallback(
+    (type: SideBySideLayout['type']) => {
+      const newLayout: SideBySideLayout = {
+        type,
+        primaryContent: 'code', // Default to code as primary for consistency
+        splitRatio: 0.5,
+        gap: 16,
+        alignment: 'start',
+      };
+
+      onLayoutChange(newLayout);
+      setIsOpen(false);
+    },
+    [onLayoutChange]
+  );
 
   // Only show if we have both code and visual items
   if (codeItems.length === 0 || visualItems.length === 0) {
@@ -328,33 +357,42 @@ export function SideBySideLayoutControls({
           <div className="w-3 h-2 bg-green-500 rounded-sm" />
         </div>
         <span>Side-by-Side Layout</span>
-        <ArrowRight className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
+        <ArrowRight
+          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-90' : ''}`}
+        />
       </button>
 
       {isOpen && (
         <div className="absolute top-full left-0 mt-2 bg-bg-primary border border-border-subtle rounded-lg shadow-lg z-50 min-w-64">
           <div className="p-3">
-            <div className="text-sm font-medium text-text-primary mb-3">Choose Layout</div>
-            
+            <div className="text-sm font-medium text-text-primary mb-3">
+              Choose Layout
+            </div>
+
             <div className="space-y-2">
               {layoutOptions.map((option) => (
                 <button
                   key={option.type}
                   className={`
                     w-full text-left p-3 rounded-lg border transition-colors
-                    ${currentLayout?.type === option.type
-                      ? 'border-accent-yellow bg-accent-yellow bg-opacity-10'
-                      : 'border-border-subtle hover:border-border-primary hover:bg-bg-secondary'
+                    ${
+                      currentLayout?.type === option.type
+                        ? 'border-accent-yellow bg-accent-yellow bg-opacity-10'
+                        : 'border-border-subtle hover:border-border-primary hover:bg-bg-secondary'
                     }
                   `}
                   onClick={() => handleLayoutSelect(option.type)}
                 >
-                  <div className="font-medium text-text-primary text-sm">{option.label}</div>
-                  <div className="text-text-secondary text-xs mt-1">{option.description}</div>
+                  <div className="font-medium text-text-primary text-sm">
+                    {option.label}
+                  </div>
+                  <div className="text-text-secondary text-xs mt-1">
+                    {option.description}
+                  </div>
                 </button>
               ))}
             </div>
-            
+
             <div className="border-t border-border-subtle mt-3 pt-3">
               <button
                 className="w-full text-center px-3 py-2 text-sm text-text-secondary hover:text-text-primary"
@@ -376,8 +414,14 @@ interface OptimizationSuggestionsProps {
   onApplyOptimization: (optimization: any) => void;
 }
 
-export function OptimizationSuggestions({ analysis, onApplyOptimization }: OptimizationSuggestionsProps) {
-  if (!analysis.isScreenRecording || analysis.optimizationSuggestions.length === 0) {
+export function OptimizationSuggestions({
+  analysis,
+  onApplyOptimization,
+}: OptimizationSuggestionsProps) {
+  if (
+    !analysis.isScreenRecording ||
+    analysis.optimizationSuggestions.length === 0
+  ) {
     return null;
   }
 
@@ -385,9 +429,11 @@ export function OptimizationSuggestions({ analysis, onApplyOptimization }: Optim
     <div className="bg-bg-secondary border border-border-subtle rounded-lg p-3 mb-4">
       <div className="flex items-center gap-2 mb-2">
         <Zap className="w-4 h-4 text-yellow-500" />
-        <span className="text-sm font-medium text-text-primary">Optimization Suggestions</span>
+        <span className="text-sm font-medium text-text-primary">
+          Optimization Suggestions
+        </span>
       </div>
-      
+
       <div className="space-y-2">
         {analysis.optimizationSuggestions.map((suggestion, index) => (
           <div
@@ -395,7 +441,9 @@ export function OptimizationSuggestions({ analysis, onApplyOptimization }: Optim
             className="flex items-center justify-between p-2 bg-bg-primary rounded border border-border-subtle"
           >
             <div className="flex-1">
-              <div className="text-sm text-text-primary">{suggestion.description}</div>
+              <div className="text-sm text-text-primary">
+                {suggestion.description}
+              </div>
               <div className="text-xs text-text-secondary">
                 Confidence: {Math.round(suggestion.confidence * 100)}%
               </div>
@@ -420,19 +468,26 @@ interface EnhancedThumbnailProps {
   showIndicators?: boolean;
 }
 
-export function EnhancedThumbnail({ asset, className = '', showIndicators = true }: EnhancedThumbnailProps) {
+export function EnhancedThumbnail({
+  asset,
+  className = '',
+  showIndicators = true,
+}: EnhancedThumbnailProps) {
   const analysis = useMemo(() => analyzeScreenRecording(asset), [asset]);
   const thumbnailUrl = useMemo(() => generateThumbnailUrl(asset), [asset]);
-  const indicators = useMemo(() => getScreenRecordingIndicators(analysis), [analysis]);
+  const indicators = useMemo(
+    () => getScreenRecordingIndicators(analysis),
+    [analysis]
+  );
 
   return (
     <div className={`relative ${className}`}>
       {/* Thumbnail Image */}
-      <div 
+      <div
         className="w-full h-full bg-cover bg-center rounded border border-border-subtle"
         style={{ backgroundImage: `url(${thumbnailUrl})` }}
       />
-      
+
       {/* Play Overlay for Videos */}
       {asset.type === 'video' && (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -441,7 +496,7 @@ export function EnhancedThumbnail({ asset, className = '', showIndicators = true
           </div>
         </div>
       )}
-      
+
       {/* Screen Recording Indicators */}
       {showIndicators && indicators.length > 0 && (
         <div className="absolute top-1 left-1 flex flex-wrap gap-1">
@@ -450,14 +505,18 @@ export function EnhancedThumbnail({ asset, className = '', showIndicators = true
               key={indicator.type}
               className="bg-black bg-opacity-75 text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1"
             >
-              {indicator.type === 'screen-recording' && <Monitor className="w-2 h-2" />}
-              {indicator.type === 'code-content' && <Code className="w-2 h-2" />}
+              {indicator.type === 'screen-recording' && (
+                <Monitor className="w-2 h-2" />
+              )}
+              {indicator.type === 'code-content' && (
+                <Code className="w-2 h-2" />
+              )}
               <span>{indicator.label}</span>
             </div>
           ))}
         </div>
       )}
-      
+
       {/* Duration Badge */}
       {asset.duration && (
         <div className="absolute bottom-1 right-1 bg-black bg-opacity-75 text-white text-xs px-1.5 py-0.5 rounded">

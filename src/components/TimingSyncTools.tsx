@@ -28,7 +28,9 @@ export function TimingSyncTools({
   className = '',
 }: TimingSyncToolsProps) {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedSyncPoint, setSelectedSyncPoint] = useState<string | null>(null);
+  const [selectedSyncPoint, setSelectedSyncPoint] = useState<string | null>(
+    null
+  );
   const [newSyncPointLabel, setNewSyncPointLabel] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -40,29 +42,36 @@ export function TimingSyncTools({
       type: 'marker',
     };
 
-    const updatedSyncPoints = [...syncPoints, newSyncPoint]
-      .sort((a, b) => a.time - b.time);
+    const updatedSyncPoints = [...syncPoints, newSyncPoint].sort(
+      (a, b) => a.time - b.time
+    );
 
     onSyncPointsChange(updatedSyncPoints);
     setNewSyncPointLabel('');
     setShowAddForm(false);
   }, [currentTime, newSyncPointLabel, syncPoints, onSyncPointsChange]);
 
-  const removeSyncPoint = useCallback((id: string) => {
-    const updatedSyncPoints = syncPoints.filter(point => point.id !== id);
-    onSyncPointsChange(updatedSyncPoints);
-    if (selectedSyncPoint === id) {
-      setSelectedSyncPoint(null);
-    }
-  }, [syncPoints, onSyncPointsChange, selectedSyncPoint]);
+  const removeSyncPoint = useCallback(
+    (id: string) => {
+      const updatedSyncPoints = syncPoints.filter((point) => point.id !== id);
+      onSyncPointsChange(updatedSyncPoints);
+      if (selectedSyncPoint === id) {
+        setSelectedSyncPoint(null);
+      }
+    },
+    [syncPoints, onSyncPointsChange, selectedSyncPoint]
+  );
 
-  const updateSyncPoint = useCallback((id: string, updates: Partial<TimingSyncPoint>) => {
-    const updatedSyncPoints = syncPoints.map(point =>
-      point.id === id ? { ...point, ...updates } : point
-    ).sort((a, b) => a.time - b.time);
+  const updateSyncPoint = useCallback(
+    (id: string, updates: Partial<TimingSyncPoint>) => {
+      const updatedSyncPoints = syncPoints
+        .map((point) => (point.id === id ? { ...point, ...updates } : point))
+        .sort((a, b) => a.time - b.time);
 
-    onSyncPointsChange(updatedSyncPoints);
-  }, [syncPoints, onSyncPointsChange]);
+      onSyncPointsChange(updatedSyncPoints);
+    },
+    [syncPoints, onSyncPointsChange]
+  );
 
   const generateAutoSync = useCallback(async () => {
     if (!audioBuffer) return;
@@ -70,9 +79,10 @@ export function TimingSyncTools({
     setIsGenerating(true);
     try {
       const autoSyncPoints = await generateAutoSyncPoints(audioBuffer, 0.5);
-      const allSyncPoints = [...syncPoints, ...autoSyncPoints]
-        .sort((a, b) => a.time - b.time);
-      
+      const allSyncPoints = [...syncPoints, ...autoSyncPoints].sort(
+        (a, b) => a.time - b.time
+      );
+
       onSyncPointsChange(allSyncPoints);
     } catch (error) {
       console.error('Failed to generate auto sync points:', error);
@@ -81,10 +91,13 @@ export function TimingSyncTools({
     }
   }, [audioBuffer, syncPoints, onSyncPointsChange]);
 
-  const jumpToSyncPoint = useCallback((syncPoint: TimingSyncPoint) => {
-    onSeek(syncPoint.time);
-    setSelectedSyncPoint(syncPoint.id);
-  }, [onSeek]);
+  const jumpToSyncPoint = useCallback(
+    (syncPoint: TimingSyncPoint) => {
+      onSeek(syncPoint.time);
+      setSelectedSyncPoint(syncPoint.id);
+    },
+    [onSeek]
+  );
 
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
@@ -94,14 +107,18 @@ export function TimingSyncTools({
   };
 
   return (
-    <div className={`timing-sync-tools bg-background-subtle rounded-lg p-4 ${className}`}>
+    <div
+      className={`timing-sync-tools bg-background-subtle rounded-lg p-4 ${className}`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-accent-blue" />
-          <h3 className="font-medium text-text-primary">Timing Synchronization</h3>
+          <h3 className="font-medium text-text-primary">
+            Timing Synchronization
+          </h3>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowAddForm(!showAddForm)}
@@ -110,7 +127,7 @@ export function TimingSyncTools({
             <Plus className="w-3 h-3" />
             Add Point
           </button>
-          
+
           {audioBuffer && (
             <button
               onClick={generateAutoSync}
@@ -129,7 +146,9 @@ export function TimingSyncTools({
         <div className="mb-4 p-3 bg-background-hover rounded border border-border-subtle">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-sm text-text-secondary">Current Time:</span>
-            <span className="text-sm font-mono text-text-primary">{formatTime(currentTime)}</span>
+            <span className="text-sm font-mono text-text-primary">
+              {formatTime(currentTime)}
+            </span>
             <button
               onClick={onPlayPause}
               className="p-1 rounded hover:bg-background-subtle transition-colors"
@@ -141,7 +160,7 @@ export function TimingSyncTools({
               )}
             </button>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <input
               type="text"
@@ -172,7 +191,9 @@ export function TimingSyncTools({
           <div className="text-center py-8 text-text-secondary">
             <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p className="text-sm">No sync points yet</p>
-            <p className="text-xs mt-1">Add sync points to align narration with other content</p>
+            <p className="text-xs mt-1">
+              Add sync points to align narration with other content
+            </p>
           </div>
         ) : (
           syncPoints.map((syncPoint) => (
@@ -208,8 +229,9 @@ export function TimingSyncTools({
       {/* Help Text */}
       <div className="mt-4 p-3 bg-background-hover rounded text-sm text-text-secondary">
         <p>
-          Sync points help align narration with visual content. Use "Add Point" to mark important moments,
-          or "Auto Sync" to automatically detect pauses in your narration.
+          Sync points help align narration with visual content. Use "Add Point"
+          to mark important moments, or "Auto Sync" to automatically detect
+          pauses in your narration.
         </p>
       </div>
     </div>
@@ -293,7 +315,7 @@ function SyncPointItem({
             onChange={(e) => setEditLabel(e.target.value)}
             className="w-full px-2 py-1 text-sm bg-background-subtle border border-border-subtle rounded focus:outline-none focus:ring-1 focus:ring-accent-blue"
           />
-          
+
           <div className="flex items-center gap-2">
             <input
               type="number"
@@ -305,7 +327,7 @@ function SyncPointItem({
             />
             <span className="text-xs text-text-secondary">seconds</span>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <button
               onClick={handleSave}
@@ -338,7 +360,9 @@ function SyncPointItem({
         <div className="flex items-center gap-2 flex-1">
           <span className="text-lg">{getTypeIcon(syncPoint.type)}</span>
           <div className="flex-1">
-            <div className="font-medium text-text-primary text-sm">{syncPoint.label}</div>
+            <div className="font-medium text-text-primary text-sm">
+              {syncPoint.label}
+            </div>
             <div className="flex items-center gap-2 text-xs text-text-secondary">
               <span className="font-mono">{formatTime(syncPoint.time)}</span>
               <span className={`capitalize ${getTypeColor(syncPoint.type)}`}>
@@ -352,7 +376,7 @@ function SyncPointItem({
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-1">
           <button
             onClick={(e) => {

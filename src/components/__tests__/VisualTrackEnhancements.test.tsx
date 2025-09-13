@@ -21,38 +21,54 @@ vi.mock('../../state/hooks', () => ({
 
 // Mock Lucide React icons
 vi.mock('lucide-react/dist/esm/icons/monitor.js', () => ({
-  default: ({ className }: { className?: string }) => <div className={className} data-testid="monitor-icon" />,
+  default: ({ className }: { className?: string }) => (
+    <div className={className} data-testid="monitor-icon" />
+  ),
 }));
 
 vi.mock('lucide-react/dist/esm/icons/play.js', () => ({
-  default: ({ className }: { className?: string }) => <div className={className} data-testid="play-icon" />,
+  default: ({ className }: { className?: string }) => (
+    <div className={className} data-testid="play-icon" />
+  ),
 }));
 
 vi.mock('lucide-react/dist/esm/icons/code.js', () => ({
-  default: ({ className }: { className?: string }) => <div className={className} data-testid="code-icon" />,
+  default: ({ className }: { className?: string }) => (
+    <div className={className} data-testid="code-icon" />
+  ),
 }));
 
 vi.mock('lucide-react/dist/esm/icons/mouse-pointer.js', () => ({
-  default: ({ className }: { className?: string }) => <div className={className} data-testid="mouse-pointer-icon" />,
+  default: ({ className }: { className?: string }) => (
+    <div className={className} data-testid="mouse-pointer-icon" />
+  ),
 }));
 
 vi.mock('lucide-react/dist/esm/icons/maximize.js', () => ({
-  default: ({ className }: { className?: string }) => <div className={className} data-testid="maximize-icon" />,
+  default: ({ className }: { className?: string }) => (
+    <div className={className} data-testid="maximize-icon" />
+  ),
 }));
 
 vi.mock('lucide-react/dist/esm/icons/zap.js', () => ({
-  default: ({ className }: { className?: string }) => <div className={className} data-testid="zap-icon" />,
+  default: ({ className }: { className?: string }) => (
+    <div className={className} data-testid="zap-icon" />
+  ),
 }));
 
 vi.mock('lucide-react/dist/esm/icons/eye.js', () => ({
-  default: ({ className }: { className?: string }) => <div className={className} data-testid="eye-icon" />,
+  default: ({ className }: { className?: string }) => (
+    <div className={className} data-testid="eye-icon" />
+  ),
 }));
 
 vi.mock('lucide-react/dist/esm/icons/arrow-right.js', () => ({
-  default: ({ className }: { className?: string }) => <div className={className} data-testid="arrow-right-icon" />,
+  default: ({ className }: { className?: string }) => (
+    <div className={className} data-testid="arrow-right-icon" />
+  ),
 }));
 
-const mockVisualTrack = EDUCATIONAL_TRACKS.find(t => t.id === 'visual')!;
+const mockVisualTrack = EDUCATIONAL_TRACKS.find((t) => t.id === 'visual')!;
 
 const mockVideoAsset: MediaAsset = {
   id: 'video-1',
@@ -91,7 +107,7 @@ const mockScreenRecordingAnalysis: ScreenRecordingAnalysis = {
     hasCodeContent: true,
     hasMouseCursor: false,
     hasApplicationWindows: true,
-    aspectRatio: 16/9,
+    aspectRatio: 16 / 9,
     resolution: { width: 1920, height: 1080 },
   },
   optimizationSuggestions: [
@@ -122,34 +138,36 @@ describe('VisualTrackClip', () => {
 
   it('renders visual track clip with asset name', () => {
     render(<VisualTrackClip {...defaultProps} />);
-    
+
     expect(screen.getByText('screen-recording-demo.mp4')).toBeInTheDocument();
     expect(screen.getAllByTestId('monitor-icon').length).toBeGreaterThan(0);
   });
 
   it('displays screen recording indicators', () => {
     render(<VisualTrackClip {...defaultProps} />);
-    
+
     // Should show screen recording indicators based on filename analysis
     expect(screen.getByText('Screen Recording')).toBeInTheDocument();
   });
 
   it('shows thumbnail preview when available', () => {
     render(<VisualTrackClip {...defaultProps} />);
-    
-    const thumbnailElement = document.querySelector('[style*="background-image"]');
+
+    const thumbnailElement = document.querySelector(
+      '[style*="background-image"]'
+    );
     expect(thumbnailElement).toBeInTheDocument();
   });
 
   it('displays video duration', () => {
     render(<VisualTrackClip {...defaultProps} />);
-    
+
     expect(screen.getByText('10s')).toBeInTheDocument();
   });
 
   it('shows animation menu button on hover', () => {
     render(<VisualTrackClip {...defaultProps} />);
-    
+
     const animationButton = screen.getByTitle('Animation Presets');
     expect(animationButton).toBeInTheDocument();
     expect(screen.getByTestId('zap-icon')).toBeInTheDocument();
@@ -157,10 +175,10 @@ describe('VisualTrackClip', () => {
 
   it('opens animation presets menu when clicked', async () => {
     render(<VisualTrackClip {...defaultProps} />);
-    
+
     const animationButton = screen.getByTitle('Animation Presets');
     fireEvent.click(animationButton);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Animation Presets')).toBeInTheDocument();
     });
@@ -169,21 +187,22 @@ describe('VisualTrackClip', () => {
   it('applies animation preset when selected', async () => {
     const onItemUpdate = vi.fn();
     render(<VisualTrackClip {...defaultProps} onItemUpdate={onItemUpdate} />);
-    
+
     const animationButton = screen.getByTitle('Animation Presets');
     fireEvent.click(animationButton);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Animation Presets')).toBeInTheDocument();
     });
-    
+
     // Click on the first available preset (which should be "Zoom Focus (Custom Point)" based on screen recording analysis)
     const presetButtons = screen.getAllByRole('button');
-    const firstPresetButton = presetButtons.find(button => 
-      button.textContent?.includes('Zoom Focus') || 
-      button.textContent?.includes('Callout')
+    const firstPresetButton = presetButtons.find(
+      (button) =>
+        button.textContent?.includes('Zoom Focus') ||
+        button.textContent?.includes('Callout')
     );
-    
+
     if (firstPresetButton) {
       fireEvent.click(firstPresetButton);
       expect(onItemUpdate).toHaveBeenCalled();
@@ -192,7 +211,7 @@ describe('VisualTrackClip', () => {
 
   it('handles missing asset gracefully', () => {
     render(<VisualTrackClip {...defaultProps} asset={undefined} />);
-    
+
     expect(screen.getByText('Visual Content')).toBeInTheDocument();
   });
 });
@@ -224,28 +243,28 @@ describe('SideBySideLayoutControls', () => {
 
   it('renders layout controls when both code and visual items exist', () => {
     render(<SideBySideLayoutControls {...defaultProps} />);
-    
+
     expect(screen.getByText('Side-by-Side Layout')).toBeInTheDocument();
   });
 
   it('does not render when no code items', () => {
     render(<SideBySideLayoutControls {...defaultProps} codeItems={[]} />);
-    
+
     expect(screen.queryByText('Side-by-Side Layout')).not.toBeInTheDocument();
   });
 
   it('does not render when no visual items', () => {
     render(<SideBySideLayoutControls {...defaultProps} visualItems={[]} />);
-    
+
     expect(screen.queryByText('Side-by-Side Layout')).not.toBeInTheDocument();
   });
 
   it('opens layout options menu when clicked', () => {
     render(<SideBySideLayoutControls {...defaultProps} />);
-    
+
     const layoutButton = screen.getByText('Side-by-Side Layout');
     fireEvent.click(layoutButton);
-    
+
     expect(screen.getByText('Choose Layout')).toBeInTheDocument();
     expect(screen.getByText('Code Left, Visual Right')).toBeInTheDocument();
     expect(screen.getByText('Visual Left, Code Right')).toBeInTheDocument();
@@ -253,14 +272,19 @@ describe('SideBySideLayoutControls', () => {
 
   it('calls onLayoutChange when layout option is selected', () => {
     const onLayoutChange = vi.fn();
-    render(<SideBySideLayoutControls {...defaultProps} onLayoutChange={onLayoutChange} />);
-    
+    render(
+      <SideBySideLayoutControls
+        {...defaultProps}
+        onLayoutChange={onLayoutChange}
+      />
+    );
+
     const layoutButton = screen.getByText('Side-by-Side Layout');
     fireEvent.click(layoutButton);
-    
+
     const leftRightOption = screen.getByText('Code Left, Visual Right');
     fireEvent.click(leftRightOption);
-    
+
     expect(onLayoutChange).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'left-right',
@@ -279,13 +303,20 @@ describe('SideBySideLayoutControls', () => {
       gap: 16,
       alignment: 'start' as const,
     };
-    
-    render(<SideBySideLayoutControls {...defaultProps} currentLayout={currentLayout} />);
-    
+
+    render(
+      <SideBySideLayoutControls
+        {...defaultProps}
+        currentLayout={currentLayout}
+      />
+    );
+
     const layoutButton = screen.getByText('Side-by-Side Layout');
     fireEvent.click(layoutButton);
-    
-    const selectedOption = screen.getByText('Code Left, Visual Right').closest('button');
+
+    const selectedOption = screen
+      .getByText('Code Left, Visual Right')
+      .closest('button');
     expect(selectedOption).toHaveClass('border-accent-yellow');
   });
 });
@@ -298,26 +329,37 @@ describe('OptimizationSuggestions', () => {
 
   it('renders optimization suggestions for screen recordings', () => {
     render(<OptimizationSuggestions {...defaultProps} />);
-    
+
     expect(screen.getByText('Optimization Suggestions')).toBeInTheDocument();
-    expect(screen.getByText('Focus on code editor area for better readability')).toBeInTheDocument();
-    expect(screen.getByText('Add highlights to draw attention to important UI elements')).toBeInTheDocument();
+    expect(
+      screen.getByText('Focus on code editor area for better readability')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Add highlights to draw attention to important UI elements'
+      )
+    ).toBeInTheDocument();
   });
 
   it('shows confidence levels for suggestions', () => {
     render(<OptimizationSuggestions {...defaultProps} />);
-    
+
     expect(screen.getByText('Confidence: 80%')).toBeInTheDocument();
     expect(screen.getByText('Confidence: 60%')).toBeInTheDocument();
   });
 
   it('calls onApplyOptimization when Apply button is clicked', () => {
     const onApplyOptimization = vi.fn();
-    render(<OptimizationSuggestions {...defaultProps} onApplyOptimization={onApplyOptimization} />);
-    
+    render(
+      <OptimizationSuggestions
+        {...defaultProps}
+        onApplyOptimization={onApplyOptimization}
+      />
+    );
+
     const applyButtons = screen.getAllByText('Apply');
     fireEvent.click(applyButtons[0]);
-    
+
     expect(onApplyOptimization).toHaveBeenCalledWith(
       mockScreenRecordingAnalysis.optimizationSuggestions[0]
     );
@@ -328,14 +370,14 @@ describe('OptimizationSuggestions', () => {
       ...mockScreenRecordingAnalysis,
       isScreenRecording: false,
     };
-    
+
     const { container } = render(
-      <OptimizationSuggestions 
-        {...defaultProps} 
-        analysis={nonScreenRecordingAnalysis} 
+      <OptimizationSuggestions
+        {...defaultProps}
+        analysis={nonScreenRecordingAnalysis}
       />
     );
-    
+
     expect(container.firstChild).toBeNull();
   });
 
@@ -344,14 +386,14 @@ describe('OptimizationSuggestions', () => {
       ...mockScreenRecordingAnalysis,
       optimizationSuggestions: [],
     };
-    
+
     const { container } = render(
-      <OptimizationSuggestions 
-        {...defaultProps} 
-        analysis={noSuggestionsAnalysis} 
+      <OptimizationSuggestions
+        {...defaultProps}
+        analysis={noSuggestionsAnalysis}
       />
     );
-    
+
     expect(container.firstChild).toBeNull();
   });
 });
@@ -364,14 +406,16 @@ describe('EnhancedThumbnail', () => {
 
   it('renders thumbnail with background image', () => {
     render(<EnhancedThumbnail {...defaultProps} />);
-    
-    const thumbnailElement = document.querySelector('[style*="background-image"]');
+
+    const thumbnailElement = document.querySelector(
+      '[style*="background-image"]'
+    );
     expect(thumbnailElement).toBeInTheDocument();
   });
 
   it('shows play overlay for video assets', () => {
     render(<EnhancedThumbnail {...defaultProps} />);
-    
+
     expect(screen.getByTestId('play-icon')).toBeInTheDocument();
   });
 
@@ -380,27 +424,27 @@ describe('EnhancedThumbnail', () => {
       ...mockVideoAsset,
       type: 'image',
     };
-    
+
     render(<EnhancedThumbnail {...defaultProps} asset={imageAsset} />);
-    
+
     expect(screen.queryByTestId('play-icon')).not.toBeInTheDocument();
   });
 
   it('displays screen recording indicators when enabled', () => {
     render(<EnhancedThumbnail {...defaultProps} showIndicators={true} />);
-    
+
     expect(screen.getByText('Screen Recording')).toBeInTheDocument();
   });
 
   it('hides indicators when disabled', () => {
     render(<EnhancedThumbnail {...defaultProps} showIndicators={false} />);
-    
+
     expect(screen.queryByText('Screen Recording')).not.toBeInTheDocument();
   });
 
   it('shows duration badge for video assets', () => {
     render(<EnhancedThumbnail {...defaultProps} />);
-    
+
     expect(screen.getByText('120s')).toBeInTheDocument();
   });
 
@@ -409,15 +453,17 @@ describe('EnhancedThumbnail', () => {
       ...mockVideoAsset,
       duration: undefined,
     };
-    
-    render(<EnhancedThumbnail {...defaultProps} asset={assetWithoutDuration} />);
-    
+
+    render(
+      <EnhancedThumbnail {...defaultProps} asset={assetWithoutDuration} />
+    );
+
     expect(screen.queryByText(/\d+s/)).not.toBeInTheDocument();
   });
 
   it('applies custom className', () => {
     const { container } = render(<EnhancedThumbnail {...defaultProps} />);
-    
+
     expect(container.firstChild).toHaveClass('test-thumbnail');
   });
 });

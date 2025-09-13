@@ -7,10 +7,12 @@ Two paths are viable. This doc describes what must be configured for each and wh
 ## Option A: Keep current server‑managed auth (username/password + JWT cookie)
 
 Current state in this repo:
+
 - API exposes `/api/auth/register`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/me` (cookie‑based).
 - Client (webapp) expects `/api/auth/session` and related endpoints; there are mismatches to resolve before production (see owner actions).
 
 Configuration items to document and decide:
+
 - Cookie attributes for cross‑origin deployments
   - If the webapp and API are on different domains, configure the cookie with `SameSite=None; Secure` and a proper `Domain` so that XHR/fetch requests include it.
   - Alternatively, move to bearer tokens carried in the `Authorization` header and avoid cookies entirely (requires small client changes).
@@ -24,6 +26,7 @@ Configuration items to document and decide:
   - Today, users are stored in memory in `server/services/auth.mjs` while other entities use a JSON file. Production may lose users on restart. Decide whether this is acceptable for an MVP or if we should switch to file‑based or external storage.
 
 Implications:
+
 - Lowest change surface but requires endpoint alignment and cookie strategy decisions before go‑live.
 
 ## Option B: Firebase Authentication
@@ -31,6 +34,7 @@ Implications:
 Why: managed auth with email/password and OAuth providers, works with Vercel/Cloud Run, and simplifies account recovery and security.
 
 Configuration items to document and decide:
+
 - Identity providers to enable
   - Email/Password (recommended for MVP)
   - Google, GitHub (optional)

@@ -74,4 +74,3 @@ describe('Inspector - Educational track badge', () => {
     ).toBeInTheDocument();
   });
 });
-

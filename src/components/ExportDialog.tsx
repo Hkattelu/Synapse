@@ -17,7 +17,8 @@ import {
   formatDuration,
   isTransparencySupported,
   getTransparencyCompatibilityWarning,
-  validateTransparencySettings
+  validateTransparencySettings,
+  downloadExportedFile,
 } from '../lib/exportManagerClient';
 import { useAuth } from '../state/authContext';
 
@@ -34,7 +35,8 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const { startExport, cancelExport, getEstimatedFileSize } = useExport();
   const { settings, presets, updateSettings, applyPreset } =
     useExportSettings();
-  const { isExporting, progress, canStartExport } = useExportStatus();
+  const { isExporting, progress, canStartExport, currentJob } =
+    useExportStatus();
   const {
     authenticated,
     membership,
@@ -48,7 +50,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const [activeTab, setActiveTab] = useState<'presets' | 'custom'>('presets');
   const [selectedPresetId, setSelectedPresetId] =
     useState<string>('youtube-1080p');
-  const [outputName, setOutputName] = useState<string>(project?.name || 'export');
+  const [outputName, setOutputName] = useState<string>(
+    project?.name || 'export'
+  );
+  const [hasTriggeredDownload, setHasTriggeredDownload] = useState(false);
 
   // Calculate estimated file size
   const estimatedSize = project ? getEstimatedFileSize(project) : 0;
@@ -81,16 +86,52 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     cancelExport();
   };
 
-  // Close dialog when export completes successfully
+  // Handle file download/save after completion
+  const handleDownload = async () => {
+    try {
+      const outputUrl = (currentJob as any)?.outputPath as string | undefined;
+      if (!outputUrl) return;
+      const suggestedName =
+        outputUrl.split('/').pop() || `${outputName}.${settings.format}`;
+
+      // If running in Electron, offer native Save dialog and write file
+      const anyWindow = window as any;
+      if (typeof window !== 'undefined' && anyWindow?.SynapseFS) {
+        const savePath = await anyWindow.SynapseFS.showSaveDialog({
+          title: 'Save exported video',
+          defaultPath: suggestedName,
+          filters: [{ name: 'Video', extensions: ['mp4', 'webm', 'mov'] }],
+        });
+        if (savePath) {
+          const resp = await fetch(outputUrl);
+          const buf = new Uint8Array(await resp.arrayBuffer());
+          await anyWindow.SynapseFS.writeFile(savePath, buf);
+        }
+      } else {
+        // Browser: trigger a download using an anchor element
+        downloadExportedFile(outputUrl, suggestedName);
+      }
+    } catch (e) {
+      console.warn('Download failed:', e);
+    }
+  };
+
+  // On export completion, trigger a download once and then auto-close
   useEffect(() => {
     if (progress?.status === 'completed') {
+      if (!hasTriggeredDownload) {
+        setHasTriggeredDownload(true);
+        void handleDownload();
+      }
       const timer = setTimeout(() => {
         onClose();
       }, 3000); // Auto-close after 3 seconds
-
       return () => clearTimeout(timer);
+    } else if (progress?.status && progress.status !== 'completed') {
+      // Reset flag if a new export starts
+      if (hasTriggeredDownload) setHasTriggeredDownload(false);
     }
-  }, [progress?.status, onClose]);
+  }, [progress?.status, onClose, hasTriggeredDownload]);
 
   if (!isOpen) return null;
   if (!isOpen) return null;
@@ -205,9 +246,23 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               {progress?.status === 'completed' && (
                 <div className="mt-4 p-3 bg-green-900/20 border border-green-700 rounded">
                   <p className="text-green-400 text-sm">
-                    Export completed successfully! The file will be available in
-                    your downloads.
+                    Export completed successfully!
                   </p>
+                  <div className="mt-3 flex gap-3">
+                    <button
+                      onClick={() => void handleDownload()}
+                      className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded transition-colors"
+                    >
+                      Download file
+                    </button>
+                    <a
+                      href={(currentJob as any)?.outputPath || '#'}
+                      download
+                      className="px-4 py-2 border border-border-subtle rounded text-text-secondary hover:text-text-primary hover:bg-background-secondary transition-colors"
+                    >
+                      Open link
+                    </a>
+                  </div>
                 </div>
               )}
 
@@ -215,24 +270,24 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               <div className="flex justify-end gap-3 mt-6">
                 {(progress?.status === 'preparing' ||
                   progress?.status === 'rendering') && (
-                    <button
-                      onClick={handleCancelExport}
-                      className="px-4 py-2 text-text-secondary hover:text-text-primary border border-border-subtle rounded hover:bg-background-secondary transition-colors"
-                    >
-                      Cancel Export
-                    </button>
-                  )}
+                  <button
+                    onClick={handleCancelExport}
+                    className="px-4 py-2 text-text-secondary hover:text-text-primary border border-border-subtle rounded hover:bg-background-secondary transition-colors"
+                  >
+                    Cancel Export
+                  </button>
+                )}
 
                 {(progress?.status === 'completed' ||
                   progress?.status === 'failed' ||
                   progress?.status === 'cancelled') && (
-                    <button
-                      onClick={onClose}
-                      className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded transition-colors"
-                    >
-                      Close
-                    </button>
-                  )}
+                  <button
+                    onClick={onClose}
+                    className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded transition-colors"
+                  >
+                    Close
+                  </button>
+                )}
               </div>
             </div>
           ) : (
@@ -252,27 +307,29 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   <AuthInlineForm />
                 </div>
               )}
-              {process.env.NODE_ENV !== 'development' && authenticated && !membership?.active && (
-                <div className="p-6 border-b border-border-subtle">
-                  <div className="mb-3">
-                    <h3 className="text-lg font-semibold text-text-primary">
-                      Unlock exports
-                    </h3>
-                    <p className="text-sm text-text-secondary">
-                      You have {trialsRemaining} of {trialsLimit || 2} trial
-                      exports remaining. Support us on Ko‑fi to unlock unlimited
-                      exports for 30 days.
-                    </p>
+              {process.env.NODE_ENV !== 'development' &&
+                authenticated &&
+                !membership?.active && (
+                  <div className="p-6 border-b border-border-subtle">
+                    <div className="mb-3">
+                      <h3 className="text-lg font-semibold text-text-primary">
+                        Unlock exports
+                      </h3>
+                      <p className="text-sm text-text-secondary">
+                        You have {trialsRemaining} of {trialsLimit || 2} trial
+                        exports remaining. Support us on Ko‑fi to unlock
+                        unlimited exports for 30 days.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => void donateDemo(500)}
+                      disabled={authLoading}
+                      className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded disabled:opacity-60"
+                    >
+                      {authLoading ? 'Processing…' : 'Support on Ko‑fi (demo)'}
+                    </button>
                   </div>
-                  <button
-                    onClick={() => void donateDemo(500)}
-                    disabled={authLoading}
-                    className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded disabled:opacity-60"
-                  >
-                    {authLoading ? 'Processing…' : 'Support on Ko‑fi (demo)'}
-                  </button>
-                </div>
-              )}
+                )}
               {/* Development mode notice */}
               {process.env.NODE_ENV === 'development' && (
                 <div className="p-6 border-b border-border-subtle">
@@ -281,7 +338,8 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                       🚧 Development Mode
                     </h3>
                     <p className="text-sm text-text-secondary">
-                      Authentication is bypassed in development mode. You can export without signing in.
+                      Authentication is bypassed in development mode. You can
+                      export without signing in.
                     </p>
                   </div>
                 </div>
@@ -290,19 +348,21 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               <div className="flex border-b border-border-subtle">
                 <button
                   onClick={() => setActiveTab('presets')}
-                  className={`px-6 py-3 text-sm font-medium transition-colors ${activeTab === 'presets'
-                    ? 'text-primary-400 border-b-2 border-primary-400'
-                    : 'text-text-secondary hover:text-text-primary'
-                    }`}
+                  className={`px-6 py-3 text-sm font-medium transition-colors ${
+                    activeTab === 'presets'
+                      ? 'text-primary-400 border-b-2 border-primary-400'
+                      : 'text-text-secondary hover:text-text-primary'
+                  }`}
                 >
                   Presets
                 </button>
                 <button
                   onClick={() => setActiveTab('custom')}
-                  className={`px-6 py-3 text-sm font-medium transition-colors ${activeTab === 'custom'
-                    ? 'text-primary-400 border-b-2 border-primary-400'
-                    : 'text-text-secondary hover:text-primary-400'
-                    }`}
+                  className={`px-6 py-3 text-sm font-medium transition-colors ${
+                    activeTab === 'custom'
+                      ? 'text-primary-400 border-b-2 border-primary-400'
+                      : 'text-text-secondary hover:text-primary-400'
+                  }`}
                 >
                   Custom Settings
                 </button>
@@ -328,26 +388,34 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                 </div>
                 {activeTab === 'presets' ? (
                   // Presets Tab
-                  <div className="space-y-4" role="radiogroup" aria-label="Export presets">
+                  <div
+                    className="space-y-4"
+                    role="radiogroup"
+                    aria-label="Export presets"
+                  >
                     {presets.map((preset) => (
                       <div
                         key={preset.id}
                         role="radio"
                         aria-checked={selectedPresetId === preset.id}
                         tabIndex={0}
-                        className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedPresetId === preset.id
-                          ? 'border-primary-400 bg-primary-900/20 ring-1 ring-primary-500'
-                          : 'border-border-subtle hover:border-border-primary'
-                          }`}
+                        className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                          selectedPresetId === preset.id
+                            ? 'border-primary-400 bg-primary-900/20 ring-1 ring-primary-500'
+                            : 'border-border-subtle hover:border-border-primary'
+                        }`}
                         onClick={() => handlePresetSelect(preset)}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') handlePresetSelect(preset);
+                          if (e.key === 'Enter' || e.key === ' ')
+                            handlePresetSelect(preset);
                         }}
                       >
                         <div className="flex items-start justify-between">
                           <div>
                             <h3 className="font-medium text-text-primary flex items-center gap-2">
-                              <span className={`inline-block w-3 h-3 rounded-full border ${selectedPresetId === preset.id ? 'bg-primary-600 border-primary-600' : 'border-border-subtle'}`} />
+                              <span
+                                className={`inline-block w-3 h-3 rounded-full border ${selectedPresetId === preset.id ? 'bg-primary-600 border-primary-600' : 'border-border-subtle'}`}
+                              />
                               {preset.name}
                               {selectedPresetId === preset.id && (
                                 <span className="ml-2 text-xxs uppercase tracking-wide text-primary-300 bg-primary-900/40 px-2 py-0.5 rounded">
@@ -444,10 +512,11 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                                     });
                                   }
                                 }}
-                                className={`w-full p-2 border rounded text-sm transition-colors ${isVertical
-                                  ? 'border-primary-400 bg-primary-900/20 text-text-primary'
-                                  : 'border-border-subtle bg-background-secondary text-text-primary'
-                                  }`}
+                                className={`w-full p-2 border rounded text-sm transition-colors ${
+                                  isVertical
+                                    ? 'border-primary-400 bg-primary-900/20 text-text-primary'
+                                    : 'border-border-subtle bg-background-secondary text-text-primary'
+                                }`}
                                 title="Toggle between landscape (16:9) and vertical (9:16)"
                               >
                                 {isVertical
@@ -659,22 +728,34 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                           </span>
                         </label>
                         <p className="text-xs text-text-secondary mt-1 ml-6">
-                          Export with alpha channel for compositing over other content
+                          Export with alpha channel for compositing over other
+                          content
                         </p>
                       </div>
 
                       {/* Format Compatibility Warning */}
                       {(() => {
-                        const warning = getTransparencyCompatibilityWarning(settings);
+                        const warning =
+                          getTransparencyCompatibilityWarning(settings);
                         if (!warning) return null;
 
                         return (
                           <div className="mb-4 p-3 bg-yellow-900/20 border border-yellow-700 rounded">
                             <div className="flex items-start gap-2">
-                              <svg className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              <svg
+                                className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                  clipRule="evenodd"
+                                />
                               </svg>
-                              <p className="text-xs text-yellow-200">{warning}</p>
+                              <p className="text-xs text-yellow-200">
+                                {warning}
+                              </p>
                             </div>
                           </div>
                         );
@@ -721,11 +802,21 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
 
                           <div className="mt-3 p-3 bg-blue-900/20 border border-blue-700 rounded">
                             <div className="flex items-start gap-2">
-                              <svg className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                              <svg
+                                className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                  clipRule="evenodd"
+                                />
                               </svg>
                               <div className="text-xs text-blue-200">
-                                <p className="font-medium mb-1">Transparency Preview</p>
+                                <p className="font-medium mb-1">
+                                  Transparency Preview
+                                </p>
                                 <div className="w-full h-8 bg-transparent border border-blue-400 rounded relative overflow-hidden">
                                   <div
                                     className="absolute inset-0 opacity-20"
@@ -737,14 +828,20 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                                         linear-gradient(-45deg, transparent 75%, #666 75%)
                                       `,
                                       backgroundSize: '8px 8px',
-                                      backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0px'
+                                      backgroundPosition:
+                                        '0 0, 0 4px, 4px -4px, -4px 0px',
                                     }}
                                   />
                                   <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="text-xs text-blue-300 font-mono">Transparent</span>
+                                    <span className="text-xs text-blue-300 font-mono">
+                                      Transparent
+                                    </span>
                                   </div>
                                 </div>
-                                <p className="mt-1">Checkerboard pattern indicates transparent areas</p>
+                                <p className="mt-1">
+                                  Checkerboard pattern indicates transparent
+                                  areas
+                                </p>
                               </div>
                             </div>
                           </div>
@@ -772,7 +869,6 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                 Duration:{' '}
                 <span className="text-text-primary">
                   {formatDuration(project?.settings?.duration ?? 0)}
-                  {formatDuration(project?.settings?.duration ?? 0)}
                 </span>
               </div>
             </div>
@@ -781,22 +877,45 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               {/* Validation Warnings */}
               {(() => {
                 const validation = validateTransparencySettings(settings);
-                if (!validation.errors.length && !validation.warnings.length) return null;
+                if (!validation.errors.length && !validation.warnings.length)
+                  return null;
 
                 return (
                   <div className="space-y-2">
                     {validation.errors.map((error, index) => (
-                      <div key={`error-${index}`} className="flex items-start gap-2 p-2 bg-red-900/20 border border-red-700 rounded">
-                        <svg className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      <div
+                        key={`error-${index}`}
+                        className="flex items-start gap-2 p-2 bg-red-900/20 border border-red-700 rounded"
+                      >
+                        <svg
+                          className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clipRule="evenodd"
+                          />
                         </svg>
                         <p className="text-xs text-red-200">{error}</p>
                       </div>
                     ))}
                     {validation.warnings.map((warning, index) => (
-                      <div key={`warning-${index}`} className="flex items-start gap-2 p-2 bg-yellow-900/20 border border-yellow-700 rounded">
-                        <svg className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      <div
+                        key={`warning-${index}`}
+                        className="flex items-start gap-2 p-2 bg-yellow-900/20 border border-yellow-700 rounded"
+                      >
+                        <svg
+                          className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
                         </svg>
                         <p className="text-xs text-yellow-200">{warning}</p>
                       </div>
@@ -813,24 +932,39 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   Cancel
                 </button>
                 <button
+                  type="button"
+                  aria-label="Start export"
+                  title="Start export"
                   onClick={handleStartExport}
                   disabled={
                     !canStartExport ||
-                    (process.env.NODE_ENV !== 'development' && !authenticated) ||
-                    (process.env.NODE_ENV !== 'development' && !(membership?.active || trialsRemaining > 0)) ||
+                    (process.env.NODE_ENV !== 'development' &&
+                      !authenticated) ||
+                    (process.env.NODE_ENV !== 'development' &&
+                      !(membership?.active || trialsRemaining > 0)) ||
                     !validateTransparencySettings(settings).isValid
                   }
-                  className="px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-600 disabled:cursor-not-allowed text-white rounded transition-colors"
+                  className="px-6 py-3 min-w-[180px] inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 active:translate-y-[1px] transition-all disabled:bg-neutral-600 disabled:cursor-not-allowed"
                 >
-                  {(process.env.NODE_ENV === 'development')
-                    ? 'Start Export (Dev Mode)'
-                    : !authenticated
-                      ? 'Sign in to export'
-                      : membership?.active
-                        ? 'Start Export'
-                        : trialsRemaining > 0
-                          ? `Start Export (trial ${trialsUsed + 1}/${trialsLimit || 2})`
-                          : 'Unlock to export'}
+                  <svg
+                    aria-hidden="true"
+                    className="w-5 h-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M6 4l10 6-10 6V4z" />
+                  </svg>
+                  <span>
+                    {process.env.NODE_ENV === 'development'
+                      ? 'Start Export (Dev Mode)'
+                      : !authenticated
+                        ? 'Sign in to export'
+                        : membership?.active
+                          ? 'Start Export'
+                          : trialsRemaining > 0
+                            ? `Start Export (trial ${trialsUsed + 1}/${trialsLimit || 2})`
+                            : 'Unlock to export'}
+                  </span>
                 </button>
               </div>
             </div>

@@ -1,7 +1,11 @@
 // Theme validation utilities
 
 import type { ThemeDefinition } from '../themes/types';
-import { validateAnyColor, validateColorContrast, type ColorValidationResult } from './colorValidation';
+import {
+  validateAnyColor,
+  validateColorContrast,
+  type ColorValidationResult,
+} from './colorValidation';
 
 export interface ThemeValidationResult {
   isValid: boolean;
@@ -27,14 +31,14 @@ export interface ThemeValidationOptions {
  * Validates a complete theme definition
  */
 export function validateTheme(
-  theme: ThemeDefinition, 
+  theme: ThemeDefinition,
   options: ThemeValidationOptions = {}
 ): ThemeValidationResult {
   const {
     strictColorValidation = true,
     checkContrast = true,
     requireAllColors = true,
-    allowCustomProperties = false
+    allowCustomProperties = false,
   } = options;
 
   const errors: string[] = [];
@@ -45,14 +49,22 @@ export function validateTheme(
   // Validate basic structure
   if (!theme) {
     errors.push('Theme definition is required');
-    return { isValid: false, errors, warnings, colorValidation, contrastIssues };
+    return {
+      isValid: false,
+      errors,
+      warnings,
+      colorValidation,
+      contrastIssues,
+    };
   }
 
   // Validate required fields
   if (!theme.id || typeof theme.id !== 'string') {
     errors.push('Theme ID is required and must be a string');
   } else if (!/^[a-z0-9-]+$/.test(theme.id)) {
-    errors.push('Theme ID must contain only lowercase letters, numbers, and hyphens');
+    errors.push(
+      'Theme ID must contain only lowercase letters, numbers, and hyphens'
+    );
   }
 
   if (!theme.name || typeof theme.name !== 'string') {
@@ -61,29 +73,58 @@ export function validateTheme(
     errors.push('Theme name cannot be empty');
   }
 
-  if (!theme.category || !['light', 'dark', 'high-contrast'].includes(theme.category)) {
+  if (
+    !theme.category ||
+    !['light', 'dark', 'high-contrast'].includes(theme.category)
+  ) {
     errors.push('Theme category must be "light", "dark", or "high-contrast"');
   }
 
   // Validate colors object
   if (!theme.colors || typeof theme.colors !== 'object') {
     errors.push('Theme colors object is required');
-    return { isValid: false, errors, warnings, colorValidation, contrastIssues };
+    return {
+      isValid: false,
+      errors,
+      warnings,
+      colorValidation,
+      contrastIssues,
+    };
   }
 
   // Required color properties
   const requiredColors = [
-    'background', 'foreground', 'comment', 'keyword', 'string', 
-    'number', 'operator', 'punctuation', 'function', 'variable',
-    'type', 'class', 'constant', 'property', 'tag', 'attribute',
-    'boolean', 'regex', 'escape', 'selection', 'lineHighlight',
-    'cursor', 'diffAdded', 'diffRemoved', 'diffModified'
+    'background',
+    'foreground',
+    'comment',
+    'keyword',
+    'string',
+    'number',
+    'operator',
+    'punctuation',
+    'function',
+    'variable',
+    'type',
+    'class',
+    'constant',
+    'property',
+    'tag',
+    'attribute',
+    'boolean',
+    'regex',
+    'escape',
+    'selection',
+    'lineHighlight',
+    'cursor',
+    'diffAdded',
+    'diffRemoved',
+    'diffModified',
   ];
 
   // Validate each required color
   for (const colorKey of requiredColors) {
     const colorValue = theme.colors[colorKey as keyof typeof theme.colors];
-    
+
     if (requireAllColors && !colorValue) {
       errors.push(`Missing required color: ${colorKey}`);
       continue;
@@ -115,34 +156,52 @@ export function validateTheme(
 
   // Validate contrast ratios
   if (checkContrast && theme.colors.background && theme.colors.foreground) {
-    const contrastResult = validateColorContrast(theme.colors.foreground, theme.colors.background);
-    
-    if (contrastResult.isValid && contrastResult.contrastRatio && contrastResult.wcagLevel) {
+    const contrastResult = validateColorContrast(
+      theme.colors.foreground,
+      theme.colors.background
+    );
+
+    if (
+      contrastResult.isValid &&
+      contrastResult.contrastRatio &&
+      contrastResult.wcagLevel
+    ) {
       contrastIssues.push({
         foreground: 'foreground',
         background: 'background',
         contrastRatio: contrastResult.contrastRatio,
-        wcagLevel: contrastResult.wcagLevel
+        wcagLevel: contrastResult.wcagLevel,
       });
 
       if (contrastResult.wcagLevel === 'fail') {
-        warnings.push(`Poor contrast between foreground and background (${contrastResult.contrastRatio.toFixed(2)}:1). Consider improving for better accessibility.`);
+        warnings.push(
+          `Poor contrast between foreground and background (${contrastResult.contrastRatio.toFixed(2)}:1). Consider improving for better accessibility.`
+        );
       }
     }
 
     // Check comment contrast
     if (theme.colors.comment) {
-      const commentContrast = validateColorContrast(theme.colors.comment, theme.colors.background);
-      if (commentContrast.isValid && commentContrast.contrastRatio && commentContrast.wcagLevel) {
+      const commentContrast = validateColorContrast(
+        theme.colors.comment,
+        theme.colors.background
+      );
+      if (
+        commentContrast.isValid &&
+        commentContrast.contrastRatio &&
+        commentContrast.wcagLevel
+      ) {
         contrastIssues.push({
           foreground: 'comment',
           background: 'background',
           contrastRatio: commentContrast.contrastRatio,
-          wcagLevel: commentContrast.wcagLevel
+          wcagLevel: commentContrast.wcagLevel,
         });
 
         if (commentContrast.wcagLevel === 'fail') {
-          warnings.push(`Poor contrast for comments (${commentContrast.contrastRatio.toFixed(2)}:1). Comments may be hard to read.`);
+          warnings.push(
+            `Poor contrast for comments (${commentContrast.contrastRatio.toFixed(2)}:1). Comments may be hard to read.`
+          );
         }
       }
     }
@@ -158,13 +217,18 @@ export function validateTheme(
         if (typeof theme.fonts.size !== 'number' || theme.fonts.size <= 0) {
           errors.push('Font size must be a positive number');
         } else if (theme.fonts.size < 8 || theme.fonts.size > 72) {
-          warnings.push('Font size should typically be between 8 and 72 pixels');
+          warnings.push(
+            'Font size should typically be between 8 and 72 pixels'
+          );
         }
       }
 
       // Validate line height
       if (theme.fonts.lineHeight !== undefined) {
-        if (typeof theme.fonts.lineHeight !== 'number' || theme.fonts.lineHeight <= 0) {
+        if (
+          typeof theme.fonts.lineHeight !== 'number' ||
+          theme.fonts.lineHeight <= 0
+        ) {
           errors.push('Line height must be a positive number');
         } else if (theme.fonts.lineHeight < 1 || theme.fonts.lineHeight > 3) {
           warnings.push('Line height should typically be between 1 and 3');
@@ -191,11 +255,17 @@ export function validateTheme(
         warnings.push('Theme author should be a string');
       }
 
-      if (theme.metadata.description && typeof theme.metadata.description !== 'string') {
+      if (
+        theme.metadata.description &&
+        typeof theme.metadata.description !== 'string'
+      ) {
         warnings.push('Theme description should be a string');
       }
 
-      if (theme.metadata.version && typeof theme.metadata.version !== 'string') {
+      if (
+        theme.metadata.version &&
+        typeof theme.metadata.version !== 'string'
+      ) {
         warnings.push('Theme version should be a string');
       }
 
@@ -218,7 +288,7 @@ export function validateTheme(
     errors,
     warnings,
     colorValidation,
-    contrastIssues
+    contrastIssues,
   };
 }
 
@@ -234,7 +304,8 @@ export function validateThemeCategory(theme: ThemeDefinition): {
   if (!theme.colors?.background || !theme.colors?.foreground) {
     return {
       isValid: false,
-      reasoning: 'Cannot determine category without background and foreground colors'
+      reasoning:
+        'Cannot determine category without background and foreground colors',
     };
   }
 
@@ -242,9 +313,11 @@ export function validateThemeCategory(theme: ThemeDefinition): {
     // Calculate luminance of background
     const bgLuminance = getColorLuminance(theme.colors.background);
     const fgLuminance = getColorLuminance(theme.colors.foreground);
-    
+
     // Calculate contrast ratio
-    const contrastRatio = (Math.max(bgLuminance, fgLuminance) + 0.05) / (Math.min(bgLuminance, fgLuminance) + 0.05);
+    const contrastRatio =
+      (Math.max(bgLuminance, fgLuminance) + 0.05) /
+      (Math.min(bgLuminance, fgLuminance) + 0.05);
 
     let suggestedCategory: 'light' | 'dark' | 'high-contrast';
     let confidence: number;
@@ -281,12 +354,12 @@ export function validateThemeCategory(theme: ThemeDefinition): {
       isValid,
       suggestedCategory,
       confidence,
-      reasoning
+      reasoning,
     };
   } catch (error) {
     return {
       isValid: false,
-      reasoning: `Failed to analyze theme colors: ${error instanceof Error ? error.message : 'Unknown error'}`
+      reasoning: `Failed to analyze theme colors: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
 }
@@ -301,17 +374,17 @@ function getColorLuminance(color: string): number {
   canvas.width = 1;
   canvas.height = 1;
   const ctx = canvas.getContext('2d')!;
-  
+
   ctx.fillStyle = color;
   ctx.fillRect(0, 0, 1, 1);
-  
+
   const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-  
+
   // Convert to relative luminance
-  const [rNorm, gNorm, bNorm] = [r, g, b].map(c => {
+  const [rNorm, gNorm, bNorm] = [r, g, b].map((c) => {
     const normalized = c / 255;
-    return normalized <= 0.03928 
-      ? normalized / 12.92 
+    return normalized <= 0.03928
+      ? normalized / 12.92
       : Math.pow((normalized + 0.055) / 1.055, 2.4);
   });
 
@@ -321,7 +394,9 @@ function getColorLuminance(color: string): number {
 /**
  * Create a fallback theme with safe default colors
  */
-export function createFallbackTheme(originalTheme?: Partial<ThemeDefinition>): ThemeDefinition {
+export function createFallbackTheme(
+  originalTheme?: Partial<ThemeDefinition>
+): ThemeDefinition {
   const baseTheme: ThemeDefinition = {
     id: originalTheme?.id || 'fallback-theme',
     name: originalTheme?.name || 'Fallback Theme',
@@ -360,7 +435,8 @@ export function createFallbackTheme(originalTheme?: Partial<ThemeDefinition>): T
     },
     metadata: {
       author: 'System',
-      description: 'Fallback theme used when the original theme fails validation',
+      description:
+        'Fallback theme used when the original theme fails validation',
       version: '1.0.0',
       tags: ['fallback', 'safe'],
     },

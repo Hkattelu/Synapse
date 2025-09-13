@@ -6,7 +6,10 @@ import { LanguageIndicator, AnimationModeIndicator } from './CodeSyntaxPreview';
 import { LazyTrackContent } from './LazyTrackContent';
 import { VisualTrackClip } from './VisualTrackEnhancements';
 import { VirtualizedTimelineItems } from './VirtualizedTimelineItems';
-import { useIntersectionObserver, useResponsiveBreakpoint } from '../lib/performanceOptimizations';
+import {
+  useIntersectionObserver,
+  useResponsiveBreakpoint,
+} from '../lib/performanceOptimizations';
 import { Code, Monitor, Mic, User, Volume2 } from 'lucide-react';
 
 interface EducationalTrackProps {
@@ -59,19 +62,21 @@ export function EducationalTrack({
 }: EducationalTrackProps) {
   const { getMediaAssetById } = useMediaAssets();
   const breakpoint = useResponsiveBreakpoint();
-  
-  // Intersection observer for lazy loading
-  const [trackElementRef, isTrackVisible] = useIntersectionObserver<HTMLDivElement>({
-    threshold: 0.1,
-    rootMargin: '100px',
-  });
 
-  const IconComponent = TRACK_ICONS[track.icon as keyof typeof TRACK_ICONS] || Code;
+  // Intersection observer for lazy loading
+  const [trackElementRef, isTrackVisible] =
+    useIntersectionObserver<HTMLDivElement>({
+      threshold: 0.1,
+      rootMargin: '100px',
+    });
+
+  const IconComponent =
+    TRACK_ICONS[track.icon as keyof typeof TRACK_ICONS] || Code;
 
   // Create assets map for performance
   const assetsMap = useMemo(() => {
     const map = new Map<string, MediaAsset>();
-    items.forEach(item => {
+    items.forEach((item) => {
       const asset = getMediaAssetById(item.assetId);
       if (asset) {
         map.set(item.assetId, asset);
@@ -115,7 +120,9 @@ export function EducationalTrack({
         style={{ height: `${responsiveTrackHeight}px` }}
       >
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-xs text-gray-500 animate-pulse">Loading track content...</div>
+          <div className="text-xs text-gray-500 animate-pulse">
+            Loading track content...
+          </div>
         </div>
       </div>
     );
@@ -124,7 +131,9 @@ export function EducationalTrack({
   return (
     <div
       ref={(el) => {
-        (trackElementRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+        (
+          trackElementRef as React.MutableRefObject<HTMLDivElement | null>
+        ).current = el;
       }}
       className="educational-track relative"
       style={{ height: `${responsiveTrackHeight}px` }}
@@ -176,7 +185,12 @@ interface EducationalTrackHeaderProps {
   breakpoint: 'mobile' | 'tablet' | 'desktop';
 }
 
-function EducationalTrackHeader({ track, IconComponent, height, breakpoint }: EducationalTrackHeaderProps) {
+function EducationalTrackHeader({
+  track,
+  IconComponent,
+  height,
+  breakpoint,
+}: EducationalTrackHeaderProps) {
   // Deprecated: header is now rendered in the left sticky column by EducationalTimeline
   return null;
 }
@@ -202,7 +216,6 @@ function EducationalTimelineClip({
   onMouseDown,
   onContextMenu,
 }: EducationalTimelineClipProps) {
-
   return (
     <div
       className={`
@@ -242,7 +255,6 @@ function EducationalTimelineClip({
   );
 }
 
-
 // Traditional track items rendering (fallback)
 function TraditionalTrackItems({
   track,
@@ -270,15 +282,17 @@ function TraditionalTrackItems({
   return (
     <>
       {items
-        .filter(item => item.track === track.trackNumber)
+        .filter((item) => item.track === track.trackNumber)
         .map((item) => {
           const asset = assetsMap.get(item.assetId);
           const isSelected = selectedItems.includes(item.id);
-          const isDragging = dragState.isDragging && dragState.itemId === item.id;
+          const isDragging =
+            dragState.isDragging && dragState.itemId === item.id;
 
           // Use enhanced Visual track clip for Visual track
           if (track.id === 'visual') {
-            const isDragging = dragState.isDragging && dragState.itemId === item.id;
+            const isDragging =
+              dragState.isDragging && dragState.itemId === item.id;
             return (
               <VisualTrackClip
                 key={item.id}
@@ -295,7 +309,11 @@ function TraditionalTrackItems({
                 }}
                 onItemUpdate={onItemUpdate || (() => {})}
                 onMouseDown={(e) => onItemMouseDown(e, item)}
-                onContextMenu={onItemContextMenu ? (e) => onItemContextMenu(e, item) : undefined}
+                onContextMenu={
+                  onItemContextMenu
+                    ? (e) => onItemContextMenu(e, item)
+                    : undefined
+                }
               />
             );
           }
@@ -315,7 +333,11 @@ function TraditionalTrackItems({
                 top: '4px',
               }}
               onMouseDown={(e) => onItemMouseDown(e, item)}
-              onContextMenu={onItemContextMenu ? (e) => onItemContextMenu(e, item) : undefined}
+              onContextMenu={
+                onItemContextMenu
+                  ? (e) => onItemContextMenu(e, item)
+                  : undefined
+              }
             />
           );
         })}

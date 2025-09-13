@@ -72,7 +72,8 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    return () =>
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
   // Calculate timeline dimensions using project duration as a floor
@@ -327,7 +328,13 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
     const targetZoom = Math.max(0.1, Math.min(5, available / contentWidth));
     updateTimelineView({ zoom: targetZoom, scrollPosition: 0 });
     viewport.scrollLeft = 0;
-  }, [scrollRef, timeToPixels, maxDuration, ui.timeline.zoom, updateTimelineView]);
+  }, [
+    scrollRef,
+    timeToPixels,
+    maxDuration,
+    ui.timeline.zoom,
+    updateTimelineView,
+  ]);
 
   // Delete selected keyframes
   const deleteSelectedKeyframes = useCallback(() => {
@@ -348,20 +355,23 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't trigger shortcuts when typing in inputs
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
         return;
       }
 
       if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
-        
+
         // Delete selected keyframes first, then selected clips
         if (selectedKeyframes.length > 0) {
           deleteSelectedKeyframes();
         } else if (selectedItems.length > 0) {
           // Delete selected timeline items
-          selectedItems.forEach(itemId => {
-            const item = timeline.find(item => item.id === itemId);
+          selectedItems.forEach((itemId) => {
+            const item = timeline.find((item) => item.id === itemId);
             if (item) {
               // Remove from timeline using the project store
               const { deleteClip } = useProjectStore.getState();
@@ -375,7 +385,13 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [deleteSelectedKeyframes, selectedKeyframes, selectedItems, timeline, clearTimelineSelection]);
+  }, [
+    deleteSelectedKeyframes,
+    selectedKeyframes,
+    selectedItems,
+    timeline,
+    clearTimelineSelection,
+  ]);
 
   // Add global mouse event listeners
   useEffect(() => {
@@ -512,8 +528,8 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
           <div className="text-xs text-text-tertiary">
             Duration: {Math.round(timelineDuration * 10) / 10}s
           </div>
-              {selectedKeyframes.length > 0 && (
-        <div className="text-text-primary">
+          {selectedKeyframes.length > 0 && (
+            <div className="text-text-primary">
               {selectedKeyframes.length} keyframe
               {selectedKeyframes.length > 1 ? 's' : ''} selected
             </div>
@@ -533,7 +549,10 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
           if (e.shiftKey) {
             e.preventDefault();
             const delta = Math.sign(e.deltaY) * -0.2;
-            const newZoom = Math.max(0.1, Math.min(5, ui.timeline.zoom + delta));
+            const newZoom = Math.max(
+              0.1,
+              Math.min(5, ui.timeline.zoom + delta)
+            );
             updateTimelineView({ zoom: newZoom });
           } else {
             const el = e.currentTarget as HTMLDivElement;
@@ -628,7 +647,15 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
                     aria-describedby={`adv-tip-${trackIndex}`}
                     aria-label={`Tips for track ${trackIndex + 1}`}
                   >
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      className="w-3.5 h-3.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M12 18h.01" />
                       <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
                       <circle cx="12" cy="12" r="9" />
@@ -639,7 +666,9 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
                     id={`adv-tip-${trackIndex}`}
                     className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-background-tertiary border border-border-subtle text-text-primary text-xs rounded-md shadow-lg w-64"
                   >
-                    <div className="px-3 py-2 border-b border-border-subtle font-medium">Advanced Timeline Tips</div>
+                    <div className="px-3 py-2 border-b border-border-subtle font-medium">
+                      Advanced Timeline Tips
+                    </div>
                     <div className="px-3 py-2">
                       <ul className="list-disc pl-4 space-y-1">
                         <li>Double-click to add keyframes</li>
@@ -659,12 +688,17 @@ export function AdvancedTimeline({ className = '' }: AdvancedTimelineProps) {
               className="absolute top-0 bottom-0 w-0.5 pointer-events-none z-50"
               style={{
                 left: `${timeToPixels(playback.currentTime)}px`,
-                backgroundColor: 'var(--synapse-playhead)'
+                backgroundColor: 'var(--synapse-playhead)',
               }}
             >
               {/* Playhead Handle */}
-              <div className="absolute -top-2 -left-2 w-4 h-4 rounded-full border-2 shadow-lg pointer-events-auto cursor-pointer"
-                   style={{ backgroundColor: 'var(--synapse-playhead)', borderColor: 'var(--synapse-background)' }}>
+              <div
+                className="absolute -top-2 -left-2 w-4 h-4 rounded-full border-2 shadow-lg pointer-events-auto cursor-pointer"
+                style={{
+                  backgroundColor: 'var(--synapse-playhead)',
+                  borderColor: 'var(--synapse-background)',
+                }}
+              >
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-background-tertiary/90 text-text-primary text-xs px-2 py-1 rounded whitespace-nowrap">
                   {Math.floor(playback.currentTime / 60)}:
                   {(playback.currentTime % 60).toFixed(1).padStart(4, '0')}

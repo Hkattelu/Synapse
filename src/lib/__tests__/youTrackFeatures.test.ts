@@ -10,14 +10,14 @@ import {
   generatePersonalVideoTransitions,
   type TalkingHeadDetectionResult,
   type PiPPosition,
-  type PiPSize
+  type PiPSize,
 } from '../youTrackFeatures';
 import type { TimelineItem } from '../types';
 
 // Mock HTMLVideoElement and Canvas API
 const mockVideoElement = {
   videoWidth: 1920,
-  videoHeight: 1080
+  videoHeight: 1080,
 } as HTMLVideoElement;
 
 const mockCanvas = {
@@ -30,14 +30,14 @@ const mockCanvas = {
       const data = new Uint8ClampedArray(1920 * 1080 * 4);
       // Fill with skin tone values (R > 95, G > 40, B > 20, and other conditions)
       for (let i = 0; i < data.length; i += 4) {
-        data[i] = 150;     // R
+        data[i] = 150; // R
         data[i + 1] = 100; // G
-        data[i + 2] = 80;  // B
+        data[i + 2] = 80; // B
         data[i + 3] = 255; // A
       }
       return { data };
-    })
-  }))
+    }),
+  })),
 };
 
 // Mock document.createElement
@@ -47,7 +47,7 @@ Object.defineProperty(document, 'createElement', {
       return mockCanvas;
     }
     return {};
-  })
+  }),
 });
 
 describe('youTrackFeatures', () => {
@@ -58,7 +58,7 @@ describe('youTrackFeatures', () => {
   describe('detectTalkingHead', () => {
     it('detects face in video with good confidence', async () => {
       const result = await detectTalkingHead(mockVideoElement);
-      
+
       expect(result.hasFace).toBe(true);
       expect(result.faceConfidence).toBeGreaterThan(0);
       expect(result.faceBounds).toBeDefined();
@@ -76,20 +76,22 @@ describe('youTrackFeatures', () => {
             const data = new Uint8ClampedArray(1920 * 1080 * 4);
             // Fill with non-skin tone values
             for (let i = 0; i < data.length; i += 4) {
-              data[i] = 50;     // R
+              data[i] = 50; // R
               data[i + 1] = 50; // G
               data[i + 2] = 50; // B
               data[i + 3] = 255; // A
             }
             return { data };
-          })
-        }))
+          }),
+        })),
       };
 
-      vi.mocked(document.createElement).mockReturnValue(mockLowConfidenceCanvas);
+      vi.mocked(document.createElement).mockReturnValue(
+        mockLowConfidenceCanvas
+      );
 
       const result = await detectTalkingHead(mockVideoElement);
-      
+
       expect(result.suggestions.length).toBeGreaterThan(0);
       expect(result.suggestions[0]).toContain('No face detected');
     });
@@ -97,16 +99,18 @@ describe('youTrackFeatures', () => {
     it('handles canvas context failure gracefully', async () => {
       const mockFailedCanvas = {
         ...mockCanvas,
-        getContext: vi.fn(() => null)
+        getContext: vi.fn(() => null),
       };
 
       vi.mocked(document.createElement).mockReturnValue(mockFailedCanvas);
 
       const result = await detectTalkingHead(mockVideoElement);
-      
+
       expect(result.hasFace).toBe(false);
       expect(result.faceConfidence).toBe(0);
-      expect(result.suggestions).toContain('Unable to analyze video - canvas not supported');
+      expect(result.suggestions).toContain(
+        'Unable to analyze video - canvas not supported'
+      );
     });
   });
 
@@ -117,7 +121,7 @@ describe('youTrackFeatures', () => {
         faceConfidence: 85,
         faceBounds: { x: 100, y: 50, width: 200, height: 300 },
         isOptimal: true,
-        suggestions: []
+        suggestions: [],
       };
 
       const optimized = optimizeTalkingHeadSettings(detectionResult, {});
@@ -133,7 +137,7 @@ describe('youTrackFeatures', () => {
         faceConfidence: 75,
         faceBounds: { x: 100, y: 50, width: 200, height: 300 },
         isOptimal: true,
-        suggestions: []
+        suggestions: [],
       };
 
       const optimized = optimizeTalkingHeadSettings(detectionResult, {});
@@ -148,7 +152,7 @@ describe('youTrackFeatures', () => {
         faceConfidence: 50,
         faceBounds: { x: 100, y: 50, width: 200, height: 300 },
         isOptimal: false,
-        suggestions: []
+        suggestions: [],
       };
 
       const optimized = optimizeTalkingHeadSettings(detectionResult, {});
@@ -162,11 +166,14 @@ describe('youTrackFeatures', () => {
         faceConfidence: 85,
         faceBounds: { x: 100, y: 50, width: 200, height: 300 },
         isOptimal: true,
-        suggestions: []
+        suggestions: [],
       };
 
       const existingProperties = { volume: 0.5, customProperty: 'test' };
-      const optimized = optimizeTalkingHeadSettings(detectionResult, existingProperties);
+      const optimized = optimizeTalkingHeadSettings(
+        detectionResult,
+        existingProperties
+      );
 
       expect(optimized.volume).toBe(0.9); // Should be updated
       expect(optimized.customProperty).toBe('test'); // Should be preserved
@@ -178,22 +185,38 @@ describe('youTrackFeatures', () => {
     const pipSize = { width: 400, height: 300 };
 
     it('calculates top-left position correctly', () => {
-      const position = getPiPPositionCoordinates('top-left', containerSize, pipSize);
+      const position = getPiPPositionCoordinates(
+        'top-left',
+        containerSize,
+        pipSize
+      );
       expect(position).toEqual({ x: 20, y: 20 });
     });
 
     it('calculates bottom-right position correctly', () => {
-      const position = getPiPPositionCoordinates('bottom-right', containerSize, pipSize);
+      const position = getPiPPositionCoordinates(
+        'bottom-right',
+        containerSize,
+        pipSize
+      );
       expect(position).toEqual({ x: 1500, y: 760 }); // 1920-400-20, 1080-300-20
     });
 
     it('calculates center position correctly', () => {
-      const position = getPiPPositionCoordinates('center', containerSize, pipSize);
+      const position = getPiPPositionCoordinates(
+        'center',
+        containerSize,
+        pipSize
+      );
       expect(position).toEqual({ x: 760, y: 390 }); // (1920-400)/2, (1080-300)/2
     });
 
     it('defaults to top-left for unknown position', () => {
-      const position = getPiPPositionCoordinates('custom' as PiPPosition, containerSize, pipSize);
+      const position = getPiPPositionCoordinates(
+        'custom' as PiPPosition,
+        containerSize,
+        pipSize
+      );
       expect(position).toEqual({ x: 20, y: 20 });
     });
   });
@@ -229,8 +252,8 @@ describe('youTrackFeatures', () => {
   describe('PRESENTATION_TEMPLATES', () => {
     it('contains expected templates', () => {
       expect(PRESENTATION_TEMPLATES).toHaveLength(4);
-      
-      const templateIds = PRESENTATION_TEMPLATES.map(t => t.id);
+
+      const templateIds = PRESENTATION_TEMPLATES.map((t) => t.id);
       expect(templateIds).toContain('professional-corner');
       expect(templateIds).toContain('center-stage');
       expect(templateIds).toContain('split-screen');
@@ -238,7 +261,7 @@ describe('youTrackFeatures', () => {
     });
 
     it('has valid template structure', () => {
-      PRESENTATION_TEMPLATES.forEach(template => {
+      PRESENTATION_TEMPLATES.forEach((template) => {
         expect(template).toHaveProperty('id');
         expect(template).toHaveProperty('name');
         expect(template).toHaveProperty('description');
@@ -256,11 +279,13 @@ describe('youTrackFeatures', () => {
       type: 'video',
       src: '/test.mp4',
       startTime: 0,
-      duration: 30
+      duration: 30,
     };
 
     it('applies professional corner template correctly', () => {
-      const template = PRESENTATION_TEMPLATES.find(t => t.id === 'professional-corner')!;
+      const template = PRESENTATION_TEMPLATES.find(
+        (t) => t.id === 'professional-corner'
+      )!;
       const properties = applyPresentationTemplate(template, mockItem);
 
       expect(properties.talkingHeadEnabled).toBe(true);
@@ -271,7 +296,9 @@ describe('youTrackFeatures', () => {
     });
 
     it('applies center stage template correctly', () => {
-      const template = PRESENTATION_TEMPLATES.find(t => t.id === 'center-stage')!;
+      const template = PRESENTATION_TEMPLATES.find(
+        (t) => t.id === 'center-stage'
+      )!;
       const properties = applyPresentationTemplate(template, mockItem);
 
       expect(properties.talkingHeadEnabled).toBe(true);
@@ -281,7 +308,9 @@ describe('youTrackFeatures', () => {
     });
 
     it('includes template overlays', () => {
-      const template = PRESENTATION_TEMPLATES.find(t => t.id === 'professional-corner')!;
+      const template = PRESENTATION_TEMPLATES.find(
+        (t) => t.id === 'professional-corner'
+      )!;
       const properties = applyPresentationTemplate(template, mockItem);
 
       expect(properties.templateOverlays).toEqual(template.overlays);
@@ -298,8 +327,8 @@ describe('youTrackFeatures', () => {
         duration: 30,
         properties: {
           talkingHeadEnabled: true,
-          volume: 0.8
-        }
+          volume: 0.8,
+        },
       };
 
       const validation = validateYouTrackContent(videoItem);
@@ -314,14 +343,18 @@ describe('youTrackFeatures', () => {
         type: 'audio',
         src: '/test.mp3',
         startTime: 0,
-        duration: 30
+        duration: 30,
       };
 
       const validation = validateYouTrackContent(audioItem);
 
       expect(validation.isValid).toBe(false);
-      expect(validation.warnings).toContain('You track is optimized for video content');
-      expect(validation.suggestions).toContain('Consider moving non-video content to appropriate tracks');
+      expect(validation.warnings).toContain(
+        'You track is optimized for video content'
+      );
+      expect(validation.suggestions).toContain(
+        'Consider moving non-video content to appropriate tracks'
+      );
     });
 
     it('suggests enabling talking head mode', () => {
@@ -332,13 +365,15 @@ describe('youTrackFeatures', () => {
         startTime: 0,
         duration: 30,
         properties: {
-          talkingHeadEnabled: false
-        }
+          talkingHeadEnabled: false,
+        },
       };
 
       const validation = validateYouTrackContent(videoItem);
 
-      expect(validation.suggestions).toContain('Enable talking head mode for better personal video presentation');
+      expect(validation.suggestions).toContain(
+        'Enable talking head mode for better personal video presentation'
+      );
     });
 
     it('suggests increasing volume for low audio', () => {
@@ -349,13 +384,15 @@ describe('youTrackFeatures', () => {
         startTime: 0,
         duration: 30,
         properties: {
-          volume: 0.5
-        }
+          volume: 0.5,
+        },
       };
 
       const validation = validateYouTrackContent(videoItem);
 
-      expect(validation.suggestions).toContain('Consider increasing audio volume for better narration clarity');
+      expect(validation.suggestions).toContain(
+        'Consider increasing audio volume for better narration clarity'
+      );
     });
   });
 
@@ -368,7 +405,7 @@ describe('youTrackFeatures', () => {
           src: '/video1.mp4',
           startTime: 0,
           duration: 10,
-          properties: { talkingHeadCorner: 'bottom-right' }
+          properties: { talkingHeadCorner: 'bottom-right' },
         },
         {
           id: 'item2',
@@ -376,7 +413,7 @@ describe('youTrackFeatures', () => {
           src: '/video2.mp4',
           startTime: 10,
           duration: 10,
-          properties: { talkingHeadCorner: 'bottom-left' }
+          properties: { talkingHeadCorner: 'bottom-left' },
         },
         {
           id: 'item3',
@@ -384,14 +421,14 @@ describe('youTrackFeatures', () => {
           src: '/video3.mp4',
           startTime: 20,
           duration: 10,
-          properties: { talkingHeadCorner: 'bottom-left' }
-        }
+          properties: { talkingHeadCorner: 'bottom-left' },
+        },
       ];
 
       const transitions = generatePersonalVideoTransitions(items);
 
       expect(transitions).toHaveLength(2);
-      
+
       // First transition (different positions) should use slide
       expect(transitions[0]).toEqual({
         fromItem: 'item1',
@@ -399,8 +436,8 @@ describe('youTrackFeatures', () => {
         transition: {
           type: 'slide',
           duration: 0.5,
-          easing: 'ease-in-out'
-        }
+          easing: 'ease-in-out',
+        },
       });
 
       // Second transition (same positions) should use crossfade
@@ -410,8 +447,8 @@ describe('youTrackFeatures', () => {
         transition: {
           type: 'crossfade',
           duration: 0.5,
-          easing: 'ease-in-out'
-        }
+          easing: 'ease-in-out',
+        },
       });
     });
 
@@ -422,8 +459,8 @@ describe('youTrackFeatures', () => {
           type: 'video',
           src: '/video1.mp4',
           startTime: 0,
-          duration: 10
-        }
+          duration: 10,
+        },
       ];
 
       const transitions = generatePersonalVideoTransitions(items);

@@ -49,17 +49,22 @@ describe('Educational content addition workflows (integration)', () => {
     const onCodeAdded = vi.fn();
     const onClose = vi.fn();
 
-    render(<CodeEditorWorkflow isOpen onClose={onClose} onCodeAdded={onCodeAdded} />);
+    render(
+      <CodeEditorWorkflow isOpen onClose={onClose} onCodeAdded={onCodeAdded} />
+    );
 
     // Switch to custom editor (optional) and type code
     fireEvent.click(screen.getByText('Start from Scratch'));
     const textarea = screen.getByPlaceholderText('Enter your code here...');
-    fireEvent.change(textarea, { target: { value: 'console.log(\'Hello\');' } });
+    fireEvent.change(textarea, { target: { value: "console.log('Hello');" } });
 
     // Provide a title
-    fireEvent.change(screen.getByPlaceholderText('Enter a descriptive title for your code'), {
-      target: { value: 'My Demo' },
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText('Enter a descriptive title for your code'),
+      {
+        target: { value: 'My Demo' },
+      }
+    );
 
     // Add to timeline
     const addBtn = screen.getByRole('button', { name: 'Add to Timeline' });
@@ -70,7 +75,10 @@ describe('Educational content addition workflows (integration)', () => {
 
     // Media asset created first
     expect(mockAddMediaAsset).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'code', metadata: expect.objectContaining({ language: 'javascript' }) })
+      expect.objectContaining({
+        type: 'code',
+        metadata: expect.objectContaining({ language: 'javascript' }),
+      })
     );
 
     // Timeline item placed on Code track (trackNumber 0)
@@ -91,15 +99,20 @@ describe('Educational content addition workflows (integration)', () => {
     const onVideoAdded = vi.fn();
     const onClose = vi.fn();
 
-    render(<VideoWorkflow isOpen onClose={onClose} onVideoAdded={onVideoAdded} />);
+    render(
+      <VideoWorkflow isOpen onClose={onClose} onVideoAdded={onVideoAdded} />
+    );
 
     // Choose Talking Head option
     fireEvent.click(screen.getByText('Talking Head'));
 
     // Provide a title
-    fireEvent.change(screen.getByPlaceholderText('Enter title for your talking head'), {
-      target: { value: 'Presenter Intro' },
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText('Enter title for your talking head'),
+      {
+        target: { value: 'Presenter Intro' },
+      }
+    );
 
     // Intercept file picker and simulate a file selection (shared helper ensures cleanup)
     const { input: inputEl, restore } = patchNextFileInput(
@@ -117,11 +130,18 @@ describe('Educational content addition workflows (integration)', () => {
 
     // Asset and timeline item created
     expect(mockAddMediaAsset).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'video', metadata: expect.objectContaining({ videoType: 'talking-head' }) })
+      expect.objectContaining({
+        type: 'video',
+        metadata: expect.objectContaining({ videoType: 'talking-head' }),
+      })
     );
     // You track is trackNumber 3
     expect(mockAddTimelineItem).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'video', track: 3, properties: expect.objectContaining({ title: 'Presenter Intro' }) })
+      expect.objectContaining({
+        type: 'video',
+        track: 3,
+        properties: expect.objectContaining({ title: 'Presenter Intro' }),
+      })
     );
   });
 });

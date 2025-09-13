@@ -49,7 +49,10 @@ function AddMediaMenu({
 
   React.useEffect(() => {
     const onDoc = (e: MouseEvent) => {
-      if (btnRef.current && !btnRef.current.parentElement?.contains(e.target as Node)) {
+      if (
+        btnRef.current &&
+        !btnRef.current.parentElement?.contains(e.target as Node)
+      ) {
         setOpen(false);
         setVisualOpen(false);
       }
@@ -97,7 +100,15 @@ function AddMediaMenu({
             </button>
             {visualOpen && (
               <div className="absolute left-full top-0 ml-1 w-44 bg-background-tertiary border border-border-subtle rounded shadow-lg">
-                {(['arrow','box','finger-pointer','circle','line'] as VisualAssetType[]).map((t) => (
+                {(
+                  [
+                    'arrow',
+                    'box',
+                    'finger-pointer',
+                    'circle',
+                    'line',
+                  ] as VisualAssetType[]
+                ).map((t) => (
                   <button
                     key={t}
                     className="w-full text-left px-3 py-2 text-xs hover:bg-background-secondary capitalize"
@@ -117,7 +128,9 @@ function AddMediaMenu({
             className="w-full text-left px-3 py-2 text-xs hover:bg-background-secondary"
             onClick={() => {
               // Fire global event handled by StudioView to open recorder dialog
-              try { window.dispatchEvent(new CustomEvent('openRecorderDialog')); } catch {}
+              try {
+                window.dispatchEvent(new CustomEvent('openRecorderDialog'));
+              } catch {}
               setOpen(false);
             }}
           >
@@ -139,15 +152,23 @@ export function MediaBin({ className = '' }: MediaBinProps) {
   const [isUploading, setIsUploading] = useState(false);
   const { notify } = useNotifications();
   // Single dropdown category: Code, Visual, Audio, You (music+narration collapsed into Audio)
-  const [educationalFilter, setEducationalFilter] = useState<'code' | 'visual' | 'audio' | 'you'>('visual');
+  const [educationalFilter, setEducationalFilter] = useState<
+    'code' | 'visual' | 'audio' | 'you'
+  >('visual');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Category counts for dropdown labels
   const categoryCounts = React.useMemo(() => {
-    const count = { visual: 0, code: 0, audio: 0, you: 0 } as Record<'visual'|'code'|'audio'|'you', number>;
+    const count = { visual: 0, code: 0, audio: 0, you: 0 } as Record<
+      'visual' | 'code' | 'audio' | 'you',
+      number
+    >;
     try {
       for (const a of mediaAssets) {
-        if (a.type === 'audio') { count.audio++; continue; }
+        if (a.type === 'audio') {
+          count.audio++;
+          continue;
+        }
         const s = suggestTrackPlacement(a);
         const name = s.suggestedTrack.name.toLowerCase();
         if (name === 'visual') count.visual++;
@@ -170,7 +191,10 @@ export function MediaBin({ className = '' }: MediaBinProps) {
 
     window.addEventListener('uploadFiles', handleUploadFiles as EventListener);
     return () => {
-      window.removeEventListener('uploadFiles', handleUploadFiles as EventListener);
+      window.removeEventListener(
+        'uploadFiles',
+        handleUploadFiles as EventListener
+      );
     };
   }, []);
 
@@ -511,38 +535,62 @@ export function MediaBin({ className = '' }: MediaBinProps) {
   }, [addMediaAsset, mediaAssets]);
 
   // Create a new visual asset
-  const createVisualAsset = useCallback((assetType: VisualAssetType) => {
-    const assetNames = {
-      'arrow': 'Arrow',
-      'box': 'Box',
-      'finger-pointer': 'Finger Pointer',
-      'circle': 'Circle',
-      'line': 'Line'
-    };
+  const createVisualAsset = useCallback(
+    (assetType: VisualAssetType) => {
+      const assetNames = {
+        arrow: 'Arrow',
+        box: 'Box',
+        'finger-pointer': 'Finger Pointer',
+        circle: 'Circle',
+        line: 'Line',
+      };
 
-    const defaultProperties = {
-      'arrow': { arrowDirection: 'right' as const, strokeColor: '#ff0000', strokeWidth: 3 },
-      'box': { strokeColor: '#ff0000', strokeWidth: 3, fillColor: 'transparent' },
-      'finger-pointer': { fingerDirection: 'down' as const, strokeColor: '#ff0000', fillColor: '#ff0000' },
-      'circle': { strokeColor: '#ff0000', strokeWidth: 3, fillColor: 'transparent' },
-      'line': { strokeColor: '#ff0000', strokeWidth: 3, lineEndX: 100, lineEndY: 0 }
-    };
+      const defaultProperties = {
+        arrow: {
+          arrowDirection: 'right' as const,
+          strokeColor: '#ff0000',
+          strokeWidth: 3,
+        },
+        box: {
+          strokeColor: '#ff0000',
+          strokeWidth: 3,
+          fillColor: 'transparent',
+        },
+        'finger-pointer': {
+          fingerDirection: 'down' as const,
+          strokeColor: '#ff0000',
+          fillColor: '#ff0000',
+        },
+        circle: {
+          strokeColor: '#ff0000',
+          strokeWidth: 3,
+          fillColor: 'transparent',
+        },
+        line: {
+          strokeColor: '#ff0000',
+          strokeWidth: 3,
+          lineEndX: 100,
+          lineEndY: 0,
+        },
+      };
 
-    const visualAsset: Omit<MediaAsset, 'id' | 'createdAt'> = {
-      name: `${assetNames[assetType]} ${mediaAssets.filter((a) => a.type === 'visual-asset' && a.metadata.visualAssetType === assetType).length + 1}`,
-      type: 'visual-asset',
-      url: '', // Visual assets don't need URLs
-      duration: 3, // Default 3 seconds
-      metadata: {
-        fileSize: 0,
-        mimeType: 'application/visual-asset',
-        visualAssetType: assetType,
-        defaultProperties: defaultProperties[assetType],
-      },
-    };
+      const visualAsset: Omit<MediaAsset, 'id' | 'createdAt'> = {
+        name: `${assetNames[assetType]} ${mediaAssets.filter((a) => a.type === 'visual-asset' && a.metadata.visualAssetType === assetType).length + 1}`,
+        type: 'visual-asset',
+        url: '', // Visual assets don't need URLs
+        duration: 3, // Default 3 seconds
+        metadata: {
+          fileSize: 0,
+          mimeType: 'application/visual-asset',
+          visualAssetType: assetType,
+          defaultProperties: defaultProperties[assetType],
+        },
+      };
 
-    addMediaAsset(visualAsset);
-  }, [addMediaAsset, mediaAssets]);
+      addMediaAsset(visualAsset);
+    },
+    [addMediaAsset, mediaAssets]
+  );
 
   // Open file dialog
   const openFileDialog = useCallback(() => {
@@ -607,7 +655,11 @@ export function MediaBin({ className = '' }: MediaBinProps) {
 
           {/* Add button with compact menu */}
           <div className="relative">
-            <AddMediaMenu onUpload={openFileDialog} onCreateCode={createCodeClip} onCreateVisual={createVisualAsset} />
+            <AddMediaMenu
+              onUpload={openFileDialog}
+              onCreateCode={createCodeClip}
+              onCreateVisual={createVisualAsset}
+            />
           </div>
         </div>
 
@@ -698,73 +750,45 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                 .filter((asset) => {
                   try {
                     const suggestion = suggestTrackPlacement(asset);
-                    const trackName = suggestion.suggestedTrack.name.toLowerCase();
+                    const trackName =
+                      suggestion.suggestedTrack.name.toLowerCase();
                     // 'audio' category handled separately by MusicLibrary
                     if (trackName !== educationalFilter) return false;
                     const q = searchQuery.trim().toLowerCase();
                     if (!q) return true;
-                    const codeLang = (asset.metadata?.language || '').toString().toLowerCase();
-                    return asset.name.toLowerCase().includes(q) || codeLang.includes(q);
+                    const codeLang = (asset.metadata?.language || '')
+                      .toString()
+                      .toLowerCase();
+                    return (
+                      asset.name.toLowerCase().includes(q) ||
+                      codeLang.includes(q)
+                    );
                   } catch {
                     return false;
                   }
                 })
                 .map((asset) => (
-                <div
-                  key={asset.id}
-                  className="bg-background-tertiary rounded-lg overflow-hidden hover:bg-background-secondary transition-colors cursor-pointer group border border-border-subtle hover:border-synapse-border-hover"
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, asset)}
-                  onDoubleClick={() => handleDoubleClick(asset)}
-                  title="Double-click to add to timeline, or drag to timeline"
-                >
-                  {/* Thumbnail */}
-                  <div className="aspect-video bg-background-primary flex items-center justify-center relative">
-                    {asset.thumbnail ? (
-                      <img
-                        src={asset.thumbnail}
-                        alt={asset.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="text-text-tertiary">
-                        {asset.type === 'video' && (
-                          <svg
-                            className="w-8 h-8"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                            />
-                          </svg>
-                        )}
-                        {asset.type === 'image' && (
-                          <svg
-                            className="w-8 h-8"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                          </svg>
-                        )}
-                        {asset.type === 'audio' && (
-                          <AudioWaveform src={asset.url} />
-                        )}
-                        {asset.type === 'code' && (
-                          <div className="text-center">
+                  <div
+                    key={asset.id}
+                    className="bg-background-tertiary rounded-lg overflow-hidden hover:bg-background-secondary transition-colors cursor-pointer group border border-border-subtle hover:border-synapse-border-hover"
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, asset)}
+                    onDoubleClick={() => handleDoubleClick(asset)}
+                    title="Double-click to add to timeline, or drag to timeline"
+                  >
+                    {/* Thumbnail */}
+                    <div className="aspect-video bg-background-primary flex items-center justify-center relative">
+                      {asset.thumbnail ? (
+                        <img
+                          src={asset.thumbnail}
+                          alt={asset.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-text-tertiary">
+                          {asset.type === 'video' && (
                             <svg
-                              className="w-8 h-8 mx-auto mb-1"
+                              className="w-8 h-8"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -773,158 +797,246 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth={2}
-                                d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
                               />
                             </svg>
-                            <div className="text-xs font-mono bg-background-tertiary px-2 py-1 rounded">
-                              {displayLanguage(asset.metadata.language)}
-                            </div>
-                          </div>
-                        )}
-                        {asset.type === 'visual-asset' && (
-                          <div className="text-center">
-                            {asset.metadata.visualAssetType === 'arrow' && (
-                              <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                              </svg>
-                            )}
-                            {asset.metadata.visualAssetType === 'box' && (
-                              <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16v12H4z" />
-                              </svg>
-                            )}
-                            {asset.metadata.visualAssetType === 'finger-pointer' && (
-                              <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 13l3 3 7-7" />
-                              </svg>
-                            )}
-                            {asset.metadata.visualAssetType === 'circle' && (
-                              <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" strokeWidth={2} />
-                              </svg>
-                            )}
-                            {asset.metadata.visualAssetType === 'line' && (
-                              <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14" />
-                              </svg>
-                            )}
-                            <div className="text-xs font-mono bg-background-tertiary px-2 py-1 rounded">
-                              {asset.metadata.visualAssetType?.toUpperCase()}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Duration overlay */}
-                    {asset.duration && (
-                      <div className="absolute bottom-1 right-1 bg-background-primary/80 text-text-primary text-xs px-1 rounded">
-                        {formatDuration(asset.duration)}
-                      </div>
-                    )}
-
-                    {/* Delete button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeMediaAsset(asset.id);
-                        if (asset.url.startsWith('blob:')) {
-                          URL.revokeObjectURL(asset.url);
-                        }
-                      }}
-                      className="absolute top-1 right-1 bg-synapse-error hover:opacity-90 text-synapse-text-inverse rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Remove asset"
-                    >
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-
-                  {/* Asset info */}
-                  <div className="p-2">
-                    <p
-                      className="text-sm font-medium text-text-primary truncate"
-                      title={asset.name}
-                    >
-                      {asset.name}
-                    </p>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-xs text-text-tertiary uppercase">
-                        {asset.type.toUpperCase()}
-                      </span>
-                      <span className="text-xs text-text-tertiary">
-                        {formatFileSize(asset.metadata.fileSize)}
-                      </span>
-                    </div>
-                    {/* Educational content categorization */}
-                    {(() => {
-                      try {
-                        const suggestion = suggestTrackPlacement(asset);
-                        const track = suggestion.suggestedTrack;
-                        return (
-                          <div className="mt-1 flex items-center justify-between">
-                            <span
-                              className="inline-block px-1.5 py-0.5 rounded text-synapse-text-inverse text-[10px] font-medium"
-                              title={`Suggested Track: ${track.name} (${Math.round(
-                                suggestion.confidence * 100
-                              )}% confidence) - ${suggestion.reason}`}
-                              style={{ backgroundColor: track.color }}
+                          )}
+                          {asset.type === 'image' && (
+                            <svg
+                              className="w-8 h-8"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
                             >
-                              {track.name}
-                            </span>
-                            {/* Educational content type indicator */}
-                            <div className="flex items-center gap-1">
-                              {asset.type === 'code' && (
-                                <span className="text-[9px] text-synapse-clip-code bg-synapse-clip-code/20 px-1 py-0.5 rounded font-mono">
-                                  {asset.metadata.language?.toUpperCase() || 'CODE'}
-                                </span>
-                              )}
-                              {asset.type === 'video' && suggestion.suggestedTrack.name === 'You' && (
-                                <span className="text-[9px] text-synapse-error bg-synapse-error/20 px-1 py-0.5 rounded">
-                                  PERSONAL
-                                </span>
-                              )}
-                              {asset.type === 'video' && suggestion.suggestedTrack.name === 'Visual' && (
-                                <span className="text-[9px] text-synapse-success bg-synapse-success/20 px-1 py-0.5 rounded">
-                                  DEMO
-                                </span>
-                              )}
-                              {asset.type === 'audio' && (
-                                <span className="text-[9px] text-synapse-warning bg-synapse-warning/20 px-1 py-0.5 rounded">
-                                  AUDIO
-                                </span>
-                              )}
-                              {asset.type === 'visual-asset' && (
-                                <span className="text-[9px] text-synapse-info bg-synapse-info/20 px-1 py-0.5 rounded">
-                                  VISUAL
-                                </span>
-                              )}
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                              />
+                            </svg>
+                          )}
+                          {asset.type === 'audio' && (
+                            <AudioWaveform src={asset.url} />
+                          )}
+                          {asset.type === 'code' && (
+                            <div className="text-center">
+                              <svg
+                                className="w-8 h-8 mx-auto mb-1"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                                />
+                              </svg>
+                              <div className="text-xs font-mono bg-background-tertiary px-2 py-1 rounded">
+                                {displayLanguage(asset.metadata.language)}
+                              </div>
                             </div>
-                          </div>
-                        );
-                      } catch {
-                        return null;
-                      }
-                    })()}
+                          )}
+                          {asset.type === 'visual-asset' && (
+                            <div className="text-center">
+                              {asset.metadata.visualAssetType === 'arrow' && (
+                                <svg
+                                  className="w-8 h-8 mx-auto mb-1"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                                  />
+                                </svg>
+                              )}
+                              {asset.metadata.visualAssetType === 'box' && (
+                                <svg
+                                  className="w-8 h-8 mx-auto mb-1"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M4 6h16v12H4z"
+                                  />
+                                </svg>
+                              )}
+                              {asset.metadata.visualAssetType ===
+                                'finger-pointer' && (
+                                <svg
+                                  className="w-8 h-8 mx-auto mb-1"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M7 13l3 3 7-7"
+                                  />
+                                </svg>
+                              )}
+                              {asset.metadata.visualAssetType === 'circle' && (
+                                <svg
+                                  className="w-8 h-8 mx-auto mb-1"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    strokeWidth={2}
+                                  />
+                                </svg>
+                              )}
+                              {asset.metadata.visualAssetType === 'line' && (
+                                <svg
+                                  className="w-8 h-8 mx-auto mb-1"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M5 12h14"
+                                  />
+                                </svg>
+                              )}
+                              <div className="text-xs font-mono bg-background-tertiary px-2 py-1 rounded">
+                                {asset.metadata.visualAssetType?.toUpperCase()}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Duration overlay */}
+                      {asset.duration && (
+                        <div className="absolute bottom-1 right-1 bg-background-primary/80 text-text-primary text-xs px-1 rounded">
+                          {formatDuration(asset.duration)}
+                        </div>
+                      )}
+
+                      {/* Delete button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeMediaAsset(asset.id);
+                          if (asset.url.startsWith('blob:')) {
+                            URL.revokeObjectURL(asset.url);
+                          }
+                        }}
+                        className="absolute top-1 right-1 bg-synapse-error hover:opacity-90 text-synapse-text-inverse rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove asset"
+                      >
+                        <svg
+                          className="w-3 h-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Asset info */}
+                    <div className="p-2">
+                      <p
+                        className="text-sm font-medium text-text-primary truncate"
+                        title={asset.name}
+                      >
+                        {asset.name}
+                      </p>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-xs text-text-tertiary uppercase">
+                          {asset.type.toUpperCase()}
+                        </span>
+                        <span className="text-xs text-text-tertiary">
+                          {formatFileSize(asset.metadata.fileSize)}
+                        </span>
+                      </div>
+                      {/* Educational content categorization */}
+                      {(() => {
+                        try {
+                          const suggestion = suggestTrackPlacement(asset);
+                          const track = suggestion.suggestedTrack;
+                          return (
+                            <div className="mt-1 flex items-center justify-between">
+                              <span
+                                className="inline-block px-1.5 py-0.5 rounded text-synapse-text-inverse text-[10px] font-medium"
+                                title={`Suggested Track: ${track.name} (${Math.round(
+                                  suggestion.confidence * 100
+                                )}% confidence) - ${suggestion.reason}`}
+                                style={{ backgroundColor: track.color }}
+                              >
+                                {track.name}
+                              </span>
+                              {/* Educational content type indicator */}
+                              <div className="flex items-center gap-1">
+                                {asset.type === 'code' && (
+                                  <span className="text-[9px] text-synapse-clip-code bg-synapse-clip-code/20 px-1 py-0.5 rounded font-mono">
+                                    {asset.metadata.language?.toUpperCase() ||
+                                      'CODE'}
+                                  </span>
+                                )}
+                                {asset.type === 'video' &&
+                                  suggestion.suggestedTrack.name === 'You' && (
+                                    <span className="text-[9px] text-synapse-error bg-synapse-error/20 px-1 py-0.5 rounded">
+                                      PERSONAL
+                                    </span>
+                                  )}
+                                {asset.type === 'video' &&
+                                  suggestion.suggestedTrack.name ===
+                                    'Visual' && (
+                                    <span className="text-[9px] text-synapse-success bg-synapse-success/20 px-1 py-0.5 rounded">
+                                      DEMO
+                                    </span>
+                                  )}
+                                {asset.type === 'audio' && (
+                                  <span className="text-[9px] text-synapse-warning bg-synapse-warning/20 px-1 py-0.5 rounded">
+                                    AUDIO
+                                  </span>
+                                )}
+                                {asset.type === 'visual-asset' && (
+                                  <span className="text-[9px] text-synapse-info bg-synapse-info/20 px-1 py-0.5 rounded">
+                                    VISUAL
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        } catch {
+                          return null;
+                        }
+                      })()}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         )}
       </div>
-
     </div>
   );
 }

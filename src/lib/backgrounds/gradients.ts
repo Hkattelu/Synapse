@@ -27,11 +27,11 @@ export const gradientPresets: GradientPreset[] = [
       angle: 45,
       colors: [
         { color: '#ff7e5f', position: 0 },
-        { color: '#feb47b', position: 1 }
-      ]
+        { color: '#feb47b', position: 1 },
+      ],
     },
     category: 'warm',
-    tags: ['orange', 'warm', 'sunset']
+    tags: ['orange', 'warm', 'sunset'],
   },
   {
     id: 'fire',
@@ -41,11 +41,11 @@ export const gradientPresets: GradientPreset[] = [
       angle: 90,
       colors: [
         { color: '#ff416c', position: 0 },
-        { color: '#ff4b2b', position: 1 }
-      ]
+        { color: '#ff4b2b', position: 1 },
+      ],
     },
     category: 'warm',
-    tags: ['red', 'fire', 'intense']
+    tags: ['red', 'fire', 'intense'],
   },
   {
     id: 'golden-hour',
@@ -57,11 +57,11 @@ export const gradientPresets: GradientPreset[] = [
       colors: [
         { color: '#ffeaa7', position: 0 },
         { color: '#fab1a0', position: 0.5 },
-        { color: '#e17055', position: 1 }
-      ]
+        { color: '#e17055', position: 1 },
+      ],
     },
     category: 'warm',
-    tags: ['gold', 'warm', 'radial']
+    tags: ['gold', 'warm', 'radial'],
   },
 
   // Cool gradients
@@ -73,11 +73,11 @@ export const gradientPresets: GradientPreset[] = [
       angle: 135,
       colors: [
         { color: '#667eea', position: 0 },
-        { color: '#764ba2', position: 1 }
-      ]
+        { color: '#764ba2', position: 1 },
+      ],
     },
     category: 'cool',
-    tags: ['blue', 'purple', 'ocean']
+    tags: ['blue', 'purple', 'ocean'],
   },
   {
     id: 'arctic',
@@ -87,11 +87,11 @@ export const gradientPresets: GradientPreset[] = [
       angle: 180,
       colors: [
         { color: '#74b9ff', position: 0 },
-        { color: '#0984e3', position: 1 }
-      ]
+        { color: '#0984e3', position: 1 },
+      ],
     },
     category: 'cool',
-    tags: ['blue', 'cold', 'arctic']
+    tags: ['blue', 'cold', 'arctic'],
   },
   {
     id: 'mint',
@@ -102,11 +102,11 @@ export const gradientPresets: GradientPreset[] = [
       centerY: 0.5,
       colors: [
         { color: '#00b894', position: 0 },
-        { color: '#00cec9', position: 1 }
-      ]
+        { color: '#00cec9', position: 1 },
+      ],
     },
     category: 'cool',
-    tags: ['green', 'mint', 'fresh']
+    tags: ['green', 'mint', 'fresh'],
   },
 
   // Neutral gradients
@@ -118,11 +118,11 @@ export const gradientPresets: GradientPreset[] = [
       angle: 45,
       colors: [
         { color: '#bdc3c7', position: 0 },
-        { color: '#2c3e50', position: 1 }
-      ]
+        { color: '#2c3e50', position: 1 },
+      ],
     },
     category: 'neutral',
-    tags: ['gray', 'silver', 'metallic']
+    tags: ['gray', 'silver', 'metallic'],
   },
   {
     id: 'charcoal',
@@ -132,11 +132,11 @@ export const gradientPresets: GradientPreset[] = [
       angle: 90,
       colors: [
         { color: '#434343', position: 0 },
-        { color: '#000000', position: 1 }
-      ]
+        { color: '#000000', position: 1 },
+      ],
     },
     category: 'neutral',
-    tags: ['black', 'dark', 'charcoal']
+    tags: ['black', 'dark', 'charcoal'],
   },
 
   // Vibrant gradients
@@ -153,11 +153,11 @@ export const gradientPresets: GradientPreset[] = [
         { color: '#00ff00', position: 0.5 },
         { color: '#0080ff', position: 0.67 },
         { color: '#8000ff', position: 0.83 },
-        { color: '#ff00ff', position: 1 }
-      ]
+        { color: '#ff00ff', position: 1 },
+      ],
     },
     category: 'vibrant',
-    tags: ['rainbow', 'colorful', 'vibrant']
+    tags: ['rainbow', 'colorful', 'vibrant'],
   },
   {
     id: 'neon',
@@ -169,12 +169,12 @@ export const gradientPresets: GradientPreset[] = [
       colors: [
         { color: '#ff006e', position: 0 },
         { color: '#8338ec', position: 0.5 },
-        { color: '#3a86ff', position: 1 }
-      ]
+        { color: '#3a86ff', position: 1 },
+      ],
     },
     category: 'vibrant',
-    tags: ['neon', 'bright', 'electric']
-  }
+    tags: ['neon', 'bright', 'electric'],
+  },
 ];
 
 export class GradientBuilder {
@@ -185,10 +185,10 @@ export class GradientBuilder {
       type: 'linear',
       colors: [
         { color: '#ffffff', position: 0 },
-        { color: '#000000', position: 1 }
+        { color: '#000000', position: 1 },
       ],
       angle: 0,
-      ...initialConfig
+      ...initialConfig,
     };
   }
 
@@ -216,12 +216,12 @@ export class GradientBuilder {
     if (colors.length < 2) {
       throw new Error('Gradient must have at least 2 colors');
     }
-    
+
     // Sort colors by position and validate
     const sortedColors = [...colors]
-      .map(color => ({
+      .map((color) => ({
         ...color,
-        position: this.clamp(color.position, 0, 1)
+        position: this.clamp(color.position, 0, 1),
       }))
       .sort((a, b) => a.position - b.position);
 
@@ -231,15 +231,20 @@ export class GradientBuilder {
 
   addColorStop(color: string, position: number): this {
     const normalizedPosition = this.clamp(position, 0, 1);
-    const newColors = [...this.config.colors, { color, position: normalizedPosition }];
+    const newColors = [
+      ...this.config.colors,
+      { color, position: normalizedPosition },
+    ];
     return this.setColors(newColors);
   }
 
   removeColorStop(index: number): this {
     if (this.config.colors.length <= 2) {
-      throw new Error('Cannot remove color stop: gradient must have at least 2 colors');
+      throw new Error(
+        'Cannot remove color stop: gradient must have at least 2 colors'
+      );
     }
-    
+
     const newColors = this.config.colors.filter((_, i) => i !== index);
     this.config.colors = newColors;
     return this;
@@ -254,9 +259,10 @@ export class GradientBuilder {
     updatedColors[index] = {
       ...updatedColors[index],
       ...updates,
-      position: updates.position !== undefined 
-        ? this.clamp(updates.position, 0, 1) 
-        : updatedColors[index].position
+      position:
+        updates.position !== undefined
+          ? this.clamp(updates.position, 0, 1)
+          : updatedColors[index].position,
     };
 
     return this.setColors(updatedColors);
@@ -289,20 +295,22 @@ export interface GradientValidationResult {
   warnings: string[];
 }
 
-export function validateGradient(config: GradientConfig): GradientValidationResult {
+export function validateGradient(
+  config: GradientConfig
+): GradientValidationResult {
   try {
     const result = validateGradientFull(config);
     return {
       isValid: result.isValid,
       errors: result.errors,
-      warnings: result.warnings
+      warnings: result.warnings,
     };
   } catch (error) {
     console.error('Gradient validation error:', error);
     return {
       isValid: false,
       errors: ['Validation module unavailable'],
-      warnings: []
+      warnings: [],
     };
   }
 }
@@ -332,18 +340,21 @@ export function generateGradientCSS(config: GradientConfig): string {
 }
 
 // Preset utilities
-export function getGradientPresetsByCategory(category: GradientPreset['category']): GradientPreset[] {
-  return gradientPresets.filter(preset => preset.category === category);
+export function getGradientPresetsByCategory(
+  category: GradientPreset['category']
+): GradientPreset[] {
+  return gradientPresets.filter((preset) => preset.category === category);
 }
 
 export function getGradientPresetById(id: string): GradientPreset | null {
-  return gradientPresets.find(preset => preset.id === id) || null;
+  return gradientPresets.find((preset) => preset.id === id) || null;
 }
 
 export function searchGradientPresets(query: string): GradientPreset[] {
   const lowerQuery = query.toLowerCase();
-  return gradientPresets.filter(preset => 
-    preset.name.toLowerCase().includes(lowerQuery) ||
-    preset.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+  return gradientPresets.filter(
+    (preset) =>
+      preset.name.toLowerCase().includes(lowerQuery) ||
+      preset.tags.some((tag) => tag.toLowerCase().includes(lowerQuery))
   );
 }

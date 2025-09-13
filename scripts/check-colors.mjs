@@ -63,9 +63,10 @@ if (hasError) {
   for (const p of problems) {
     console.error(` - ${p.file}: ${p.match} @ ${p.index}`);
   }
-  console.error('\nUse synapse tokens (bg-synapse-*, text-synapse-*, border-synapse-*) or CSS variables.');
+  console.error(
+    '\nUse synapse tokens (bg-synapse-*, text-synapse-*, border-synapse-*) or CSS variables.'
+  );
   process.exit(1);
 } else {
   console.log('Color hygiene check passed.');
 }
-

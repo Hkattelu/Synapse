@@ -1,6 +1,11 @@
 // Export format validation and compatibility checking
 
-import type { ExportSettings, VideoFormat, VideoCodec, AudioCodec } from '../types';
+import type {
+  ExportSettings,
+  VideoFormat,
+  VideoCodec,
+  AudioCodec,
+} from '../types';
 
 export interface ExportValidationResult {
   isValid: boolean;
@@ -89,18 +94,21 @@ const FORMAT_CAPABILITIES: Record<VideoFormat, FormatCapabilities> = {
 };
 
 // Codec compatibility matrix
-const CODEC_COMPATIBILITY: Record<VideoCodec, {
-  formats: VideoFormat[];
-  hardwareAcceleration: boolean;
-  qualityEfficiency: 'low' | 'medium' | 'high' | 'excellent';
-  fileSize: 'large' | 'medium' | 'small' | 'very-small';
-  browserSupport: {
-    chrome: boolean;
-    firefox: boolean;
-    safari: boolean;
-    edge: boolean;
-  };
-}> = {
+const CODEC_COMPATIBILITY: Record<
+  VideoCodec,
+  {
+    formats: VideoFormat[];
+    hardwareAcceleration: boolean;
+    qualityEfficiency: 'low' | 'medium' | 'high' | 'excellent';
+    fileSize: 'large' | 'medium' | 'small' | 'very-small';
+    browserSupport: {
+      chrome: boolean;
+      firefox: boolean;
+      safari: boolean;
+      edge: boolean;
+    };
+  }
+> = {
   h264: {
     formats: ['mp4', 'mov'],
     hardwareAcceleration: true,
@@ -166,7 +174,9 @@ const CODEC_COMPATIBILITY: Record<VideoCodec, {
 /**
  * Validates export settings for compatibility and optimal configuration
  */
-export function validateExportSettings(settings: ExportSettings): ExportValidationResult {
+export function validateExportSettings(
+  settings: ExportSettings
+): ExportValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
   const recommendations: string[] = [];
@@ -244,9 +254,13 @@ export function validateExportSettings(settings: ExportSettings): ExportValidati
     } else {
       // Transparency is supported, but provide recommendations
       if (settings.format === 'webm') {
-        recommendations.push('WebM with VP9 codec provides excellent transparency support and compression');
+        recommendations.push(
+          'WebM with VP9 codec provides excellent transparency support and compression'
+        );
       } else if (settings.format === 'mov') {
-        recommendations.push('MOV format provides high-quality transparency but larger file sizes');
+        recommendations.push(
+          'MOV format provides high-quality transparency but larger file sizes'
+        );
       }
     }
   }
@@ -254,7 +268,10 @@ export function validateExportSettings(settings: ExportSettings): ExportValidati
   // Validate resolution
   if (settings.width && settings.height) {
     const maxRes = formatCaps.maxResolution;
-    if (maxRes && (settings.width > maxRes.width || settings.height > maxRes.height)) {
+    if (
+      maxRes &&
+      (settings.width > maxRes.width || settings.height > maxRes.height)
+    ) {
       const issue: ExportCompatibilityIssue = {
         type: 'resolution',
         severity: 'warning',
@@ -269,7 +286,9 @@ export function validateExportSettings(settings: ExportSettings): ExportValidati
     // Check for unusual aspect ratios
     const aspectRatio = settings.width / settings.height;
     if (aspectRatio < 0.5 || aspectRatio > 3) {
-      warnings.push(`Unusual aspect ratio detected (${aspectRatio.toFixed(2)}:1). Ensure this is intentional.`);
+      warnings.push(
+        `Unusual aspect ratio detected (${aspectRatio.toFixed(2)}:1). Ensure this is intentional.`
+      );
     }
 
     // Check for very small resolutions
@@ -283,9 +302,13 @@ export function validateExportSettings(settings: ExportSettings): ExportValidati
     const recBitrates = formatCaps.recommendedBitrates;
     if (recBitrates) {
       if (settings.bitrate < recBitrates.min) {
-        warnings.push(`Bitrate ${settings.bitrate} kbps is below recommended minimum (${recBitrates.min} kbps)`);
+        warnings.push(
+          `Bitrate ${settings.bitrate} kbps is below recommended minimum (${recBitrates.min} kbps)`
+        );
       } else if (settings.bitrate > recBitrates.max) {
-        warnings.push(`Bitrate ${settings.bitrate} kbps is above recommended maximum (${recBitrates.max} kbps)`);
+        warnings.push(
+          `Bitrate ${settings.bitrate} kbps is above recommended maximum (${recBitrates.max} kbps)`
+        );
       }
     }
   }
@@ -293,9 +316,13 @@ export function validateExportSettings(settings: ExportSettings): ExportValidati
   // Audio bitrate validation
   if (settings.audioBitrate) {
     if (settings.audioBitrate < 64) {
-      warnings.push('Audio bitrate below 64 kbps may result in poor audio quality');
+      warnings.push(
+        'Audio bitrate below 64 kbps may result in poor audio quality'
+      );
     } else if (settings.audioBitrate > 320) {
-      warnings.push('Audio bitrate above 320 kbps provides diminishing returns');
+      warnings.push(
+        'Audio bitrate above 320 kbps provides diminishing returns'
+      );
     }
   }
 
@@ -318,16 +345,25 @@ export function validateExportSettings(settings: ExportSettings): ExportValidati
 
   // Quality and codec efficiency recommendations
   if (settings.quality === 'ultra' && codecInfo.qualityEfficiency === 'low') {
-    recommendations.push(`Consider using a more efficient codec like H.265 or VP9 for ultra quality exports`);
+    recommendations.push(
+      `Consider using a more efficient codec like H.265 or VP9 for ultra quality exports`
+    );
   }
 
   if (settings.quality === 'low' && codecInfo.fileSize === 'large') {
-    recommendations.push(`Consider using a more efficient codec to reduce file size at low quality`);
+    recommendations.push(
+      `Consider using a more efficient codec to reduce file size at low quality`
+    );
   }
 
   // Hardware acceleration recommendations
-  if (!codecInfo.hardwareAcceleration && (settings.width || 0) * (settings.height || 0) > 1920 * 1080) {
-    recommendations.push(`Codec ${settings.codec} doesn't support hardware acceleration. Consider H.264 or H.265 for faster encoding of high-resolution content`);
+  if (
+    !codecInfo.hardwareAcceleration &&
+    (settings.width || 0) * (settings.height || 0) > 1920 * 1080
+  ) {
+    recommendations.push(
+      `Codec ${settings.codec} doesn't support hardware acceleration. Consider H.264 or H.265 for faster encoding of high-resolution content`
+    );
   }
 
   return {
@@ -342,7 +378,9 @@ export function validateExportSettings(settings: ExportSettings): ExportValidati
 /**
  * Get transparency compatibility warning for current settings
  */
-export function getTransparencyCompatibilityWarning(settings: ExportSettings): string | null {
+export function getTransparencyCompatibilityWarning(
+  settings: ExportSettings
+): string | null {
   if (!settings.transparentBackground) {
     return null;
   }
@@ -365,7 +403,9 @@ export function isTransparencySupported(format: VideoFormat): boolean {
 /**
  * Get recommended settings for a specific use case
  */
-export function getRecommendedSettings(useCase: 'web' | 'social' | 'broadcast' | 'archive'): Partial<ExportSettings> {
+export function getRecommendedSettings(
+  useCase: 'web' | 'social' | 'broadcast' | 'archive'
+): Partial<ExportSettings> {
   switch (useCase) {
     case 'web':
       return {
@@ -447,7 +487,11 @@ export function getFormatRecommendations(requirements: {
       format: 'webm' as VideoFormat,
       codec: 'vp9' as VideoCodec,
       reason: 'Best transparency support with excellent compression',
-      pros: ['Supports transparency', 'Excellent compression', 'Good browser support'],
+      pros: [
+        'Supports transparency',
+        'Excellent compression',
+        'Good browser support',
+      ],
       cons: ['Not supported in Safari', 'Slower encoding'],
     });
 
@@ -464,7 +508,11 @@ export function getFormatRecommendations(requirements: {
         format: 'mp4' as VideoFormat,
         codec: 'h264' as VideoCodec,
         reason: 'Maximum compatibility across all platforms and browsers',
-        pros: ['Universal support', 'Hardware acceleration', 'Proven reliability'],
+        pros: [
+          'Universal support',
+          'Hardware acceleration',
+          'Proven reliability',
+        ],
         cons: ['No transparency support', 'Less efficient than newer codecs'],
       });
     }
@@ -482,7 +530,11 @@ export function getFormatRecommendations(requirements: {
         format: 'mp4' as VideoFormat,
         codec: 'h265' as VideoCodec,
         reason: 'Better compression than H.264 with good compatibility',
-        pros: ['Excellent compression', 'Hardware acceleration', 'High quality'],
+        pros: [
+          'Excellent compression',
+          'Hardware acceleration',
+          'High quality',
+        ],
         cons: ['Limited browser support', 'Patent licensing'],
       });
     }
@@ -492,7 +544,11 @@ export function getFormatRecommendations(requirements: {
         format: 'mov' as VideoFormat,
         codec: 'h265' as VideoCodec,
         reason: 'Professional quality with efficient compression',
-        pros: ['Excellent quality', 'Efficient compression', 'Professional standard'],
+        pros: [
+          'Excellent quality',
+          'Efficient compression',
+          'Professional standard',
+        ],
         cons: ['Limited browser support', 'Larger files than VP9'],
       });
     }
@@ -518,21 +574,29 @@ export function validateTransparencySettings(settings: ExportSettings): {
 
   // Check format support
   if (!isTransparencySupported(settings.format)) {
-    errors.push(`Format ${settings.format} does not support transparent backgrounds`);
+    errors.push(
+      `Format ${settings.format} does not support transparent backgrounds`
+    );
   }
 
   // Check codec compatibility with transparency
   if (settings.format === 'webm' && !['vp8', 'vp9'].includes(settings.codec)) {
-    errors.push(`Codec ${settings.codec} does not support transparency in WebM format`);
+    errors.push(
+      `Codec ${settings.codec} does not support transparency in WebM format`
+    );
   }
 
   if (settings.format === 'mov' && !['h264', 'h265'].includes(settings.codec)) {
-    errors.push(`Codec ${settings.codec} does not support transparency in MOV format`);
+    errors.push(
+      `Codec ${settings.codec} does not support transparency in MOV format`
+    );
   }
 
   // Warn about file size implications
   if (settings.transparentBackground && settings.quality === 'ultra') {
-    warnings.push('Transparent backgrounds with ultra quality will result in very large file sizes');
+    warnings.push(
+      'Transparent backgrounds with ultra quality will result in very large file sizes'
+    );
   }
 
   // Warn about browser compatibility
@@ -541,7 +605,9 @@ export function validateTransparencySettings(settings: ExportSettings): {
   }
 
   if (settings.format === 'mov') {
-    warnings.push('MOV format is not supported for web playback in most browsers');
+    warnings.push(
+      'MOV format is not supported for web playback in most browsers'
+    );
   }
 
   return {

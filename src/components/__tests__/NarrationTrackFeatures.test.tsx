@@ -4,7 +4,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NarrationTrackFeatures } from '../NarrationTrackFeatures';
 import type { TimelineItem, MediaAsset } from '../../lib/types';
 import type { EducationalTrack } from '../../lib/educationalTypes';
-import { EDUCATIONAL_TRACKS, DEFAULT_NARRATION_PROPERTIES } from '../../lib/educationalTypes';
+import {
+  EDUCATIONAL_TRACKS,
+  DEFAULT_NARRATION_PROPERTIES,
+} from '../../lib/educationalTypes';
 
 // Mock audio context and related APIs
 const mockAudioContext = {
@@ -79,8 +82,8 @@ describe('NarrationTrackFeatures', () => {
     keyframes: [],
   };
 
-  const narrationTrack = EDUCATIONAL_TRACKS.find(t => t.id === 'narration')!;
-  
+  const narrationTrack = EDUCATIONAL_TRACKS.find((t) => t.id === 'narration')!;
+
   const availableTracks = [
     { id: 0, name: 'Code', color: '#8B5CF6' },
     { id: 1, name: 'Visual', color: '#10B981' },
@@ -105,7 +108,7 @@ describe('NarrationTrackFeatures', () => {
 
   it('renders narration track features with tabs', () => {
     render(<NarrationTrackFeatures {...defaultProps} />);
-    
+
     expect(screen.getByText('Waveform')).toBeInTheDocument();
     expect(screen.getByText('Levels')).toBeInTheDocument();
     expect(screen.getByText('Ducking')).toBeInTheDocument();
@@ -115,7 +118,7 @@ describe('NarrationTrackFeatures', () => {
 
   it('shows waveform tab by default', () => {
     render(<NarrationTrackFeatures {...defaultProps} />);
-    
+
     // Waveform tab should be active
     const waveformTab = screen.getByText('Waveform').closest('button');
     expect(waveformTab).toHaveClass('text-accent-blue');
@@ -123,15 +126,15 @@ describe('NarrationTrackFeatures', () => {
 
   it('switches between tabs correctly', async () => {
     render(<NarrationTrackFeatures {...defaultProps} />);
-    
+
     // Click on Levels tab
     fireEvent.click(screen.getByText('Levels'));
-    
+
     await waitFor(() => {
       const levelsTab = screen.getByText('Levels').closest('button');
       expect(levelsTab).toHaveClass('text-accent-blue');
     });
-    
+
     // Should show volume controls
     expect(screen.getByText(/Volume \(/)).toBeInTheDocument();
     expect(screen.getByText(/Gain \(/)).toBeInTheDocument();
@@ -139,15 +142,17 @@ describe('NarrationTrackFeatures', () => {
 
   it('handles volume changes', async () => {
     const onItemUpdate = vi.fn();
-    render(<NarrationTrackFeatures {...defaultProps} onItemUpdate={onItemUpdate} />);
-    
+    render(
+      <NarrationTrackFeatures {...defaultProps} onItemUpdate={onItemUpdate} />
+    );
+
     // Switch to Levels tab
     fireEvent.click(screen.getByText('Levels'));
-    
+
     await waitFor(() => {
       const volumeSlider = screen.getByDisplayValue('0.8');
       fireEvent.change(volumeSlider, { target: { value: '0.6' } });
-      
+
       expect(onItemUpdate).toHaveBeenCalledWith({
         ...mockItem,
         properties: {
@@ -160,15 +165,17 @@ describe('NarrationTrackFeatures', () => {
 
   it('handles gain changes', async () => {
     const onItemUpdate = vi.fn();
-    render(<NarrationTrackFeatures {...defaultProps} onItemUpdate={onItemUpdate} />);
-    
+    render(
+      <NarrationTrackFeatures {...defaultProps} onItemUpdate={onItemUpdate} />
+    );
+
     // Switch to Levels tab
     fireEvent.click(screen.getByText('Levels'));
-    
+
     await waitFor(() => {
       const gainSlider = screen.getByDisplayValue('0');
       fireEvent.change(gainSlider, { target: { value: '5' } });
-      
+
       expect(onItemUpdate).toHaveBeenCalledWith({
         ...mockItem,
         properties: {
@@ -181,10 +188,10 @@ describe('NarrationTrackFeatures', () => {
 
   it('shows ducking controls in ducking tab', async () => {
     render(<NarrationTrackFeatures {...defaultProps} />);
-    
+
     // Switch to Ducking tab
     fireEvent.click(screen.getByText('Ducking'));
-    
+
     await waitFor(() => {
       expect(screen.getByText('Audio Ducking')).toBeInTheDocument();
       expect(screen.getByText('Trigger Threshold')).toBeInTheDocument();
@@ -194,10 +201,10 @@ describe('NarrationTrackFeatures', () => {
 
   it('shows sync tools in sync tab', async () => {
     render(<NarrationTrackFeatures {...defaultProps} />);
-    
+
     // Switch to Sync tab
     fireEvent.click(screen.getByText('Sync'));
-    
+
     await waitFor(() => {
       expect(screen.getByText('Timing Synchronization')).toBeInTheDocument();
       expect(screen.getByText('Add Point')).toBeInTheDocument();
@@ -207,10 +214,10 @@ describe('NarrationTrackFeatures', () => {
 
   it('shows processing options in processing tab', async () => {
     render(<NarrationTrackFeatures {...defaultProps} />);
-    
+
     // Switch to Processing tab
     fireEvent.click(screen.getByText('Processing'));
-    
+
     await waitFor(() => {
       expect(screen.getByText('Audio Processing')).toBeInTheDocument();
       expect(screen.getByText('High-pass filter')).toBeInTheDocument();
@@ -221,15 +228,17 @@ describe('NarrationTrackFeatures', () => {
 
   it('handles processing option toggles', async () => {
     const onItemUpdate = vi.fn();
-    render(<NarrationTrackFeatures {...defaultProps} onItemUpdate={onItemUpdate} />);
-    
+    render(
+      <NarrationTrackFeatures {...defaultProps} onItemUpdate={onItemUpdate} />
+    );
+
     // Switch to Processing tab
     fireEvent.click(screen.getByText('Processing'));
-    
+
     await waitFor(() => {
       const noiseReductionCheckbox = screen.getByLabelText(/Noise reduction/);
       fireEvent.click(noiseReductionCheckbox);
-      
+
       expect(onItemUpdate).toHaveBeenCalledWith({
         ...mockItem,
         properties: {
@@ -242,15 +251,17 @@ describe('NarrationTrackFeatures', () => {
 
   it('handles waveform color changes', async () => {
     const onItemUpdate = vi.fn();
-    render(<NarrationTrackFeatures {...defaultProps} onItemUpdate={onItemUpdate} />);
-    
+    render(
+      <NarrationTrackFeatures {...defaultProps} onItemUpdate={onItemUpdate} />
+    );
+
     // Switch to Processing tab
     fireEvent.click(screen.getByText('Processing'));
-    
+
     await waitFor(() => {
       const colorInput = screen.getByDisplayValue('#F59E0B');
       fireEvent.change(colorInput, { target: { value: '#FF0000' } });
-      
+
       expect(onItemUpdate).toHaveBeenCalledWith({
         ...mockItem,
         properties: {
@@ -263,7 +274,7 @@ describe('NarrationTrackFeatures', () => {
 
   it('shows message when no audio asset is provided', () => {
     render(<NarrationTrackFeatures {...defaultProps} asset={undefined} />);
-    
+
     expect(screen.getByText('No audio asset selected')).toBeInTheDocument();
   });
 
@@ -272,16 +283,16 @@ describe('NarrationTrackFeatures', () => {
       ...mockAsset,
       type: 'video',
     };
-    
+
     render(<NarrationTrackFeatures {...defaultProps} asset={videoAsset} />);
-    
+
     expect(screen.getByText('No audio asset selected')).toBeInTheDocument();
   });
 
   it('calls onSeek when waveform is clicked', async () => {
     const onSeek = vi.fn();
     render(<NarrationTrackFeatures {...defaultProps} onSeek={onSeek} />);
-    
+
     // The waveform component should be rendered in the default tab
     // This test would need the actual waveform component to be rendered
     // For now, we'll test that the onSeek prop is passed correctly
@@ -290,11 +301,13 @@ describe('NarrationTrackFeatures', () => {
 
   it('calls onPlayPause when play/pause is triggered', async () => {
     const onPlayPause = vi.fn();
-    render(<NarrationTrackFeatures {...defaultProps} onPlayPause={onPlayPause} />);
-    
+    render(
+      <NarrationTrackFeatures {...defaultProps} onPlayPause={onPlayPause} />
+    );
+
     // Switch to Sync tab where play/pause controls are available
     fireEvent.click(screen.getByText('Sync'));
-    
+
     await waitFor(() => {
       // The play/pause functionality should be available through sync tools
       expect(onPlayPause).toBeDefined();
@@ -308,16 +321,16 @@ describe('NarrationTrackFeatures', () => {
         volume: 0.5, // Only basic property
       },
     };
-    
+
     const onItemUpdate = vi.fn();
     render(
-      <NarrationTrackFeatures 
-        {...defaultProps} 
+      <NarrationTrackFeatures
+        {...defaultProps}
         item={itemWithoutNarrationProps}
         onItemUpdate={onItemUpdate}
       />
     );
-    
+
     // Component should initialize with default narration properties
     expect(screen.getByText('Waveform')).toBeInTheDocument();
   });

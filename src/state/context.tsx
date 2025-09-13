@@ -1,6 +1,12 @@
 // React Context for global state management
 
-import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  useRef,
+} from 'react';
 import type { ReactNode } from 'react';
 import type { AppState, AppAction, AppContextType } from './types';
 import { appReducer, initialState } from './reducers';
@@ -74,7 +80,8 @@ export function AppProvider({ children }: AppProviderProps) {
           // Prefer loading the first sample project in dev
           const preferredId = sampleStored[0]?.project.id;
           const starterProject =
-            (preferredId && projects.find((p) => p.project.id === preferredId)) ||
+            (preferredId &&
+              projects.find((p) => p.project.id === preferredId)) ||
             projects.find((p) => sampleIds.has(p.project.id));
 
           if (starterProject) {

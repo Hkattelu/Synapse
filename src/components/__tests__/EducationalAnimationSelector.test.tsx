@@ -17,7 +17,8 @@ vi.mock('../../lib/educationalAnimationPresets', () => ({
           name: 'Typewriter (Educational)',
           type: 'entrance',
           trackType: 'Code',
-          educationalPurpose: 'Perfect for beginners - shows code being written character by character',
+          educationalPurpose:
+            'Perfect for beginners - shows code being written character by character',
           difficulty: 'beginner',
           recommendedFor: ['tutorials', 'step-by-step guides'],
           previewDescription: 'Code appears as if being typed in real-time',
@@ -78,7 +79,7 @@ vi.mock('../../lib/educationalAnimationPresets', () => ({
       ],
     };
     const trackPresets = allPresets[trackType] || [];
-    return trackPresets.filter(p => p.difficulty === difficulty);
+    return trackPresets.filter((p) => p.difficulty === difficulty);
   }),
   getRecommendedPresets: vi.fn((trackType, contentType) => {
     if (trackType === 'Code' && contentType === 'code') {
@@ -161,13 +162,19 @@ describe('EducationalAnimationSelector', () => {
       />
     );
 
-    expect(screen.getByText('Educational Animations - Code Track')).toBeInTheDocument();
-    expect(screen.getByText('Choose animations designed specifically for educational content')).toBeInTheDocument();
+    expect(
+      screen.getByText('Educational Animations - Code Track')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Choose animations designed specifically for educational content'
+      )
+    ).toBeInTheDocument();
   });
 
   it('should show message for non-educational tracks', () => {
     const nonEducationalItem = { ...mockTimelineItem, track: 99 };
-    
+
     render(
       <EducationalAnimationSelector
         item={nonEducationalItem}
@@ -175,7 +182,11 @@ describe('EducationalAnimationSelector', () => {
       />
     );
 
-    expect(screen.getByText('No educational animations available for this track type.')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'No educational animations available for this track type.'
+      )
+    ).toBeInTheDocument();
   });
 
   it('should display difficulty filter buttons', () => {
@@ -216,7 +227,9 @@ describe('EducationalAnimationSelector', () => {
       />
     );
 
-    expect(screen.getByText(/Recommended for code content/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Recommended for code content/)
+    ).toBeInTheDocument();
   });
 
   it('should display preset cards with correct information', () => {
@@ -277,7 +290,9 @@ describe('EducationalAnimationSelector', () => {
 
     // Should show preview section
     expect(screen.getByText('Preview')).toBeInTheDocument();
-    expect(screen.getByText('Code appears as if being typed in real-time')).toBeInTheDocument();
+    expect(
+      screen.getByText('Code appears as if being typed in real-time')
+    ).toBeInTheDocument();
   });
 
   it('should hide preview when Hide Preview button is clicked', async () => {
@@ -319,7 +334,11 @@ describe('EducationalAnimationSelector', () => {
       expect(screen.getByText('Custom Parameters')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Adjust parameters for the selected animation (optional)')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Adjust parameters for the selected animation (optional)'
+      )
+    ).toBeInTheDocument();
   });
 
   it('should display preset count in header', () => {
@@ -358,8 +377,12 @@ describe('EducationalAnimationSelector', () => {
   });
 
   it('should handle Visual track items correctly', () => {
-    const visualItem = { ...mockTimelineItem, track: 1, type: 'video' as const };
-    
+    const visualItem = {
+      ...mockTimelineItem,
+      track: 1,
+      type: 'video' as const,
+    };
+
     render(
       <EducationalAnimationSelector
         item={visualItem}
@@ -367,7 +390,9 @@ describe('EducationalAnimationSelector', () => {
       />
     );
 
-    expect(screen.getByText('Educational Animations - Visual Track')).toBeInTheDocument();
+    expect(
+      screen.getByText('Educational Animations - Visual Track')
+    ).toBeInTheDocument();
   });
 
   it('should apply custom parameters when provided', async () => {
@@ -407,13 +432,17 @@ describe('PresetCard Component', () => {
 
     // Check preset name
     expect(screen.getByText('Typewriter (Educational)')).toBeInTheDocument();
-    
+
     // Check educational purpose
-    expect(screen.getByText('Perfect for beginners - shows code being written character by character')).toBeInTheDocument();
-    
+    expect(
+      screen.getByText(
+        'Perfect for beginners - shows code being written character by character'
+      )
+    ).toBeInTheDocument();
+
     // Check duration
     expect(screen.getByText('3s')).toBeInTheDocument();
-    
+
     // Check easing
     expect(screen.getByText('linear')).toBeInTheDocument();
   });
@@ -445,7 +474,9 @@ describe('CustomParametersEditor Component', () => {
     fireEvent.click(previewButtons[0]);
 
     await waitFor(() => {
-      expect(screen.getByText('No customizable parameters for this preset.')).toBeInTheDocument();
+      expect(
+        screen.getByText('No customizable parameters for this preset.')
+      ).toBeInTheDocument();
     });
   });
 });

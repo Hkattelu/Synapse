@@ -69,4 +69,3 @@ describe('MediaBin - suggested educational track badges', () => {
     expect(badge).toHaveTextContent('Narration');
   });
 });
-

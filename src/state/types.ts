@@ -28,13 +28,13 @@ export type TimelineAction =
   | { type: 'ADD_TIMELINE_ITEM'; payload: TimelineItem }
   | { type: 'REMOVE_TIMELINE_ITEM'; payload: string }
   | {
-    type: 'UPDATE_TIMELINE_ITEM';
-    payload: { id: string; updates: Partial<TimelineItem> };
-  }
+      type: 'UPDATE_TIMELINE_ITEM';
+      payload: { id: string; updates: Partial<TimelineItem> };
+    }
   | {
-    type: 'MOVE_TIMELINE_ITEM';
-    payload: { id: string; startTime: number; track: number };
-  }
+      type: 'MOVE_TIMELINE_ITEM';
+      payload: { id: string; startTime: number; track: number };
+    }
   | { type: 'RESIZE_TIMELINE_ITEM'; payload: { id: string; duration: number } }
   | { type: 'SELECT_TIMELINE_ITEMS'; payload: string[] }
   | { type: 'CLEAR_TIMELINE_SELECTION' }
@@ -44,9 +44,9 @@ export type MediaAction =
   | { type: 'ADD_MEDIA_ASSET'; payload: MediaAsset }
   | { type: 'REMOVE_MEDIA_ASSET'; payload: string }
   | {
-    type: 'UPDATE_MEDIA_ASSET';
-    payload: { id: string; updates: Partial<MediaAsset> };
-  };
+      type: 'UPDATE_MEDIA_ASSET';
+      payload: { id: string; updates: Partial<MediaAsset> };
+    };
 
 export type UIAction =
   | { type: 'SET_CURRENT_VIEW'; payload: 'dashboard' | 'studio' }

@@ -96,7 +96,9 @@ export const VisualAssetSequence: React.FC<VisualAssetSequenceProps> = ({
       >
         {visualAssetType === 'arrow' && <ArrowAsset item={item} />}
         {visualAssetType === 'box' && <BoxAsset item={item} />}
-        {visualAssetType === 'finger-pointer' && <FingerPointerAsset item={item} />}
+        {visualAssetType === 'finger-pointer' && (
+          <FingerPointerAsset item={item} />
+        )}
         {visualAssetType === 'circle' && <CircleAsset item={item} />}
         {visualAssetType === 'line' && <LineAsset item={item} />}
       </div>
@@ -116,18 +118,18 @@ const ArrowAsset: React.FC<{ item: TimelineItem }> = ({ item }) => {
   const getArrowPath = () => {
     const size = 60;
     const headSize = 15;
-    
+
     switch (arrowDirection) {
       case 'right':
-        return `M 0 ${size/2} L ${size - headSize} ${size/2} M ${size - headSize} ${headSize} L ${size} ${size/2} L ${size - headSize} ${size - headSize}`;
+        return `M 0 ${size / 2} L ${size - headSize} ${size / 2} M ${size - headSize} ${headSize} L ${size} ${size / 2} L ${size - headSize} ${size - headSize}`;
       case 'left':
-        return `M ${size} ${size/2} L ${headSize} ${size/2} M ${headSize} ${headSize} L 0 ${size/2} L ${headSize} ${size - headSize}`;
+        return `M ${size} ${size / 2} L ${headSize} ${size / 2} M ${headSize} ${headSize} L 0 ${size / 2} L ${headSize} ${size - headSize}`;
       case 'up':
-        return `M ${size/2} ${size} L ${size/2} ${headSize} M ${headSize} ${headSize} L ${size/2} 0 L ${size - headSize} ${headSize}`;
+        return `M ${size / 2} ${size} L ${size / 2} ${headSize} M ${headSize} ${headSize} L ${size / 2} 0 L ${size - headSize} ${headSize}`;
       case 'down':
-        return `M ${size/2} 0 L ${size/2} ${size - headSize} M ${headSize} ${size - headSize} L ${size/2} ${size} L ${size - headSize} ${size - headSize}`;
+        return `M ${size / 2} 0 L ${size / 2} ${size - headSize} M ${headSize} ${size - headSize} L ${size / 2} ${size} L ${size - headSize} ${size - headSize}`;
       default:
-        return `M 0 ${size/2} L ${size - headSize} ${size/2} M ${size - headSize} ${headSize} L ${size} ${size/2} L ${size - headSize} ${size - headSize}`;
+        return `M 0 ${size / 2} L ${size - headSize} ${size / 2} M ${size - headSize} ${headSize} L ${size} ${size / 2} L ${size - headSize} ${size - headSize}`;
     }
   };
 
@@ -169,7 +171,9 @@ const BoxAsset: React.FC<{ item: TimelineItem }> = ({ item }) => {
         ry={borderRadius}
         stroke={strokeColor}
         strokeWidth={strokeWidth}
-        strokeDasharray={boxStyle === 'dashed' ? '8,4' : boxStyle === 'dotted' ? '2,2' : 'none'}
+        strokeDasharray={
+          boxStyle === 'dashed' ? '8,4' : boxStyle === 'dotted' ? '2,2' : 'none'
+        }
         fill={fillColor}
       />
     </svg>
@@ -232,7 +236,13 @@ const CircleAsset: React.FC<{ item: TimelineItem }> = ({ item }) => {
         r={radius}
         stroke={strokeColor}
         strokeWidth={strokeWidth}
-        strokeDasharray={circleStyle === 'dashed' ? '8,4' : circleStyle === 'dotted' ? '2,2' : 'none'}
+        strokeDasharray={
+          circleStyle === 'dashed'
+            ? '8,4'
+            : circleStyle === 'dotted'
+              ? '2,2'
+              : 'none'
+        }
         fill={fillColor}
       />
     </svg>
@@ -254,7 +264,7 @@ const LineAsset: React.FC<{ item: TimelineItem }> = ({ item }) => {
   const minY = Math.min(lineStartY, lineEndY);
   const maxX = Math.max(lineStartX, lineEndX);
   const maxY = Math.max(lineStartY, lineEndY);
-  
+
   const width = maxX - minX + strokeWidth;
   const height = maxY - minY + strokeWidth;
 
@@ -267,7 +277,13 @@ const LineAsset: React.FC<{ item: TimelineItem }> = ({ item }) => {
         y2={lineEndY - minY + strokeWidth / 2}
         stroke={strokeColor}
         strokeWidth={strokeWidth}
-        strokeDasharray={lineStyle === 'dashed' ? '8,4' : lineStyle === 'dotted' ? '2,2' : 'none'}
+        strokeDasharray={
+          lineStyle === 'dashed'
+            ? '8,4'
+            : lineStyle === 'dotted'
+              ? '2,2'
+              : 'none'
+        }
         strokeLinecap="round"
       />
     </svg>

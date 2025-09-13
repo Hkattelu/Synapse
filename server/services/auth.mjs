@@ -12,7 +12,12 @@ export const register = async ({ email, password }) => {
   const existing = users.get(email.toLowerCase());
   if (existing) throw new Error('User already exists');
   const passwordHash = await bcrypt.hash(password, 10);
-  const user = { id: String(idSeq++), email: email.toLowerCase(), passwordHash, createdAt: new Date().toISOString() };
+  const user = {
+    id: String(idSeq++),
+    email: email.toLowerCase(),
+    passwordHash,
+    createdAt: new Date().toISOString(),
+  };
   users.set(user.email, user);
   const token = signToken({ sub: user.id, email: user.email });
   return { user: { id: user.id, email: user.email }, token };
@@ -35,7 +40,11 @@ export const getUserFromToken = (token) => {
 };
 
 export const requireAuth = (req, res, next) => {
-  const token = req.cookies?.token || (req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.slice(7) : null);
+  const token =
+    req.cookies?.token ||
+    (req.headers.authorization?.startsWith('Bearer ')
+      ? req.headers.authorization.slice(7)
+      : null);
   const user = token ? getUserFromToken(token) : null;
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   req.user = user;

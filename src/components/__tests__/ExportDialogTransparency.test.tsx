@@ -11,13 +11,21 @@ vi.mock('../../lib/exportManagerClient', () => ({
   formatFileSize: (bytes: number) => `${bytes} bytes`,
   formatDuration: (seconds: number) => `${seconds}s`,
   isTransparencySupported: (format: string, codec: string) => {
-    return (format === 'mov' && (codec === 'h264' || codec === 'h265')) ||
-           (format === 'webm' && (codec === 'vp8' || codec === 'vp9'));
+    return (
+      (format === 'mov' && (codec === 'h264' || codec === 'h265')) ||
+      (format === 'webm' && (codec === 'vp8' || codec === 'vp9'))
+    );
   },
   getTransparencyCompatibilityWarning: (settings: any) => {
     if (!settings.transparentBackground) return null;
-    if (!((settings.format === 'mov' && (settings.codec === 'h264' || settings.codec === 'h265')) ||
-          (settings.format === 'webm' && (settings.codec === 'vp8' || settings.codec === 'vp9')))) {
+    if (
+      !(
+        (settings.format === 'mov' &&
+          (settings.codec === 'h264' || settings.codec === 'h265')) ||
+        (settings.format === 'webm' &&
+          (settings.codec === 'vp8' || settings.codec === 'vp9'))
+      )
+    ) {
       return `Transparent backgrounds are not supported with ${settings.format.toUpperCase()} + ${settings.codec.toUpperCase()}. Consider using MOV + H.264 or WebM + VP9.`;
     }
     return null;
@@ -25,22 +33,34 @@ vi.mock('../../lib/exportManagerClient', () => ({
   validateTransparencySettings: (settings: any) => {
     const warnings: string[] = [];
     const errors: string[] = [];
-    
+
     if (settings.transparentBackground) {
-      if (!((settings.format === 'mov' && (settings.codec === 'h264' || settings.codec === 'h265')) ||
-            (settings.format === 'webm' && (settings.codec === 'vp8' || settings.codec === 'vp9')))) {
-        errors.push(`Transparent backgrounds require MOV + H.264/H.265 or WebM + VP8/VP9. Current: ${settings.format.toUpperCase()} + ${settings.codec.toUpperCase()}`);
+      if (
+        !(
+          (settings.format === 'mov' &&
+            (settings.codec === 'h264' || settings.codec === 'h265')) ||
+          (settings.format === 'webm' &&
+            (settings.codec === 'vp8' || settings.codec === 'vp9'))
+        )
+      ) {
+        errors.push(
+          `Transparent backgrounds require MOV + H.264/H.265 or WebM + VP8/VP9. Current: ${settings.format.toUpperCase()} + ${settings.codec.toUpperCase()}`
+        );
       }
-      
+
       if (settings.includeWallpaper && settings.includeGradient) {
-        warnings.push('Both wallpaper and gradient backgrounds are enabled. This may reduce the transparency effect.');
+        warnings.push(
+          'Both wallpaper and gradient backgrounds are enabled. This may reduce the transparency effect.'
+        );
       }
-      
+
       if (settings.quality === 'low') {
-        warnings.push('Low quality settings may affect alpha channel quality. Consider using medium or higher quality.');
+        warnings.push(
+          'Low quality settings may affect alpha channel quality. Consider using medium or higher quality.'
+        );
       }
     }
-    
+
     return {
       isValid: errors.length === 0,
       warnings,
@@ -116,9 +136,7 @@ vi.mock('../../state/exportContext', () => ({
 
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AppProvider>
-    <ExportProvider>
-      {children}
-    </ExportProvider>
+    <ExportProvider>{children}</ExportProvider>
   </AppProvider>
 );
 
@@ -139,7 +157,9 @@ describe('ExportDialog Transparency Controls', () => {
 
     // Check for transparency settings section
     expect(screen.getByText('Transparency Settings')).toBeInTheDocument();
-    expect(screen.getByText('Enable transparent background')).toBeInTheDocument();
+    expect(
+      screen.getByText('Enable transparent background')
+    ).toBeInTheDocument();
   });
 
   it('should toggle transparent background setting', () => {
@@ -153,7 +173,9 @@ describe('ExportDialog Transparency Controls', () => {
     fireEvent.click(screen.getByText('Custom Settings'));
 
     // Find and click the transparency checkbox
-    const transparencyCheckbox = screen.getByLabelText('Enable transparent background');
+    const transparencyCheckbox = screen.getByLabelText(
+      'Enable transparent background'
+    );
     fireEvent.click(transparencyCheckbox);
 
     // Verify updateSettings was called
@@ -164,20 +186,21 @@ describe('ExportDialog Transparency Controls', () => {
 
   it.skip('should show background inclusion options when transparency is enabled', () => {
     // Mock settings with transparency enabled
-    vi.mocked(vi.importActual('../../state/exportContext')).useExportSettings = () => ({
-      settings: {
-        format: 'mov',
-        codec: 'h264',
-        quality: 'high',
-        audioCodec: 'aac',
-        transparentBackground: true,
-        includeWallpaper: true,
-        includeGradient: true,
-      },
-      presets: [],
-      updateSettings: mockUpdateSettings,
-      applyPreset: vi.fn(),
-    });
+    vi.mocked(vi.importActual('../../state/exportContext')).useExportSettings =
+      () => ({
+        settings: {
+          format: 'mov',
+          codec: 'h264',
+          quality: 'high',
+          audioCodec: 'aac',
+          transparentBackground: true,
+          includeWallpaper: true,
+          includeGradient: true,
+        },
+        presets: [],
+        updateSettings: mockUpdateSettings,
+        applyPreset: vi.fn(),
+      });
 
     render(
       <TestWrapper>
@@ -189,27 +212,34 @@ describe('ExportDialog Transparency Controls', () => {
     fireEvent.click(screen.getByText('Custom Settings'));
 
     // Check for background inclusion options
-    expect(screen.getByText('Background Elements to Include:')).toBeInTheDocument();
-    expect(screen.getByText('Include wallpaper backgrounds')).toBeInTheDocument();
-    expect(screen.getByText('Include gradient backgrounds')).toBeInTheDocument();
+    expect(
+      screen.getByText('Background Elements to Include:')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Include wallpaper backgrounds')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Include gradient backgrounds')
+    ).toBeInTheDocument();
   });
 
   it.skip('should show transparency preview with checkerboard pattern', () => {
     // Mock settings with transparency enabled
-    vi.mocked(vi.importActual('../../state/exportContext')).useExportSettings = () => ({
-      settings: {
-        format: 'mov',
-        codec: 'h264',
-        quality: 'high',
-        audioCodec: 'aac',
-        transparentBackground: true,
-        includeWallpaper: true,
-        includeGradient: true,
-      },
-      presets: [],
-      updateSettings: mockUpdateSettings,
-      applyPreset: vi.fn(),
-    });
+    vi.mocked(vi.importActual('../../state/exportContext')).useExportSettings =
+      () => ({
+        settings: {
+          format: 'mov',
+          codec: 'h264',
+          quality: 'high',
+          audioCodec: 'aac',
+          transparentBackground: true,
+          includeWallpaper: true,
+          includeGradient: true,
+        },
+        presets: [],
+        updateSettings: mockUpdateSettings,
+        applyPreset: vi.fn(),
+      });
 
     render(
       <TestWrapper>
@@ -223,25 +253,28 @@ describe('ExportDialog Transparency Controls', () => {
     // Check for transparency preview
     expect(screen.getByText('Transparency Preview')).toBeInTheDocument();
     expect(screen.getByText('Transparent')).toBeInTheDocument();
-    expect(screen.getByText('Checkerboard pattern indicates transparent areas')).toBeInTheDocument();
+    expect(
+      screen.getByText('Checkerboard pattern indicates transparent areas')
+    ).toBeInTheDocument();
   });
 
   it.skip('should show compatibility warning for unsupported format/codec combinations', () => {
     // Mock settings with transparency enabled but unsupported format
-    vi.mocked(vi.importActual('../../state/exportContext')).useExportSettings = () => ({
-      settings: {
-        format: 'mp4',
-        codec: 'h264',
-        quality: 'high',
-        audioCodec: 'aac',
-        transparentBackground: true,
-        includeWallpaper: true,
-        includeGradient: true,
-      },
-      presets: [],
-      updateSettings: mockUpdateSettings,
-      applyPreset: vi.fn(),
-    });
+    vi.mocked(vi.importActual('../../state/exportContext')).useExportSettings =
+      () => ({
+        settings: {
+          format: 'mp4',
+          codec: 'h264',
+          quality: 'high',
+          audioCodec: 'aac',
+          transparentBackground: true,
+          includeWallpaper: true,
+          includeGradient: true,
+        },
+        presets: [],
+        updateSettings: mockUpdateSettings,
+        applyPreset: vi.fn(),
+      });
 
     render(
       <TestWrapper>
@@ -253,25 +286,30 @@ describe('ExportDialog Transparency Controls', () => {
     fireEvent.click(screen.getByText('Custom Settings'));
 
     // Check for compatibility warning
-    expect(screen.getByText(/Transparent backgrounds are not supported with MP4 \+ H264/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Transparent backgrounds are not supported with MP4 \+ H264/
+      )
+    ).toBeInTheDocument();
   });
 
   it.skip('should disable export button when transparency settings are invalid', () => {
     // Mock settings with invalid transparency configuration
-    vi.mocked(vi.importActual('../../state/exportContext')).useExportSettings = () => ({
-      settings: {
-        format: 'mp4',
-        codec: 'h264',
-        quality: 'high',
-        audioCodec: 'aac',
-        transparentBackground: true,
-        includeWallpaper: true,
-        includeGradient: true,
-      },
-      presets: [],
-      updateSettings: mockUpdateSettings,
-      applyPreset: vi.fn(),
-    });
+    vi.mocked(vi.importActual('../../state/exportContext')).useExportSettings =
+      () => ({
+        settings: {
+          format: 'mp4',
+          codec: 'h264',
+          quality: 'high',
+          audioCodec: 'aac',
+          transparentBackground: true,
+          includeWallpaper: true,
+          includeGradient: true,
+        },
+        presets: [],
+        updateSettings: mockUpdateSettings,
+        applyPreset: vi.fn(),
+      });
 
     render(
       <TestWrapper>
@@ -286,20 +324,21 @@ describe('ExportDialog Transparency Controls', () => {
 
   it('should allow export when transparency settings are valid', () => {
     // Mock settings with valid transparency configuration
-    vi.mocked(vi.importActual('../../state/exportContext')).useExportSettings = () => ({
-      settings: {
-        format: 'mov',
-        codec: 'h264',
-        quality: 'high',
-        audioCodec: 'aac',
-        transparentBackground: true,
-        includeWallpaper: false,
-        includeGradient: false,
-      },
-      presets: [],
-      updateSettings: mockUpdateSettings,
-      applyPreset: vi.fn(),
-    });
+    vi.mocked(vi.importActual('../../state/exportContext')).useExportSettings =
+      () => ({
+        settings: {
+          format: 'mov',
+          codec: 'h264',
+          quality: 'high',
+          audioCodec: 'aac',
+          transparentBackground: true,
+          includeWallpaper: false,
+          includeGradient: false,
+        },
+        presets: [],
+        updateSettings: mockUpdateSettings,
+        applyPreset: vi.fn(),
+      });
 
     render(
       <TestWrapper>
@@ -314,20 +353,21 @@ describe('ExportDialog Transparency Controls', () => {
 
   it.skip('should toggle wallpaper inclusion setting', () => {
     // Mock settings with transparency enabled
-    vi.mocked(vi.importActual('../../state/exportContext')).useExportSettings = () => ({
-      settings: {
-        format: 'mov',
-        codec: 'h264',
-        quality: 'high',
-        audioCodec: 'aac',
-        transparentBackground: true,
-        includeWallpaper: true,
-        includeGradient: true,
-      },
-      presets: [],
-      updateSettings: mockUpdateSettings,
-      applyPreset: vi.fn(),
-    });
+    vi.mocked(vi.importActual('../../state/exportContext')).useExportSettings =
+      () => ({
+        settings: {
+          format: 'mov',
+          codec: 'h264',
+          quality: 'high',
+          audioCodec: 'aac',
+          transparentBackground: true,
+          includeWallpaper: true,
+          includeGradient: true,
+        },
+        presets: [],
+        updateSettings: mockUpdateSettings,
+        applyPreset: vi.fn(),
+      });
 
     render(
       <TestWrapper>
@@ -339,7 +379,9 @@ describe('ExportDialog Transparency Controls', () => {
     fireEvent.click(screen.getByText('Custom Settings'));
 
     // Find and click the wallpaper inclusion checkbox
-    const wallpaperCheckbox = screen.getByLabelText('Include wallpaper backgrounds');
+    const wallpaperCheckbox = screen.getByLabelText(
+      'Include wallpaper backgrounds'
+    );
     fireEvent.click(wallpaperCheckbox);
 
     // Verify updateSettings was called
@@ -350,20 +392,21 @@ describe('ExportDialog Transparency Controls', () => {
 
   it.skip('should toggle gradient inclusion setting', () => {
     // Mock settings with transparency enabled
-    vi.mocked(vi.importActual('../../state/exportContext')).useExportSettings = () => ({
-      settings: {
-        format: 'mov',
-        codec: 'h264',
-        quality: 'high',
-        audioCodec: 'aac',
-        transparentBackground: true,
-        includeWallpaper: true,
-        includeGradient: true,
-      },
-      presets: [],
-      updateSettings: mockUpdateSettings,
-      applyPreset: vi.fn(),
-    });
+    vi.mocked(vi.importActual('../../state/exportContext')).useExportSettings =
+      () => ({
+        settings: {
+          format: 'mov',
+          codec: 'h264',
+          quality: 'high',
+          audioCodec: 'aac',
+          transparentBackground: true,
+          includeWallpaper: true,
+          includeGradient: true,
+        },
+        presets: [],
+        updateSettings: mockUpdateSettings,
+        applyPreset: vi.fn(),
+      });
 
     render(
       <TestWrapper>
@@ -375,7 +418,9 @@ describe('ExportDialog Transparency Controls', () => {
     fireEvent.click(screen.getByText('Custom Settings'));
 
     // Find and click the gradient inclusion checkbox
-    const gradientCheckbox = screen.getByLabelText('Include gradient backgrounds');
+    const gradientCheckbox = screen.getByLabelText(
+      'Include gradient backgrounds'
+    );
     fireEvent.click(gradientCheckbox);
 
     // Verify updateSettings was called

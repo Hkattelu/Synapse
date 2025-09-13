@@ -26,6 +26,7 @@ renderRouter.get('/:id/status', (req, res) => {
 
 renderRouter.get('/:id/download', (req, res) => {
   const job = getJob(req.params.id);
-  if (!job || job.status !== 'completed' || !job.output) return res.status(404).json({ error: 'Not ready' });
+  if (!job || job.status !== 'completed' || !job.output)
+    return res.status(404).json({ error: 'Not ready' });
   res.download(path.resolve(job.output));
 });

@@ -1,7 +1,10 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useTimeline, useMediaAssets } from '../state/hooks';
 import { useNotifications } from '../state/notifications';
-import { EDUCATIONAL_TRACKS, getEducationalTrackByName } from '../lib/educationalTypes';
+import {
+  EDUCATIONAL_TRACKS,
+  getEducationalTrackByName,
+} from '../lib/educationalTypes';
 import type { EducationalTrackName } from '../lib/educationalTypes';
 import { CodeEditorWorkflow } from './workflows/CodeEditorWorkflow';
 import { VideoWorkflow } from './workflows/VideoWorkflow';
@@ -19,11 +22,14 @@ interface QuickAction {
   action: () => void;
 }
 
-export function ContentAdditionToolbar({ className = '', variant = 'full' }: ContentAdditionToolbarProps) {
+export function ContentAdditionToolbar({
+  className = '',
+  variant = 'full',
+}: ContentAdditionToolbarProps) {
   const { addTimelineItem } = useTimeline();
   const { addMediaAsset } = useMediaAssets();
   const { notify } = useNotifications();
-  
+
   const [showVideoMenu, setShowVideoMenu] = useState(false);
   const [recentlyAdded, setRecentlyAdded] = useState<string | null>(null);
   const [showCodeWorkflow, setShowCodeWorkflow] = useState(false);
@@ -34,14 +40,18 @@ export function ContentAdditionToolbar({ className = '', variant = 'full' }: Con
   // Close video menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (videoMenuRef.current && !videoMenuRef.current.contains(event.target as Node)) {
+      if (
+        videoMenuRef.current &&
+        !videoMenuRef.current.contains(event.target as Node)
+      ) {
         setShowVideoMenu(false);
       }
     };
 
     if (showVideoMenu) {
       document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      return () =>
+        document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [showVideoMenu]);
 
@@ -73,8 +83,18 @@ export function ContentAdditionToolbar({ className = '', variant = 'full' }: Con
       id: 'advanced-workflow',
       label: 'Advanced Video Workflow',
       icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+          />
         </svg>
       ),
       action: openVideoWorkflow,
@@ -83,8 +103,18 @@ export function ContentAdditionToolbar({ className = '', variant = 'full' }: Con
       id: 'quick-upload',
       label: 'Quick Upload',
       icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+          />
         </svg>
       ),
       action: () => {
@@ -142,13 +172,25 @@ export function ContentAdditionToolbar({ className = '', variant = 'full' }: Con
         <button
           onClick={openCodeWorkflow}
           className={`flex items-center gap-2 px-2 py-1 rounded-md text-white text-xs font-medium transition-colors ${
-            recentlyAdded === 'code' ? 'bg-purple-600' : 'bg-purple-600 hover:bg-purple-700'
+            recentlyAdded === 'code'
+              ? 'bg-purple-600'
+              : 'bg-purple-600 hover:bg-purple-700'
           }`}
           title="Add Code"
           data-help-id="add-code-btn"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+            />
           </svg>
           <span>Code</span>
         </button>
@@ -158,17 +200,39 @@ export function ContentAdditionToolbar({ className = '', variant = 'full' }: Con
           <button
             onClick={() => setShowVideoMenu(!showVideoMenu)}
             className={`flex items-center gap-2 px-2 py-1 rounded-md text-white text-xs font-medium transition-colors ${
-              recentlyAdded === 'video' ? 'bg-green-600' : 'bg-green-600 hover:bg-green-700'
+              recentlyAdded === 'video'
+                ? 'bg-green-600'
+                : 'bg-green-600 hover:bg-green-700'
             }`}
             title="Add Video"
             data-help-id="add-video-btn"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+              />
             </svg>
             <span>Video</span>
-            <svg className={`w-3 h-3 transition-transform ${showVideoMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg
+              className={`w-3 h-3 transition-transform ${showVideoMenu ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
           {showVideoMenu && (
@@ -184,8 +248,8 @@ export function ContentAdditionToolbar({ className = '', variant = 'full' }: Con
                     <div>
                       <div className="font-medium">{action.label}</div>
                       <div className="text-[10px] text-gray-400">
-                        {action.id === 'advanced-workflow' 
-                          ? 'Full workflow' 
+                        {action.id === 'advanced-workflow'
+                          ? 'Full workflow'
                           : 'Quick upload'}
                       </div>
                     </div>
@@ -200,13 +264,25 @@ export function ContentAdditionToolbar({ className = '', variant = 'full' }: Con
         <button
           onClick={openAssetsWorkflow}
           className={`flex items-center gap-2 px-2 py-1 rounded-md text-white text-xs font-medium transition-colors ${
-            recentlyAdded === 'assets' ? 'bg-amber-600' : 'bg-amber-600 hover:bg-amber-700'
+            recentlyAdded === 'assets'
+              ? 'bg-amber-600'
+              : 'bg-amber-600 hover:bg-amber-700'
           }`}
           title="Add Assets"
           data-help-id="add-assets-btn"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
           </svg>
           <span>Assets</span>
         </button>
@@ -233,29 +309,45 @@ export function ContentAdditionToolbar({ className = '', variant = 'full' }: Con
 
   // Default full toolbar variant
   return (
-    <div className={`bg-gradient-to-r from-gray-800 to-gray-700 border-b border-gray-600 px-6 py-4 ${className}`}>
+    <div
+      className={`bg-gradient-to-r from-gray-800 to-gray-700 border-b border-gray-600 px-6 py-4 ${className}`}
+    >
       <div className="flex items-center justify-between">
         {/* Left side - Educational content buttons */}
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-3">
-            <span className="text-sm font-medium text-gray-300">Quick Add:</span>
-            <span className="text-xs text-gray-400 hidden lg:block">Create educational content instantly</span>
+            <span className="text-sm font-medium text-gray-300">
+              Quick Add:
+            </span>
+            <span className="text-xs text-gray-400 hidden lg:block">
+              Create educational content instantly
+            </span>
           </div>
-          
+
           {/* Add Code Button */}
           <button
             onClick={openCodeWorkflow}
             className={`content-addition-button flex items-center space-x-3 px-6 py-3 rounded-xl text-white font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 ${
-              recentlyAdded === 'code' 
-                ? 'bg-purple-600 scale-105 shadow-purple-500/25' 
+              recentlyAdded === 'code'
+                ? 'bg-purple-600 scale-105 shadow-purple-500/25'
                 : 'bg-purple-600 hover:bg-purple-700'
             }`}
             title="Open code editor workflow"
             data-help-id="add-code-btn"
             data-tutorial="add-code"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+              />
             </svg>
             <span>Add Code</span>
           </button>
@@ -265,19 +357,39 @@ export function ContentAdditionToolbar({ className = '', variant = 'full' }: Con
             <button
               onClick={() => setShowVideoMenu(!showVideoMenu)}
               className={`content-addition-button flex items-center space-x-3 px-6 py-3 rounded-xl text-white font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 ${
-                recentlyAdded === 'video' 
-                  ? 'bg-green-600 scale-105 shadow-green-500/25' 
+                recentlyAdded === 'video'
+                  ? 'bg-green-600 scale-105 shadow-green-500/25'
                   : 'bg-green-600 hover:bg-green-700'
               }`}
               title="Add video content"
               data-help-id="add-video-btn"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
               </svg>
               <span>Add Video</span>
-              <svg className={`w-4 h-4 transition-transform duration-200 ${showVideoMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <svg
+                className={`w-4 h-4 transition-transform duration-200 ${showVideoMenu ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
 
@@ -295,10 +407,9 @@ export function ContentAdditionToolbar({ className = '', variant = 'full' }: Con
                       <div>
                         <div className="font-medium">{action.label}</div>
                         <div className="text-xs text-gray-400">
-                          {action.id === 'advanced-workflow' 
-                            ? 'Full featured video creation workflow' 
-                            : 'Simple drag-and-drop video upload'
-                          }
+                          {action.id === 'advanced-workflow'
+                            ? 'Full featured video creation workflow'
+                            : 'Simple drag-and-drop video upload'}
                         </div>
                       </div>
                     </button>
@@ -312,15 +423,25 @@ export function ContentAdditionToolbar({ className = '', variant = 'full' }: Con
           <button
             onClick={openAssetsWorkflow}
             className={`content-addition-button flex items-center space-x-3 px-6 py-3 rounded-xl text-white font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 ${
-              recentlyAdded === 'assets' 
-                ? 'bg-amber-600 scale-105 shadow-amber-500/25' 
+              recentlyAdded === 'assets'
+                ? 'bg-amber-600 scale-105 shadow-amber-500/25'
                 : 'bg-amber-600 hover:bg-amber-700'
             }`}
             title="Open educational assets workflow"
             data-help-id="add-assets-btn"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
             </svg>
             <span>Add Assets</span>
           </button>
@@ -336,11 +457,13 @@ export function ContentAdditionToolbar({ className = '', variant = 'full' }: Con
                 className="flex items-center space-x-1 px-2 py-1 rounded-lg bg-gray-700/50 border border-gray-600"
                 title={`${track.name} Track`}
               >
-                <div 
+                <div
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: track.color }}
                 />
-                <span className="text-xs text-gray-300 font-medium">{track.name}</span>
+                <span className="text-xs text-gray-300 font-medium">
+                  {track.name}
+                </span>
               </div>
             ))}
           </div>
@@ -350,11 +473,23 @@ export function ContentAdditionToolbar({ className = '', variant = 'full' }: Con
       {/* Educational guidance hint */}
       <div className="mt-3 text-xs text-gray-400 bg-gray-800/50 rounded-lg px-3 py-2 border border-gray-700">
         <div className="flex items-center space-x-2">
-          <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            className="w-4 h-4 text-blue-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
           <span>
-            <strong>Educational Workflow:</strong> Use the enhanced workflows for guided content creation with templates, tips, and smart categorization
+            <strong>Educational Workflow:</strong> Use the enhanced workflows
+            for guided content creation with templates, tips, and smart
+            categorization
           </span>
         </div>
       </div>
@@ -365,13 +500,13 @@ export function ContentAdditionToolbar({ className = '', variant = 'full' }: Con
         onClose={() => setShowCodeWorkflow(false)}
         onCodeAdded={() => showFeedback('code')}
       />
-      
+
       <VideoWorkflow
         isOpen={showVideoWorkflow}
         onClose={() => setShowVideoWorkflow(false)}
         onVideoAdded={() => showFeedback('video')}
       />
-      
+
       <AssetsWorkflow
         isOpen={showAssetsWorkflow}
         onClose={() => setShowAssetsWorkflow(false)}

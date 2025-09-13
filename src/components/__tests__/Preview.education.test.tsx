@@ -40,7 +40,13 @@ const makeHooksMock = (currentTime: number = 0.5) => ({
           createdAt: new Date(),
         },
       ],
-      settings: { width: 1280, height: 720, fps: 30, duration: 5, backgroundColor: '#000000' },
+      settings: {
+        width: 1280,
+        height: 720,
+        fps: 30,
+        duration: 5,
+        backgroundColor: '#000000',
+      },
       version: '1.0.0',
     },
   }),
@@ -79,7 +85,11 @@ vi.mock('../../state/hooks', () => makeHooksMock());
 
 // Silence Remotion Player in test
 vi.mock('@remotion/player', () => ({
-  Player: vi.fn().mockImplementation(({ children }) => <div data-testid="player">{children}</div>),
+  Player: vi
+    .fn()
+    .mockImplementation(({ children }) => (
+      <div data-testid="player">{children}</div>
+    )),
 }));
 
 // MainComposition is not under test
@@ -88,8 +98,12 @@ vi.mock('../../remotion/MainComposition', () => ({
 }));
 
 // Icons mocked
-vi.mock('lucide-react/dist/esm/icons/eye.js', () => ({ default: (props: any) => <svg {...props} /> }));
-vi.mock('lucide-react/dist/esm/icons/eye-off.js', () => ({ default: (props: any) => <svg {...props} /> }));
+vi.mock('lucide-react/dist/esm/icons/eye.js', () => ({
+  default: (props: any) => <svg {...props} />,
+}));
+vi.mock('lucide-react/dist/esm/icons/eye-off.js', () => ({
+  default: (props: any) => <svg {...props} />,
+}));
 
 describe('Preview - Educational overlay toggle and persistence', () => {
   beforeEach(() => {
@@ -118,7 +132,9 @@ describe('Preview - Educational overlay toggle and persistence', () => {
     expect(screen.queryByText('Now Playing')).not.toBeInTheDocument();
 
     // Persisted to localStorage
-    expect(window.localStorage.getItem('synapse-show-edu-overlay')).toBe('false');
+    expect(window.localStorage.getItem('synapse-show-edu-overlay')).toBe(
+      'false'
+    );
 
     // Re-render to confirm persistence
     unmount();
@@ -134,4 +150,3 @@ describe('Preview - Educational overlay toggle and persistence', () => {
     expect(screen.getByText('Now Playing')).toBeInTheDocument();
   });
 });
-

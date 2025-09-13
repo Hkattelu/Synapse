@@ -1,8 +1,14 @@
 // Tests for Code track specialized features
 
 import { describe, it, expect } from 'vitest';
-import { detectLanguageFromCode, getCodeLanguageDefaults } from '../../lib/educationalTypes';
-import { getApplicablePresets, getRecommendedPresetsFor } from '../../remotion/animations/presets';
+import {
+  detectLanguageFromCode,
+  getCodeLanguageDefaults,
+} from '../../lib/educationalTypes';
+import {
+  getApplicablePresets,
+  getRecommendedPresetsFor,
+} from '../../remotion/animations/presets';
 
 describe('Code Track Specialized Features', () => {
   describe('Language Detection', () => {
@@ -143,8 +149,8 @@ describe('Code Track Specialized Features', () => {
     it('should get applicable presets for code items', () => {
       const presets = getApplicablePresets('code', 'code');
       expect(presets.length).toBeGreaterThan(0);
-      
-      const presetIds = presets.map(p => p.id);
+
+      const presetIds = presets.map((p) => p.id);
       expect(presetIds).toContain('typewriter');
       expect(presetIds).toContain('lineFocus');
       expect(presetIds).toContain('diffHighlight');
@@ -153,8 +159,8 @@ describe('Code Track Specialized Features', () => {
     it('should get recommended presets for beginners', () => {
       const presets = getRecommendedPresetsFor('beginner');
       expect(presets.length).toBeGreaterThan(0);
-      
-      const presetIds = presets.map(p => p.id);
+
+      const presetIds = presets.map((p) => p.id);
       expect(presetIds).toContain('typewriter');
       expect(presetIds).toContain('lineFocus');
     });
@@ -162,16 +168,16 @@ describe('Code Track Specialized Features', () => {
     it('should get recommended presets for refactoring', () => {
       const presets = getRecommendedPresetsFor('refactoring');
       expect(presets.length).toBeGreaterThan(0);
-      
-      const presetIds = presets.map(p => p.id);
+
+      const presetIds = presets.map((p) => p.id);
       expect(presetIds).toContain('diffHighlight');
     });
 
     it('should get recommended presets for debugging', () => {
       const presets = getRecommendedPresetsFor('debugging');
       expect(presets.length).toBeGreaterThan(0);
-      
-      const presetIds = presets.map(p => p.id);
+
+      const presetIds = presets.map((p) => p.id);
       expect(presetIds).toContain('lineFocus');
       expect(presetIds).toContain('diffHighlight');
     });
@@ -180,8 +186,8 @@ describe('Code Track Specialized Features', () => {
   describe('Educational Animation Configuration', () => {
     it('should create typewriter config with educational speed', () => {
       const presets = getApplicablePresets('code', 'code');
-      const typewriterPreset = presets.find(p => p.id === 'typewriter');
-      
+      const typewriterPreset = presets.find((p) => p.id === 'typewriter');
+
       expect(typewriterPreset).toBeDefined();
       const config = typewriterPreset!.makeDefault();
       expect(config.preset).toBe('typewriter');
@@ -190,8 +196,8 @@ describe('Code Track Specialized Features', () => {
 
     it('should create line focus config with educational opacity', () => {
       const presets = getApplicablePresets('code', 'code');
-      const lineFocusPreset = presets.find(p => p.id === 'lineFocus');
-      
+      const lineFocusPreset = presets.find((p) => p.id === 'lineFocus');
+
       expect(lineFocusPreset).toBeDefined();
       const config = lineFocusPreset!.makeDefault();
       expect(config.preset).toBe('lineFocus');
@@ -201,8 +207,8 @@ describe('Code Track Specialized Features', () => {
 
     it('should create diff highlight config for educational changes', () => {
       const presets = getApplicablePresets('code', 'code');
-      const diffPreset = presets.find(p => p.id === 'diffHighlight');
-      
+      const diffPreset = presets.find((p) => p.id === 'diffHighlight');
+
       expect(diffPreset).toBeDefined();
       const config = diffPreset!.makeDefault();
       expect(config.preset).toBe('diffHighlight');

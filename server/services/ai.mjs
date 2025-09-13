@@ -8,7 +8,9 @@ const exec = promisify(execCb);
 // Heuristic generator: clones a repo and proposes a minimal timeline
 export const generateFromRepo = async ({ repoUrl, branch = 'main' }) => {
   if (!repoUrl) throw new Error('repoUrl required');
-  const dir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'synapse-repo-'));
+  const dir = await fs.promises.mkdtemp(
+    path.join(os.tmpdir(), 'synapse-repo-')
+  );
   await exec(`git clone --depth 1 -b ${branch} ${repoUrl} "${dir}"`);
 
   // Collect a few representative files for code sequences
@@ -19,7 +21,12 @@ export const generateFromRepo = async ({ repoUrl, branch = 'main' }) => {
     for (const e of entries) {
       const full = path.join(p, e.name);
       if (e.isDirectory()) {
-        if (['node_modules', '.git', 'dist', 'build', '.next', 'out'].includes(e.name)) continue;
+        if (
+          ['node_modules', '.git', 'dist', 'build', '.next', 'out'].includes(
+            e.name
+          )
+        )
+          continue;
         await walk(full, depth + 1);
       } else if (/\.(js|ts|tsx|py|go|rs|java|md|json)$/i.test(e.name)) {
         candidates.push(full);
@@ -43,13 +50,29 @@ export const generateFromRepo = async ({ repoUrl, branch = 'main' }) => {
       type: 'code',
       startTime: 5 + i * 10,
       duration: 10,
-      properties: { language: guessLanguage(file), codePath: file, code: safeRead(file) },
+      properties: {
+        language: guessLanguage(file),
+        codePath: file,
+        code: safeRead(file),
+      },
       animation: { type: 'typewriter' },
     })),
   ];
 
-  const settings = { width: 1920, height: 1080, fps: 30, duration: Math.max(15, 5 + pick.length * 10), backgroundColor: '#000000' };
-  const exportSettings = { format: 'mp4', codec: 'h264', quality: 'high', audioCodec: 'aac', transparentBackground: false };
+  const settings = {
+    width: 1920,
+    height: 1080,
+    fps: 30,
+    duration: Math.max(15, 5 + pick.length * 10),
+    backgroundColor: '#000000',
+  };
+  const exportSettings = {
+    format: 'mp4',
+    codec: 'h264',
+    quality: 'high',
+    audioCodec: 'aac',
+    transparentBackground: false,
+  };
 
   return { timeline, mediaAssets: [], settings, exportSettings };
 };
@@ -65,6 +88,16 @@ const safeRead = (file) => {
 
 const guessLanguage = (file) => {
   const ext = path.extname(file).toLowerCase();
-  const map = { '.ts': 'typescript', '.tsx': 'tsx', '.js': 'javascript', '.py': 'python', '.go': 'go', '.rs': 'rust', '.java': 'java', '.md': 'markdown', '.json': 'json' };
+  const map = {
+    '.ts': 'typescript',
+    '.tsx': 'tsx',
+    '.js': 'javascript',
+    '.py': 'python',
+    '.go': 'go',
+    '.rs': 'rust',
+    '.java': 'java',
+    '.md': 'markdown',
+    '.json': 'json',
+  };
   return map[ext] || 'plaintext';
 };

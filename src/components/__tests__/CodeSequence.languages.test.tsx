@@ -7,7 +7,9 @@ import type { TimelineItem } from '../../lib/types';
 
 // Mock Remotion hooks
 vi.mock('remotion', () => ({
-  AbsoluteFill: ({ children, style }: any) => <div style={style}>{children}</div>,
+  AbsoluteFill: ({ children, style }: any) => (
+    <div style={style}>{children}</div>
+  ),
   Sequence: ({ children }: any) => <div>{children}</div>,
   interpolate: vi.fn((frame, input, output) => output[0]),
   useCurrentFrame: vi.fn(() => 30),
@@ -114,13 +116,9 @@ void main()
 }`;
 
       const item = createCodeItem('glsl', glslCode);
-      
+
       const { container } = render(
-        <CodeSequence
-          item={item}
-          startFrame={0}
-          durationInFrames={300}
-        />
+        <CodeSequence item={item} startFrame={0} durationInFrames={300} />
       );
 
       // Check that the code is rendered
@@ -141,13 +139,9 @@ void main() {
 }`;
 
       const item = createCodeItem('glsl', glslCode);
-      
+
       const { container } = render(
-        <CodeSequence
-          item={item}
-          startFrame={0}
-          durationInFrames={300}
-        />
+        <CodeSequence item={item} startFrame={0} durationInFrames={300} />
       );
 
       // Check for GLSL-specific content
@@ -184,13 +178,9 @@ func _on_body_entered(body):
         queue_free()`;
 
       const item = createCodeItem('gdscript', gdscriptCode);
-      
+
       const { container } = render(
-        <CodeSequence
-          item={item}
-          startFrame={0}
-          durationInFrames={300}
-        />
+        <CodeSequence item={item} startFrame={0} durationInFrames={300} />
       );
 
       // Check that the code is rendered
@@ -220,13 +210,9 @@ func _physics_process(delta):
     velocity = move_and_slide()`;
 
       const item = createCodeItem('gdscript', gdscriptCode);
-      
+
       const { container } = render(
-        <CodeSequence
-          item={item}
-          startFrame={0}
-          durationInFrames={300}
-        />
+        <CodeSequence item={item} startFrame={0} durationInFrames={300} />
       );
 
       // Check for GDScript-specific content
@@ -242,13 +228,9 @@ func _physics_process(delta):
   describe('Language Detection', () => {
     it('should use javascript as fallback for unknown languages', () => {
       const item = createCodeItem('unknown-language', 'console.log("test");');
-      
+
       const { container } = render(
-        <CodeSequence
-          item={item}
-          startFrame={0}
-          durationInFrames={300}
-        />
+        <CodeSequence item={item} startFrame={0} durationInFrames={300} />
       );
 
       // Should still render the code even with unknown language
@@ -257,13 +239,9 @@ func _physics_process(delta):
 
     it('should handle empty language gracefully', () => {
       const item = createCodeItem('', 'print("hello")');
-      
+
       const { container } = render(
-        <CodeSequence
-          item={item}
-          startFrame={0}
-          durationInFrames={300}
-        />
+        <CodeSequence item={item} startFrame={0} durationInFrames={300} />
       );
 
       // Should still render the code

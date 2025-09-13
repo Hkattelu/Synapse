@@ -75,7 +75,7 @@ print(f"Sorted: {sorted_numbers}")`,
  * Generate theme preview HTML
  */
 export function generateThemePreview(
-  themeId: string, 
+  themeId: string,
   language: keyof typeof PREVIEW_CODE = 'javascript',
   options: {
     showLineNumbers?: boolean;
@@ -97,21 +97,37 @@ export function generateThemePreview(
   const code = PREVIEW_CODE[language];
   const lines = code.split('\n');
 
-  const lineNumbersHtml = showLineNumbers 
-    ? lines.map((_, i) => `<span class="line-number">${i + 1}</span>`).join('\n')
+  const lineNumbersHtml = showLineNumbers
+    ? lines
+        .map((_, i) => `<span class="line-number">${i + 1}</span>`)
+        .join('\n')
     : '';
 
-  const codeHtml = lines.map(line => {
-    // Simple syntax highlighting for preview
-    let highlighted = line
-      .replace(/(\/\/.*$|#.*$|\/\*.*?\*\/)/g, `<span class="comment">$1</span>`)
-      .replace(/\b(function|class|const|let|var|if|else|for|while|return|def|import|from|interface|type)\b/g, `<span class="keyword">$1</span>`)
-      .replace(/(['"`])((?:\\.|(?!\1)[^\\])*?)\1/g, `<span class="string">$1$2$1</span>`)
-      .replace(/\b(\d+(?:\.\d+)?)\b/g, `<span class="number">$1</span>`)
-      .replace(/\b(true|false|null|undefined|None|True|False)\b/g, `<span class="boolean">$1</span>`);
-    
-    return `<span class="code-line">${highlighted}</span>`;
-  }).join('\n');
+  const codeHtml = lines
+    .map((line) => {
+      // Simple syntax highlighting for preview
+      let highlighted = line
+        .replace(
+          /(\/\/.*$|#.*$|\/\*.*?\*\/)/g,
+          `<span class="comment">$1</span>`
+        )
+        .replace(
+          /\b(function|class|const|let|var|if|else|for|while|return|def|import|from|interface|type)\b/g,
+          `<span class="keyword">$1</span>`
+        )
+        .replace(
+          /(['"`])((?:\\.|(?!\1)[^\\])*?)\1/g,
+          `<span class="string">$1$2$1</span>`
+        )
+        .replace(/\b(\d+(?:\.\d+)?)\b/g, `<span class="number">$1</span>`)
+        .replace(
+          /\b(true|false|null|undefined|None|True|False)\b/g,
+          `<span class="boolean">$1</span>`
+        );
+
+      return `<span class="code-line">${highlighted}</span>`;
+    })
+    .join('\n');
 
   return `
     <div class="theme-preview" style="

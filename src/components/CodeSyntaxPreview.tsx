@@ -28,7 +28,7 @@ export function CodeSyntaxPreview({
     if (themeDefinition) {
       return themeDefinition.colors;
     }
-    
+
     // Fallback colors
     return {
       background: '#1e1e1e',
@@ -54,7 +54,7 @@ export function CodeSyntaxPreview({
       const lines = codeText.split('\n');
       const truncatedCode = lines.slice(0, maxLines).join('\n');
       const hasMore = lines.length > maxLines;
-      
+
       const prismLanguage = Prism.languages[language] ? language : 'javascript';
       let highlighted = Prism.highlight(
         truncatedCode,
@@ -72,8 +72,11 @@ export function CodeSyntaxPreview({
       const lines = codeText.split('\n');
       const truncatedCode = lines.slice(0, maxLines).join('\n');
       const hasMore = lines.length > maxLines;
-      
-      return escapeHtml(truncatedCode) + (hasMore ? '\n<span class="text-gray-500">...</span>' : '');
+
+      return (
+        escapeHtml(truncatedCode) +
+        (hasMore ? '\n<span class="text-gray-500">...</span>' : '')
+      );
     }
   }, [codeText, language, maxLines]);
 
@@ -88,7 +91,8 @@ export function CodeSyntaxPreview({
   };
 
   // Generate CSS for syntax highlighting
-  const syntaxStyles = useMemo(() => `
+  const syntaxStyles = useMemo(
+    () => `
     .code-preview {
       background-color: ${themeColors.background};
       color: ${themeColors.foreground};
@@ -130,12 +134,14 @@ export function CodeSyntaxPreview({
     .code-preview .token.variable {
       color: ${themeColors.variable};
     }
-  `, [themeColors]);
+  `,
+    [themeColors]
+  );
 
   return (
     <div className={`code-syntax-preview ${className}`}>
       <style>{syntaxStyles}</style>
-      
+
       {showLanguage && (
         <div className="flex items-center justify-between mb-1">
           <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
@@ -148,13 +154,15 @@ export function CodeSyntaxPreview({
           )}
         </div>
       )}
-      
+
       <div className="code-preview rounded border overflow-hidden">
         <pre className="text-xs p-2 m-0 overflow-hidden">
           <code
             dangerouslySetInnerHTML={{ __html: highlightedCode }}
             style={{
-              fontFamily: item.properties.fontFamily || 'Monaco, Menlo, "Ubuntu Mono", monospace',
+              fontFamily:
+                item.properties.fontFamily ||
+                'Monaco, Menlo, "Ubuntu Mono", monospace',
               fontSize: Math.min(item.properties.fontSize || 14, 12),
               lineHeight: 1.3,
             }}
@@ -166,12 +174,12 @@ export function CodeSyntaxPreview({
 }
 
 // Language indicator component for minimal displays
-export function LanguageIndicator({ 
-  language, 
-  className = '' 
-}: { 
-  language: string; 
-  className?: string; 
+export function LanguageIndicator({
+  language,
+  className = '',
+}: {
+  language: string;
+  className?: string;
 }) {
   const getLanguageColor = (lang: string): string => {
     const colors: Record<string, string> = {
@@ -190,11 +198,11 @@ export function LanguageIndicator({
   };
 
   return (
-    <div 
+    <div
       className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded ${className}`}
       style={{ backgroundColor: `${getLanguageColor(language)}20` }}
     >
-      <div 
+      <div
         className="w-2 h-2 rounded-full"
         style={{ backgroundColor: getLanguageColor(language) }}
       />
@@ -204,12 +212,12 @@ export function LanguageIndicator({
 }
 
 // Animation mode indicator
-export function AnimationModeIndicator({ 
-  mode, 
-  className = '' 
-}: { 
-  mode: string; 
-  className?: string; 
+export function AnimationModeIndicator({
+  mode,
+  className = '',
+}: {
+  mode: string;
+  className?: string;
 }) {
   const getModeIcon = (mode: string): string => {
     switch (mode) {
@@ -238,11 +246,11 @@ export function AnimationModeIndicator({
   };
 
   return (
-    <div 
+    <div
       className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded ${className}`}
-      style={{ 
+      style={{
         backgroundColor: `${getModeColor(mode)}20`,
-        color: getModeColor(mode)
+        color: getModeColor(mode),
       }}
     >
       <span>{getModeIcon(mode)}</span>

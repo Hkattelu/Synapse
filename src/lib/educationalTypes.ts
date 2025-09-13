@@ -93,7 +93,10 @@ export interface TrackConflictHandler {
 }
 
 export interface MigrationConflictResolver {
-  onMultipleItemsPerTrack: (items: TimelineItem[], track: number) => EducationalTrack[];
+  onMultipleItemsPerTrack: (
+    items: TimelineItem[],
+    track: number
+  ) => EducationalTrack[];
   onUnknownContentType: (item: TimelineItem) => EducationalTrack;
   onUserDecision: (conflicts: MigrationConflict[]) => MigrationDecision[];
 }
@@ -114,7 +117,7 @@ export const EDUCATIONAL_TRACKS: EducationalTrack[] = [
       typingSpeedCps: 20,
     },
     allowedContentTypes: ['code'],
-    suggestedAnimations: ['typewriter', 'lineFocus', 'diffHighlight']
+    suggestedAnimations: ['typewriter', 'lineFocus', 'diffHighlight'],
   },
   {
     id: 'visual',
@@ -127,7 +130,7 @@ export const EDUCATIONAL_TRACKS: EducationalTrack[] = [
       focusScale: 1.2,
     },
     allowedContentTypes: ['video', 'visual-asset'],
-    suggestedAnimations: ['kenBurns', 'slide', 'fade']
+    suggestedAnimations: ['kenBurns', 'slide', 'fade'],
   },
   {
     id: 'narration',
@@ -139,7 +142,7 @@ export const EDUCATIONAL_TRACKS: EducationalTrack[] = [
       volume: 0.8,
     },
     allowedContentTypes: ['audio'],
-    suggestedAnimations: ['fade']
+    suggestedAnimations: ['fade'],
   },
   {
     id: 'you',
@@ -153,24 +156,33 @@ export const EDUCATIONAL_TRACKS: EducationalTrack[] = [
       talkingHeadSize: 'md',
     },
     allowedContentTypes: ['video'],
-    suggestedAnimations: ['fade', 'slide']
-  }
+    suggestedAnimations: ['fade', 'slide'],
+  },
 ];
 
 // Helper functions for educational tracks
-export function getEducationalTrackById(id: string): EducationalTrack | undefined {
-  return EDUCATIONAL_TRACKS.find(track => track.id === id);
+export function getEducationalTrackById(
+  id: string
+): EducationalTrack | undefined {
+  return EDUCATIONAL_TRACKS.find((track) => track.id === id);
 }
 
-export function getEducationalTrackByNumber(trackNumber: number): EducationalTrack | undefined {
-  return EDUCATIONAL_TRACKS.find(track => track.trackNumber === trackNumber);
+export function getEducationalTrackByNumber(
+  trackNumber: number
+): EducationalTrack | undefined {
+  return EDUCATIONAL_TRACKS.find((track) => track.trackNumber === trackNumber);
 }
 
-export function getEducationalTrackByName(name: EducationalTrackName): EducationalTrack | undefined {
-  return EDUCATIONAL_TRACKS.find(track => track.name === name);
+export function getEducationalTrackByName(
+  name: EducationalTrackName
+): EducationalTrack | undefined {
+  return EDUCATIONAL_TRACKS.find((track) => track.name === name);
 }
 
-export function isContentTypeAllowed(track: EducationalTrack, contentType: TimelineItemType): boolean {
+export function isContentTypeAllowed(
+  track: EducationalTrack,
+  contentType: TimelineItemType
+): boolean {
   return track.allowedContentTypes.includes(contentType);
 }
 
@@ -182,7 +194,10 @@ export interface LanguageDetectionResult {
 }
 
 // Simple language detection based on common patterns
-export function detectLanguageFromCode(code: string, filename?: string): LanguageDetectionResult {
+export function detectLanguageFromCode(
+  code: string,
+  filename?: string
+): LanguageDetectionResult {
   if (!code.trim()) {
     return {
       language: 'javascript',
@@ -192,10 +207,21 @@ export function detectLanguageFromCode(code: string, filename?: string): Languag
   }
 
   const scores: Record<string, number> = {};
-  const languages = ['javascript', 'typescript', 'python', 'java', 'cpp', 'html', 'css', 'json', 'glsl', 'gdscript'];
+  const languages = [
+    'javascript',
+    'typescript',
+    'python',
+    'java',
+    'cpp',
+    'html',
+    'css',
+    'json',
+    'glsl',
+    'gdscript',
+  ];
 
   // Initialize scores
-  languages.forEach(lang => scores[lang] = 0);
+  languages.forEach((lang) => (scores[lang] = 0));
 
   // Check filename extension if provided
   if (filename) {
@@ -222,16 +248,48 @@ export function detectLanguageFromCode(code: string, filename?: string): Languag
 
   // Simple pattern matching
   const patterns: Record<string, RegExp[]> = {
-    javascript: [/function\s+\w+/, /const\s+\w+\s*=/, /=>\s*{/, /console\.log/, /require\(/],
-    typescript: [/interface\s+\w+/, /type\s+\w+\s*=/, /:\s*(string|number|boolean)/, /<[A-Z]\w*>/],
-    python: [/def\s+\w+\s*\(/, /import\s+\w+/, /from\s+\w+\s+import/, /print\(/, /if\s+__name__/],
-    java: [/public\s+class/, /public\s+static\s+void\s+main/, /System\.out\.println/, /import\s+java\./],
+    javascript: [
+      /function\s+\w+/,
+      /const\s+\w+\s*=/,
+      /=>\s*{/,
+      /console\.log/,
+      /require\(/,
+    ],
+    typescript: [
+      /interface\s+\w+/,
+      /type\s+\w+\s*=/,
+      /:\s*(string|number|boolean)/,
+      /<[A-Z]\w*>/,
+    ],
+    python: [
+      /def\s+\w+\s*\(/,
+      /import\s+\w+/,
+      /from\s+\w+\s+import/,
+      /print\(/,
+      /if\s+__name__/,
+    ],
+    java: [
+      /public\s+class/,
+      /public\s+static\s+void\s+main/,
+      /System\.out\.println/,
+      /import\s+java\./,
+    ],
     cpp: [/#include\s*</, /std::/, /cout\s*<</, /namespace\s+\w+/],
     html: [/<!DOCTYPE\s+html>/i, /<html[^>]*>/i, /<\/\w+>/, /<\w+[^>]*>/],
     css: [/\w+\s*:\s*[^;]+;/, /\.\w+\s*{/, /#\w+\s*{/, /@media\s*\(/],
     json: [/^\s*{[\s\S]*}\s*$/, /"\w+":\s*"[^"]*"/, /"\w+":\s*\d+/],
-    glsl: [/#version\s+\d+/, /gl_Position\s*=/, /attribute\s+\w+/, /uniform\s+\w+/],
-    gdscript: [/extends\s+\w+/, /@export\s+var/, /func\s+\w+\s*\(/, /signal\s+\w+/],
+    glsl: [
+      /#version\s+\d+/,
+      /gl_Position\s*=/,
+      /attribute\s+\w+/,
+      /uniform\s+\w+/,
+    ],
+    gdscript: [
+      /extends\s+\w+/,
+      /@export\s+var/,
+      /func\s+\w+\s*\(/,
+      /signal\s+\w+/,
+    ],
   };
 
   for (const [lang, langPatterns] of Object.entries(patterns)) {
@@ -261,7 +319,9 @@ export function detectLanguageFromCode(code: string, filename?: string): Languag
 }
 
 // Get language-specific defaults for Code track
-export function getCodeLanguageDefaults(language: string): Partial<ItemProperties> {
+export function getCodeLanguageDefaults(
+  language: string
+): Partial<ItemProperties> {
   const defaults: Record<string, Partial<ItemProperties>> = {
     javascript: {
       theme: 'vscode-dark-plus',

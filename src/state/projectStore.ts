@@ -117,8 +117,7 @@ const useProjectStoreBase = create<ProjectStoreState>((set) => ({
       ),
     })),
 
-  addMedia: (asset) =>
-    set((s) => ({ mediaAssets: [...s.mediaAssets, asset] })),
+  addMedia: (asset) => set((s) => ({ mediaAssets: [...s.mediaAssets, asset] })),
 
   removeMedia: (assetId) =>
     set((s) => ({
@@ -179,12 +178,12 @@ export const useProjectTemporal = () => {
     throw new Error('Temporal store not available');
   } catch {
     // Fallback if temporal store isn't ready yet
-    return { 
-      undo: () => {}, 
-      redo: () => {}, 
-      pastStates: [], 
+    return {
+      undo: () => {},
+      redo: () => {},
+      pastStates: [],
       futureStates: [],
-      clear: () => {}
+      clear: () => {},
     };
   }
 };

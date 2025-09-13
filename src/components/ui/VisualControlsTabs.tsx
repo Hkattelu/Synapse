@@ -6,7 +6,11 @@ import { VisualSettingsPanel } from './VisualSettingsPanel';
 import { DiffSlideControls } from '../animation/controls/DiffSlideControls';
 import { DiffFadeControls } from '../animation/controls/DiffFadeControls';
 import { TypewriterDiffControls } from '../animation/controls/TypewriterDiffControls';
-import type { ItemProperties, BackgroundConfig, AnimationConfig } from '../../lib/types';
+import type {
+  ItemProperties,
+  BackgroundConfig,
+  AnimationConfig,
+} from '../../lib/types';
 
 interface VisualControlsTabsProps {
   item: {
@@ -26,39 +30,48 @@ interface TabConfig {
   badge?: number;
 }
 
-export function VisualControlsTabs({ 
-  item, 
-  onUpdateProperties, 
-  className = '' 
+export function VisualControlsTabs({
+  item,
+  onUpdateProperties,
+  className = '',
 }: VisualControlsTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>('animations');
-  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
+    new Set()
+  );
 
   // Count active visual settings for badges
-  const getActiveSettingsCount = useCallback((tabId: TabId): number => {
-    const props = item.properties;
-    
-    switch (tabId) {
-      case 'animations':
-        let animCount = 0;
-        if (props.diffAnimationType && props.diffAnimationType !== 'none') animCount++;
-        if (props.animationMode && props.animationMode !== 'none') animCount++;
-        return animCount;
-      
-      case 'themes':
-        return props.theme && props.theme !== 'vscode-dark-plus' ? 1 : 0;
-      
-      case 'backgrounds':
-        return props.backgroundType && props.backgroundType !== 'none' ? 1 : 0;
-      
-      default:
-        return 0;
-    }
-  }, [item.properties]);
+  const getActiveSettingsCount = useCallback(
+    (tabId: TabId): number => {
+      const props = item.properties;
+
+      switch (tabId) {
+        case 'animations':
+          let animCount = 0;
+          if (props.diffAnimationType && props.diffAnimationType !== 'none')
+            animCount++;
+          if (props.animationMode && props.animationMode !== 'none')
+            animCount++;
+          return animCount;
+
+        case 'themes':
+          return props.theme && props.theme !== 'vscode-dark-plus' ? 1 : 0;
+
+        case 'backgrounds':
+          return props.backgroundType && props.backgroundType !== 'none'
+            ? 1
+            : 0;
+
+        default:
+          return 0;
+      }
+    },
+    [item.properties]
+  );
 
   // Toggle section collapse
   const toggleSection = useCallback((sectionId: string) => {
-    setCollapsedSections(prev => {
+    setCollapsedSections((prev) => {
       const next = new Set(prev);
       if (next.has(sectionId)) {
         next.delete(sectionId);
@@ -80,21 +93,41 @@ export function VisualControlsTabs({
           id: 'animations',
           label: 'Animations',
           icon: (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
             </svg>
           ),
-          badge: getActiveSettingsCount('animations')
+          badge: getActiveSettingsCount('animations'),
         },
         {
           id: 'themes',
           label: 'Themes',
           icon: (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM7 3H5a2 2 0 00-2 2v12a4 4 0 004 4h2a2 2 0 002-2V5a2 2 0 00-2-2z" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM7 3H5a2 2 0 00-2 2v12a4 4 0 004 4h2a2 2 0 002-2V5a2 2 0 00-2-2z"
+              />
             </svg>
           ),
-          badge: getActiveSettingsCount('themes')
+          badge: getActiveSettingsCount('themes'),
         }
       );
     }
@@ -104,8 +137,18 @@ export function VisualControlsTabs({
         id: 'talking-head',
         label: 'Talking Head',
         icon: (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A4 4 0 016 17h12a4 4 0 01.879.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5.121 17.804A4 4 0 016 17h12a4 4 0 01.879.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+            />
           </svg>
         ),
         badge: item.properties.talkingHeadEnabled ? 1 : 0,
@@ -117,56 +160,71 @@ export function VisualControlsTabs({
       id: 'backgrounds',
       label: 'Backgrounds',
       icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
         </svg>
       ),
-      badge: getActiveSettingsCount('backgrounds')
+      badge: getActiveSettingsCount('backgrounds'),
     });
 
     return list;
   })();
 
   // Handle background config change
-  const handleBackgroundChange = useCallback((config: BackgroundConfig | null) => {
-    if (!config) {
-      onUpdateProperties({
-        backgroundType: 'none',
-        backgroundWallpaper: undefined,
-        backgroundGradient: undefined,
-        backgroundColor: undefined
-      });
-    } else {
-      const updates: Partial<ItemProperties> = {
-        backgroundType: config.type
-      };
+  const handleBackgroundChange = useCallback(
+    (config: BackgroundConfig | null) => {
+      if (!config) {
+        onUpdateProperties({
+          backgroundType: 'none',
+          backgroundWallpaper: undefined,
+          backgroundGradient: undefined,
+          backgroundColor: undefined,
+        });
+      } else {
+        const updates: Partial<ItemProperties> = {
+          backgroundType: config.type,
+        };
 
-      switch (config.type) {
-        case 'color':
-          updates.backgroundColor = config.color;
-          updates.backgroundWallpaper = undefined;
-          updates.backgroundGradient = undefined;
-          break;
-        case 'gradient':
-          updates.backgroundGradient = config.gradient;
-          updates.backgroundColor = undefined;
-          updates.backgroundWallpaper = undefined;
-          break;
-        case 'wallpaper':
-          updates.backgroundWallpaper = config.wallpaper?.assetId;
-          updates.backgroundColor = undefined;
-          updates.backgroundGradient = undefined;
-          break;
+        switch (config.type) {
+          case 'color':
+            updates.backgroundColor = config.color;
+            updates.backgroundWallpaper = undefined;
+            updates.backgroundGradient = undefined;
+            break;
+          case 'gradient':
+            updates.backgroundGradient = config.gradient;
+            updates.backgroundColor = undefined;
+            updates.backgroundWallpaper = undefined;
+            break;
+          case 'wallpaper':
+            updates.backgroundWallpaper = config.wallpaper?.assetId;
+            updates.backgroundColor = undefined;
+            updates.backgroundGradient = undefined;
+            break;
+        }
+
+        onUpdateProperties(updates);
       }
-
-      onUpdateProperties(updates);
-    }
-  }, [onUpdateProperties]);
+    },
+    [onUpdateProperties]
+  );
 
   // Get current background config
-  const getCurrentBackgroundConfig = useCallback((): BackgroundConfig | undefined => {
+  const getCurrentBackgroundConfig = useCallback(():
+    | BackgroundConfig
+    | undefined => {
     const props = item.properties;
-    
+
     if (!props.backgroundType || props.backgroundType === 'none') {
       return undefined;
     }
@@ -175,22 +233,26 @@ export function VisualControlsTabs({
       case 'color':
         return {
           type: 'color',
-          color: props.backgroundColor || '#1e1e1e'
+          color: props.backgroundColor || '#1e1e1e',
         };
       case 'gradient':
-        return props.backgroundGradient ? {
-          type: 'gradient',
-          gradient: props.backgroundGradient
-        } : undefined;
+        return props.backgroundGradient
+          ? {
+              type: 'gradient',
+              gradient: props.backgroundGradient,
+            }
+          : undefined;
       case 'wallpaper':
-        return props.backgroundWallpaper ? {
-          type: 'wallpaper',
-          wallpaper: {
-            assetId: props.backgroundWallpaper,
-            opacity: props.backgroundOpacity || 1,
-            blendMode: 'normal'
-          }
-        } : undefined;
+        return props.backgroundWallpaper
+          ? {
+              type: 'wallpaper',
+              wallpaper: {
+                assetId: props.backgroundWallpaper,
+                opacity: props.backgroundOpacity || 1,
+                blendMode: 'normal',
+              },
+            }
+          : undefined;
       default:
         return undefined;
     }
@@ -204,7 +266,7 @@ export function VisualControlsTabs({
     hasActiveSettings = false
   ) => {
     const isCollapsed = collapsedSections.has(id);
-    
+
     return (
       <div className="border border-border-subtle rounded-lg overflow-hidden">
         <button
@@ -212,24 +274,29 @@ export function VisualControlsTabs({
           className="w-full px-3 py-2 bg-background-tertiary hover:bg-background-secondary transition-colors flex items-center justify-between text-left"
         >
           <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium text-text-primary">{title}</span>
+            <span className="text-sm font-medium text-text-primary">
+              {title}
+            </span>
             {hasActiveSettings && (
               <div className="w-2 h-2 bg-primary-500 rounded-full" />
             )}
           </div>
-          <svg 
+          <svg
             className={`w-4 h-4 text-text-secondary transition-transform ${isCollapsed ? '' : 'rotate-180'}`}
-            fill="none" 
-            stroke="currentColor" 
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
           </svg>
         </button>
         {!isCollapsed && (
-          <div className="p-3 border-t border-border-subtle">
-            {children}
-          </div>
+          <div className="p-3 border-t border-border-subtle">{children}</div>
         )}
       </div>
     );
@@ -243,7 +310,10 @@ export function VisualControlsTabs({
     const shape = props.talkingHeadShape || 'circle';
     const size = props.talkingHeadSize || 'sm';
 
-    const CornerButton: React.FC<{ id: typeof corner; label: string }> = ({ id, label }) => (
+    const CornerButton: React.FC<{ id: typeof corner; label: string }> = ({
+      id,
+      label,
+    }) => (
       <button
         onClick={() => onUpdateProperties({ talkingHeadCorner: id })}
         className={`px-2 py-1 rounded text-xs border ${corner === id ? 'bg-primary-600 text-white border-primary-600' : 'bg-background-tertiary text-text-primary border-border-subtle hover:bg-background-secondary'}`}
@@ -256,16 +326,22 @@ export function VisualControlsTabs({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-text-secondary">Enable Talking Head</label>
+            <label className="text-sm font-medium text-text-secondary">
+              Enable Talking Head
+            </label>
             <input
               type="checkbox"
               checked={Boolean(props.talkingHeadEnabled)}
-              onChange={(e) => onUpdateProperties({ talkingHeadEnabled: e.target.checked })}
+              onChange={(e) =>
+                onUpdateProperties({ talkingHeadEnabled: e.target.checked })
+              }
             />
           </div>
 
           <div className="space-y-2">
-            <div className="text-sm font-medium text-text-secondary">Corner Presets</div>
+            <div className="text-sm font-medium text-text-secondary">
+              Corner Presets
+            </div>
             <div className="grid grid-cols-2 gap-2">
               <CornerButton id="top-left" label="Top Left" />
               <CornerButton id="top-right" label="Top Right" />
@@ -275,10 +351,14 @@ export function VisualControlsTabs({
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-secondary">Shape</label>
+            <label className="block text-sm font-medium text-text-secondary">
+              Shape
+            </label>
             <select
               value={shape}
-              onChange={(e) => onUpdateProperties({ talkingHeadShape: e.target.value as any })}
+              onChange={(e) =>
+                onUpdateProperties({ talkingHeadShape: e.target.value as any })
+              }
               className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
             >
               <option value="circle">Circle</option>
@@ -287,10 +367,14 @@ export function VisualControlsTabs({
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-secondary">Size</label>
+            <label className="block text-sm font-medium text-text-secondary">
+              Size
+            </label>
             <select
               value={size}
-              onChange={(e) => onUpdateProperties({ talkingHeadSize: e.target.value as any })}
+              onChange={(e) =>
+                onUpdateProperties({ talkingHeadSize: e.target.value as any })
+              }
               className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
             >
               <option value="sm">Small</option>
@@ -299,19 +383,35 @@ export function VisualControlsTabs({
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-secondary">Quick Presets</label>
+            <label className="block text-sm font-medium text-text-secondary">
+              Quick Presets
+            </label>
             <div className="grid grid-cols-4 gap-2">
-              {(['top-left','top-right','bottom-left','bottom-right'] as const).map((c) => (
+              {(
+                [
+                  'top-left',
+                  'top-right',
+                  'bottom-left',
+                  'bottom-right',
+                ] as const
+              ).map((c) => (
                 <button
                   key={c}
-                  onClick={() => onUpdateProperties({ talkingHeadEnabled: true, talkingHeadCorner: c })}
+                  onClick={() =>
+                    onUpdateProperties({
+                      talkingHeadEnabled: true,
+                      talkingHeadCorner: c,
+                    })
+                  }
                   className={`h-16 rounded border relative ${corner === c ? 'border-primary-600' : 'border-border-subtle hover:border-border-primary'}`}
                   title={`Move to ${c.replace('-', ' ')}`}
                 >
                   <div className="absolute inset-1 border border-dashed border-border-subtle rounded pointer-events-none" />
-                  <div className={`absolute w-6 h-6 bg-white/80 rounded-full border border-white/70 shadow ${
-                    c.includes('top') ? 'top-1' : 'bottom-1'
-                  } ${c.includes('left') ? 'left-1' : 'right-1'}`} />
+                  <div
+                    className={`absolute w-6 h-6 bg-white/80 rounded-full border border-white/70 shadow ${
+                      c.includes('top') ? 'top-1' : 'bottom-1'
+                    } ${c.includes('left') ? 'left-1' : 'right-1'}`}
+                  />
                 </button>
               ))}
             </div>
@@ -320,7 +420,11 @@ export function VisualControlsTabs({
 
         {/* Live Preview */}
         <div className="min-h-[300px]">
-          <PreviewPanel item={item} previewType="animation" className="h-full" />
+          <PreviewPanel
+            item={item}
+            previewType="animation"
+            className="h-full"
+          />
         </div>
       </div>
     );
@@ -329,16 +433,16 @@ export function VisualControlsTabs({
   // Render animation controls
   const renderAnimationControls = () => {
     const props = item.properties;
-    
+
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
         {/* Controls */}
         <div className="space-y-4">
           {/* Diff Animations - only for code items */}
-          {item.type === 'code' && renderSection(
-            'diff-animations',
-            'Code Diff Animations',
-            (
+          {item.type === 'code' &&
+            renderSection(
+              'diff-animations',
+              'Code Diff Animations',
               <div className="space-y-3">
                 <div>
                   <label className="block text-sm font-medium text-text-secondary mb-1">
@@ -346,7 +450,11 @@ export function VisualControlsTabs({
                   </label>
                   <select
                     value={props.diffAnimationType || 'none'}
-                    onChange={(e) => onUpdateProperties({ diffAnimationType: e.target.value as any })}
+                    onChange={(e) =>
+                      onUpdateProperties({
+                        diffAnimationType: e.target.value as any,
+                      })
+                    }
                     className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
                   >
                     <option value="none">None</option>
@@ -364,14 +472,14 @@ export function VisualControlsTabs({
                       preset: 'diffSlide',
                       direction: props.diffSlideDirection || 'right',
                       speed: props.diffAnimationSpeed || 1,
-                      highlightColor: props.diffHighlightColor || '#4ade80'
+                      highlightColor: props.diffHighlightColor || '#4ade80',
                     }}
                     onChange={(config) => {
                       if (config.preset === 'diffSlide') {
                         onUpdateProperties({
                           diffSlideDirection: config.direction,
                           diffAnimationSpeed: config.speed,
-                          diffHighlightColor: config.highlightColor
+                          diffHighlightColor: config.highlightColor,
                         });
                       }
                     }}
@@ -384,14 +492,14 @@ export function VisualControlsTabs({
                       preset: 'diffFade',
                       fadeInDuration: props.diffFadeInDuration || 0.5,
                       fadeOutDuration: props.diffFadeOutDuration || 0.5,
-                      highlightIntensity: props.diffHighlightIntensity || 0.8
+                      highlightIntensity: props.diffHighlightIntensity || 0.8,
                     }}
                     onChange={(config) => {
                       if (config.preset === 'diffFade') {
                         onUpdateProperties({
                           diffFadeInDuration: config.fadeInDuration,
                           diffFadeOutDuration: config.fadeOutDuration,
-                          diffHighlightIntensity: config.highlightIntensity
+                          diffHighlightIntensity: config.highlightIntensity,
                         });
                       }
                     }}
@@ -404,80 +512,91 @@ export function VisualControlsTabs({
                       preset: 'typewriterDiff',
                       speedCps: props.typewriterDiffSpeedCps || 30,
                       showCursor: props.typewriterDiffShowCursor || true,
-                      highlightChanges: props.typewriterDiffHighlightChanges || true
+                      highlightChanges:
+                        props.typewriterDiffHighlightChanges || true,
                     }}
                     onChange={(config) => {
                       if (config.preset === 'typewriterDiff') {
                         onUpdateProperties({
                           typewriterDiffSpeedCps: config.speedCps,
                           typewriterDiffShowCursor: config.showCursor,
-                          typewriterDiffHighlightChanges: config.highlightChanges
+                          typewriterDiffHighlightChanges:
+                            config.highlightChanges,
                         });
                       }
                     }}
                   />
                 )}
-              </div>
-            ),
-            Boolean(props.diffAnimationType && props.diffAnimationType !== 'none')
-          )}
+              </div>,
+              Boolean(
+                props.diffAnimationType && props.diffAnimationType !== 'none'
+              )
+            )}
 
           {/* General Animation Mode */}
           {renderSection(
             'general-animations',
             'General Animations',
-            (
-              <div className="space-y-3">
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">
+                  Animation Mode
+                </label>
+                <select
+                  value={props.animationMode || 'typing'}
+                  onChange={(e) =>
+                    onUpdateProperties({ animationMode: e.target.value as any })
+                  }
+                  className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
+                >
+                  <option value="none">None</option>
+                  <option value="typing">Typing</option>
+                  <option value="line-by-line">Line by Line</option>
+                  <option value="diff">Diff Highlight</option>
+                </select>
+              </div>
+
+              {props.animationMode === 'typing' && (
                 <div>
                   <label className="block text-sm font-medium text-text-secondary mb-1">
-                    Animation Mode
+                    Typing Speed (CPS)
                   </label>
-                  <select
-                    value={props.animationMode || 'typing'}
-                    onChange={(e) => onUpdateProperties({ animationMode: e.target.value as any })}
+                  <input
+                    type="number"
+                    min="1"
+                    max="120"
+                    value={props.typingSpeedCps || 30}
+                    onChange={(e) =>
+                      onUpdateProperties({
+                        typingSpeedCps: parseInt(e.target.value),
+                      })
+                    }
                     className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
-                  >
-                    <option value="none">None</option>
-                    <option value="typing">Typing</option>
-                    <option value="line-by-line">Line by Line</option>
-                    <option value="diff">Diff Highlight</option>
-                  </select>
+                  />
                 </div>
+              )}
 
-                {props.animationMode === 'typing' && (
-                  <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-1">
-                      Typing Speed (CPS)
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="120"
-                      value={props.typingSpeedCps || 30}
-                      onChange={(e) => onUpdateProperties({ typingSpeedCps: parseInt(e.target.value) })}
-                      className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
-                    />
-                  </div>
-                )}
-
-                {props.animationMode === 'line-by-line' && (
-                  <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-1">
-                      Line Reveal Interval (ms)
-                    </label>
-                    <input
-                      type="number"
-                      min="50"
-                      max="2000"
-                      step="10"
-                      value={props.lineRevealIntervalMs || 350}
-                      onChange={(e) => onUpdateProperties({ lineRevealIntervalMs: parseInt(e.target.value) })}
-                      className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
-                    />
-                  </div>
-                )}
-              </div>
-            ),
+              {props.animationMode === 'line-by-line' && (
+                <div>
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
+                    Line Reveal Interval (ms)
+                  </label>
+                  <input
+                    type="number"
+                    min="50"
+                    max="2000"
+                    step="10"
+                    value={props.lineRevealIntervalMs || 350}
+                    onChange={(e) =>
+                      onUpdateProperties({
+                        lineRevealIntervalMs: parseInt(e.target.value),
+                      })
+                    }
+                    className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
+                  />
+                </div>
+              )}
+            </div>,
             Boolean(props.animationMode && props.animationMode !== 'none')
           )}
         </div>
@@ -503,61 +622,65 @@ export function VisualControlsTabs({
           {renderSection(
             'code-themes',
             'Code Themes',
-            (
-              <ThemePicker
-                value={item.properties.theme || 'vscode-dark-plus'}
-                onChange={(themeId) => onUpdateProperties({ theme: themeId })}
-              />
-            ),
-            Boolean(item.properties.theme && item.properties.theme !== 'vscode-dark-plus')
+            <ThemePicker
+              value={item.properties.theme || 'vscode-dark-plus'}
+              onChange={(themeId) => onUpdateProperties({ theme: themeId })}
+            />,
+            Boolean(
+              item.properties.theme &&
+                item.properties.theme !== 'vscode-dark-plus'
+            )
           )}
 
           {/* Font Settings */}
           {renderSection(
             'font-settings',
             'Font Settings',
-            (
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-1">
-                    Font Family
-                  </label>
-                  <input
-                    type="text"
-                    value={item.properties.fontFamily || 'Monaco, Menlo, "Ubuntu Mono", monospace'}
-                    onChange={(e) => onUpdateProperties({ fontFamily: e.target.value })}
-                    className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-1">
-                    Font Size (px)
-                  </label>
-                  <input
-                    type="number"
-                    min="8"
-                    max="48"
-                    value={item.properties.fontSize || 14}
-                    onChange={(e) => onUpdateProperties({ fontSize: parseInt(e.target.value) })}
-                    className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
-                  />
-                </div>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">
+                  Font Family
+                </label>
+                <input
+                  type="text"
+                  value={
+                    item.properties.fontFamily ||
+                    'Monaco, Menlo, "Ubuntu Mono", monospace'
+                  }
+                  onChange={(e) =>
+                    onUpdateProperties({ fontFamily: e.target.value })
+                  }
+                  className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
+                />
               </div>
-            ),
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">
+                  Font Size (px)
+                </label>
+                <input
+                  type="number"
+                  min="8"
+                  max="48"
+                  value={item.properties.fontSize || 14}
+                  onChange={(e) =>
+                    onUpdateProperties({ fontSize: parseInt(e.target.value) })
+                  }
+                  className="w-full bg-background-tertiary border border-border-subtle rounded px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-primary-500"
+                />
+              </div>
+            </div>,
             Boolean(
-              (item.properties.fontFamily && item.properties.fontFamily !== 'Monaco, Menlo, "Ubuntu Mono", monospace') ||
-              (item.properties.fontSize && item.properties.fontSize !== 14)
+              (item.properties.fontFamily &&
+                item.properties.fontFamily !==
+                  'Monaco, Menlo, "Ubuntu Mono", monospace') ||
+                (item.properties.fontSize && item.properties.fontSize !== 14)
             )
           )}
         </div>
 
         {/* Live Preview */}
         <div className="min-h-[300px]">
-          <PreviewPanel
-            item={item}
-            previewType="theme"
-            className="h-full"
-          />
+          <PreviewPanel item={item} previewType="theme" className="h-full" />
         </div>
       </div>
     );
@@ -572,15 +695,18 @@ export function VisualControlsTabs({
           {renderSection(
             'background-settings',
             'Background Settings',
-            (
-              <BackgroundPicker
-                value={getCurrentBackgroundConfig()}
-                onChange={handleBackgroundChange}
-                opacity={item.properties.backgroundOpacity || 1}
-                onOpacityChange={(opacity) => onUpdateProperties({ backgroundOpacity: opacity })}
-              />
-            ),
-            Boolean(item.properties.backgroundType && item.properties.backgroundType !== 'none')
+            <BackgroundPicker
+              value={getCurrentBackgroundConfig()}
+              onChange={handleBackgroundChange}
+              opacity={item.properties.backgroundOpacity || 1}
+              onOpacityChange={(opacity) =>
+                onUpdateProperties({ backgroundOpacity: opacity })
+              }
+            />,
+            Boolean(
+              item.properties.backgroundType &&
+                item.properties.backgroundType !== 'none'
+            )
           )}
         </div>
 
@@ -600,7 +726,7 @@ export function VisualControlsTabs({
     <div className={`visual-controls-tabs ${className}`}>
       {/* Tab Navigation */}
       <div className="flex border-b border-border-subtle mb-4">
-        {tabs.map(tab => (
+        {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
@@ -624,8 +750,12 @@ export function VisualControlsTabs({
       {/* Tab Content */}
       <div className="tab-content mb-4">
         {activeTab === 'talking-head' && renderTalkingHeadControls()}
-        {activeTab === 'animations' && item.type === 'code' && renderAnimationControls()}
-        {activeTab === 'themes' && item.type === 'code' && renderThemeControls()}
+        {activeTab === 'animations' &&
+          item.type === 'code' &&
+          renderAnimationControls()}
+        {activeTab === 'themes' &&
+          item.type === 'code' &&
+          renderThemeControls()}
         {activeTab === 'backgrounds' && renderBackgroundControls()}
       </div>
 

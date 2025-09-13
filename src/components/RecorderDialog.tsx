@@ -8,7 +8,9 @@ interface RecorderDialogProps {
   onClose: () => void;
 }
 
-const AudioLevelMeter = lazy(() => import('./AudioLevelMeter').then(m => ({ default: m.AudioLevelMeter })));
+const AudioLevelMeter = lazy(() =>
+  import('./AudioLevelMeter').then((m) => ({ default: m.AudioLevelMeter }))
+);
 
 export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
   const { addMediaAsset } = useMediaAssets();
@@ -78,8 +80,12 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
         } catch {}
       }
       // Clean up audio analysis
-      try { audioSourceRef.current?.disconnect(); } catch {}
-      try { audioCtxRef.current?.close(); } catch {}
+      try {
+        audioSourceRef.current?.disconnect();
+      } catch {}
+      try {
+        audioCtxRef.current?.close();
+      } catch {}
       audioSourceRef.current = null;
       audioCtxRef.current = null;
     };
@@ -106,8 +112,12 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
           } catch {}
         }
         // Clean up audio analysis
-        try { audioSourceRef.current?.disconnect(); } catch {}
-        try { audioCtxRef.current?.close(); } catch {}
+        try {
+          audioSourceRef.current?.disconnect();
+        } catch {}
+        try {
+          audioCtxRef.current?.close();
+        } catch {}
         audioSourceRef.current = null;
         audioCtxRef.current = null;
       }
@@ -124,7 +134,8 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     try {
       const hasAudio = stream.getAudioTracks().length > 0;
       if (!hasAudio) return;
-      const Ctor: typeof AudioContext = (window as any).AudioContext || (window as any).webkitAudioContext;
+      const Ctor: typeof AudioContext =
+        (window as any).AudioContext || (window as any).webkitAudioContext;
       if (!Ctor) return;
       const ctx = new Ctor();
       audioCtxRef.current = ctx;
@@ -132,8 +143,12 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       audioSourceRef.current = src;
     } catch {}
     return () => {
-      try { audioSourceRef.current?.disconnect(); } catch {}
-      try { audioCtxRef.current?.close(); } catch {}
+      try {
+        audioSourceRef.current?.disconnect();
+      } catch {}
+      try {
+        audioCtxRef.current?.close();
+      } catch {}
       audioSourceRef.current = null;
       audioCtxRef.current = null;
     };
@@ -144,14 +159,22 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     try {
       // Stop previous stream (if any) before requesting new constraints
       if (stream) {
-        try { stream.getTracks().forEach((t) => t.stop()); } catch {}
+        try {
+          stream.getTracks().forEach((t) => t.stop());
+        } catch {}
         setStream(null);
       }
       if (videoRef.current) {
-        try { (videoRef.current as any).srcObject = null; } catch {}
+        try {
+          (videoRef.current as any).srcObject = null;
+        } catch {}
       }
-      try { audioSourceRef.current?.disconnect(); } catch {}
-      try { audioCtxRef.current?.close(); } catch {}
+      try {
+        audioSourceRef.current?.disconnect();
+      } catch {}
+      try {
+        audioCtxRef.current?.close();
+      } catch {}
       audioSourceRef.current = null;
       audioCtxRef.current = null;
 
@@ -269,8 +292,12 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       } catch {}
     }
     // Clean up audio analysis
-    try { audioSourceRef.current?.disconnect(); } catch {}
-    try { audioCtxRef.current?.close(); } catch {}
+    try {
+      audioSourceRef.current?.disconnect();
+    } catch {}
+    try {
+      audioCtxRef.current?.close();
+    } catch {}
     audioSourceRef.current = null;
     audioCtxRef.current = null;
   };
@@ -300,8 +327,12 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
         } catch {}
       }
       // Clean up audio analysis
-      try { audioSourceRef.current?.disconnect(); } catch {}
-      try { audioCtxRef.current?.close(); } catch {}
+      try {
+        audioSourceRef.current?.disconnect();
+      } catch {}
+      try {
+        audioCtxRef.current?.close();
+      } catch {}
       audioSourceRef.current = null;
       audioCtxRef.current = null;
     }
@@ -372,7 +403,9 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                   {/* Lightweight live level meter */}
                   {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                   {/* @ts-ignore - component accepts AudioNode */}
-                  <Suspense fallback={<div className="h-3 bg-gray-200 rounded" />}>
+                  <Suspense
+                    fallback={<div className="h-3 bg-gray-200 rounded" />}
+                  >
                     <AudioLevelMeter
                       audioContext={audioCtxRef.current || undefined}
                       audioSource={audioSourceRef.current || undefined}
@@ -515,7 +548,6 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     </div>
   );
 }
-
 
 async function getBlobDuration(url: string, kind: 'audio' | 'video') {
   return new Promise<number | null>((resolve) => {

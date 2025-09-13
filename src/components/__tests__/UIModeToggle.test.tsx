@@ -23,7 +23,7 @@ Object.defineProperty(window, 'localStorage', {
 
 describe('UIModeToggle', () => {
   const mockSetUIMode = vi.fn();
-  
+
   beforeEach(() => {
     vi.clearAllMocks();
     (useUI as any).mockReturnValue({
@@ -38,29 +38,32 @@ describe('UIModeToggle', () => {
 
   it('renders both mode buttons', () => {
     render(<UIModeToggle />);
-    
+
     expect(screen.getByText('Simplified')).toBeInTheDocument();
     expect(screen.getByText('Advanced')).toBeInTheDocument();
   });
 
   it('highlights the current mode', () => {
     render(<UIModeToggle />);
-    
+
     const simplifiedButton = screen.getByText('Simplified').closest('button');
     const advancedButton = screen.getByText('Advanced').closest('button');
-    
+
     expect(simplifiedButton).toHaveClass('text-purple-600');
     expect(advancedButton).toHaveClass('text-white/70');
   });
 
   it('switches to advanced mode when clicked', () => {
     render(<UIModeToggle />);
-    
+
     const advancedButton = screen.getByText('Advanced');
     fireEvent.click(advancedButton);
-    
+
     expect(mockSetUIMode).toHaveBeenCalledWith('advanced');
-    expect(localStorageMock.setItem).toHaveBeenCalledWith('synapse-ui-mode', 'advanced');
+    expect(localStorageMock.setItem).toHaveBeenCalledWith(
+      'synapse-ui-mode',
+      'advanced'
+    );
   });
 
   it('switches to simplified mode when clicked', () => {
@@ -70,12 +73,15 @@ describe('UIModeToggle', () => {
     });
 
     render(<UIModeToggle />);
-    
+
     const simplifiedButton = screen.getByText('Simplified');
     fireEvent.click(simplifiedButton);
-    
+
     expect(mockSetUIMode).toHaveBeenCalledWith('simplified');
-    expect(localStorageMock.setItem).toHaveBeenCalledWith('synapse-ui-mode', 'simplified');
+    expect(localStorageMock.setItem).toHaveBeenCalledWith(
+      'synapse-ui-mode',
+      'simplified'
+    );
   });
 
   it('handles localStorage errors gracefully', () => {
@@ -86,29 +92,38 @@ describe('UIModeToggle', () => {
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     render(<UIModeToggle />);
-    
+
     const advancedButton = screen.getByText('Advanced');
     fireEvent.click(advancedButton);
-    
+
     expect(mockSetUIMode).toHaveBeenCalledWith('advanced');
-    expect(consoleSpy).toHaveBeenCalledWith('Failed to save UI mode preference:', expect.any(Error));
-    
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Failed to save UI mode preference:',
+      expect.any(Error)
+    );
+
     consoleSpy.mockRestore();
   });
 
   it('applies custom className', () => {
     const { container } = render(<UIModeToggle className="custom-class" />);
-    
+
     expect(container.firstChild).toHaveClass('custom-class');
   });
 
   it('shows correct tooltips', () => {
     render(<UIModeToggle />);
-    
+
     const simplifiedButton = screen.getByText('Simplified').closest('button');
     const advancedButton = screen.getByText('Advanced').closest('button');
-    
-    expect(simplifiedButton).toHaveAttribute('title', 'Simplified Mode - Streamlined interface for educational content');
-    expect(advancedButton).toHaveAttribute('title', 'Advanced Mode - Full feature access with detailed controls');
+
+    expect(simplifiedButton).toHaveAttribute(
+      'title',
+      'Simplified Mode - Streamlined interface for educational content'
+    );
+    expect(advancedButton).toHaveAttribute(
+      'title',
+      'Advanced Mode - Full feature access with detailed controls'
+    );
   });
 });

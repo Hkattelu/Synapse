@@ -41,7 +41,10 @@ const pickExtForFormat = (format) => {
 
 const sanitizeBase = (name) => {
   if (!name || typeof name !== 'string') return '';
-  const cleaned = name.trim().replace(/[^a-zA-Z0-9 _.-]+/g, '-').replace(/-+/g, '-');
+  const cleaned = name
+    .trim()
+    .replace(/[^a-zA-Z0-9 _.-]+/g, '-')
+    .replace(/-+/g, '-');
   return cleaned || '';
 };
 
@@ -55,13 +58,20 @@ const runNext = async () => {
   try {
     // Log a small debug line for troubleshooting (safe, no PII)
     console.log('[render] starting job', id, {
-      timeline: Array.isArray(inputProps?.timeline) ? inputProps.timeline.length : 0,
-      mediaAssets: Array.isArray(inputProps?.mediaAssets) ? inputProps.mediaAssets.length : 0,
+      timeline: Array.isArray(inputProps?.timeline)
+        ? inputProps.timeline.length
+        : 0,
+      mediaAssets: Array.isArray(inputProps?.mediaAssets)
+        ? inputProps.mediaAssets.length
+        : 0,
     });
 
     const { bundleLocation, compositions } = await ensureBundle(inputProps);
-    const composition = compositions.find((c) => c.id === config.render.compositionId);
-    if (!composition) throw new Error(`Composition ${config.render.compositionId} not found`);
+    const composition = compositions.find(
+      (c) => c.id === config.render.compositionId
+    );
+    if (!composition)
+      throw new Error(`Composition ${config.render.compositionId} not found`);
 
     const format = String(inputProps?.exportSettings?.format || 'mp4');
     const codec = String(inputProps?.exportSettings?.codec || 'h264');
@@ -82,7 +92,25 @@ const runNext = async () => {
       codec,
       inputProps,
       outputLocation: out,
-      // onProgress: currently limited; placeholder for future hook
+      onProgress: (p) => {
+        // Forward basic progress when possible
+        const total =
+          (p && (p.totalFrames || p.totalFrameCount)) ||
+          composition?.durationInFrames ||
+          0;
+        const rendered = (p && (p.encodedFrames || p.renderedFrames)) || 0;
+        const percent =
+          total > 0 ? Math.min(100, Math.round((rendered / total) * 100)) : 0;
+        const existing = jobs.get(id) || {};
+        jobs.set(id, {
+          ...existing,
+          status: 'rendering',
+          output: out,
+          progress: percent,
+          renderedFrames: rendered,
+          totalFrames: total,
+        });
+      },
     });
     jobs.set(id, { status: 'completed', output: out, progress: 100 });
   } catch (e) {

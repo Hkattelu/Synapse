@@ -2,12 +2,19 @@ import React, { useState, useCallback } from 'react';
 import { useTimeline, useMediaAssets } from '../state/hooks';
 import { validateItemProperties } from '../lib/validation';
 import { PresetSelector } from './animation/PresetSelector';
-import { getApplicablePresets, getRecommendedPresetsFor } from '../remotion/animations/presets';
+import {
+  getApplicablePresets,
+  getRecommendedPresetsFor,
+} from '../remotion/animations/presets';
 import * as animationPresetsModule from '../lib/animationPresets';
 import { VisualControlsTabs } from './ui/VisualControlsTabs';
 import { BackgroundPicker } from './ui/BackgroundPicker';
 import { themeManager } from '../lib/themes';
-import { detectLanguageFromCode, getCodeLanguageDefaults, getEducationalTrackByNumber } from '../lib/educationalTypes';
+import {
+  detectLanguageFromCode,
+  getCodeLanguageDefaults,
+  getEducationalTrackByNumber,
+} from '../lib/educationalTypes';
 import type {
   TimelineItem,
   ItemProperties,
@@ -21,7 +28,9 @@ interface InspectorProps {
 export function Inspector({ className = '' }: InspectorProps) {
   const { selectedTimelineItems, updateTimelineItem } = useTimeline();
   const { getMediaAssetById } = useMediaAssets();
-  const [activeTab, setActiveTab] = useState<'properties' | 'visual' | 'layout'>('properties');
+  const [activeTab, setActiveTab] = useState<
+    'properties' | 'visual' | 'layout'
+  >('properties');
 
   // Get the first selected item (for now, we'll handle single selection)
   const selectedItem = selectedTimelineItems[0];
@@ -64,7 +73,9 @@ export function Inspector({ className = '' }: InspectorProps) {
                 </svg>
               </div>
               <p className="font-medium text-text-primary">No Selection</p>
-              <p className="text-sm text-text-secondary">Select a clip to edit properties</p>
+              <p className="text-sm text-text-secondary">
+                Select a clip to edit properties
+              </p>
             </div>
           </div>
         </div>
@@ -82,9 +93,7 @@ export function Inspector({ className = '' }: InspectorProps) {
       {/* Simplified Header */}
       <div className="p-3 border-b border-border-subtle flex-shrink-0">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sm text-text-primary">
-            Inspector
-          </h3>
+          <h3 className="font-semibold text-sm text-text-primary">Inspector</h3>
           <div className="flex items-center gap-2">
             <span className="text-xs text-text-secondary bg-background-tertiary px-2 py-1 rounded">
               {selectedItem.type.toUpperCase()}
@@ -101,7 +110,10 @@ export function Inspector({ className = '' }: InspectorProps) {
                     {track.name}
                   </span>
                   {/* Educational track icon */}
-                  <div className="text-xs text-text-tertiary" title={`Track ${track.trackNumber + 1}`}>
+                  <div
+                    className="text-xs text-text-tertiary"
+                    title={`Track ${track.trackNumber + 1}`}
+                  >
                     {track.icon === 'code' && '💻'}
                     {track.icon === 'monitor' && '🖥️'}
                     {track.icon === 'mic' && '🎤'}
@@ -131,7 +143,7 @@ export function Inspector({ className = '' }: InspectorProps) {
           >
             Properties
           </button>
-          
+
           {/* Visual tab hidden for code items */}
           {selectedItem.type !== 'code' && (
             <button
@@ -167,10 +179,18 @@ export function Inspector({ className = '' }: InspectorProps) {
             {(() => {
               const track = getEducationalTrackByNumber(selectedItem.track);
               if (track?.name === 'Code') {
-                const tip = 'Code Track Tips:\n• Use typing animation for step-by-step explanations\n• Enable line numbers for better reference\n• Choose a readable theme';
+                const tip =
+                  'Code Track Tips:\n• Use typing animation for step-by-step explanations\n• Enable line numbers for better reference\n• Choose a readable theme';
                 return (
                   <div className="px-4 py-2 border-b border-border-subtle text-xs text-text-secondary">
-                    <span role="img" aria-label="tip" title={tip} className="cursor-help">💡 Code track tips (hover)</span>
+                    <span
+                      role="img"
+                      aria-label="tip"
+                      title={tip}
+                      className="cursor-help"
+                    >
+                      💡 Code track tips (hover)
+                    </span>
                   </div>
                 );
               }
@@ -190,12 +210,14 @@ export function Inspector({ className = '' }: InspectorProps) {
             <ClipMetadata item={selectedItem} asset={selectedAsset} />
           </>
         )}
-        
+
         {activeTab === 'visual' && selectedItem.type !== 'code' && (
           <VisualControlsTabs
             item={selectedItem}
             onUpdateProperties={(properties) =>
-              updateTimelineItem(selectedItem.id, { properties: { ...selectedItem.properties, ...properties } })
+              updateTimelineItem(selectedItem.id, {
+                properties: { ...selectedItem.properties, ...properties },
+              })
             }
           />
         )}
@@ -371,7 +393,9 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
 
         {asset && (
           <div className="pt-2 border-t border-border-subtle">
-            <p className="text-xs text-text-secondary font-medium mb-2">Source File</p>
+            <p className="text-xs text-text-secondary font-medium mb-2">
+              Source File
+            </p>
             <div className="text-xs text-text-secondary">
               <p>
                 Size: {(asset.metadata.fileSize / 1024 / 1024).toFixed(1)} MB
@@ -396,7 +420,11 @@ interface ClipPropertiesProps {
   onUpdateProperties: (properties: ItemProperties) => void;
 }
 
-function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps) {
+function ClipProperties({
+  item,
+  mode,
+  onUpdateProperties,
+}: ClipPropertiesProps) {
   const [localProperties, setLocalProperties] = useState<ItemProperties>(
     item.properties
   );
@@ -467,7 +495,10 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
     const opts = [...defaultFontOptions];
     const current = localProperties.fontFamily;
     if (current && !opts.some((o) => o.value === current)) {
-      opts.unshift({ label: `Current (${current.slice(0, 40)}${current.length > 40 ? '…' : ''})`, value: current });
+      opts.unshift({
+        label: `Current (${current.slice(0, 40)}${current.length > 40 ? '…' : ''})`,
+        value: current,
+      });
     }
     return opts;
   }, [defaultFontOptions, localProperties.fontFamily]);
@@ -485,13 +516,17 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
     if (!g) return '';
     if (g.type === 'linear') {
       const angle = typeof g.angle === 'number' ? g.angle : 180;
-      const stops = (g.colors || []).map((c: any) => `${c.color} ${Math.round((c.position || 0) * 100)}%`).join(', ');
+      const stops = (g.colors || [])
+        .map((c: any) => `${c.color} ${Math.round((c.position || 0) * 100)}%`)
+        .join(', ');
       return `linear-gradient(${angle}deg, ${stops})`;
     }
     if (g.type === 'radial') {
-      const cx = Math.round(((g.centerX ?? 0.5) * 100));
-      const cy = Math.round(((g.centerY ?? 0.5) * 100));
-      const stops = (g.colors || []).map((c: any) => `${c.color} ${Math.round((c.position || 0) * 100)}%`).join(', ');
+      const cx = Math.round((g.centerX ?? 0.5) * 100);
+      const cy = Math.round((g.centerY ?? 0.5) * 100);
+      const stops = (g.colors || [])
+        .map((c: any) => `${c.color} ${Math.round((c.position || 0) * 100)}%`)
+        .join(', ');
       return `radial-gradient(at ${cx}% ${cy}%, ${stops})`;
     }
     return '';
@@ -499,7 +534,11 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
 
   const computeBackgroundStyle = React.useCallback((): React.CSSProperties => {
     const props = localProperties;
-    const style: React.CSSProperties = { border: '1px solid var(--synapse-border, rgba(255,255,255,0.1))', borderRadius: 8, padding: 8 };
+    const style: React.CSSProperties = {
+      border: '1px solid var(--synapse-border, rgba(255,255,255,0.1))',
+      borderRadius: 8,
+      padding: 8,
+    };
 
     // If no explicit background set, fall back to theme background
     const theme = themeManager.getTheme(props.theme || 'vscode-dark-plus');
@@ -510,7 +549,8 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
     }
 
     if (props.backgroundType === 'color') {
-      style.backgroundColor = props.backgroundColor || theme?.colors?.background || '#1e1e1e';
+      style.backgroundColor =
+        props.backgroundColor || theme?.colors?.background || '#1e1e1e';
       return style;
     }
 
@@ -720,11 +760,12 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
             { value: 'gdscript', label: 'GDScript' },
           ]}
         />
-        
+
         {/* Language Detection Button */}
         <button
           onClick={() => {
-            const codeText = localProperties.codeText || localProperties.text || '';
+            const codeText =
+              localProperties.codeText || localProperties.text || '';
             if (codeText.trim()) {
               const detection = detectLanguageFromCode(codeText);
               if (detection.confidence > 20) {
@@ -756,16 +797,18 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
             { value: 'none', label: 'None (Instant)' },
           ]}
         />
-        
+
         {/* Educational Animation Tips */}
         <div className="text-xs text-text-secondary bg-background-tertiary p-2 rounded">
           {(() => {
             const mode = localProperties.animationMode ?? 'typing';
             const tips: Record<string, string> = {
-              'typing': '💡 Perfect for beginners - shows code being written character by character',
-              'line-by-line': '📝 Great for step-by-step explanations - reveals one line at a time',
-              'diff': '🔄 Ideal for showing code changes and refactoring',
-              'none': '⚡ Best for quick demonstrations or when code is already familiar',
+              typing:
+                '💡 Perfect for beginners - shows code being written character by character',
+              'line-by-line':
+                '📝 Great for step-by-step explanations - reveals one line at a time',
+              diff: '🔄 Ideal for showing code changes and refactoring',
+              none: '⚡ Best for quick demonstrations or when code is already familiar',
             };
             return tips[mode] || '';
           })()}
@@ -782,7 +825,7 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
           step={1}
           suffix="cps"
         />
-        
+
         {/* Educational Speed Presets */}
         <div className="flex gap-1">
           <button
@@ -881,7 +924,16 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
             className={`w-full bg-transparent border-0 outline-none px-2 py-2 text-sm resize-vertical ${error ? '' : ''}`}
             aria-invalid={error ? 'true' : 'false'}
             aria-describedby={error ? `${inputId}-error` : undefined}
-            style={{ fontFamily: localProperties.fontFamily || 'Monaco, Menlo, "Ubuntu Mono", monospace', fontSize: (localProperties.fontSize || 14) + 'px', color: themeManager.getTheme(localProperties.theme || 'vscode-dark-plus')?.colors?.foreground || 'var(--synapse-text-primary, #e6e6e6)' }}
+            style={{
+              fontFamily:
+                localProperties.fontFamily ||
+                'Monaco, Menlo, "Ubuntu Mono", monospace',
+              fontSize: (localProperties.fontSize || 14) + 'px',
+              color:
+                themeManager.getTheme(
+                  localProperties.theme || 'vscode-dark-plus'
+                )?.colors?.foreground || 'var(--synapse-text-primary, #e6e6e6)',
+            }}
           />
         </div>
         {error && (
@@ -931,10 +983,14 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
     // Derive current background config
     const getCurrentBackgroundConfig = () => {
       const props = localProperties;
-      if (!props.backgroundType || props.backgroundType === 'none') return undefined;
+      if (!props.backgroundType || props.backgroundType === 'none')
+        return undefined;
       switch (props.backgroundType) {
         case 'color':
-          return { type: 'color', color: props.backgroundColor || '#1e1e1e' } as any;
+          return {
+            type: 'color',
+            color: props.backgroundColor || '#1e1e1e',
+          } as any;
         case 'gradient':
           return props.backgroundGradient
             ? ({ type: 'gradient', gradient: props.backgroundGradient } as any)
@@ -985,7 +1041,9 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
           value={getCurrentBackgroundConfig()}
           onChange={handleBackgroundChange}
           opacity={localProperties.backgroundOpacity || 1}
-          onOpacityChange={(opacity) => updateProperty('backgroundOpacity', opacity)}
+          onOpacityChange={(opacity) =>
+            updateProperty('backgroundOpacity', opacity)
+          }
         />
       </div>
     );
@@ -993,7 +1051,7 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
 
   const renderVisualAssetProperties = () => {
     const assetType = localProperties.visualAssetType;
-    
+
     return (
       <div className="space-y-3">
         <SelectInput
@@ -1008,14 +1066,14 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
             { value: 'line', label: 'Line' },
           ]}
         />
-        
+
         <ColorInput
           label="Stroke Color"
           value={localProperties.strokeColor ?? '#ff0000'}
           onChange={(value) => updateProperty('strokeColor', value)}
           error={validationErrors.strokeColor}
         />
-        
+
         <NumberInput
           label="Stroke Width"
           value={localProperties.strokeWidth ?? 3}
@@ -1041,7 +1099,9 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
             <SelectInput
               label="Direction"
               value={localProperties.arrowDirection ?? 'right'}
-              onChange={(value) => updateProperty('arrowDirection', value as any)}
+              onChange={(value) =>
+                updateProperty('arrowDirection', value as any)
+              }
               options={[
                 { value: 'up', label: 'Up' },
                 { value: 'down', label: 'Down' },
@@ -1096,7 +1156,9 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
             <SelectInput
               label="Direction"
               value={localProperties.fingerDirection ?? 'down'}
-              onChange={(value) => updateProperty('fingerDirection', value as any)}
+              onChange={(value) =>
+                updateProperty('fingerDirection', value as any)
+              }
               options={[
                 { value: 'up', label: 'Up' },
                 { value: 'down', label: 'Down' },
@@ -1215,7 +1277,9 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
   return (
     <div className="border-b border-border-subtle">
       <div className="p-4">
-        <h4 className="font-medium text-text-primary mb-3">{mode === 'layout' ? 'Layout' : 'Properties'}</h4>
+        <h4 className="font-medium text-text-primary mb-3">
+          {mode === 'layout' ? 'Layout' : 'Properties'}
+        </h4>
 
         {mode === 'properties' && (
           <>
@@ -1358,7 +1422,6 @@ function ClipProperties({ item, mode, onUpdateProperties }: ClipPropertiesProps)
             )}
           </>
         )}
-
       </div>
     </div>
   );
@@ -1400,7 +1463,9 @@ function AnimationSettings({
 
   const removeAnimation = useCallback(
     (index: number) => {
-      const newAnimations = (item.animations ?? []).filter((_, i) => i !== index);
+      const newAnimations = (item.animations ?? []).filter(
+        (_, i) => i !== index
+      );
       onUpdateAnimations(newAnimations);
     },
     [item.animations, onUpdateAnimations]

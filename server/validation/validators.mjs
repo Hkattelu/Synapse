@@ -29,7 +29,8 @@ export function validateDemoPayment(input = {}) {
 
   if (input.durationDays !== undefined) {
     const allowedDurations = [7, 30, 90];
-    if (!isNumber(input.durationDays)) errors.push('durationDays must be a number');
+    if (!isNumber(input.durationDays))
+      errors.push('durationDays must be a number');
     else if (!allowedDurations.includes(input.durationDays))
       errors.push(`durationDays must be one of ${allowedDurations.join(', ')}`);
     else out.durationDays = input.durationDays;
@@ -61,12 +62,24 @@ export function validateRenderInput(input = {}) {
   const allowedCodecs = ['h264', 'vp9', 'h265'];
   const allowedAudio = ['aac', 'opus'];
   if (!isString(e.format) || !allowedFormats.includes(e.format))
-    errors.push(`exportSettings.format must be one of ${allowedFormats.join(', ')}`);
+    errors.push(
+      `exportSettings.format must be one of ${allowedFormats.join(', ')}`
+    );
   if (e.codec && (!isString(e.codec) || !allowedCodecs.includes(e.codec)))
-    errors.push(`exportSettings.codec must be one of ${allowedCodecs.join(', ')}`);
-  if (e.audioCodec && (!isString(e.audioCodec) || !allowedAudio.includes(e.audioCodec)))
-    errors.push(`exportSettings.audioCodec must be one of ${allowedAudio.join(', ')}`);
-  if (e.transparentBackground !== undefined && !isBoolean(e.transparentBackground))
+    errors.push(
+      `exportSettings.codec must be one of ${allowedCodecs.join(', ')}`
+    );
+  if (
+    e.audioCodec &&
+    (!isString(e.audioCodec) || !allowedAudio.includes(e.audioCodec))
+  )
+    errors.push(
+      `exportSettings.audioCodec must be one of ${allowedAudio.join(', ')}`
+    );
+  if (
+    e.transparentBackground !== undefined &&
+    !isBoolean(e.transparentBackground)
+  )
     errors.push('exportSettings.transparentBackground must be boolean');
 
   // timeline sanity (optional)
