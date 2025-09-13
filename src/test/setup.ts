@@ -40,6 +40,15 @@ if (!(globalThis as any).IntersectionObserver) {
   } as any;
 }
 
+// Polyfill TextEncoder/TextDecoder for Node environment in Vitest (fixes esbuild invariant on Windows)
+import { TextEncoder, TextDecoder } from 'util';
+if (!(globalThis as any).TextEncoder) {
+  (globalThis as any).TextEncoder = TextEncoder as any;
+}
+if (!(globalThis as any).TextDecoder) {
+  (globalThis as any).TextDecoder = TextDecoder as any;
+}
+
 // Prism markdown patch: ensure nested structures exist before markdown component loads
 try {
   // Some Prism plugins expect nested objects; ensure structure exists

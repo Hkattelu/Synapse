@@ -64,13 +64,15 @@ describe('Inspector - Educational track badge', () => {
     // Type badge for AUDIO should be present in header
     expect(screen.getByText('AUDIO')).toBeInTheDocument();
 
-    // Educational track badge should show Narration with colored badge
+// Educational track badge should show Narration with colored badge
     expect(screen.getAllByText('Narration')[0]).toBeInTheDocument();
 
-    // Properties tab should include track context panel
-    expect(screen.getByText('Narration Track')).toBeInTheDocument();
+    // Badge has an educational track title tooltip
     expect(
-      screen.getByText(/Optimized for .*audio.* content/i)
+      screen.getByTitle(/Educational Track: Narration/i)
     ).toBeInTheDocument();
+
+    // Clip information should show the track number
+    expect(screen.getAllByText(/Track\s+3/i)[0]).toBeInTheDocument();
   });
 });

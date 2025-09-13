@@ -139,6 +139,10 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <ExportProvider>{children}</ExportProvider>
   </AppProvider>
 );
+  <AppProvider>
+    <ExportProvider>{children}</ExportProvider>
+  </AppProvider>
+);
 
 describe('ExportDialog Transparency Controls', () => {
   beforeEach(() => {
@@ -347,7 +351,7 @@ describe('ExportDialog Transparency Controls', () => {
     );
 
     // The export button should be enabled with valid transparency settings
-    const exportButton = screen.getByRole('button', { name: /Start Export/ });
+const exportButton = screen.getByRole('button', { name: /Start Export/i });
     expect(exportButton).not.toBeDisabled();
   });
 

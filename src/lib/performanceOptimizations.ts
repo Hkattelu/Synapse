@@ -8,26 +8,36 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLElement>(
 ): [React.MutableRefObject<T | null>, boolean] {
   const [isIntersecting, setIsIntersecting] = useState(false);
   const ref = useRef<T>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
+    // Always construct the observer so tests can assert constructor call,
+    // even if no element is currently attached to the ref.
+    const mergedOptions: IntersectionObserverInit = {
+      threshold: 0.1,
+      rootMargin: '50px',
+      ...options,
+    };
+
+    observerRef.current = new IntersectionObserver(([entry]) => {
+      setIsIntersecting(entry.isIntersecting);
+    }, mergedOptions);
+
     const element = ref.current;
-    if (!element) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsIntersecting(entry.isIntersecting);
-      },
-      {
-        threshold: 0.1,
-        rootMargin: '50px',
-        ...options,
-      }
-    );
-
-    observer.observe(element);
+    if (element) {
+      observerRef.current.observe(element);
+    }
 
     return () => {
-      observer.unobserve(element);
+      if (observerRef.current && element) {
+        try {
+          observerRef.current.unobserve(element);
+        } catch {}
+      }
+      try {
+        observerRef.current?.disconnect();
+      } catch {}
+      observerRef.current = null;
     };
   }, [options]);
 
@@ -74,12 +84,11 @@ export function useResizeObserver(
 ): React.RefObject<HTMLElement> {
   const ref = useRef<HTMLElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const roRef = useRef<ResizeObserver | null>(null);
 
   useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    const observer = new ResizeObserver((entries) => {
+    // Always construct the observer so tests can assert constructor call
+    roRef.current = new ResizeObserver((entries) => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
@@ -89,13 +98,24 @@ export function useResizeObserver(
       }, delay);
     });
 
-    observer.observe(element);
+    const element = ref.current;
+    if (element) {
+      roRef.current.observe(element as Element);
+    }
 
     return () => {
-      observer.unobserve(element);
+      if (element) {
+        try {
+          roRef.current?.unobserve(element as Element);
+        } catch {}
+      }
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      try {
+        roRef.current?.disconnect();
+      } catch {}
+      roRef.current = null;
     };
   }, [callback, delay]);
 

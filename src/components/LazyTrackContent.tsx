@@ -186,41 +186,10 @@ const TrackContentRenderer = memo(function TrackContentRenderer({
       );
 
     case 'narration':
+      // Minimal, high-contrast label without waveform/title per design request
       return (
-        <div className="space-y-1">
-          <div className="flex items-center gap-1 text-xs">
-            <span className="font-medium text-amber-300">
-              {asset?.name || 'Audio Track'}
-            </span>
-            <span className="text-amber-400">
-              {Math.round(previewData.volume * 100)}% vol
-            </span>
-          </div>
-          {previewData.syncPoints > 0 && (
-            <div className="text-xs text-blue-400">
-              {previewData.syncPoints} sync points
-            </div>
-          )}
-          <div className="flex items-center gap-2">
-            {previewData.hasWaveform && asset?.url && (
-              <CompactWaveform
-                audioUrl={asset.url}
-                width={80}
-                height={12}
-                color="#F59E0B"
-                className="flex-1"
-              />
-            )}
-            <StaticLevelMeter
-              level={previewData.volume}
-              width={16}
-              height={8}
-              color="#10B981"
-            />
-          </div>
-          {previewData.hasDucking && (
-            <div className="text-xs text-amber-400">Audio ducking enabled</div>
-          )}
+        <div className="text-xs text-synapse-text-inverse/90">
+          Narration
         </div>
       );
 

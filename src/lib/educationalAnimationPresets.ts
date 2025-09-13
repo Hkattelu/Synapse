@@ -519,10 +519,21 @@ export function applyEducationalAnimationPreset(
       break;
   }
 
+  // Attach a lightweight animation payload for UI/testing purposes
+  const animationPayload = {
+    id: preset.id,
+    type: preset.type,
+    trackType: preset.trackType,
+    parameters,
+  } as any;
+
   return {
     ...item,
     properties: updatedProperties as ItemProperties,
-  };
+    // Note: This payload is a UI/testing helper and may not match the strict AnimationConfig union.
+    // It is intentionally typed as any to avoid breaking existing renderers.
+    animation: animationPayload,
+  } as any;
 }
 
 // Track-specific parameter application functions

@@ -28,6 +28,7 @@ import { InspectorSkeleton, MediaBinSkeleton, TimelineSkeleton } from './ui/Pane
 import { prefetchOnIdle } from '../lib/prefetch';
 import { ResizablePanel } from './ResizablePanel';
 import { ArrowLeft, Sparkles, Settings, Archive } from 'lucide-react';
+import RendersDialog from './renders/RendersDialog';
 import { UndoButton } from './UndoButton';
 import { RedoButton } from './RedoButton';
 import { ShortcutsDialog } from './ShortcutsDialog';
@@ -54,6 +55,7 @@ function StudioViewContent() {
   const [showTips, setShowTips] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [showRendersDialog, setShowRendersDialog] = useState(false);
 
   const shouldShowInspector = selectedTimelineItems.length > 0;
   const isRightPanelOpen = ui.mediaBinVisible || shouldShowInspector;
@@ -323,27 +325,49 @@ function StudioViewContent() {
               </ModeAwareComponent>
             </div>
 
-            {/* Export button in header (top-right) */}
-            <button
-              onClick={() => setIsExportDialogOpen(true)}
-              className="px-4 py-2 rounded-lg bg-synapse-primary text-synapse-text-inverse hover:bg-synapse-primary/90 shadow-synapse-md transition-colors"
-              title="Export Video"
-            >
-              <span className="hidden sm:inline">Export</span>
-              <svg
-                className="w-4 h-4 sm:ml-2 inline-block align-middle"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            {/* Renders and Export buttons in header (top-right) */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setShowRendersDialog(true)}
+                className="px-4 py-2 rounded-lg bg-synapse-surface border border-synapse-border text-text-primary hover:bg-synapse-surface-hover hover:border-synapse-border-hover shadow-synapse-sm transition-colors"
+                title="View Renders"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </button>
+                <span className="hidden sm:inline">Renders</span>
+                <svg
+                  className="w-4 h-4 sm:ml-2 inline-block align-middle"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 7h18M3 12h18M3 17h18"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={() => setIsExportDialogOpen(true)}
+                className="px-4 py-2 rounded-lg bg-synapse-primary text-synapse-text-inverse hover:bg-synapse-primary/90 shadow-synapse-md transition-colors"
+                title="Export Video"
+              >
+                <span className="hidden sm:inline">Export</span>
+                <svg
+                  className="w-4 h-4 sm:ml-2 inline-block align-middle"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </motion.header>
@@ -471,6 +495,9 @@ function StudioViewContent() {
         isOpen={isExportDialogOpen}
         onClose={() => setIsExportDialogOpen(false)}
       />
+
+      {/* Renders Dialog */}
+      <RendersDialog isOpen={showRendersDialog} onClose={() => setShowRendersDialog(false)} />
 
       {/* Recorder Dialog */}
       <RecorderDialog

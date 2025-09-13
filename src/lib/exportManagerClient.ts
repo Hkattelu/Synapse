@@ -429,6 +429,8 @@ export class ClientExportManager {
       let useRenderApi = false;
       try {
         const inputProps = {
+          // Pass project identifiers so server can attribute renders
+          project: { id: project.id, name: project.name },
           timeline: project.timeline,
           mediaAssets: project.mediaAssets,
           settings: {

@@ -13,6 +13,58 @@ let bundleLocation = null;
 let active = 0;
 const pending = [];
 
+// Persistent render metadata storage (simple JSON file)
+const META_FILE = path.join(config.render.outputDir, 'renders.json');
+
+const readMeta = async () => {
+  try {
+    const raw = await fs.promises.readFile(META_FILE, 'utf-8');
+    const data = JSON.parse(raw);
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeMeta = async (arr) => {
+  try {
+    await fs.promises.mkdir(config.render.outputDir, { recursive: true });
+    await fs.promises.writeFile(META_FILE, JSON.stringify(arr, null, 2), 'utf-8');
+  } catch (e) {
+    console.warn('[render] failed to persist render metadata:', e);
+  }
+};
+// TODO(housekeeping): Consider locking or atomic writes to avoid concurrent write hazards.
+// TODO(housekeeping): Add retention policy (max items per project, max age, max total size) and background cleanup.
+
+export const listRendersByProject = async (projectId) => {
+  if (!projectId) return [];
+  const all = await readMeta();
+  return all
+    .filter((r) => r && r.projectId === projectId)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+};
+
+export const findRenderById = async (id) => {
+  const all = await readMeta();
+  return all.find((r) => r.id === id) || null;
+};
+
+export const deleteRenderById = async (id) => {
+  const all = await readMeta();
+  const idx = all.findIndex((r) => r.id === id);
+  if (idx === -1) return { ok: false, reason: 'not_found' };
+  const record = all[idx];
+  try {
+    if (record?.path) {
+      await fs.promises.unlink(record.path).catch(() => {});
+    }
+  } catch {}
+  all.splice(idx, 1);
+  await writeMeta(all);
+  return { ok: true };
+};
+
 const ensureBundle = async (inputProps) => {
   // Bundle once and reuse; compositions may depend on inputProps, so query fresh each time
   if (!bundleLocation) {
@@ -112,6 +164,28 @@ const runNext = async () => {
         });
       },
     });
+
+    // Persist metadata when completed
+    const stat = await fs.promises.stat(out).catch(() => null);
+    const createdAt = new Date().toISOString();
+    const projectId = inputProps?.project?.id || inputProps?.projectId || null;
+    const projectName = inputProps?.project?.name || inputProps?.projectName || undefined;
+    const record = {
+      id,
+      projectId,
+      projectName,
+      filename,
+      path: out,
+      size: stat?.size || 0,
+      format,
+      codec,
+      createdAt,
+      publicUrl: `/downloads/${path.basename(out)}`,
+    };
+    const all = await readMeta();
+    all.push(record);
+    await writeMeta(all);
+
     jobs.set(id, { status: 'completed', output: out, progress: 100 });
   } catch (e) {
     jobs.set(id, { status: 'failed', error: String(e?.stack || e) });

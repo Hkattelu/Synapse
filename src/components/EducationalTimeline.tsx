@@ -73,7 +73,7 @@ interface PlacementWarning {
 const TRACK_HEIGHT = 80; // Base track height (header moved to left column)
 const MIN_NONEMPTY_TRACK_HEIGHT = 56; // Minimum height to keep clips usable
 const MIN_EMPTY_TRACK_HEIGHT = 28; // Collapsed height for empty tracks
-const HEADER_COL_WIDTH = 200; // Left sticky header column width (px)
+const HEADER_COL_WIDTH = 176; // Left sticky header column width (px) - slightly reduced for compactness
 const PIXELS_PER_SECOND = 100;
 const MIN_CLIP_DURATION = 0.1;
 
@@ -93,6 +93,7 @@ export function EducationalTimeline({
     selectTimelineItems,
     clearTimelineSelection,
     timelineDuration,
+    updateTimelineItem,
   } = useTimeline();
 
   const { getMediaAssetById } = useMediaAssets();
@@ -493,6 +494,19 @@ export function EducationalTimeline({
     ]
   );
 
+  // Throttle drag updates using requestAnimationFrame for smoother interaction
+  const rafIdRef = React.useRef<number | null>(null);
+  const pendingUpdateRef = React.useRef<null | (() => void)>(null);
+  const scheduleRaf = useCallback(() => {
+    if (rafIdRef.current !== null) return;
+    rafIdRef.current = requestAnimationFrame(() => {
+      const fn = pendingUpdateRef.current;
+      pendingUpdateRef.current = null;
+      rafIdRef.current = null;
+      if (fn) fn();
+    });
+  }, []);
+
   // Handle mouse move
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
@@ -539,7 +553,9 @@ export function EducationalTimeline({
           dur,
           dragState.itemId || undefined
         );
-        moveTimelineItem(dragState.itemId, adjustedMove.start, newTrack);
+        pendingUpdateRef.current = () =>
+          moveTimelineItem(dragState.itemId!, adjustedMove.start, newTrack);
+        scheduleRaf();
       } else if (dragState.dragType === 'resize-left') {
         let newStartTime = snapToGrid(
           Math.max(0, dragState.startTime + deltaTime)
@@ -567,8 +583,11 @@ export function EducationalTimeline({
           }
         }
 
-        moveTimelineItem(dragState.itemId, newStartTime, dragState.startTrack);
-        resizeTimelineItem(dragState.itemId, newDuration);
+        pendingUpdateRef.current = () => {
+          moveTimelineItem(dragState.itemId!, newStartTime, dragState.startTrack);
+          resizeTimelineItem(dragState.itemId!, newDuration);
+        };
+        scheduleRaf();
       } else if (dragState.dragType === 'resize-right') {
         let newDuration = Math.max(
           MIN_CLIP_DURATION,
@@ -592,7 +611,9 @@ export function EducationalTimeline({
           );
           if (newDuration > maxDuration) newDuration = maxDuration;
         }
-        resizeTimelineItem(dragState.itemId, newDuration);
+        pendingUpdateRef.current = () =>
+          resizeTimelineItem(dragState.itemId!, newDuration);
+        scheduleRaf();
       }
     },
     [
@@ -602,6 +623,10 @@ export function EducationalTimeline({
       snapToGrid,
       moveTimelineItem,
       resizeTimelineItem,
+      perTrackHeight,
+      timeline,
+      resolveNoOverlap,
+      scheduleRaf,
     ]
   );
 
@@ -837,6 +862,29 @@ export function EducationalTimeline({
     handleScrubEnd,
   ]);
 
+  // Attach a non-passive wheel listener to support preventDefault for horizontal scroll and zoom
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onWheelNonPassive = (e: WheelEvent) => {
+      if (e.shiftKey) {
+        e.preventDefault();
+        const delta = Math.sign(e.deltaY) * -0.2;
+        const newZoom = Math.max(0.1, Math.min(5, ui.timeline.zoom + delta));
+        updateTimelineView({ zoom: newZoom });
+      } else {
+        const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
+        if (delta !== 0) {
+          e.preventDefault();
+          el.scrollLeft += delta;
+          updateTimelineView({ scrollPosition: el.scrollLeft });
+        }
+      }
+    };
+    el.addEventListener('wheel', onWheelNonPassive, { passive: false });
+    return () => el.removeEventListener('wheel', onWheelNonPassive);
+  }, [scrollRef, ui.timeline.zoom, updateTimelineView]);
+
   return (
     <div
       className={`educational-timeline bg-background-secondary border-t border-border-subtle flex flex-col ${className}`}
@@ -861,8 +909,8 @@ export function EducationalTimeline({
                   flex items-center space-x-2 px-3 py-1.5 text-xs rounded-md transition-all
                   ${
                     currentMode === 'simplified'
-                      ? 'bg-primary-600 text-white shadow-glow'
-                      : 'bg-neutral-700 text-text-secondary hover:bg-neutral-600'
+                      ? 'bg-synapse-primary text-synapse-text-inverse shadow-synapse-sm'
+                      : 'bg-synapse-surface text-text-secondary hover:bg-synapse-surface-hover'
                   }
                 `}
                 title={`Switch to ${currentMode === 'simplified' ? 'Advanced' : 'Simplified'} Mode`}
@@ -887,6 +935,9 @@ export function EducationalTimeline({
           <div className="flex items-center space-x-2">
             <button
               onClick={() => handleZoom(-0.2)}
+              className="p-1 text-text-secondary hover:text-text-primary transition-colors hover:bg-synapse-surface-hover rounded"
+              title="Zoom Out"
+            >
               className="p-1 text-text-secondary hover:text-text-primary transition-colors hover:bg-neutral-700 rounded"
               title="Zoom Out"
             >
@@ -909,7 +960,7 @@ export function EducationalTimeline({
             </span>
             <button
               onClick={() => handleZoom(0.2)}
-              className="p-1 text-text-secondary hover:text-text-primary transition-colors hover:bg-neutral-700 rounded"
+              className="p-1 text-text-secondary hover:text-text-primary transition-colors hover:bg-synapse-surface-hover rounded"
               title="Zoom In"
             >
               <svg
@@ -935,24 +986,52 @@ export function EducationalTimeline({
             }
             className={`px-2 py-1 text-xs rounded transition-colors ${
               ui.timeline.snapToGrid
-                ? 'bg-primary-600 text-white shadow-glow'
-                : 'bg-neutral-700 text-text-secondary hover:bg-neutral-600'
+                ? 'bg-synapse-primary text-synapse-text-inverse shadow-synapse-sm'
+                : 'bg-background-tertiary text-text-secondary hover:text-text-primary border border-border-subtle'
             }`}
             data-help-id="snap-toggle"
+            title="Toggle snap-to-grid"
           >
             Snap
           </button>
           <button
             onClick={handleFitToDuration}
-            className="ml-2 px-2 py-1 text-xs rounded bg-neutral-700 text-text-secondary hover:text-text-primary hover:bg-neutral-600 transition-colors"
+            className="ml-2 px-2 py-1 text-xs rounded bg-background-tertiary text-text-secondary hover:text-text-primary border border-border-subtle transition-colors"
             title="Fit to duration"
           >
             Fit
           </button>
 
           {/* Inline quick-add actions */}
-          <div className="ml-4 flex items-center">
+          <div className="ml-4 flex items-center gap-2">
             <ContentAdditionToolbar variant="inline" />
+            {/* Quick toggle for Talking Head (You track) */}
+            <button
+              onClick={() => {
+                try {
+                  // Toggle talking head on the first selected video item
+                  const selId = selectedItems[0];
+                  const item = timeline.find((t) => t.id === selId);
+                  if (!item || item.type !== 'video') return;
+                  const enabled = item.properties.talkingHeadEnabled === true;
+                  updateTimelineItem(item.id, {
+                    properties: {
+                      ...item.properties,
+                      talkingHeadEnabled: !enabled,
+                    },
+                    // Move to You track if enabling
+                    track: !enabled ? 3 : item.track,
+                  });
+                } catch {}
+              }}
+              className="px-2 py-1 text-xs rounded bg-background-tertiary text-text-secondary hover:text-text-primary border border-border-subtle transition-colors"
+              title="Toggle talking head on selected video clip"
+            >
+              <span className="inline-flex items-center gap-1">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M4 21v-2a4 4 0 0 1 3-3.87"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Talking Head</span>
+              </span>
+            </button>
           </div>
         </div>
 
@@ -972,25 +1051,6 @@ export function EducationalTimeline({
         }}
         className="educational-timeline-content overflow-x-auto overflow-y-hidden flex-1"
         onScroll={handleScroll}
-        onWheel={(e) => {
-          if (e.shiftKey) {
-            e.preventDefault();
-            const delta = Math.sign(e.deltaY) * -0.2;
-            const newZoom = Math.max(
-              0.1,
-              Math.min(5, ui.timeline.zoom + delta)
-            );
-            updateTimelineView({ zoom: newZoom });
-          } else {
-            const el = e.currentTarget as HTMLDivElement;
-            const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
-            if (delta !== 0) {
-              e.preventDefault();
-              el.scrollLeft += delta;
-              updateTimelineView({ scrollPosition: el.scrollLeft });
-            }
-          }
-        }}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onClick={handleTimelineClick}
@@ -1085,7 +1145,7 @@ export function EducationalTimeline({
                     </div>
                     <div className="relative group">
                       <button
-                        className="p-1 rounded text-text-tertiary hover:text-text-primary hover:bg-neutral-700"
+                        className="p-1 rounded text-text-tertiary hover:text-text-primary hover:bg-synapse-surface-hover"
                         aria-describedby={`tip-${track.id}`}
                         aria-label={`Tips for ${track.name} track`}
                       >
@@ -1138,7 +1198,7 @@ export function EducationalTimeline({
 
                 {/* Right content cell */}
                 <div
-                  className="relative border-b border-border-subtle"
+                  className="relative border-b border-border-subtle bg-background-secondary/40"
                   style={rowStyle}
                 >
                   <EducationalTrack
@@ -1175,7 +1235,7 @@ export function EducationalTimeline({
         contextMenu.itemId &&
         createPortal(
           <div
-            className="fixed bg-background-tertiary border border-border-subtle rounded-md shadow-lg py-1"
+            className="fixed bg-background-tertiary border border-border-subtle rounded-md shadow-synapse-sm py-1"
             style={{
               left: Math.min(
                 contextMenu.x,
@@ -1190,7 +1250,7 @@ export function EducationalTimeline({
             onMouseDown={(e) => e.stopPropagation()}
           >
             <button
-              className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-text-primary hover:bg-neutral-700"
+              className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-text-primary hover:bg-synapse-surface-hover"
               onClick={() => {
                 removeTimelineItem(contextMenu.itemId!);
                 clearTimelineSelection();
@@ -1201,7 +1261,7 @@ export function EducationalTimeline({
               Delete Clip (Del)
             </button>
             <button
-              className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-text-primary hover:bg-neutral-700"
+              className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-text-primary hover:bg-synapse-surface-hover"
               onClick={() => {
                 const dupId = duplicateTimelineItem(
                   contextMenu.itemId!
@@ -1246,7 +1306,7 @@ function PlacementWarningToast({
   onApplySuggestion,
 }: PlacementWarningToastProps) {
   return (
-    <div className="fixed bottom-4 right-4 bg-background-tertiary border border-border-subtle rounded-lg shadow-lg p-4 max-w-sm z-50">
+            <div className="fixed bottom-4 right-4 bg-background-tertiary border border-border-subtle rounded-lg shadow-synapse-sm p-4 max-w-sm z-50">
       <div className="flex items-start space-x-3">
         <div className="flex-shrink-0">
           <div className="w-8 h-8 bg-accent-yellow bg-opacity-20 rounded-full flex items-center justify-center">
@@ -1273,13 +1333,13 @@ function PlacementWarningToast({
           <div className="flex space-x-2">
             <button
               onClick={onApplySuggestion}
-              className="px-3 py-1 text-xs bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors"
+              className="px-3 py-1 text-xs bg-synapse-primary text-synapse-text-inverse rounded hover:bg-synapse-primary-hover transition-colors"
             >
               Move to {warning.suggestion.suggestedTrack.name}
             </button>
             <button
               onClick={onDismiss}
-              className="px-3 py-1 text-xs bg-neutral-700 text-text-secondary rounded hover:bg-neutral-600 transition-colors"
+              className="px-3 py-1 text-xs bg-synapse-surface text-text-secondary rounded hover:bg-synapse-surface-hover transition-colors"
             >
               Keep Here
             </button>

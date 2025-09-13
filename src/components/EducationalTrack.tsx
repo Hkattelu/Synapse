@@ -237,7 +237,7 @@ function EducationalTimelineClip({
       <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize bg-text-primary bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
 
       {/* Clip Content (lazy) */}
-      <div className="p-1.5 h-full flex flex-col justify-between text-[11px] overflow-hidden">
+      <div className="p-1.5 h-full flex flex-col justify-between text-[11px] overflow-hidden text-synapse-text-inverse">
         <LazyTrackContent
           track={track}
           item={item}

@@ -144,8 +144,8 @@ export function Inspector({ className = '' }: InspectorProps) {
             Properties
           </button>
 
-          {/* Visual tab hidden for code items */}
-          {selectedItem.type !== 'code' && (
+          {/* Visual tab hidden for code and audio items */}
+          {selectedItem.type !== 'code' && selectedItem.type !== 'audio' && (
             <button
               onClick={() => setActiveTab('visual')}
               className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
@@ -158,16 +158,19 @@ export function Inspector({ className = '' }: InspectorProps) {
             </button>
           )}
 
-          <button
-            onClick={() => setActiveTab('layout')}
-            className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
-              activeTab === 'layout'
-                ? 'text-text-primary bg-synapse-surface border-b-2 border-synapse-primary'
-                : 'text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover'
-            }`}
-          >
-            Layout
-          </button>
+          {/* Layout tab hidden for audio items */}
+          {selectedItem.type !== 'audio' && (
+            <button
+              onClick={() => setActiveTab('layout')}
+              className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
+                activeTab === 'layout'
+                  ? 'text-text-primary bg-synapse-surface border-b-2 border-synapse-primary'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover'
+              }`}
+            >
+              Layout
+            </button>
+          )}
         </div>
       </div>
 
@@ -211,7 +214,7 @@ export function Inspector({ className = '' }: InspectorProps) {
           </>
         )}
 
-        {activeTab === 'visual' && selectedItem.type !== 'code' && (
+        {activeTab === 'visual' && selectedItem.type !== 'code' && selectedItem.type !== 'audio' && (
           <VisualControlsTabs
             item={selectedItem}
             onUpdateProperties={(properties) =>
@@ -222,7 +225,7 @@ export function Inspector({ className = '' }: InspectorProps) {
           />
         )}
 
-        {activeTab === 'layout' && (
+        {activeTab === 'layout' && selectedItem.type !== 'audio' && (
           <ClipProperties
             mode="layout"
             item={selectedItem}
@@ -242,6 +245,10 @@ interface ClipMetadataProps {
 }
 
 function ClipMetadata({ item, asset }: ClipMetadataProps) {
+  const { updateMediaAsset } = useMediaAssets();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [isRelinking, setIsRelinking] = useState(false);
+
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.round((seconds % 60) * 10) / 10;
@@ -349,6 +356,73 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
     }
   };
 
+  const getMediaDuration = async (
+    file: File,
+    type: 'video' | 'audio'
+  ): Promise<number | undefined> => {
+    return new Promise((resolve) => {
+      if (type === 'video') {
+        const video = document.createElement('video');
+        video.onloadedmetadata = () => {
+          resolve(video.duration);
+          URL.revokeObjectURL(video.src);
+        };
+        video.onerror = () => {
+          resolve(undefined);
+          URL.revokeObjectURL(video.src);
+        };
+        video.src = URL.createObjectURL(file);
+        video.load();
+      } else if (type === 'audio') {
+        const audio = document.createElement('audio');
+        audio.onloadedmetadata = () => {
+          resolve(audio.duration);
+          URL.revokeObjectURL(audio.src);
+        };
+        audio.onerror = () => {
+          resolve(undefined);
+          URL.revokeObjectURL(audio.src);
+        };
+        audio.src = URL.createObjectURL(file);
+        audio.load();
+      } else {
+        resolve(undefined);
+      }
+    });
+  };
+
+  const handleBrowseForNewSource = () => {
+    try {
+      fileInputRef.current?.click();
+    } catch {}
+  };
+
+  const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !asset) return;
+    const file = files[0];
+    setIsRelinking(true);
+    try {
+      const mediaType = asset.type === 'image' ? 'video' : (asset.type as 'video' | 'audio');
+      const url = URL.createObjectURL(file);
+      const duration = await getMediaDuration(file, mediaType);
+      updateMediaAsset(asset.id, {
+        name: file.name,
+        url,
+        duration,
+        metadata: {
+          ...asset.metadata,
+          fileSize: file.size,
+          mimeType: file.type,
+        },
+      } as any);
+    } finally {
+      setIsRelinking(false);
+      // reset input to allow same file selection again
+      if (e.target) e.target.value = '';
+    }
+  };
+
   return (
     <div className="p-4 border-b border-border-subtle">
       <h4 className="font-medium text-text-primary mb-3">Clip Information</h4>
@@ -396,7 +470,7 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
             <p className="text-xs text-text-secondary font-medium mb-2">
               Source File
             </p>
-            <div className="text-xs text-text-secondary">
+            <div className="text-xs text-text-secondary space-y-1">
               <p>
                 Size: {(asset.metadata.fileSize / 1024 / 1024).toFixed(1)} MB
               </p>
@@ -405,6 +479,37 @@ function ClipMetadata({ item, asset }: ClipMetadataProps) {
                 <p>
                   Resolution: {asset.metadata.width} × {asset.metadata.height}
                 </p>
+              )}
+              <div>
+                <p className="text-text-secondary font-medium mb-1">Filename</p>
+                <p className="text-text-primary break-all">{asset.name}</p>
+              </div>
+              <div>
+                <p className="text-text-secondary font-medium mb-1">Source URL / Path</p>
+                <input
+                  readOnly
+                  value={asset.url}
+                  className="w-full bg-background-tertiary border border-border-subtle rounded px-2 py-1 text-text-secondary text-xs"
+                />
+              </div>
+              {(asset.type === 'audio' || asset.type === 'video') && (
+                <div className="pt-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={onFileSelected}
+                    accept={asset.type === 'audio' ? 'audio/*' : 'video/*'}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={handleBrowseForNewSource}
+                    disabled={isRelinking}
+                    className="px-2 py-1 text-xs rounded bg-synapse-primary text-synapse-text-inverse hover:bg-synapse-primary-hover disabled:opacity-60"
+                    title="Relink to a different source file"
+                  >
+                    {isRelinking ? 'Relinking…' : 'Relink Source'}
+                  </button>
+                </div>
               )}
             </div>
           </div>

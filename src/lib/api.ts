@@ -139,6 +139,13 @@ export const api = {
   renderDownloadUrl(id: string): string {
     return `/api/render/${id}/download`;
   },
+  async listRenders(projectId: string): Promise<{ items: Array<{ id: string; filename: string; publicUrl: string; size: number; createdAt: string }> }> {
+    const url = `/api/render?projectId=${encodeURIComponent(projectId)}`;
+    return request(url);
+  },
+  async deleteRender(id: string): Promise<{ ok: boolean }> {
+    return request(`/api/render/${id}` , { method: 'DELETE' });
+  },
   // AI
   async aiGenerateFromRepo(input: {
     repoUrl: string;

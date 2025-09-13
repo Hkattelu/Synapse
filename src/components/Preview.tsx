@@ -142,7 +142,8 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     );
   }, [compositionProps.settings.duration, compositionProps.settings.fps]);
 
-  // Sync playback state with player
+  // Sync playback state with player (ensure seek on play transitions)
+  const wasPlayingRef = React.useRef<boolean>(false);
   useEffect(() => {
     if (!playerRef.current) return;
 
@@ -151,18 +152,26 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
       if (!playerRef.current) return;
 
       try {
-        if (playback.isPlaying) {
+        // If transitioning to playing, ensure the player seeks to the global current time first
+        if (playback.isPlaying && !wasPlayingRef.current) {
+          const frame = Math.round(
+            playback.currentTime * compositionProps.settings.fps
+          );
+          playerRef.current.seekTo(frame);
+          playerRef.current.play();
+        } else if (playback.isPlaying) {
           playerRef.current.play();
         } else {
           playerRef.current.pause();
         }
+        wasPlayingRef.current = playback.isPlaying;
       } catch {
         console.error('Error controlling player');
       }
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [playback.isPlaying]);
+  }, [playback.isPlaying, playback.currentTime, compositionProps.settings.fps]);
 
   // Manual timer for updating playback time when Remotion's onTimeUpdate doesn't work
   useEffect(() => {
@@ -236,9 +245,18 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
     if (playback.isPlaying) {
       pause();
     } else {
+      // Ensure player seeks to current global time before starting playback via UI control
+      if (playerRef.current) {
+        try {
+          const frame = Math.round(
+            playback.currentTime * compositionProps.settings.fps
+          );
+          playerRef.current.seekTo(frame);
+        } catch {}
+      }
       play();
     }
-  }, [playback.isPlaying, play, pause]);
+  }, [playback.isPlaying, play, pause, playback.currentTime, compositionProps.settings.fps]);
 
   // Handle seeking to specific time
   const handleSeek = useCallback(
@@ -453,12 +471,12 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               {/* Play/Pause */}
               <button
                 onClick={handlePlayPause}
-                className="bg-primary-600 hover:bg-primary-700 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+                className="bg-primary-600 hover:bg-primary-700 text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors"
                 title={playback.isPlaying ? 'Pause' : 'Play'}
               >
                 {playback.isPlaying ? (
                   <svg
-                    className="w-5 h-5"
+                    className="w-6 h-6"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -472,7 +490,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
                   </svg>
                 ) : (
                   <svg
-                    className="w-5 h-5 ml-0.5"
+                    className="w-6 h-6 ml-0.5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -562,32 +580,47 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
           </div>
         </div>
       </div>
-      {/* Timeline Scrubber */}
+      {/* Timeline Scrubber with centered Record button */}
       <div className="bg-background-secondary border-t border-border-subtle px-4 py-2">
-        <div className="relative">
-          <div
-            className="h-2 bg-gray-600 rounded-full cursor-pointer relative"
-            onMouseDown={handleTimelineDragStart}
-            onClick={handleTimelineScrub}
-          >
-            {/* Progress bar (colored left side) */}
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1">
             <div
-              className="h-full bg-purple-600 rounded-full relative transition-all duration-100"
-              style={{
-                width: `${Math.max(0, Math.min(100, (playback.currentTime / compositionProps.settings.duration) * 100))}%`,
-              }}
-            />
-            {/* Playhead handle */}
-            <div
-              className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white rounded-full border-2 border-purple-600 shadow-lg cursor-grab active:cursor-grabbing transition-all duration-100"
-              style={{
-                left: `${Math.max(0, Math.min(100, (playback.currentTime / compositionProps.settings.duration) * 100))}%`,
-                transform: 'translateX(-50%)',
-              }}
-            />
+              className="h-2 bg-gray-600 rounded-full cursor-pointer relative"
+              onMouseDown={handleTimelineDragStart}
+              onClick={handleTimelineScrub}
+            >
+              {/* Progress bar (colored left side) */}
+              <div
+                className="h-full bg-purple-600 rounded-full relative transition-all duration-100"
+                style={{
+                  width: `${Math.max(0, Math.min(100, (playback.currentTime / compositionProps.settings.duration) * 100))}%`,
+                }}
+              />
+              {/* Playhead handle */}
+              <div
+                className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white rounded-full border-2 border-purple-600 shadow-lg cursor-grab active:cursor-grabbing transition-all duration-100"
+                style={{
+                  left: `${Math.max(0, Math.min(100, (playback.currentTime / compositionProps.settings.duration) * 100))}%`,
+                  transform: 'translateX(-50%)',
+                }}
+              />
+            </div>
           </div>
-
-          {/* Timeline markers */}
+          <button
+            onClick={() => {
+              try {
+                window.dispatchEvent(new CustomEvent('openRecorderDialog'));
+              } catch {}
+            }}
+            className="w-10 h-10 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-synapse-sm"
+            title="Record narration or camera"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="5" />
+            </svg>
+          </button>
+        </div>
+      </div>
           <div className="flex justify-between text-xs text-text-secondary mt-1">
             <span>0:00</span>
             <span>{formatTime(compositionProps.settings.duration)}</span>

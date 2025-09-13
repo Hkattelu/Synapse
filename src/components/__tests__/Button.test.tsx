@@ -4,10 +4,10 @@ import { render, screen } from '@testing-library/react';
 import { Button } from '../ui/Button';
 
 describe('Button (UI)', () => {
-  it('renders with default variant and size', () => {
+it('renders with default variant and size', () => {
     render(<Button>Click me</Button>);
     const btn = screen.getByRole('button', { name: /click me/i });
-    expect(btn.className).toMatch(/bg-blue-600/);
+    expect(btn.className).toMatch(/bg-synapse-primary/);
     expect(btn.className).toMatch(/px-4 py-2/);
   });
 
@@ -19,7 +19,7 @@ describe('Button (UI)', () => {
     );
     const btn = screen.getByRole('button', { name: /outline/i });
     expect(btn).toBeDisabled();
-    expect(btn.className).toMatch(/border-gray-300/);
+expect(btn.className).toMatch(/border-synapse-border/);
     expect(btn.className).toMatch(/px-3 py-2/);
   });
 });

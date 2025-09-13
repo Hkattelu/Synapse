@@ -58,3 +58,23 @@ Security & persistence
 
 - This scaffold uses in-memory stores for users and licenses; replace with a persistent database for production.
 - Use secure cookies (secure: true) and HTTPS in production.
+
+Renders persistence, auth, and housekeeping
+
+- Metadata file: server/output/renders.json (JSON array of render records)
+- Media files: server/output/<filename> (served at /downloads/<filename>)
+- API additions:
+  - GET /api/render?projectId=<id> — lists renders for a project
+  - GET /api/render/:id/download — downloads the file (also works after process restart)
+  - DELETE /api/render/:id — deletes the file and removes its metadata entry
+
+Design notes:
+- Persistence is file-based for simplicity and local dev friendliness. For multi-instance deployments, use a shared DB/object store and atomic writes.
+- Client send project identifiers in the render payload so server can attribute renders to projects.
+
+TODOs:
+- Auth: Protect list/download/delete with session/membership checks; validate ownership to the target project.
+- Rate limiting: Add per-user limits for listing and deleting.
+- Housekeeping: Implement retention (max items per project, max age, max total size) and periodic cleanup.
+- Concurrency: Make writes to renders.json atomic or use a lock.
+- Observability: Add structured logs and audit trail for deletions.

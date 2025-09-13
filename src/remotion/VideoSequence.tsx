@@ -149,20 +149,7 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
 
             {asset.type === 'audio' && (
               <>
-                {/* Visual placeholder */}
-                <AbsoluteFill
-                  style={{
-                    backgroundColor: 'rgba(0, 255, 0, 0.3)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '24px',
-                    color: 'white',
-                  }}
-                >
-                  🎵 {asset.name}
-                </AbsoluteFill>
-                {/* Actual audio playback (guarded for test mocks) */}
+                {/* Audio playback only; no visual overlay for narration */}
                 {(() => {
                   type AudioProps = {
                     src: string;

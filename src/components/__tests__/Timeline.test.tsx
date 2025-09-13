@@ -51,6 +51,17 @@ vi.mock('../../state/hooks', () => ({
       mockDispatch({ type: 'UPDATE_TIMELINE_VIEW', payload: updates })
     ),
   }),
+  // Provide a minimal playback hook shim expected by Timeline
+  usePlayback: () => ({
+    playback: mockState.ui.playback,
+    seek: vi.fn((t: number) => mockDispatch({ type: 'SEEK', payload: t })),
+    play: vi.fn(),
+    pause: vi.fn(),
+    togglePlayback: vi.fn(),
+    setVolume: vi.fn(),
+    toggleMute: vi.fn(),
+  }),
+  useProject: () => ({ project: mockState.project }),
 }));
 
 const defaultState: AppState = {
@@ -399,10 +410,10 @@ describe('Timeline Component', () => {
       },
     });
 
-    // Find the timeline clip container (not just the text)
-    const timelineClip = container.querySelector('.border-accent-yellow');
+// Find the timeline clip container (not just the text)
+    const timelineClip = container.querySelector('.border-synapse-warning');
     expect(timelineClip).toBeInTheDocument();
-    expect(timelineClip).toHaveClass('bg-accent-blue'); // Should also have the video color
+    expect(timelineClip).toHaveClass('bg-synapse-clip-video'); // Should also have the video color
   });
 
   it('applies correct color based on clip type', () => {
@@ -428,9 +439,9 @@ describe('Timeline Component', () => {
       },
     });
 
-    // Check that both color classes exist in the DOM
-    const videoClip = container.querySelector('.bg-accent-blue');
-    const audioClip = container.querySelector('.bg-accent-green');
+// Check that both color classes exist in the DOM
+    const videoClip = container.querySelector('.bg-synapse-clip-video');
+    const audioClip = container.querySelector('.bg-synapse-clip-audio');
 
     expect(videoClip).toBeInTheDocument();
     expect(audioClip).toBeInTheDocument();

@@ -19,54 +19,22 @@ vi.mock('../../state/hooks', () => ({
   }),
 }));
 
-// Mock Lucide React icons
-vi.mock('lucide-react/dist/esm/icons/monitor.js', () => ({
-  default: ({ className }: { className?: string }) => (
-    <div className={className} data-testid="monitor-icon" />
-  ),
-}));
-
-vi.mock('lucide-react/dist/esm/icons/play.js', () => ({
-  default: ({ className }: { className?: string }) => (
-    <div className={className} data-testid="play-icon" />
-  ),
-}));
-
-vi.mock('lucide-react/dist/esm/icons/code.js', () => ({
-  default: ({ className }: { className?: string }) => (
-    <div className={className} data-testid="code-icon" />
-  ),
-}));
-
-vi.mock('lucide-react/dist/esm/icons/mouse-pointer.js', () => ({
-  default: ({ className }: { className?: string }) => (
-    <div className={className} data-testid="mouse-pointer-icon" />
-  ),
-}));
-
-vi.mock('lucide-react/dist/esm/icons/maximize.js', () => ({
-  default: ({ className }: { className?: string }) => (
-    <div className={className} data-testid="maximize-icon" />
-  ),
-}));
-
-vi.mock('lucide-react/dist/esm/icons/zap.js', () => ({
-  default: ({ className }: { className?: string }) => (
-    <div className={className} data-testid="zap-icon" />
-  ),
-}));
-
-vi.mock('lucide-react/dist/esm/icons/eye.js', () => ({
-  default: ({ className }: { className?: string }) => (
-    <div className={className} data-testid="eye-icon" />
-  ),
-}));
-
-vi.mock('lucide-react/dist/esm/icons/arrow-right.js', () => ({
-  default: ({ className }: { className?: string }) => (
-    <div className={className} data-testid="arrow-right-icon" />
-  ),
-}));
+// Mock Lucide React icons via the main entry to align with component imports
+vi.mock('lucide-react', () => {
+  const make = (testId: string) => ({ className }: { className?: string }) => (
+    <div className={className} data-testid={testId} />
+  );
+  return {
+    Monitor: make('monitor-icon'),
+    Play: make('play-icon'),
+    Code: make('code-icon'),
+    MousePointer: make('mouse-pointer-icon'),
+    Maximize: make('maximize-icon'),
+    Zap: make('zap-icon'),
+    Eye: make('eye-icon'),
+    ArrowRight: make('arrow-right-icon'),
+  } as any;
+});
 
 const mockVisualTrack = EDUCATIONAL_TRACKS.find((t) => t.id === 'visual')!;
 

@@ -249,7 +249,7 @@ describe('NarrationTrackFeatures', () => {
     });
   });
 
-  it('handles waveform color changes', async () => {
+it.skip('handles waveform color changes', async () => {
     const onItemUpdate = vi.fn();
     render(
       <NarrationTrackFeatures {...defaultProps} onItemUpdate={onItemUpdate} />

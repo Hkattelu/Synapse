@@ -515,7 +515,7 @@ export function Timeline({ className = '' }: TimelineProps) {
           </div>
 
           {/* Track Lines */}
-          {Array.from({ length: maxTrack + 1 }).map((_, trackIndex) => (
+{Array.from({ length: maxTrack + 1 }).map((_, trackIndex) => (
             <div
               key={trackIndex}
               className="absolute left-0 right-0 border-b border-border-subtle opacity-50"
@@ -524,7 +524,8 @@ export function Timeline({ className = '' }: TimelineProps) {
                 height: `${TRACK_HEIGHT}px`,
               }}
             >
-              <div className="absolute left-2 top-2 text-xs text-text-tertiary flex items-center gap-1">
+              <div className="absolute left-2 top-2 text-xs text-text-tertiary flex items-center gap-2">
+                <span>Track {trackIndex + 1}</span>
                 <div className="relative group">
                   <button
                     className="p-1 rounded hover:bg-synapse-surface-hover text-text-tertiary hover:text-text-primary"
