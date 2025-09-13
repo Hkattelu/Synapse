@@ -87,12 +87,15 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   };
 
   // Handle file download/save after completion
-  const handleDownload = async () => {
+  const handleDownload = async (): Promise<boolean> => {
     try {
       const outputUrl = (currentJob as any)?.outputPath as string | undefined;
-      if (!outputUrl) return;
-      const suggestedName =
-        outputUrl.split('/').pop() || `${outputName}.${settings.format}`;
+      if (!outputUrl) return false;
+      const lastSegment = (outputUrl.split('/').pop() || '').trim();
+      const hasExt = /\.[a-zA-Z0-9]+$/.test(lastSegment);
+      const suggestedName = hasExt
+        ? lastSegment
+        : `${outputName}.${settings.format}`;
 
       // If running in Electron, offer native Save dialog and write file
       const anyWindow = window as any;
@@ -100,28 +103,33 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
         const savePath = await anyWindow.SynapseFS.showSaveDialog({
           title: 'Save exported video',
           defaultPath: suggestedName,
-          filters: [{ name: 'Video', extensions: ['mp4', 'webm', 'mov'] }],
+          filters: [
+            { name: 'Video', extensions: ['mp4', 'webm', 'mov'] },
+          ],
         });
         if (savePath) {
           const resp = await fetch(outputUrl);
           const buf = new Uint8Array(await resp.arrayBuffer());
           await anyWindow.SynapseFS.writeFile(savePath, buf);
+          return true;
         }
+        return false;
       } else {
         // Browser: trigger a download using an anchor element
         downloadExportedFile(outputUrl, suggestedName);
+        return true;
       }
     } catch (e) {
       console.warn('Download failed:', e);
+      return false;
     }
   };
-
-  // On export completion, trigger a download once and then auto-close
   useEffect(() => {
     if (progress?.status === 'completed') {
       if (!hasTriggeredDownload) {
-        setHasTriggeredDownload(true);
-        void handleDownload();
+        void handleDownload().then((ok) => {
+          if (ok) setHasTriggeredDownload(true);
+        });
       }
       const timer = setTimeout(() => {
         onClose();
@@ -131,7 +139,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
       // Reset flag if a new export starts
       if (hasTriggeredDownload) setHasTriggeredDownload(false);
     }
-  }, [progress?.status, onClose, hasTriggeredDownload]);
+  }, [progress?.status, currentJob?.outputPath, onClose, hasTriggeredDownload]);
 
   if (!isOpen) return null;
   if (!isOpen) return null;

@@ -2,7 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useProject, useUI, useTimeline } from '../state/hooks';
-import { Preview } from './Preview';
+
+// Advanced lazy loading to speed up the initial load time.
+const Preview = React.lazy(() =>
+  import('./Preview').then((m) => ({ default: m.Preview }))
+);
+import { LoadingSpinner } from './ui/LoadingSpinner';
 const MediaBin = React.lazy(() =>
   import('./MediaBin').then((m) => ({ default: m.MediaBin }))
 );
@@ -14,11 +19,12 @@ const EnhancedTimelineView = React.lazy(() =>
 const Inspector = React.lazy(() =>
   import('./Inspector').then((m) => ({ default: m.Inspector }))
 );
+
 import { ExportDialog } from './ExportDialog';
 import { RecorderDialog } from './RecorderDialog';
 import { ExportProvider } from '../state/exportContext';
 import { StudioLoader } from './ui/StudioLoader';
-import { LoadingSpinner } from './ui/LoadingSpinner';
+import { InspectorSkeleton, MediaBinSkeleton, TimelineSkeleton } from './ui/PanelSkeletons';
 import { prefetchOnIdle } from '../lib/prefetch';
 import { ResizablePanel } from './ResizablePanel';
 import { ArrowLeft, Sparkles, Settings, Archive } from 'lucide-react';
@@ -118,17 +124,24 @@ function StudioViewContent() {
     }
   }, [shouldShowInspector, ui.mediaBinVisible, toggleMediaBin]);
 
-  // Dev-time: Warm up heavy lazy chunks shortly after mount so the first open feels instant
+  // Dev-time: Only prefetch when user intent indicates these panels might open soon,
+  // to avoid ballooning initial load.
   useEffect(() => {
-    if (import.meta.env.DEV) {
+    if (!import.meta.env.DEV) return;
+    if (isRightPanelOpen) {
+      // If right panel opens, warm the likely targets.
       prefetchOnIdle(
-        [
-          () => import('./Inspector'),
-          () => import('./EnhancedTimelineView'),
-          () => import('./MediaBin'),
-        ],
-        800
+        [() => import('./Inspector'), () => import('./MediaBin')],
+        300
       );
+    }
+  }, [isRightPanelOpen]);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    // If advanced timeline is enabled, warm the chunk a bit later.
+    if (FLAGS.ADVANCED_UI) {
+      prefetchOnIdle(() => import('./EnhancedTimelineView'), 2000);
     }
   }, []);
 
@@ -349,7 +362,9 @@ function StudioViewContent() {
             className="flex-1 bg-synapse-crust border-r border-synapse-surface2 rounded-tl-2xl overflow-hidden"
             data-tutorial="preview-area"
           >
-            <Preview className="h-full w-full" />
+<React.Suspense fallback={<div className="h-full w-full p-6"><LoadingSpinner label="Loading preview…" size="md" /></div>}>
+              <Preview className="h-full w-full" />
+            </React.Suspense>
           </div>
 
           {/* Timeline Area - Resizable */}
@@ -382,13 +397,7 @@ function StudioViewContent() {
             {/** Advanced timeline gated by feature flag */}
             {FLAGS.ADVANCED_UI ? (
               <ModeAwareComponent mode="advanced">
-                <React.Suspense
-                  fallback={
-                    <div className="flex-1 p-4">
-                      <LoadingSpinner label="Loading timeline…" size="sm" />
-                    </div>
-                  }
-                >
+<React.Suspense fallback={<TimelineSkeleton rows={6} />}>
                   <EnhancedTimelineView className="flex-1" />
                 </React.Suspense>
               </ModeAwareComponent>
@@ -436,13 +445,7 @@ function StudioViewContent() {
                   className={`h-full border-b border-synapse-border bg-synapse-surface`}
                 >
                   <div data-tutorial="media-bin">
-                    <React.Suspense
-                      fallback={
-                        <div className="p-4">
-                          <LoadingSpinner label="Loading media…" size="sm" />
-                        </div>
-                      }
-                    >
+<React.Suspense fallback={<MediaBinSkeleton />}>
                       <MediaBin />
                     </React.Suspense>
                   </div>
@@ -451,13 +454,7 @@ function StudioViewContent() {
 
               {shouldShowInspector && !ui.mediaBinVisible ? (
                 <div className={`h-full bg-synapse-surface`}>
-                  <React.Suspense
-                    fallback={
-                      <div className="p-4">
-                        <LoadingSpinner label="Loading inspector…" size="sm" />
-                      </div>
-                    }
-                  >
+<React.Suspense fallback={<InspectorSkeleton />}>
                     <Inspector />
                   </React.Suspense>
                 </div>

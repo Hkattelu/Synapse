@@ -182,6 +182,33 @@ npm test -- export
 - **Hardware acceleration**: Optional GPU acceleration support
 - **Progress throttling**: Optimized progress callbacks to prevent UI blocking
 
+## Recent updates (2025-09-13)
+
+The export experience has been improved in three areas:
+
+1) Start Export button clarity
+- Increased visual affordance (size, icon, rounded corners, shadow, focus ring)
+- Better accessibility (aria-label, explicit type, title)
+
+2) Progress and ETA accuracy
+- Server now forwards Remotion progress (renderedFrames/totalFrames) via onProgress
+- Client computes ETA in seconds and uses a smoothed FPS (EMA) when frames are available
+- Average frame time (ms) exposed for diagnostics
+
+3) Download flow
+- On completion, a one-time automatic download is triggered
+- Browser: uses an anchor download with a sensible filename
+- Electron: prompts via native Save dialog and writes the file through SynapseFS
+- The success UI includes a Download button and an Open link as a fallback
+
+Tests
+- Added end-to-end tests verifying both browser and Electron download flows
+- File: src/__tests__/export-e2e.download.test.tsx
+
+Notes
+- Duration duplication in the footer was fixed in ExportDialog
+- Suggested filename fallback ensures an extension is present (e.g., .mp4)
+
 ## Future Enhancements
 
 Potential improvements for future versions:
