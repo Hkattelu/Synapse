@@ -25,6 +25,14 @@ vi.mock('remotion', () => ({
     />
   ),
   Img: ({ src, style }: any) => <img src={src} style={style} alt="" />,
+  Audio: ({ src, volume, playbackRate, muted }: any) => (
+    <audio
+      src={src}
+      data-volume={volume}
+      data-playback-rate={playbackRate}
+      data-muted={muted}
+    />
+  ),
   staticFile: (path: string) => `/static/${path}`,
   useVideoConfig: () => ({ width: 1920, height: 1080, fps: 30 }),
 }));
@@ -134,9 +142,10 @@ describe('VideoSequence', () => {
 
     const { container } = render(<VideoSequence {...props} />);
 
-    expect(container).toHaveTextContent('🎵 test-audio.mp3');
-    // Just verify the content is rendered, not specific styles
-    expect(container.querySelector('div')).toBeInTheDocument();
+    // Ensure the audio element from Remotion is rendered with correct attributes
+    const audio = container.querySelector('audio');
+    expect(audio).toBeInTheDocument();
+    expect(audio).toHaveAttribute('src', 'blob:test-url');
   });
 
   it('renders code asset correctly', () => {

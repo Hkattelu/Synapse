@@ -1,19 +1,28 @@
 import React, { memo, Suspense, lazy } from 'react';
-import { useIntersectionObserver, useOptimizedTrackPreview } from '../lib/performanceOptimizations';
+import {
+  useIntersectionObserver,
+  useOptimizedTrackPreview,
+} from '../lib/performanceOptimizations';
 import type { TimelineItem, MediaAsset } from '../lib/types';
 import type { EducationalTrack } from '../lib/educationalTypes';
 
 // Lazy load track-specific components
-const CodeSyntaxPreview = lazy(() => 
-  import('./CodeSyntaxPreview').then(module => ({ default: module.CodeSyntaxPreview }))
+const CodeSyntaxPreview = lazy(() =>
+  import('./CodeSyntaxPreview').then((module) => ({
+    default: module.CodeSyntaxPreview,
+  }))
 );
 
-const CompactWaveform = lazy(() => 
-  import('./WaveformVisualization').then(module => ({ default: module.CompactWaveform }))
+const CompactWaveform = lazy(() =>
+  import('./WaveformVisualization').then((module) => ({
+    default: module.CompactWaveform,
+  }))
 );
 
-const StaticLevelMeter = lazy(() => 
-  import('./AudioLevelMeter').then(module => ({ default: module.StaticLevelMeter }))
+const StaticLevelMeter = lazy(() =>
+  import('./AudioLevelMeter').then((module) => ({
+    default: module.StaticLevelMeter,
+  }))
 );
 
 interface LazyTrackContentProps {
@@ -33,7 +42,10 @@ function ContentSkeleton({ track }: { track: EducationalTrack }) {
       <div className="h-3 bg-gray-700 rounded mb-1" style={{ width: '50%' }} />
       {track.id === 'code' && (
         <>
-          <div className="h-3 bg-gray-700 rounded mb-1" style={{ width: '80%' }} />
+          <div
+            className="h-3 bg-gray-700 rounded mb-1"
+            style={{ width: '80%' }}
+          />
           <div className="h-3 bg-gray-700 rounded" style={{ width: '60%' }} />
         </>
       )}
@@ -63,7 +75,10 @@ export const LazyTrackContent = memo(function LazyTrackContent({
   // Don't render content until visible
   if (!isVisible) {
     return (
-      <div ref={ref as unknown as React.Ref<HTMLDivElement>} className={className}>
+      <div
+        ref={ref as unknown as React.Ref<HTMLDivElement>}
+        className={className}
+      >
         <ContentSkeleton track={track} />
       </div>
     );
@@ -71,14 +86,20 @@ export const LazyTrackContent = memo(function LazyTrackContent({
 
   if (!previewData) {
     return (
-      <div ref={ref as unknown as React.Ref<HTMLDivElement>} className={className}>
+      <div
+        ref={ref as unknown as React.Ref<HTMLDivElement>}
+        className={className}
+      >
         <div className="text-xs text-gray-400 italic">No content available</div>
       </div>
     );
   }
 
   return (
-    <div ref={ref as unknown as React.Ref<HTMLDivElement>} className={className}>
+    <div
+      ref={ref as unknown as React.Ref<HTMLDivElement>}
+      className={className}
+    >
       <Suspense fallback={<ContentSkeleton track={track} />}>
         <TrackContentRenderer
           track={track}
@@ -151,7 +172,9 @@ const TrackContentRenderer = memo(function TrackContentRenderer({
             </span>
           </div>
           {previewData.dimensions && (
-            <div className="text-xs text-gray-400">{previewData.dimensions}</div>
+            <div className="text-xs text-gray-400">
+              {previewData.dimensions}
+            </div>
           )}
           {previewData.thumbnail && (
             <div
@@ -163,41 +186,10 @@ const TrackContentRenderer = memo(function TrackContentRenderer({
       );
 
     case 'narration':
+      // Minimal, high-contrast label without waveform/title per design request
       return (
-        <div className="space-y-1">
-          <div className="flex items-center gap-1 text-xs">
-            <span className="font-medium text-amber-300">
-              {asset?.name || 'Audio Track'}
-            </span>
-            <span className="text-amber-400">
-              {Math.round(previewData.volume * 100)}% vol
-            </span>
-          </div>
-          {previewData.syncPoints > 0 && (
-            <div className="text-xs text-blue-400">
-              {previewData.syncPoints} sync points
-            </div>
-          )}
-          <div className="flex items-center gap-2">
-            {previewData.hasWaveform && asset?.url && (
-              <CompactWaveform
-                audioUrl={asset.url}
-                width={80}
-                height={12}
-                color="#F59E0B"
-                className="flex-1"
-              />
-            )}
-            <StaticLevelMeter
-              level={previewData.volume}
-              width={16}
-              height={8}
-              color="#10B981"
-            />
-          </div>
-          {previewData.hasDucking && (
-            <div className="text-xs text-amber-400">Audio ducking enabled</div>
-          )}
+        <div className="text-xs text-synapse-text-inverse/90">
+          Narration
         </div>
       );
 

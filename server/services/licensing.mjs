@@ -4,7 +4,12 @@ const licenses = new Map(); // key: userId -> {key, plan, active, activatedAt}
 export const activateLicense = async ({ userId, licenseKey }) => {
   if (!licenseKey) throw new Error('licenseKey required');
   // TODO: Validate signature or check with licensing provider
-  const record = { key: licenseKey, plan: 'pro', active: true, activatedAt: new Date().toISOString() };
+  const record = {
+    key: licenseKey,
+    plan: 'pro',
+    active: true,
+    activatedAt: new Date().toISOString(),
+  };
   licenses.set(userId, record);
   return record;
 };

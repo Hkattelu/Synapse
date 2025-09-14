@@ -78,13 +78,13 @@ describe('Inspector Component - Basic Functionality', () => {
     ).toBeInTheDocument();
   });
 
-  it('should display video clip metadata correctly', () => {
+it('should display video clip metadata correctly', () => {
     mockSelectedTimelineItems.push(mockVideoItem);
     mockGetMediaAssetById.mockReturnValue(mockVideoAsset);
 
     renderInspector();
 
-    expect(screen.getByText('test-video.mp4')).toBeInTheDocument();
+    expect(screen.getAllByText('test-video.mp4')[0]).toBeInTheDocument();
     expect(screen.getByText(/video.*clip/i)).toBeInTheDocument();
     expect(screen.getByText('0:05.5')).toBeInTheDocument(); // Duration
     expect(screen.getByText('Track 1')).toBeInTheDocument();
@@ -92,18 +92,16 @@ describe('Inspector Component - Basic Functionality', () => {
     expect(screen.getByText(/1920.*×.*1080/)).toBeInTheDocument();
   });
 
-  it('should display transform properties with correct values', () => {
+  it('should display Properties tab by default with media controls', () => {
     mockSelectedTimelineItems.push(mockVideoItem);
     mockGetMediaAssetById.mockReturnValue(mockVideoAsset);
 
     renderInspector();
 
-    // Check that form inputs exist with correct labels
-    expect(screen.getByLabelText('X Position')).toBeInTheDocument();
-    expect(screen.getByLabelText('Y Position')).toBeInTheDocument();
-    expect(screen.getByLabelText('Scale')).toBeInTheDocument();
-    expect(screen.getByLabelText('Rotation')).toBeInTheDocument();
-    expect(screen.getByLabelText('Opacity')).toBeInTheDocument();
+    // Properties tab should be active and media controls visible in simplified inspector
+    expect(screen.getAllByText('Properties').length).toBeGreaterThan(0);
+    expect(screen.getByLabelText('Volume')).toBeInTheDocument();
+    expect(screen.getByLabelText('Playback Rate')).toBeInTheDocument();
   });
 
   it('should display video-specific properties', () => {
@@ -116,18 +114,17 @@ describe('Inspector Component - Basic Functionality', () => {
     expect(screen.getByLabelText('Playback Rate')).toBeInTheDocument();
   });
 
-  it('should display animation section', () => {
+it('should not render legacy animation section in simplified inspector', () => {
     mockSelectedTimelineItems.push(mockVideoItem);
     mockGetMediaAssetById.mockReturnValue(mockVideoAsset);
 
     renderInspector();
 
-    expect(screen.getByText('Animations')).toBeInTheDocument();
-    expect(screen.getByText('Add Animation')).toBeInTheDocument();
-    expect(screen.getByText('Add')).toBeInTheDocument();
+    expect(screen.queryByText('Animations')).not.toBeInTheDocument();
+    expect(screen.queryByText('Add Animation')).not.toBeInTheDocument();
   });
 
-  it('should show multiple items selected count', () => {
+it('should handle multiple selections without a count badge', () => {
     const mockCodeItem: TimelineItem = {
       id: 'test-item-2',
       assetId: 'code-asset',
@@ -149,7 +146,8 @@ describe('Inspector Component - Basic Functionality', () => {
 
     renderInspector();
 
-    expect(screen.getByText('2 items selected')).toBeInTheDocument();
+// The simplified inspector no longer shows a selection count badge
+    expect(screen.queryByText(/items selected/)).not.toBeInTheDocument();
   });
 
   it('should render without crashing when asset is not found', () => {

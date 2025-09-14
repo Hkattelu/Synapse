@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { visualSettingsManager, DEFAULT_VISUAL_SETTINGS } from '../VisualSettingsManager';
+import {
+  visualSettingsManager,
+  DEFAULT_VISUAL_SETTINGS,
+} from '../VisualSettingsManager';
 
 // Mock localStorage
 const localStorageMock = {
@@ -32,7 +35,7 @@ describe('VisualSettingsManager', () => {
         backgroundOpacity: 1,
         diffAnimationType: 'none',
         diffAnimationSpeed: 1,
-        diffHighlightColor: '#4ade80'
+        diffHighlightColor: '#4ade80',
       });
     });
   });
@@ -42,7 +45,7 @@ describe('VisualSettingsManager', () => {
       const testSettings = {
         theme: 'monokai',
         fontSize: 16,
-        animationMode: 'line-by-line' as const
+        animationMode: 'line-by-line' as const,
       };
 
       visualSettingsManager.saveAsDefaults(testSettings);
@@ -57,17 +60,19 @@ describe('VisualSettingsManager', () => {
       const savedSettings = {
         theme: 'monokai',
         fontSize: 16,
-        savedAt: '2023-01-01T00:00:00.000Z'
+        savedAt: '2023-01-01T00:00:00.000Z',
       };
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify(savedSettings));
 
       const loaded = visualSettingsManager.loadDefaults();
 
-      expect(loaded).toEqual(expect.objectContaining({
-        theme: 'monokai',
-        fontSize: 16
-      }));
+      expect(loaded).toEqual(
+        expect.objectContaining({
+          theme: 'monokai',
+          fontSize: 16,
+        })
+      );
     });
 
     it('should return default settings when no saved settings exist', () => {
@@ -91,7 +96,9 @@ describe('VisualSettingsManager', () => {
     it('should reset to factory defaults', () => {
       const reset = visualSettingsManager.resetToDefaults();
 
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('synapse-visual-settings');
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith(
+        'synapse-visual-settings'
+      );
       expect(reset).toEqual(DEFAULT_VISUAL_SETTINGS);
     });
   });
@@ -101,7 +108,7 @@ describe('VisualSettingsManager', () => {
       const customTheme = {
         id: 'custom-theme-1',
         name: 'My Custom Theme',
-        colors: { background: '#000000', foreground: '#ffffff' }
+        colors: { background: '#000000', foreground: '#ffffff' },
       };
 
       visualSettingsManager.saveCustomTheme(customTheme);
@@ -115,7 +122,7 @@ describe('VisualSettingsManager', () => {
     it('should get custom themes', () => {
       const themes = [
         { id: 'theme1', name: 'Theme 1', isCustom: true },
-        { id: 'theme2', name: 'Theme 2', isCustom: true }
+        { id: 'theme2', name: 'Theme 2', isCustom: true },
       ];
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify(themes));
@@ -128,7 +135,7 @@ describe('VisualSettingsManager', () => {
     it('should delete custom theme', () => {
       const themes = [
         { id: 'theme1', name: 'Theme 1' },
-        { id: 'theme2', name: 'Theme 2' }
+        { id: 'theme2', name: 'Theme 2' },
       ];
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify(themes));
@@ -150,8 +157,8 @@ describe('VisualSettingsManager', () => {
         type: 'linear' as const,
         colors: [
           { color: '#ff0000', position: 0 },
-          { color: '#0000ff', position: 1 }
-        ]
+          { color: '#0000ff', position: 1 },
+        ],
       };
 
       visualSettingsManager.saveCustomGradient(gradient);
@@ -164,7 +171,14 @@ describe('VisualSettingsManager', () => {
 
     it('should get custom gradients', () => {
       const gradients = [
-        { id: 'grad1', name: 'Gradient 1', type: 'linear', colors: [], isCustom: true, createdAt: '2023-01-01' }
+        {
+          id: 'grad1',
+          name: 'Gradient 1',
+          type: 'linear',
+          colors: [],
+          isCustom: true,
+          createdAt: '2023-01-01',
+        },
       ];
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify(gradients));
@@ -189,18 +203,20 @@ describe('VisualSettingsManager', () => {
 
       const config = visualSettingsManager.exportSettings();
 
-      expect(config).toEqual(expect.objectContaining({
-        version: '1.0.0',
-        themes: expect.objectContaining({
-          customThemes: [{ id: 'theme1', name: 'Theme 1' }]
-        }),
-        defaults: expect.objectContaining({
-          theme: 'monokai'
-        }),
-        metadata: expect.objectContaining({
-          exportedAt: expect.any(String)
+      expect(config).toEqual(
+        expect.objectContaining({
+          version: '1.0.0',
+          themes: expect.objectContaining({
+            customThemes: [{ id: 'theme1', name: 'Theme 1' }],
+          }),
+          defaults: expect.objectContaining({
+            theme: 'monokai',
+          }),
+          metadata: expect.objectContaining({
+            exportedAt: expect.any(String),
+          }),
         })
-      }));
+      );
     });
 
     it('should generate settings file blob', () => {
@@ -215,22 +231,22 @@ describe('VisualSettingsManager', () => {
         version: '1.0.0',
         themes: {
           customThemes: [{ id: 'imported-theme', name: 'Imported Theme' }],
-          favoriteThemes: []
+          favoriteThemes: [],
         },
         backgrounds: {
           customGradients: [],
-          customWallpapers: []
+          customWallpapers: [],
         },
         defaults: {
           theme: 'imported-theme',
           fontSize: 18,
           fontFamily: 'Arial',
           animationMode: 'typing',
-          backgroundType: 'none'
+          backgroundType: 'none',
         },
         metadata: {
-          exportedAt: '2023-01-01T00:00:00.000Z'
-        }
+          exportedAt: '2023-01-01T00:00:00.000Z',
+        },
       };
 
       const result = await visualSettingsManager.importSettings(validConfig);
@@ -245,7 +261,7 @@ describe('VisualSettingsManager', () => {
         themes: { customThemes: [], favoriteThemes: [] },
         backgrounds: { customGradients: [], customWallpapers: [] },
         defaults: {},
-        metadata: { exportedAt: '2023-01-01T00:00:00.000Z' }
+        metadata: { exportedAt: '2023-01-01T00:00:00.000Z' },
       };
 
       const result = await visualSettingsManager.importSettings(invalidConfig);
@@ -261,9 +277,11 @@ describe('VisualSettingsManager', () => {
       // Mock localStorage keys
       Object.defineProperty(localStorage, 'length', { value: 2 });
       Object.defineProperty(localStorage, 'key', {
-        value: vi.fn((index) => index === 0 ? 'synapse-visual-settings' : 'other-key')
+        value: vi.fn((index) =>
+          index === 0 ? 'synapse-visual-settings' : 'other-key'
+        ),
       });
-      
+
       localStorageMock.getItem.mockImplementation((key) => {
         if (key === 'synapse-visual-settings') return '{"theme":"monokai"}';
         return null;
@@ -271,19 +289,27 @@ describe('VisualSettingsManager', () => {
 
       const info = visualSettingsManager.getStorageInfo();
 
-      expect(info).toEqual(expect.objectContaining({
-        used: expect.any(Number),
-        available: expect.any(Number),
-        percentage: expect.any(Number)
-      }));
+      expect(info).toEqual(
+        expect.objectContaining({
+          used: expect.any(Number),
+          available: expect.any(Number),
+          percentage: expect.any(Number),
+        })
+      );
     });
 
     it('should clear all custom settings', () => {
       visualSettingsManager.clearAllCustomSettings();
 
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('synapse-visual-settings');
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('synapse-custom-themes');
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('synapse-custom-gradients');
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith(
+        'synapse-visual-settings'
+      );
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith(
+        'synapse-custom-themes'
+      );
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith(
+        'synapse-custom-gradients'
+      );
     });
   });
 });

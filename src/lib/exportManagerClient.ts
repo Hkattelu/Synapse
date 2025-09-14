@@ -235,7 +235,9 @@ const getQualitySettings = (quality: ExportQuality) => {
 const sanitizeFileBase = (name: string): string => {
   const trimmed = name.trim();
   // Replace illegal filename characters with dashes and collapse repeats
-  const cleaned = trimmed.replace(/[^a-zA-Z0-9 _.-]+/g, '-').replace(/-+/g, '-');
+  const cleaned = trimmed
+    .replace(/[^a-zA-Z0-9 _.-]+/g, '-')
+    .replace(/-+/g, '-');
   // Avoid empty names
   return cleaned || 'export';
 };
@@ -427,6 +429,8 @@ export class ClientExportManager {
       let useRenderApi = false;
       try {
         const inputProps = {
+          // Pass project identifiers so server can attribute renders
+          project: { id: project.id, name: project.name },
           timeline: project.timeline,
           mediaAssets: project.mediaAssets,
           settings: {
@@ -440,15 +444,15 @@ export class ClientExportManager {
                 : Math.max(
                     60,
                     Math.ceil(
-                      (project.timeline || [])
-                        .reduce(
-                          (max, item) =>
-                            Math.max(
-                              max,
-                              (Number(item.startTime) || 0) + (Number(item.duration) || 0)
-                            ),
-                          0
-                        ) || 0
+                      (project.timeline || []).reduce(
+                        (max, item) =>
+                          Math.max(
+                            max,
+                            (Number(item.startTime) || 0) +
+                              (Number(item.duration) || 0)
+                          ),
+                        0
+                      ) || 0
                     )
                   ),
             backgroundColor: project.settings.backgroundColor || '#000000',
@@ -568,15 +572,38 @@ export class ClientExportManager {
         (job as any).progress ??
           (status === 'completed' ? 100 : status === 'rendering' ? 50 : 0)
       );
+
+      // Compute ETA with smoothing using frames throughput if available
+      const renderedFrames = Number((job as any).renderedFrames || 0);
+      const totalFrames = Number((job as any).totalFrames || 0);
+      let etaSeconds = 0;
+      if (totalFrames > 0 && renderedFrames > 10) {
+        // Use exponential moving average of fps
+        const elapsedMs = Date.now() - start;
+        const instantFps = renderedFrames / Math.max(0.001, elapsedMs / 1000);
+        const prevAvg =
+          (this.currentJob?.progress as any)?.averageFps || instantFps;
+        const alpha = 0.25; // smoothing factor
+        const averageFps = alpha * instantFps + (1 - alpha) * prevAvg;
+        const remainingFrames = Math.max(0, totalFrames - renderedFrames);
+        etaSeconds = Math.round(remainingFrames / Math.max(0.001, averageFps));
+        this.updateProgress({
+          averageFrameTime: Math.round(1000 / Math.max(0.001, averageFps)),
+        });
+      } else if (progress > 0) {
+        // Fallback: proportion-based estimate
+        const elapsedMs = Date.now() - start;
+        etaSeconds = Math.round(
+          ((100 - progress) / Math.max(1, progress)) * (elapsedMs / 1000)
+        );
+      }
+
       this.updateProgress({
         status,
         progress,
-        estimatedTimeRemaining: Math.max(
-          0,
-          Math.round(
-            (Date.now() - start) * ((100 - progress) / Math.max(1, progress))
-          )
-        ),
+        currentFrame: renderedFrames || undefined,
+        totalFrames: totalFrames || undefined,
+        estimatedTimeRemaining: etaSeconds,
       });
 
       if (status === 'completed') {

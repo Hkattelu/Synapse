@@ -25,51 +25,68 @@ export function AudioDuckingControls({
     });
   }, [duckingConfig, onConfigChange]);
 
-  const handleThresholdChange = useCallback((threshold: number) => {
-    onConfigChange({
-      ...duckingConfig,
-      threshold,
-    });
-  }, [duckingConfig, onConfigChange]);
+  const handleThresholdChange = useCallback(
+    (threshold: number) => {
+      onConfigChange({
+        ...duckingConfig,
+        threshold,
+      });
+    },
+    [duckingConfig, onConfigChange]
+  );
 
-  const handleRatioChange = useCallback((ratio: number) => {
-    onConfigChange({
-      ...duckingConfig,
-      ratio,
-    });
-  }, [duckingConfig, onConfigChange]);
+  const handleRatioChange = useCallback(
+    (ratio: number) => {
+      onConfigChange({
+        ...duckingConfig,
+        ratio,
+      });
+    },
+    [duckingConfig, onConfigChange]
+  );
 
-  const handleAttackTimeChange = useCallback((attackTime: number) => {
-    onConfigChange({
-      ...duckingConfig,
-      attackTime,
-    });
-  }, [duckingConfig, onConfigChange]);
+  const handleAttackTimeChange = useCallback(
+    (attackTime: number) => {
+      onConfigChange({
+        ...duckingConfig,
+        attackTime,
+      });
+    },
+    [duckingConfig, onConfigChange]
+  );
 
-  const handleReleaseTimeChange = useCallback((releaseTime: number) => {
-    onConfigChange({
-      ...duckingConfig,
-      releaseTime,
-    });
-  }, [duckingConfig, onConfigChange]);
+  const handleReleaseTimeChange = useCallback(
+    (releaseTime: number) => {
+      onConfigChange({
+        ...duckingConfig,
+        releaseTime,
+      });
+    },
+    [duckingConfig, onConfigChange]
+  );
 
-  const handleTargetTracksChange = useCallback((trackId: number, enabled: boolean) => {
-    const newTargetTracks = enabled
-      ? [...duckingConfig.targetTracks, trackId]
-      : duckingConfig.targetTracks.filter(id => id !== trackId);
-    
-    onConfigChange({
-      ...duckingConfig,
-      targetTracks: newTargetTracks,
-    });
-  }, [duckingConfig, onConfigChange]);
+  const handleTargetTracksChange = useCallback(
+    (trackId: number, enabled: boolean) => {
+      const newTargetTracks = enabled
+        ? [...duckingConfig.targetTracks, trackId]
+        : duckingConfig.targetTracks.filter((id) => id !== trackId);
+
+      onConfigChange({
+        ...duckingConfig,
+        targetTracks: newTargetTracks,
+      });
+    },
+    [duckingConfig, onConfigChange]
+  );
 
   const resetToDefaults = useCallback(() => {
     onConfigChange(DEFAULT_NARRATION_PROPERTIES.ducking);
   }, [onConfigChange]);
 
   return (
-    <div className={`audio-ducking-controls bg-background-subtle rounded-lg p-4 ${className}`}>
+    <div
+      className={`audio-ducking-controls bg-background-subtle rounded-lg p-4 ${className}`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -80,7 +97,7 @@ export function AudioDuckingControls({
           )}
           <h3 className="font-medium text-text-primary">Audio Ducking</h3>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
@@ -89,7 +106,7 @@ export function AudioDuckingControls({
           >
             <Settings className="w-4 h-4 text-text-secondary" />
           </button>
-          
+
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -159,11 +176,16 @@ export function AudioDuckingControls({
           </label>
           <div className="space-y-2">
             {availableTracks.map((track) => (
-              <label key={track.id} className="flex items-center gap-2 cursor-pointer">
+              <label
+                key={track.id}
+                className="flex items-center gap-2 cursor-pointer"
+              >
                 <input
                   type="checkbox"
                   checked={duckingConfig.targetTracks.includes(track.id)}
-                  onChange={(e) => handleTargetTracksChange(track.id, e.target.checked)}
+                  onChange={(e) =>
+                    handleTargetTracksChange(track.id, e.target.checked)
+                  }
                   disabled={!duckingConfig.enabled}
                   className="rounded"
                 />
@@ -182,7 +204,7 @@ export function AudioDuckingControls({
       {showAdvanced && (
         <div className="mt-6 pt-4 border-t border-border-subtle space-y-4">
           <h4 className="font-medium text-text-primary">Advanced Settings</h4>
-          
+
           {/* Attack Time */}
           <div>
             <label className="block text-sm font-medium text-text-primary mb-2">
@@ -221,7 +243,9 @@ export function AudioDuckingControls({
               max="2000"
               step="50"
               value={duckingConfig.releaseTime}
-              onChange={(e) => handleReleaseTimeChange(parseInt(e.target.value))}
+              onChange={(e) =>
+                handleReleaseTimeChange(parseInt(e.target.value))
+              }
               disabled={!duckingConfig.enabled}
               className="w-full"
             />
@@ -246,8 +270,9 @@ export function AudioDuckingControls({
       {/* Help Text */}
       <div className="mt-4 p-3 bg-background-hover rounded text-sm text-text-secondary">
         <p>
-          Audio ducking automatically reduces the volume of selected tracks when narration is detected.
-          Adjust the threshold to control when ducking triggers, and the ratio to control how much the volume is reduced.
+          Audio ducking automatically reduces the volume of selected tracks when
+          narration is detected. Adjust the threshold to control when ducking
+          triggers, and the ratio to control how much the volume is reduced.
         </p>
       </div>
     </div>
@@ -306,7 +331,11 @@ export function DuckingPresetSelector({
     { key: 'disabled', label: 'Disabled', config: DUCKING_PRESETS.disabled },
     { key: 'subtle', label: 'Subtle', config: DUCKING_PRESETS.subtle },
     { key: 'moderate', label: 'Moderate', config: DUCKING_PRESETS.moderate },
-    { key: 'aggressive', label: 'Aggressive', config: DUCKING_PRESETS.aggressive },
+    {
+      key: 'aggressive',
+      label: 'Aggressive',
+      config: DUCKING_PRESETS.aggressive,
+    },
   ];
 
   const getCurrentPreset = () => {
@@ -330,7 +359,7 @@ export function DuckingPresetSelector({
       <select
         value={getCurrentPreset()}
         onChange={(e) => {
-          const preset = presets.find(p => p.key === e.target.value);
+          const preset = presets.find((p) => p.key === e.target.value);
           if (preset) {
             onPresetSelect({
               ...preset.config,

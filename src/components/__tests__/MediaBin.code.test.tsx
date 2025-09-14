@@ -65,15 +65,19 @@ describe('MediaBin - Code Clips', () => {
     mockMediaAssets = [];
   });
 
-  it('renders Add Code button', () => {
+it('renders Add menu and shows New code clip item', () => {
     render(
       <TestProviders>
         <MediaBin />
       </TestProviders>
     );
 
-    expect(screen.getByText('Add Code')).toBeInTheDocument();
-    expect(screen.getByTitle('Create a new code clip')).toBeInTheDocument();
+    const addBtn = screen.getByTitle('Add');
+    expect(addBtn).toBeInTheDocument();
+
+    // Open the menu and check for the code clip action
+    addBtn.click();
+    expect(screen.getByText('New code clip')).toBeInTheDocument();
   });
 
   it('creates a new code clip when Add Code is clicked', async () => {
@@ -108,14 +112,16 @@ describe('MediaBin - Code Clips', () => {
     // Mock existing code assets
     mockMediaAssets = [mockCodeAsset];
 
-    render(
+render(
       <TestProviders>
         <MediaBin />
       </TestProviders>
     );
 
-    const addCodeButton = screen.getByText('Add Code');
-    fireEvent.click(addCodeButton);
+    const addBtn = screen.getByTitle('Add');
+    fireEvent.click(addBtn);
+    fireEvent.click(screen.getByText('New code clip'));
+screen.getByText('New code clip'));
 
     await waitFor(() => {
       expect(mockAddMediaAsset).toHaveBeenCalledWith(
@@ -127,13 +133,17 @@ describe('MediaBin - Code Clips', () => {
   });
 
   it('displays code clips with proper icon and language badge', () => {
-    mockMediaAssets = [mockCodeAsset];
+mockMediaAssets = [mockCodeAsset];
 
     render(
       <TestProviders>
         <MediaBin />
       </TestProviders>
     );
+
+    // Switch filter to Code to display code assets
+    const filter = screen.getByTitle('Content Type');
+    fireEvent.change(filter, { target: { value: 'code' } });
 
     expect(screen.getByText('Code Clip 1')).toBeInTheDocument();
     expect(screen.getByText('js')).toBeInTheDocument(); // Language badge
@@ -141,13 +151,16 @@ describe('MediaBin - Code Clips', () => {
   });
 
   it('adds code clip to timeline on double-click', async () => {
-    mockMediaAssets = [mockCodeAsset];
+mockMediaAssets = [mockCodeAsset];
 
     render(
       <TestProviders>
         <MediaBin />
       </TestProviders>
     );
+
+    const filter = screen.getByTitle('Content Type');
+    fireEvent.change(filter, { target: { value: 'code' } });
 
     const codeClipElement = screen.getByText('Code Clip 1').closest('.group');
     expect(codeClipElement).toBeInTheDocument();
@@ -177,11 +190,14 @@ describe('MediaBin - Code Clips', () => {
   it('handles code clips differently from media assets on double-click', async () => {
     mockMediaAssets = [mockCodeAsset, mockVideoAsset];
 
-    render(
+render(
       <TestProviders>
         <MediaBin />
       </TestProviders>
     );
+
+    const filter = screen.getByTitle('Content Type');
+    fireEvent.change(filter, { target: { value: 'code' } });
 
     // Double-click code clip
     const codeClipElement = screen.getByText('Code Clip 1').closest('.group');
@@ -228,11 +244,14 @@ describe('MediaBin - Code Clips', () => {
 
     mockMediaAssets = [mockCodeAsset, pythonCodeAsset];
 
-    render(
+render(
       <TestProviders>
         <MediaBin />
       </TestProviders>
     );
+
+    const filter = screen.getByTitle('Content Type');
+    fireEvent.change(filter, { target: { value: 'code' } });
 
     expect(screen.getByText('js')).toBeInTheDocument();
     expect(screen.getByText('python')).toBeInTheDocument();
@@ -241,11 +260,14 @@ describe('MediaBin - Code Clips', () => {
   it('removes code clips when delete button is clicked', async () => {
     mockMediaAssets = [mockCodeAsset];
 
-    render(
+render(
       <TestProviders>
         <MediaBin />
       </TestProviders>
     );
+
+    const filter = screen.getByTitle('Content Type');
+    fireEvent.change(filter, { target: { value: 'code' } });
 
     const codeClipElement = screen.getByText('Code Clip 1').closest('.group');
     expect(codeClipElement).toBeInTheDocument();
@@ -264,11 +286,14 @@ describe('MediaBin - Code Clips', () => {
   it('shows 0 Bytes for code clips file size', () => {
     mockMediaAssets = [mockCodeAsset];
 
-    render(
+render(
       <TestProviders>
         <MediaBin />
       </TestProviders>
     );
+
+    const filter = screen.getByTitle('Content Type');
+    fireEvent.change(filter, { target: { value: 'code' } });
 
     expect(screen.getByText('0 Bytes')).toBeInTheDocument();
   });
@@ -276,11 +301,14 @@ describe('MediaBin - Code Clips', () => {
   it('shows duration for code clips', () => {
     mockMediaAssets = [mockCodeAsset];
 
-    render(
+render(
       <TestProviders>
         <MediaBin />
       </TestProviders>
     );
+
+    const filter = screen.getByTitle('Content Type');
+    fireEvent.change(filter, { target: { value: 'code' } });
 
     expect(screen.getByText('0:10')).toBeInTheDocument(); // 10 seconds formatted
   });

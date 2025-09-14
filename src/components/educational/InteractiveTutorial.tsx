@@ -14,14 +14,16 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     id: 'welcome',
     target: '[data-tutorial="timeline-toolbar"]',
     title: 'Welcome to Synapse Studio',
-    description: 'This tutorial will guide you through creating your first educational video using the educational interface.',
+    description:
+      'This tutorial will guide you through creating your first educational video using the educational interface.',
     position: 'bottom',
   },
   {
     id: 'add-code',
     target: '[data-tutorial="add-code"]',
     title: 'Add Your First Code Snippet',
-    description: 'Click the Add Code button to create a code clip with syntax highlighting and educational animations.',
+    description:
+      'Click the Add Code button to create a code clip with syntax highlighting and educational animations.',
     position: 'bottom',
     action: 'click',
   },
@@ -29,14 +31,16 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     id: 'timeline-tracks',
     target: '[data-tutorial="educational-timeline"]',
     title: 'Four Educational Tracks',
-    description: 'Notice the four specialized tracks: Code (purple), Visual (green), Narration (blue), and You (orange). Each is optimized for different content types.',
+    description:
+      'Notice the four specialized tracks: Code (purple), Visual (green), Narration (blue), and You (orange). Each is optimized for different content types.',
     position: 'top',
   },
   {
     id: 'smart-placement',
     target: '[data-tutorial="media-bin"]',
     title: 'Smart Track Placement',
-    description: 'Drag assets from the Media Bin to the timeline. We\'ll suggest the best educational track based on content type.',
+    description:
+      "Drag assets from the Media Bin to the timeline. We'll suggest the best educational track based on content type.",
     position: 'left',
     action: 'drag',
   },
@@ -44,14 +48,16 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     id: 'mode-switch',
     target: '[data-tutorial="mode-toggle"]',
     title: 'Simplified vs Advanced',
-    description: 'Toggle between simplified (educational) and advanced modes based on your workflow needs.',
+    description:
+      'Toggle between simplified (educational) and advanced modes based on your workflow needs.',
     position: 'bottom',
   },
   {
     id: 'preview',
     target: '[data-tutorial="preview-area"]',
     title: 'Real-time Preview',
-    description: 'See your educational content rendered in real-time as you build. The preview updates instantly as you make changes.',
+    description:
+      'See your educational content rendered in real-time as you build. The preview updates instantly as you make changes.',
     position: 'bottom',
   },
 ];
@@ -62,7 +68,11 @@ interface InteractiveTutorialProps {
   onClose: () => void;
 }
 
-export function InteractiveTutorial({ isActive, onComplete, onClose }: InteractiveTutorialProps) {
+export function InteractiveTutorial({
+  isActive,
+  onComplete,
+  onClose,
+}: InteractiveTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [highlightRect, setHighlightRect] = useState<DOMRect | null>(null);
   const observerRef = useRef<ResizeObserver | null>(null);
@@ -165,7 +175,7 @@ export function InteractiveTutorial({ isActive, onComplete, onClose }: Interacti
     <div className="fixed inset-0 z-50 pointer-events-none">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/60" />
-      
+
       {/* Highlight cutout */}
       {highlightRect && (
         <>
@@ -193,7 +203,7 @@ export function InteractiveTutorial({ isActive, onComplete, onClose }: Interacti
             Step {currentStep + 1} of {TUTORIAL_STEPS.length}
           </div>
         </div>
-        
+
         <p className="text-sm text-gray-700 mb-4 leading-relaxed">
           {step.description}
         </p>
@@ -226,7 +236,7 @@ export function InteractiveTutorial({ isActive, onComplete, onClose }: Interacti
               Skip Tutorial
             </button>
           </div>
-          
+
           <button
             onClick={handleNext}
             className="px-4 py-2 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 transition-colors"

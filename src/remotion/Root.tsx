@@ -15,7 +15,10 @@ export const RemotionRoot: React.FC = () => {
         calculateMetadata={({ props }: { props: MainCompositionProps }) => {
           // Dynamically compute duration from incoming props if provided
           const fps = 30;
-          const durationSec = Math.max(1, Math.floor(props.settings?.duration ?? 60));
+          const durationSec = Math.max(
+            1,
+            Math.floor(props.settings?.duration ?? 60)
+          );
           return {
             durationInFrames: durationSec * fps,
             fps,

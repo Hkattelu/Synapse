@@ -16,22 +16,21 @@ import { Button } from './ui/Button';
 import { Label } from './ui/Label';
 import { Input } from './ui/Input';
 import { Textarea } from './ui/Textarea';
-import { 
-  Play, 
-  Video, 
-  Users, 
-  Sparkles, 
-  Heart, 
-  Mail, 
-  MapPin, 
-  Phone, 
-  ArrowRight, 
-  Zap, 
-  Shield, 
-  Layers 
+import {
+  Play,
+  Video,
+  Users,
+  Sparkles,
+  Heart,
+  Mail,
+  MapPin,
+  Phone,
+  ArrowRight,
+  Zap,
+  Shield,
+  Layers,
 } from 'lucide-react';
 import { section } from 'motion/react-client';
-
 
 interface HeroSectionProps {
   title?: string;
@@ -188,7 +187,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => window.open('https://www.producthunt.com/products/synapse-studio', '_blank')}
+                onClick={() =>
+                  window.open(
+                    'https://www.producthunt.com/products/synapse-studio',
+                    '_blank'
+                  )
+                }
                 className="border-synapse-primary text-synapse-primary hover:bg-synapse-primary/10 px-8 py-4 rounded-full font-semibold text-lg shadow-synapse-sm"
               >
                 <Heart className="w-5 h-5 mr-2" />
@@ -212,11 +216,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                       🎯 Product Hunt Launch
                     </h3>
                     <p className="text-text-secondary mb-4">
-                      Join us on September 5th, 2025 and help us reach #1 Product of the Day!
+                      Join us on September 5th, 2025 and help us reach #1
+                      Product of the Day!
                     </p>
                     <div className="flex items-center justify-center space-x-4 text-sm">
                       <div className="bg-synapse-surface rounded-lg px-3 py-2 shadow-synapse-sm">
-                        <div className="font-bold text-synapse-primary text-lg">Sep 5</div>
+                        <div className="font-bold text-synapse-primary text-lg">
+                          Sep 5
+                        </div>
                         <div className="text-text-tertiary">2025</div>
                       </div>
                       <div className="text-synapse-primary font-medium">
@@ -231,17 +238,23 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             {/* Stats */}
             <div className="flex items-center justify-center space-x-8 text-sm text-text-tertiary">
               <div className="text-center">
-                <div className="font-semibold text-text-primary text-lg">10K+</div>
+                <div className="font-semibold text-text-primary text-lg">
+                  10K+
+                </div>
                 <div>Creators</div>
               </div>
               <Separator orientation="vertical" className="h-8" />
               <div className="text-center">
-                <div className="font-semibold text-text-primary text-lg">50K+</div>
+                <div className="font-semibold text-text-primary text-lg">
+                  50K+
+                </div>
                 <div>Videos Created</div>
               </div>
               <Separator orientation="vertical" className="h-8" />
               <div className="text-center">
-                <div className="font-semibold text-text-primary text-lg">Human</div>
+                <div className="font-semibold text-text-primary text-lg">
+                  Human
+                </div>
                 <div>Powered</div>
               </div>
             </div>
@@ -285,12 +298,18 @@ const ProductHuntSection: React.FC = () => {
             🚀 We're Launching on Product Hunt!
           </h2>
           <p className="text-xl mb-8 text-synapse-text-inverse/80 max-w-2xl mx-auto">
-            Help us reach #1 Product of the Day on September 5th, 2025. Your support means everything to our creator community!
+            Help us reach #1 Product of the Day on September 5th, 2025. Your
+            support means everything to our creator community!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button
               size="lg"
-              onClick={() => window.open('https://www.producthunt.com/products/synapse-studio', '_blank')}
+              onClick={() =>
+                window.open(
+                  'https://www.producthunt.com/products/synapse-studio',
+                  '_blank'
+                )
+              }
               className="bg-synapse-surface text-text-primary hover:bg-synapse-surface-hover border border-border-subtle px-8 py-4 rounded-full font-semibold text-lg shadow-synapse-md hover:shadow-synapse-lg transition-all duration-200 hover:scale-105"
             >
               <Heart className="w-5 h-5 mr-2" />
@@ -299,11 +318,17 @@ const ProductHuntSection: React.FC = () => {
             <Button
               variant="outline"
               size="lg"
-              onClick={() => navigator.share?.({
-                title: 'Synapse Studio - Human-Powered Video Creation',
-                text: 'Check out Synapse Studio launching on Product Hunt!',
-                url: 'https://www.producthunt.com/products/synapse-studio'
-              }) || window.open('https://twitter.com/intent/tweet?text=Excited%20for%20@SynapseStudio%20launching%20on%20Product%20Hunt!%20%F0%9F%9A%80&url=https://www.producthunt.com/products/synapse-studio', '_blank')}
+              onClick={() =>
+                navigator.share?.({
+                  title: 'Synapse Studio - Human-Powered Video Creation',
+                  text: 'Check out Synapse Studio launching on Product Hunt!',
+                  url: 'https://www.producthunt.com/products/synapse-studio',
+                }) ||
+                window.open(
+                  'https://twitter.com/intent/tweet?text=Excited%20for%20@SynapseStudio%20launching%20on%20Product%20Hunt!%20%F0%9F%9A%80&url=https://www.producthunt.com/products/synapse-studio',
+                  '_blank'
+                )
+              }
               className="border-synapse-text-inverse text-synapse-text-inverse hover:bg-synapse-text-inverse/20 bg-transparent px-8 py-4 rounded-full font-semibold text-lg shadow-synapse-sm"
             >
               <Users className="w-5 h-5 mr-2" />
@@ -312,7 +337,8 @@ const ProductHuntSection: React.FC = () => {
           </div>
           <div className="mt-8 text-orange-100">
             <p className="text-sm">
-              🗓️ Launch Date: September 5th, 2025 • 🎯 Goal: #1 Product of the Day
+              🗓️ Launch Date: September 5th, 2025 • 🎯 Goal: #1 Product of the
+              Day
             </p>
           </div>
         </motion.div>
@@ -529,7 +555,7 @@ const PowerSection: React.FC = () => {
 const ContactSection: React.FC<ContactFormProps> = ({
   onSubmit,
   isSubmitting = false,
-  submitStatus = 'idle'
+  submitStatus = 'idle',
 }) => {
   const formRef = React.useRef<HTMLFormElement>(null);
 
@@ -603,8 +629,6 @@ const ContactSection: React.FC<ContactFormProps> = ({
                   </span>
                 </div>
               </div>
-
-
             </div>
 
             <Card className="p-8 shadow-synapse-md">
@@ -671,15 +695,24 @@ const ContactSection: React.FC<ContactFormProps> = ({
                 {submitStatus === 'success' && (
                   <div className="mt-4 p-4 bg-synapse-success/10 border border-synapse-success rounded-lg">
                     <div className="flex items-start">
-                      <svg className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      <svg
+                        className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                       <div>
                         <p className="text-synapse-success text-sm font-medium">
                           Message sent successfully!
                         </p>
                         <p className="text-synapse-success text-sm mt-1">
-                          Thank you for reaching out. We'll get back to you within 24 hours at the email address you provided.
+                          Thank you for reaching out. We'll get back to you
+                          within 24 hours at the email address you provided.
                         </p>
                       </div>
                     </div>
@@ -689,21 +722,30 @@ const ContactSection: React.FC<ContactFormProps> = ({
                 {submitStatus === 'error' && (
                   <div className="mt-4 p-3 bg-status-error/10 border border-status-error rounded-lg">
                     <div className="flex items-center">
-                      <svg className="w-5 h-5 text-red-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      <svg
+                        className="w-5 h-5 text-red-600 mr-2"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                       <p className="text-status-error text-sm">
-                        Failed to send message. Please try again or email us directly at glowstringman@gmail.com
+                        Failed to send message. Please try again or email us
+                        directly at glowstringman@gmail.com
                       </p>
                     </div>
                   </div>
                 )}
-            </form>
-          </Card>
+              </form>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
-    </section >
+    </section>
   );
 };
 
@@ -716,7 +758,11 @@ const Footer: React.FC = () => {
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <img src="/branding/logo.svg" alt="Synapse Studio" className="h-8 w-auto" />
+              <img
+                src="/branding/logo.svg"
+                alt="Synapse Studio"
+                className="h-8 w-auto"
+              />
               <span className="sr-only">Synapse Studio</span>
             </div>
             <p className="text-text-tertiary text-sm">
@@ -738,7 +784,12 @@ const Footer: React.FC = () => {
               {isEnabled('PRODUCT_HUNT') && (
                 <li>
                   <button
-                    onClick={() => window.open('https://www.producthunt.com/products/synapse-studio', '_blank')}
+                    onClick={() =>
+                      window.open(
+                        'https://www.producthunt.com/products/synapse-studio',
+                        '_blank'
+                      )
+                    }
                     className="hover:text-orange-400 transition-colors text-left"
                   >
                     🚀 Product Hunt
@@ -752,12 +803,18 @@ const Footer: React.FC = () => {
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-sm text-text-tertiary">
               <li>
-                <a href="#contact" className="hover:text-text-primary transition-colors">
+                <a
+                  href="#contact"
+                  className="hover:text-text-primary transition-colors"
+                >
                   Contact
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-text-primary transition-colors">
+                <a
+                  href="#"
+                  className="hover:text-text-primary transition-colors"
+                >
                   Privacy
                 </a>
               </li>
@@ -790,7 +847,11 @@ const Navigation: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
-            <img src="/branding/logo.svg" alt="Synapse Studio" className="h-8 w-auto" />
+            <img
+              src="/branding/logo.svg"
+              alt="Synapse Studio"
+              className="h-8 w-auto"
+            />
             <span className="sr-only">Synapse Studio</span>
           </div>
 
@@ -809,7 +870,12 @@ const Navigation: React.FC = () => {
             </a>
             {isEnabled('PRODUCT_HUNT') && (
               <button
-                onClick={() => window.open('https://www.producthunt.com/products/synapse-studio', '_blank')}
+                onClick={() =>
+                  window.open(
+                    'https://www.producthunt.com/products/synapse-studio',
+                    '_blank'
+                  )
+                }
                 className="text-orange-600 hover:text-orange-700 transition-colors font-medium"
               >
                 🚀 Product Hunt
@@ -839,16 +905,20 @@ const Navigation: React.FC = () => {
 
 const SynapseStudioLanding: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [submitStatus, setSubmitStatus] = React.useState<'idle' | 'success' | 'error'>('idle');
+  const [submitStatus, setSubmitStatus] = React.useState<
+    'idle' | 'success' | 'error'
+  >('idle');
 
-  const handleContactSubmit = async (data: Record<string, FormDataEntryValue>) => {
+  const handleContactSubmit = async (
+    data: Record<string, FormDataEntryValue>
+  ) => {
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
     const name = (data.name as string) || '';
     const email = (data.email as string) || '';
     const message = (data.message as string) || '';
-    const projectType = ((data.projectType as string) || 'Not specified');
+    const projectType = (data.projectType as string) || 'Not specified';
 
     const subject = `New Contact Form Submission from ${name}`;
     const timestamp = new Date().toLocaleString();

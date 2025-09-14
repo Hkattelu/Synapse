@@ -1,8 +1,23 @@
 // Core data types for Synapse Studio
 
-export type MediaAssetType = 'video' | 'image' | 'audio' | 'code' | 'visual-asset';
-export type TimelineItemType = 'video' | 'code' | 'title' | 'audio' | 'visual-asset';
-export type VisualAssetType = 'arrow' | 'box' | 'finger-pointer' | 'circle' | 'line';
+export type MediaAssetType =
+  | 'video'
+  | 'image'
+  | 'audio'
+  | 'code'
+  | 'visual-asset';
+export type TimelineItemType =
+  | 'video'
+  | 'code'
+  | 'title'
+  | 'audio'
+  | 'visual-asset';
+export type VisualAssetType =
+  | 'arrow'
+  | 'box'
+  | 'finger-pointer'
+  | 'circle'
+  | 'line';
 export type AnimationType = 'entrance' | 'exit' | 'emphasis' | 'transition';
 
 export interface AssetMetadata {
@@ -188,18 +203,24 @@ export interface ItemProperties {
   dimOpacity?: number; // 0..1 dim amount for non-focused regions
 
   // Enhanced diff animation properties
-  diffAnimationType?: 'none' | 'slide' | 'fade' | 'highlight' | 'typewriter-diff' | 'line-focus-diff';
+  diffAnimationType?:
+    | 'none'
+    | 'slide'
+    | 'fade'
+    | 'highlight'
+    | 'typewriter-diff'
+    | 'line-focus-diff';
   diffAnimationSpeed?: number; // animation speed multiplier
   diffHighlightColor?: string; // color for highlighting changes
-  
+
   // Diff slide animation properties
   diffSlideDirection?: 'left' | 'right' | 'up' | 'down';
-  
+
   // Diff fade animation properties
   diffFadeInDuration?: number; // duration in seconds
   diffFadeOutDuration?: number; // duration in seconds
   diffHighlightIntensity?: number; // 0-1 intensity of highlight effect
-  
+
   // Typewriter diff animation properties
   typewriterDiffSpeedCps?: number; // characters per second
   typewriterDiffShowCursor?: boolean;
@@ -243,7 +264,15 @@ export interface ItemProperties {
   // Visual asset properties
   visualAssetType?: VisualAssetType;
   // Arrow properties
-  arrowDirection?: 'up' | 'down' | 'left' | 'right' | 'up-left' | 'up-right' | 'down-left' | 'down-right';
+  arrowDirection?:
+    | 'up'
+    | 'down'
+    | 'left'
+    | 'right'
+    | 'up-left'
+    | 'up-right'
+    | 'down-left'
+    | 'down-right';
   arrowStyle?: 'solid' | 'dashed' | 'curved';
   arrowThickness?: number;
   // Box properties

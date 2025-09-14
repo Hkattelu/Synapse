@@ -1,5 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { validateWallpaperAsset, validateImageFile } from '../validation/backgroundValidation';
+import {
+  validateWallpaperAsset,
+  validateImageFile,
+} from '../validation/backgroundValidation';
 import type { WallpaperAsset } from '../backgrounds/types';
 
 describe('Backgrounds - GIF support', () => {
@@ -24,7 +27,9 @@ describe('Backgrounds - GIF support', () => {
   });
 
   it('accepts image/gif uploads in validateImageFile', () => {
-    const file = new File([new Uint8Array([71, 73, 70])], 'loop.gif', { type: 'image/gif' });
+    const file = new File([new Uint8Array([71, 73, 70])], 'loop.gif', {
+      type: 'image/gif',
+    });
     const result = validateImageFile(file);
     expect(result.isValid).toBe(true);
     expect(result.errors).toHaveLength(0);

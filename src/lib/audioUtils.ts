@@ -38,14 +38,14 @@ export interface NarrationTrackProperties {
   highPassFilter: boolean; // Remove low frequencies
   noiseReduction: boolean; // Apply noise reduction
   normalize: boolean; // Normalize audio levels
-  
+
   // Ducking configuration
   ducking: AudioDuckingConfig;
-  
+
   // Timing synchronization
   syncPoints: TimingSyncPoint[];
   autoSync: boolean; // Enable automatic timing synchronization
-  
+
   // Visualization preferences
   waveformColor: string;
   showLevels: boolean;
@@ -55,41 +55,43 @@ export interface NarrationTrackProperties {
 /**
  * Analyzes audio data to generate waveform visualization data
  */
-export async function analyzeAudioData(audioBuffer: AudioBuffer): Promise<AudioAnalysisData> {
+export async function analyzeAudioData(
+  audioBuffer: AudioBuffer
+): Promise<AudioAnalysisData> {
   const channelData = audioBuffer.getChannelData(0); // Use first channel
   const sampleRate = audioBuffer.sampleRate;
   const duration = audioBuffer.duration;
-  
+
   // Generate waveform data (downsample for visualization)
   const waveformSamples = 1000; // Number of samples for waveform visualization
   const samplesPerPoint = Math.floor(channelData.length / waveformSamples);
   const waveform: number[] = [];
   const peaks: number[] = [];
   const rms: number[] = [];
-  
+
   for (let i = 0; i < waveformSamples; i++) {
     const start = i * samplesPerPoint;
     const end = Math.min(start + samplesPerPoint, channelData.length);
-    
+
     let sum = 0;
     let sumSquares = 0;
     let peak = 0;
-    
+
     for (let j = start; j < end; j++) {
       const sample = Math.abs(channelData[j]);
       sum += sample;
       sumSquares += sample * sample;
       peak = Math.max(peak, sample);
     }
-    
+
     const average = sum / (end - start);
     const rmsValue = Math.sqrt(sumSquares / (end - start));
-    
+
     waveform.push(average);
     peaks.push(peak);
     rms.push(rmsValue);
   }
-  
+
   return {
     waveform,
     peaks,
@@ -108,22 +110,22 @@ export function calculateAudioLevels(
 ): AudioLevelMeter {
   let sum = 0;
   let peak = 0;
-  
+
   for (let i = 0; i < audioData.length; i++) {
     const sample = Math.abs(audioData[i]);
     sum += sample;
     peak = Math.max(peak, sample);
   }
-  
+
   const currentLevel = sum / audioData.length;
   const peakLevel = Math.max(peak, previousLevels?.peakLevel || 0);
-  
+
   // Calculate running average (simple exponential smoothing)
   const alpha = 0.1; // Smoothing factor
   const averageLevel = previousLevels
     ? previousLevels.averageLevel * (1 - alpha) + currentLevel * alpha
     : currentLevel;
-  
+
   return {
     currentLevel,
     peakLevel,
@@ -142,14 +144,14 @@ export function calculateDuckingLevel(
   if (!duckingConfig.enabled) {
     return 1.0; // No ducking
   }
-  
+
   const shouldDuck = narrationLevel > duckingConfig.threshold;
-  
+
   if (shouldDuck) {
     // Apply ducking ratio
     return 1.0 - duckingConfig.ratio;
   }
-  
+
   return 1.0; // Full volume
 }
 
@@ -163,25 +165,25 @@ export async function generateAutoSyncPoints(
   const channelData = audioBuffer.getChannelData(0);
   const sampleRate = audioBuffer.sampleRate;
   const syncPoints: TimingSyncPoint[] = [];
-  
+
   // Simple silence detection for automatic sync point generation
   const windowSize = Math.floor(sampleRate * 0.1); // 100ms windows
   const silenceThreshold = 0.01 * sensitivity; // Adjustable silence threshold
-  
+
   let isInSilence = false;
   let silenceStart = 0;
-  
+
   for (let i = 0; i < channelData.length; i += windowSize) {
     const end = Math.min(i + windowSize, channelData.length);
     let sum = 0;
-    
+
     for (let j = i; j < end; j++) {
       sum += Math.abs(channelData[j]);
     }
-    
+
     const average = sum / (end - i);
     const time = i / sampleRate;
-    
+
     if (average < silenceThreshold) {
       if (!isInSilence) {
         isInSilence = true;
@@ -191,7 +193,8 @@ export async function generateAutoSyncPoints(
       if (isInSilence) {
         // End of silence - potential sync point
         const silenceDuration = time - silenceStart;
-        if (silenceDuration > 0.2) { // Only consider pauses longer than 200ms
+        if (silenceDuration > 0.2) {
+          // Only consider pauses longer than 200ms
           syncPoints.push({
             id: `auto-sync-${syncPoints.length}`,
             time: silenceStart + silenceDuration / 2, // Middle of silence
@@ -204,7 +207,7 @@ export async function generateAutoSyncPoints(
       }
     }
   }
-  
+
   return syncPoints;
 }
 
@@ -218,14 +221,22 @@ export function validateAudioForNarration(file: File): {
 } {
   const warnings: string[] = [];
   const recommendations: string[] = [];
-  
+
   // Check file type
-  const supportedTypes = ['audio/wav', 'audio/mp3', 'audio/aac', 'audio/ogg', 'audio/flac'];
+  const supportedTypes = [
+    'audio/wav',
+    'audio/mp3',
+    'audio/aac',
+    'audio/ogg',
+    'audio/flac',
+  ];
   if (!supportedTypes.includes(file.type)) {
     warnings.push(`File type ${file.type} may not be fully supported`);
-    recommendations.push('Use WAV, MP3, AAC, OGG, or FLAC for best compatibility');
+    recommendations.push(
+      'Use WAV, MP3, AAC, OGG, or FLAC for best compatibility'
+    );
   }
-  
+
   // Check file size (rough estimate for quality)
   const fileSizeMB = file.size / (1024 * 1024);
   // Treat zero-size synthetic files in tests as neutral; warn only for small-but-nonzero sizes
@@ -233,12 +244,12 @@ export function validateAudioForNarration(file: File): {
     warnings.push('Audio file is very small, quality may be poor');
     recommendations.push('Use higher quality audio files for better results');
   }
-  
+
   if (fileSizeMB > 100) {
     warnings.push('Audio file is very large, may impact performance');
     recommendations.push('Consider compressing audio or using shorter clips');
   }
-  
+
   // Determine validity based on core compatibility (file type), not soft warnings
   const isSupportedType = supportedTypes.includes(file.type);
   return {

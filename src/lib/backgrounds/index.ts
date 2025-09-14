@@ -1,29 +1,29 @@
 // Background system exports
 
 export { BackgroundManager, backgroundManager } from './BackgroundManager';
-export { 
-  builtInCollections, 
-  getAllBuiltInWallpapers, 
-  getWallpaperById, 
-  getWallpapersByCategory 
+export {
+  builtInCollections,
+  getAllBuiltInWallpapers,
+  getWallpaperById,
+  getWallpapersByCategory,
 } from './wallpapers';
-export { 
-  GradientBuilder, 
-  validateGradient, 
+export {
+  GradientBuilder,
+  validateGradient,
   generateGradientCSS,
   gradientPresets,
   getGradientPresetById,
   getGradientPresetsByCategory,
-  searchGradientPresets
+  searchGradientPresets,
 } from './gradients';
-export type { 
-  WallpaperAsset, 
-  WallpaperCollection, 
-  BackgroundPreview, 
-  BackgroundManagerEvents 
+export type {
+  WallpaperAsset,
+  WallpaperCollection,
+  BackgroundPreview,
+  BackgroundManagerEvents,
 } from './types';
-export type { 
-  GradientColorStop, 
-  GradientPreset, 
-  GradientValidationResult 
+export type {
+  GradientColorStop,
+  GradientPreset,
+  GradientValidationResult,
 } from './gradients';

@@ -3,7 +3,10 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ProjectMigrationManager, useMigrationManager } from '../ProjectMigrationManager';
+import {
+  ProjectMigrationManager,
+  useMigrationManager,
+} from '../ProjectMigrationManager';
 import type { Project } from '../../lib/types';
 import * as trackMigration from '../../lib/trackMigration';
 
@@ -15,7 +18,7 @@ vi.mock('../../lib/trackMigration', () => ({
   validateProjectForMigration: vi.fn(),
   previewProjectMigration: vi.fn(),
   isProjectMigrated: vi.fn(),
-  getMigrationStatistics: vi.fn()
+  getMigrationStatistics: vi.fn(),
 }));
 
 // Mock data
@@ -30,7 +33,7 @@ const mockProject: Project = {
     height: 1080,
     fps: 30,
     duration: 60,
-    backgroundColor: '#000000'
+    backgroundColor: '#000000',
   },
   timeline: [
     {
@@ -42,8 +45,8 @@ const mockProject: Project = {
       type: 'code',
       properties: {},
       animations: [],
-      keyframes: []
-    }
+      keyframes: [],
+    },
   ],
   mediaAssets: [
     {
@@ -56,11 +59,11 @@ const mockProject: Project = {
         fileSize: 1024,
         mimeType: 'text/plain',
         codeContent: 'console.log("Hello World");',
-        language: 'javascript'
+        language: 'javascript',
       },
-      createdAt: new Date('2024-01-01')
-    }
-  ]
+      createdAt: new Date('2024-01-01'),
+    },
+  ],
 };
 
 const mockStatistics = {
@@ -69,17 +72,17 @@ const mockStatistics = {
     Code: 1,
     Visual: 0,
     Narration: 0,
-    You: 0
+    You: 0,
   },
   itemsByType: {
     code: 1,
     video: 0,
     audio: 0,
     title: 0,
-    'visual-asset': 0
+    'visual-asset': 0,
   },
   averageConfidence: 95,
-  conflictCount: 0
+  conflictCount: 0,
 };
 
 const mockPreview = {
@@ -96,13 +99,13 @@ const mockPreview = {
         icon: 'code',
         defaultProperties: {},
         allowedContentTypes: ['code'],
-        suggestedAnimations: []
+        suggestedAnimations: [],
       },
       confidence: 95,
-      reason: 'Code content detected'
-    }
+      reason: 'Code content detected',
+    },
   ],
-  warnings: []
+  warnings: [],
 };
 
 describe('ProjectMigrationManager', () => {
@@ -111,22 +114,28 @@ describe('ProjectMigrationManager', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Setup default mocks
     vi.mocked(trackMigration.isProjectMigrated).mockReturnValue(false);
     vi.mocked(trackMigration.validateProjectForMigration).mockReturnValue({
       canMigrate: true,
-      issues: []
+      issues: [],
     });
-    vi.mocked(trackMigration.previewProjectMigration).mockReturnValue(mockPreview);
-    vi.mocked(trackMigration.getMigrationStatistics).mockReturnValue(mockStatistics);
+    vi.mocked(trackMigration.previewProjectMigration).mockReturnValue(
+      mockPreview
+    );
+    vi.mocked(trackMigration.getMigrationStatistics).mockReturnValue(
+      mockStatistics
+    );
     vi.mocked(trackMigration.getProjectBackups).mockReturnValue([]);
-    vi.mocked(trackMigration.migrateProjectToEducationalTracks).mockReturnValue({
-      success: true,
-      migratedItems: 1,
-      conflicts: [],
-      warnings: []
-    });
+    vi.mocked(trackMigration.migrateProjectToEducationalTracks).mockReturnValue(
+      {
+        success: true,
+        migratedItems: 1,
+        conflicts: [],
+        warnings: [],
+      }
+    );
   });
 
   it('should render migration interface for non-migrated project', () => {
@@ -139,7 +148,11 @@ describe('ProjectMigrationManager', () => {
     );
 
     expect(screen.getByText('Educational Track Migration')).toBeInTheDocument();
-    expect(screen.getByText('Convert your project to use the new educational track system')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Convert your project to use the new educational track system'
+      )
+    ).toBeInTheDocument();
     expect(screen.getByText('Start Migration')).toBeInTheDocument();
   });
 
@@ -155,7 +168,11 @@ describe('ProjectMigrationManager', () => {
     );
 
     expect(screen.getByText('Project Already Migrated')).toBeInTheDocument();
-    expect(screen.getByText('This project has already been migrated to use educational tracks.')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'This project has already been migrated to use educational tracks.'
+      )
+    ).toBeInTheDocument();
   });
 
   it('should start migration process when button clicked', async () => {
@@ -171,16 +188,22 @@ describe('ProjectMigrationManager', () => {
     fireEvent.click(startButton);
 
     await waitFor(() => {
-      expect(trackMigration.validateProjectForMigration).toHaveBeenCalledWith(mockProject);
-      expect(trackMigration.previewProjectMigration).toHaveBeenCalledWith(mockProject);
-      expect(trackMigration.getMigrationStatistics).toHaveBeenCalledWith(mockProject);
+      expect(trackMigration.validateProjectForMigration).toHaveBeenCalledWith(
+        mockProject
+      );
+      expect(trackMigration.previewProjectMigration).toHaveBeenCalledWith(
+        mockProject
+      );
+      expect(trackMigration.getMigrationStatistics).toHaveBeenCalledWith(
+        mockProject
+      );
     });
   });
 
   it('should show error when project validation fails', async () => {
     vi.mocked(trackMigration.validateProjectForMigration).mockReturnValue({
       canMigrate: false,
-      issues: ['Project has no timeline items']
+      issues: ['Project has no timeline items'],
     });
 
     render(
@@ -196,7 +219,9 @@ describe('ProjectMigrationManager', () => {
 
     await waitFor(() => {
       expect(screen.getByText('❌ Migration Failed')).toBeInTheDocument();
-      expect(screen.getByText(/Project has no timeline items/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Project has no timeline items/)
+      ).toBeInTheDocument();
     });
   });
 
@@ -209,7 +234,9 @@ describe('ProjectMigrationManager', () => {
       />
     );
 
-    expect(screen.getByText('Benefits of Educational Tracks')).toBeInTheDocument();
+    expect(
+      screen.getByText('Benefits of Educational Tracks')
+    ).toBeInTheDocument();
     expect(screen.getByText('Code Track:')).toBeInTheDocument();
     expect(screen.getByText('Visual Track:')).toBeInTheDocument();
     expect(screen.getByText('Narration Track:')).toBeInTheDocument();
@@ -237,7 +264,9 @@ describe('ProjectMigrationManager', () => {
     fireEvent.click(proceedButton);
 
     await waitFor(() => {
-      expect(trackMigration.migrateProjectToEducationalTracks).toHaveBeenCalled();
+      expect(
+        trackMigration.migrateProjectToEducationalTracks
+      ).toHaveBeenCalled();
       expect(mockOnProjectUpdate).toHaveBeenCalled();
       expect(mockOnMigrationComplete).toHaveBeenCalledWith(
         true,
@@ -255,15 +284,17 @@ describe('ProjectMigrationManager', () => {
           currentTrack: 0,
           suggestedTrack: mockPreview.trackAssignments[0].suggestedTrack,
           reason: 'Test conflict',
-          alternatives: []
-        }
-      ]
+          alternatives: [],
+        },
+      ],
     };
 
-    vi.mocked(trackMigration.previewProjectMigration).mockReturnValue(conflictPreview);
+    vi.mocked(trackMigration.previewProjectMigration).mockReturnValue(
+      conflictPreview
+    );
     vi.mocked(trackMigration.getMigrationStatistics).mockReturnValue({
       ...mockStatistics,
-      conflictCount: 1
+      conflictCount: 1,
     });
 
     render(
@@ -285,17 +316,21 @@ describe('ProjectMigrationManager', () => {
     fireEvent.click(proceedButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Resolve Migration Conflicts')).toBeInTheDocument();
+      expect(
+        screen.getByText('Resolve Migration Conflicts')
+      ).toBeInTheDocument();
     });
   });
 
   it('should handle migration failure', async () => {
-    vi.mocked(trackMigration.migrateProjectToEducationalTracks).mockReturnValue({
-      success: false,
-      migratedItems: 0,
-      conflicts: [],
-      warnings: ['Migration failed due to invalid data']
-    });
+    vi.mocked(trackMigration.migrateProjectToEducationalTracks).mockReturnValue(
+      {
+        success: false,
+        migratedItems: 0,
+        conflicts: [],
+        warnings: ['Migration failed due to invalid data'],
+      }
+    );
 
     render(
       <ProjectMigrationManager
@@ -328,21 +363,27 @@ describe('ProjectMigrationManager', () => {
 describe('useMigrationManager', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Setup default mocks
     vi.mocked(trackMigration.validateProjectForMigration).mockReturnValue({
       canMigrate: true,
-      issues: []
+      issues: [],
     });
-    vi.mocked(trackMigration.previewProjectMigration).mockReturnValue(mockPreview);
-    vi.mocked(trackMigration.getMigrationStatistics).mockReturnValue(mockStatistics);
+    vi.mocked(trackMigration.previewProjectMigration).mockReturnValue(
+      mockPreview
+    );
+    vi.mocked(trackMigration.getMigrationStatistics).mockReturnValue(
+      mockStatistics
+    );
     vi.mocked(trackMigration.isProjectMigrated).mockReturnValue(false);
-    vi.mocked(trackMigration.migrateProjectToEducationalTracks).mockReturnValue({
-      success: true,
-      migratedItems: 1,
-      conflicts: [],
-      warnings: []
-    });
+    vi.mocked(trackMigration.migrateProjectToEducationalTracks).mockReturnValue(
+      {
+        success: true,
+        migratedItems: 1,
+        conflicts: [],
+        warnings: [],
+      }
+    );
   });
 
   it('should provide migration utilities', () => {
@@ -376,7 +417,9 @@ describe('useMigrationManager', () => {
 
     const validation = hookResult!.validateProject();
     expect(validation.canMigrate).toBe(true);
-    expect(trackMigration.validateProjectForMigration).toHaveBeenCalledWith(mockProject);
+    expect(trackMigration.validateProjectForMigration).toHaveBeenCalledWith(
+      mockProject
+    );
   });
 
   it('should preview migration correctly', () => {
@@ -391,7 +434,9 @@ describe('useMigrationManager', () => {
 
     const preview = hookResult!.previewMigration();
     expect(preview).toEqual(mockPreview);
-    expect(trackMigration.previewProjectMigration).toHaveBeenCalledWith(mockProject);
+    expect(trackMigration.previewProjectMigration).toHaveBeenCalledWith(
+      mockProject
+    );
   });
 
   it('should get statistics correctly', () => {
@@ -406,7 +451,9 @@ describe('useMigrationManager', () => {
 
     const statistics = hookResult!.getStatistics();
     expect(statistics).toEqual(mockStatistics);
-    expect(trackMigration.getMigrationStatistics).toHaveBeenCalledWith(mockProject);
+    expect(trackMigration.getMigrationStatistics).toHaveBeenCalledWith(
+      mockProject
+    );
   });
 
   it('should check migration status correctly', () => {
@@ -435,18 +482,18 @@ describe('useMigrationManager', () => {
     render(<TestComponent />);
 
     const result = await hookResult!.performMigration();
-    
+
     expect(result.success).toBe(true);
     expect(result.migratedItems).toBe(1);
-    expect(trackMigration.migrateProjectToEducationalTracks).toHaveBeenCalledWith(
-      mockProject,
-      { preserveOriginal: true },
-      []
-    );
+    expect(
+      trackMigration.migrateProjectToEducationalTracks
+    ).toHaveBeenCalledWith(mockProject, { preserveOriginal: true }, []);
   });
 
   it('should handle migration errors', async () => {
-    vi.mocked(trackMigration.migrateProjectToEducationalTracks).mockImplementation(() => {
+    vi.mocked(
+      trackMigration.migrateProjectToEducationalTracks
+    ).mockImplementation(() => {
       throw new Error('Migration error');
     });
 
@@ -460,7 +507,7 @@ describe('useMigrationManager', () => {
     render(<TestComponent />);
 
     const result = await hookResult!.performMigration();
-    
+
     expect(result.success).toBe(false);
     expect(hookResult!.error).toBe('Migration error');
   });
@@ -478,7 +525,7 @@ describe('useMigrationManager', () => {
     expect(hookResult!.isLoading).toBe(false);
 
     const result = await hookResult!.performMigration();
-    
+
     // After migration completes, loading should be false
     expect(hookResult!.isLoading).toBe(false);
     expect(result.success).toBe(true);

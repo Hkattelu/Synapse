@@ -2,16 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useProject, useUI, useTimeline } from '../state/hooks';
-import { Preview } from './Preview';
-const MediaBin = React.lazy(() => import('./MediaBin').then(m => ({ default: m.MediaBin })));
-const EnhancedTimelineView = React.lazy(() => import('./EnhancedTimelineView').then(m => ({ default: m.EnhancedTimelineView })));
-const Inspector = React.lazy(() => import('./Inspector').then(m => ({ default: m.Inspector })));
+
+// Advanced lazy loading to speed up the initial load time.
+const Preview = React.lazy(() =>
+  import('./Preview').then((m) => ({ default: m.Preview }))
+);
+import { LoadingSpinner } from './ui/LoadingSpinner';
+const MediaBin = React.lazy(() =>
+  import('./MediaBin').then((m) => ({ default: m.MediaBin }))
+);
+const EnhancedTimelineView = React.lazy(() =>
+  import('./EnhancedTimelineView').then((m) => ({
+    default: m.EnhancedTimelineView,
+  }))
+);
+const Inspector = React.lazy(() =>
+  import('./Inspector').then((m) => ({ default: m.Inspector }))
+);
+
 import { ExportDialog } from './ExportDialog';
 import { RecorderDialog } from './RecorderDialog';
 import { ExportProvider } from '../state/exportContext';
 import { StudioLoader } from './ui/StudioLoader';
+import { InspectorSkeleton, MediaBinSkeleton, TimelineSkeleton } from './ui/PanelSkeletons';
+import { prefetchOnIdle } from '../lib/prefetch';
 import { ResizablePanel } from './ResizablePanel';
 import { ArrowLeft, Sparkles, Settings, Archive } from 'lucide-react';
+import RendersDialog from './renders/RendersDialog';
 import { UndoButton } from './UndoButton';
 import { RedoButton } from './RedoButton';
 import { ShortcutsDialog } from './ShortcutsDialog';
@@ -38,12 +55,16 @@ function StudioViewContent() {
   const [showTips, setShowTips] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
-  
+  const [showRendersDialog, setShowRendersDialog] = useState(false);
+
   const shouldShowInspector = selectedTimelineItems.length > 0;
   const isRightPanelOpen = ui.mediaBinVisible || shouldShowInspector;
   const [rightPanelWidth, setRightPanelWidth] = useState<number>(() => {
     try {
-      const saved = parseInt(localStorage.getItem('ui:rightPanelWidth') || '', 10);
+      const saved = parseInt(
+        localStorage.getItem('ui:rightPanelWidth') || '',
+        10
+      );
       return Number.isNaN(saved) ? 320 : saved;
     } catch {
       return 320;
@@ -56,12 +77,14 @@ function StudioViewContent() {
       if (!flag) setShowOnboarding(true);
     } catch {}
   }, []);
-  
+
   // Get selected item for keyboard shortcuts
-  const selectedItemId = project?.timeline.find(item => 
-    // This is a simplified way to get selected item - you might need to adjust based on your selection logic
-    false // Replace with actual selection logic
-  )?.id || null;
+  const selectedItemId =
+    project?.timeline.find(
+      (item) =>
+        // This is a simplified way to get selected item - you might need to adjust based on your selection logic
+        false // Replace with actual selection logic
+    )?.id || null;
 
   // Setup keyboard shortcuts
   useKeyboardShortcuts({
@@ -85,7 +108,10 @@ function StudioViewContent() {
 
     return () => {
       window.removeEventListener('openExportDialog', handleOpenExportDialog);
-      window.removeEventListener('openRecorderDialog', handleOpenRecorderDialog);
+      window.removeEventListener(
+        'openRecorderDialog',
+        handleOpenRecorderDialog
+      );
     };
   }, []);
 
@@ -99,6 +125,27 @@ function StudioViewContent() {
       toggleMediaBin();
     }
   }, [shouldShowInspector, ui.mediaBinVisible, toggleMediaBin]);
+
+  // Dev-time: Only prefetch when user intent indicates these panels might open soon,
+  // to avoid ballooning initial load.
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    if (isRightPanelOpen) {
+      // If right panel opens, warm the likely targets.
+      prefetchOnIdle(
+        [() => import('./Inspector'), () => import('./MediaBin')],
+        300
+      );
+    }
+  }, [isRightPanelOpen]);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    // If advanced timeline is enabled, warm the chunk a bit later.
+    if (FLAGS.ADVANCED_UI) {
+      prefetchOnIdle(() => import('./EnhancedTimelineView'), 2000);
+    }
+  }, []);
 
   // Simulate staged loading until the main editor mounts
   useEffect(() => {
@@ -157,7 +204,7 @@ function StudioViewContent() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-synapse-surface/90 backdrop-blur-sm border-b border-synapse-border px-6 py-4 shadow-synapse-sm"
+        className="bg-synapse-surface/90 z-1 backdrop-blur-sm border-b border-synapse-border px-6 py-4 shadow-synapse-sm"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -169,7 +216,11 @@ function StudioViewContent() {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center space-x-3">
-              <img src="/branding/logo.svg" alt="Synapse Studio" className="h-10 w-auto" />
+              <img
+                src="/branding/logo.svg"
+                alt="Synapse Studio"
+                className="h-10 w-auto"
+              />
               <div>
                 <h1 className="text-xl font-bold text-text-primary">
                   {project.name}
@@ -189,7 +240,7 @@ function StudioViewContent() {
                 <UIModeToggle />
               </div>
             )}
-            
+
             {/* Help Controls + Settings */}
             <div className="flex items-center space-x-2">
               <button
@@ -198,25 +249,35 @@ function StudioViewContent() {
                 title="Show contextual tips"
                 aria-pressed={showTips}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </button>
-              <button
+              {/** <button
                 onClick={() => setShowGuide(true)}
                 className="px-3 py-2 rounded-lg bg-synapse-surface border border-synapse-border text-text-primary hover:bg-synapse-surface-hover hover:border-synapse-border-hover text-sm"
                 title="Open best practices guide"
               >
                 Guide
-              </button>
+              </button>*/}
               {/* Settings gear */}
               <HeaderSettingsMenu />
             </div>
-            
+
             {/* Panel Controls */}
             <div className="flex items-center space-x-2">
-              {/* Undo/Redo Buttons - Show in both modes but more prominent in advanced */}
-              <ModeAwareComponent mode="both">
+              {/* Undo/Redo Buttons - Show in both modes but more prominent in advanced
+               <ModeAwareComponent mode="both">
                 <UndoButton
                   className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-synapse-surface border border-synapse-border text-text-primary hover:bg-synapse-surface-hover hover:border-synapse-border-hover disabled:border-synapse-border disabled:text-text-tertiary disabled:cursor-not-allowed disabled:hover:scale-100 disabled:bg-synapse-surface`}
                   title="Undo (Ctrl+Z)"
@@ -225,7 +286,7 @@ function StudioViewContent() {
                   className={`p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-synapse-surface border border-synapse-border text-text-primary hover:bg-synapse-surface-hover hover:border-synapse-border-hover disabled:border-synapse-border disabled:text-text-tertiary disabled:cursor-not-allowed disabled:hover:scale-100 disabled:bg-synapse-surface`}
                   title="Redo (Ctrl+Y / Shift+Ctrl+Z)"
                 />
-              </ModeAwareComponent>
+              </ModeAwareComponent>*/}
               <button
                 onClick={() => {
                   toggleMediaBin();
@@ -239,7 +300,7 @@ function StudioViewContent() {
               >
                 <Archive className="w-4 h-4" />
               </button>
-              
+
               {/* Shortcuts Button - Advanced mode only */}
               <ModeAwareComponent mode="advanced">
                 <button
@@ -247,34 +308,66 @@ function StudioViewContent() {
                   className="p-3 rounded-xl transition-all duration-200 hover:scale-105 bg-synapse-surface border border-synapse-border text-text-primary hover:bg-synapse-surface-hover hover:border-synapse-border-hover"
                   title="Keyboard Shortcuts (?)"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                 </button>
               </ModeAwareComponent>
             </div>
 
-            {/* Export button in header (top-right) */}
-            <button
-              onClick={() => setIsExportDialogOpen(true)}
-              className="px-4 py-2 rounded-lg bg-synapse-primary text-synapse-text-inverse hover:bg-synapse-primary/90 shadow-synapse-md transition-colors"
-              title="Export Video"
-            >
-              <span className="hidden sm:inline">Export</span>
-              <svg
-                className="w-4 h-4 sm:ml-2 inline-block align-middle"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            {/* Renders and Export buttons in header (top-right) */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setShowRendersDialog(true)}
+                className="px-4 py-2 rounded-lg bg-synapse-surface border border-synapse-border text-text-primary hover:bg-synapse-surface-hover hover:border-synapse-border-hover shadow-synapse-sm transition-colors"
+                title="View Renders"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </button>
+                <span className="hidden sm:inline">Renders</span>
+                <svg
+                  className="w-4 h-4 sm:ml-2 inline-block align-middle"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 7h18M3 12h18M3 17h18"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={() => setIsExportDialogOpen(true)}
+                className="px-4 py-2 rounded-lg bg-synapse-primary text-synapse-text-inverse hover:bg-synapse-primary/90 shadow-synapse-md transition-colors"
+                title="Export Video"
+              >
+                <span className="hidden sm:inline">Export</span>
+                <svg
+                  className="w-4 h-4 sm:ml-2 inline-block align-middle"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </motion.header>
@@ -289,8 +382,13 @@ function StudioViewContent() {
         {/* Main Editor Area */}
         <main className="flex-1 flex flex-col bg-synapse-crust rounded-l-2xl overflow-hidden min-w-0">
           {/* Preview Area */}
-          <div className="flex-1 bg-synapse-crust border-r border-synapse-surface2 rounded-tl-2xl overflow-hidden" data-tutorial="preview-area">
-            <Preview className="h-full w-full" />
+          <div
+            className="flex-1 bg-synapse-crust border-r border-synapse-surface2 rounded-tl-2xl overflow-hidden"
+            data-tutorial="preview-area"
+          >
+<React.Suspense fallback={<div className="h-full w-full p-6"><LoadingSpinner label="Loading preview…" size="md" /></div>}>
+              <Preview className="h-full w-full" />
+            </React.Suspense>
           </div>
 
           {/* Timeline Area - Resizable */}
@@ -304,24 +402,26 @@ function StudioViewContent() {
             {/* Mode-aware timeline rendering */}
             <ModeAwareComponent mode="simplified">
               <div data-tutorial="educational-timeline">
-                <EducationalTimeline 
-                  className="flex-1" 
+                <EducationalTimeline
+                  className="flex-1"
                   mode="simplified"
                   onModeChange={(mode) => {
                     // Update UI mode when timeline mode changes
                     if (mode === 'advanced') {
                       // Switch to advanced mode globally
-                      window.dispatchEvent(new CustomEvent('switchToAdvancedMode'));
+                      window.dispatchEvent(
+                        new CustomEvent('switchToAdvancedMode')
+                      );
                     }
                   }}
                 />
               </div>
             </ModeAwareComponent>
-            
+
             {/** Advanced timeline gated by feature flag */}
             {FLAGS.ADVANCED_UI ? (
               <ModeAwareComponent mode="advanced">
-                <React.Suspense fallback={<div className="flex-1 p-4 text-text-secondary">Loading timeline…</div>}>
+<React.Suspense fallback={<TimelineSkeleton rows={6} />}>
                   <EnhancedTimelineView className="flex-1" />
                 </React.Suspense>
               </ModeAwareComponent>
@@ -332,7 +432,12 @@ function StudioViewContent() {
         {/* Right Panels */}
         <div
           className="right-panels-container relative transition-all duration-200 ease-in-out overflow-hidden"
-          style={{ width: isRightPanelOpen ? rightPanelWidth : 0, pointerEvents: isRightPanelOpen ? 'auto' as const : 'none' as const }}
+          style={{
+            width: isRightPanelOpen ? rightPanelWidth : 0,
+            pointerEvents: isRightPanelOpen
+              ? ('auto' as const)
+              : ('none' as const),
+          }}
           aria-hidden={!isRightPanelOpen}
         >
           <ResizablePanel
@@ -346,7 +451,10 @@ function StudioViewContent() {
           >
             <motion.div
               initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: isRightPanelOpen ? 1 : 0, x: isRightPanelOpen ? 0 : 20 }}
+              animate={{
+                opacity: isRightPanelOpen ? 1 : 0,
+                x: isRightPanelOpen ? 0 : 20,
+              }}
               transition={{ duration: 0.2 }}
               className="h-full flex flex-col"
             >
@@ -361,7 +469,7 @@ function StudioViewContent() {
                   className={`h-full border-b border-synapse-border bg-synapse-surface`}
                 >
                   <div data-tutorial="media-bin">
-                    <React.Suspense fallback={<div className="p-4 text-text-secondary">Loading media…</div>}>
+<React.Suspense fallback={<MediaBinSkeleton />}>
                       <MediaBin />
                     </React.Suspense>
                   </div>
@@ -370,7 +478,7 @@ function StudioViewContent() {
 
               {shouldShowInspector && !ui.mediaBinVisible ? (
                 <div className={`h-full bg-synapse-surface`}>
-                  <React.Suspense fallback={<div className="p-4 text-text-secondary">Loading inspector…</div>}>
+<React.Suspense fallback={<InspectorSkeleton />}>
                     <Inspector />
                   </React.Suspense>
                 </div>
@@ -387,6 +495,9 @@ function StudioViewContent() {
         isOpen={isExportDialogOpen}
         onClose={() => setIsExportDialogOpen(false)}
       />
+
+      {/* Renders Dialog */}
+      <RendersDialog isOpen={showRendersDialog} onClose={() => setShowRendersDialog(false)} />
 
       {/* Recorder Dialog */}
       <RecorderDialog
@@ -405,13 +516,17 @@ function StudioViewContent() {
         isOpen={showOnboarding}
         onClose={() => {
           setShowOnboarding(false);
-          try { localStorage.setItem('seui_onboarded_v1', 'true'); } catch {}
+          try {
+            localStorage.setItem('seui_onboarded_v1', 'true');
+          } catch {}
         }}
         onStartTutorial={() => {
           setShowOnboarding(false);
           setShowTips(false);
           setShowTutorial(true);
-          try { localStorage.setItem('seui_onboarded_v1', 'true'); } catch {}
+          try {
+            localStorage.setItem('seui_onboarded_v1', 'true');
+          } catch {}
         }}
         onOpenGuide={() => {
           setShowGuide(true);
@@ -422,7 +537,10 @@ function StudioViewContent() {
       <HelpTipsOverlay active={showTips} onClose={() => setShowTips(false)} />
 
       {/* Best Practices Guide */}
-      <EducationalBestPractices isOpen={showGuide} onClose={() => setShowGuide(false)} />
+      <EducationalBestPractices
+        isOpen={showGuide}
+        onClose={() => setShowGuide(false)}
+      />
 
       {/* Interactive Tutorial */}
       <InteractiveTutorial
@@ -440,7 +558,10 @@ function HeaderSettingsMenu() {
   const btnRef = React.useRef<HTMLButtonElement>(null);
   React.useEffect(() => {
     const onDoc = (e: MouseEvent) => {
-      if (btnRef.current && !btnRef.current.parentElement?.contains(e.target as Node)) {
+      if (
+        btnRef.current &&
+        !btnRef.current.parentElement?.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     };

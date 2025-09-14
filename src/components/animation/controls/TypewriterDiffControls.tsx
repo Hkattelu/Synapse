@@ -1,7 +1,10 @@
 import React from 'react';
 import type { AnimationConfig } from '../../../lib/types';
 
-type TypewriterDiffConfig = Extract<AnimationConfig, { preset: 'typewriterDiff' }>;
+type TypewriterDiffConfig = Extract<
+  AnimationConfig,
+  { preset: 'typewriterDiff' }
+>;
 
 const SPEED_MIN = 1;
 const SPEED_MAX = 100;

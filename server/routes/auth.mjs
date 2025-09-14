@@ -31,7 +31,11 @@ authRouter.post('/logout', (req, res) => {
 });
 
 authRouter.get('/me', (req, res) => {
-  const token = req.cookies?.token || (req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.slice(7) : null);
+  const token =
+    req.cookies?.token ||
+    (req.headers.authorization?.startsWith('Bearer ')
+      ? req.headers.authorization.slice(7)
+      : null);
   const user = token ? getUserFromToken(token) : null;
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   res.json({ user });

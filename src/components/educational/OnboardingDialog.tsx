@@ -10,27 +10,28 @@ interface OnboardingDialogProps {
 const STEPS = [
   {
     title: 'Welcome to the Educational Interface',
-    body:
-      'This simplified view is designed to help you create high-quality educational videos faster with four dedicated tracks: Code, Visual, Narration, and You.',
+    body: 'This simplified view is designed to help you create high-quality educational videos faster with four dedicated tracks: Code, Visual, Narration, and You.',
   },
   {
     title: 'Add Content Quickly',
-    body:
-      'Use the Add Code, Add Video, and Add Assets buttons to start creating. Each workflow provides helpful defaults and guidance.',
+    body: 'Use the Add Code, Add Video, and Add Assets buttons to start creating. Each workflow provides helpful defaults and guidance.',
   },
   {
     title: 'Smart Track Placement',
-    body:
-      'Drag items from the Media Bin onto the timeline. We’ll suggest the best educational track and warn about mismatches.',
+    body: 'Drag items from the Media Bin onto the timeline. We’ll suggest the best educational track and warn about mismatches.',
   },
   {
     title: 'Learn by Doing',
-    body:
-      'Start an interactive tour that highlights key areas, or open the Best Practices guide to learn what great educational content looks like.',
+    body: 'Start an interactive tour that highlights key areas, or open the Best Practices guide to learn what great educational content looks like.',
   },
 ];
 
-export function OnboardingDialog({ isOpen, onClose, onStartTutorial, onOpenGuide }: OnboardingDialogProps) {
+export function OnboardingDialog({
+  isOpen,
+  onClose,
+  onStartTutorial,
+  onOpenGuide,
+}: OnboardingDialogProps) {
   const [step, setStep] = useState(0);
   const total = STEPS.length;
 
@@ -48,16 +49,30 @@ export function OnboardingDialog({ isOpen, onClose, onStartTutorial, onOpenGuide
         <div className="p-6">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-1">{current.title}</h2>
-              <p className="text-gray-600">Step {step + 1} of {total}</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                {current.title}
+              </h2>
+              <p className="text-gray-600">
+                Step {step + 1} of {total}
+              </p>
             </div>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
               aria-label="Close onboarding"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -122,4 +137,3 @@ export function OnboardingDialog({ isOpen, onClose, onStartTutorial, onOpenGuide
     </div>
   );
 }
-

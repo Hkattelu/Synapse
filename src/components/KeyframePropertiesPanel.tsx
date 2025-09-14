@@ -134,7 +134,9 @@ export function KeyframePropertiesPanel({
     (keyframeId: string, property: string, value: any) => {
       if (!selectedItem) return;
 
-      const keyframe = (selectedItem.keyframes ?? []).find((k) => k.id === keyframeId);
+      const keyframe = (selectedItem.keyframes ?? []).find(
+        (k) => k.id === keyframeId
+      );
       if (!keyframe) return;
 
       const updatedKeyframe = {
@@ -203,7 +205,9 @@ export function KeyframePropertiesPanel({
     (keyframeId: string) => {
       if (!selectedItem) return;
 
-      const keyframe = (selectedItem.keyframes ?? []).find((k) => k.id === keyframeId);
+      const keyframe = (selectedItem.keyframes ?? []).find(
+        (k) => k.id === keyframeId
+      );
       if (!keyframe) return;
 
       const newKeyframe: Omit<Keyframe, 'id'> = {
@@ -286,7 +290,7 @@ export function KeyframePropertiesPanel({
           Keyframe Properties
         </h3>
         <div className="text-sm text-text-secondary">
-          {(selectedItem.keyframes?.length ?? 0)} keyframe
+          {selectedItem.keyframes?.length ?? 0} keyframe
           {(selectedItem.keyframes?.length ?? 0) !== 1 ? 's' : ''} total
           {selectedKeyframes.length > 0 && (
             <span className="ml-2">• {selectedKeyframes.length} selected</span>
@@ -362,7 +366,10 @@ export function KeyframePropertiesPanel({
             {expandedSections.has('selected-keyframes') && (
               <div className="mt-3 space-y-4">
                 {selectedKeyframeObjects.map((keyframe) => (
-                  <div key={keyframe.id} className="p-3 bg-background-tertiary rounded">
+                  <div
+                    key={keyframe.id}
+                    className="p-3 bg-background-tertiary rounded"
+                  >
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-sm font-medium text-text-primary">
                         Keyframe @ {keyframe.time.toFixed(2)}s

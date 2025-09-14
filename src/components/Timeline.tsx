@@ -1,5 +1,11 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
-import { useTimeline, useMediaAssets, useUI, usePlayback, useProject } from '../state/hooks';
+import {
+  useTimeline,
+  useMediaAssets,
+  useUI,
+  usePlayback,
+  useProject,
+} from '../state/hooks';
 import type { TimelineItem, MediaAsset } from '../lib/types';
 
 interface TimelineProps {
@@ -268,7 +274,13 @@ export function Timeline({ className = '' }: TimelineProps) {
     const targetZoom = Math.max(0.1, Math.min(5, available / contentWidth));
     updateTimelineView({ zoom: targetZoom, scrollPosition: 0 });
     if (viewport) viewport.scrollLeft = 0;
-  }, [scrollRef, timeToPixels, maxDuration, ui.timeline.zoom, updateTimelineView]);
+  }, [
+    scrollRef,
+    timeToPixels,
+    maxDuration,
+    ui.timeline.zoom,
+    updateTimelineView,
+  ]);
 
   // Handle scroll
   const handleScroll = useCallback(
@@ -302,22 +314,31 @@ export function Timeline({ className = '' }: TimelineProps) {
 
   // Scrubbing
   const [isScrubbing, setIsScrubbing] = useState(false);
-  const computeTimeFromClientX = useCallback((clientX: number) => {
-    const rect = timelineRef.current?.getBoundingClientRect();
-    if (!rect) return 0;
-    const x = Math.max(0, clientX - rect.left + ui.timeline.scrollPosition);
-    return Math.max(0, Math.min(maxDuration, pixelsToTime(x)));
-  }, [ui.timeline.scrollPosition, pixelsToTime, maxDuration]);
-  const handleScrubStart = useCallback((e: React.MouseEvent) => {
-    setIsScrubbing(true);
-    const t = computeTimeFromClientX(e.clientX);
-    seek(t);
-  }, [computeTimeFromClientX, seek]);
-  const handleScrubMove = useCallback((e: MouseEvent) => {
-    if (!isScrubbing) return;
-    const t = computeTimeFromClientX(e.clientX);
-    seek(t);
-  }, [isScrubbing, computeTimeFromClientX, seek]);
+  const computeTimeFromClientX = useCallback(
+    (clientX: number) => {
+      const rect = timelineRef.current?.getBoundingClientRect();
+      if (!rect) return 0;
+      const x = Math.max(0, clientX - rect.left + ui.timeline.scrollPosition);
+      return Math.max(0, Math.min(maxDuration, pixelsToTime(x)));
+    },
+    [ui.timeline.scrollPosition, pixelsToTime, maxDuration]
+  );
+  const handleScrubStart = useCallback(
+    (e: React.MouseEvent) => {
+      setIsScrubbing(true);
+      const t = computeTimeFromClientX(e.clientX);
+      seek(t);
+    },
+    [computeTimeFromClientX, seek]
+  );
+  const handleScrubMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isScrubbing) return;
+      const t = computeTimeFromClientX(e.clientX);
+      seek(t);
+    },
+    [isScrubbing, computeTimeFromClientX, seek]
+  );
   const handleScrubEnd = useCallback(() => setIsScrubbing(false), []);
 
   useEffect(() => {
@@ -471,12 +492,30 @@ export function Timeline({ className = '' }: TimelineProps) {
             className="pointer-events-none absolute top-0 bottom-0 z-30"
             style={{ left: `${timeToPixels(playback.currentTime)}px` }}
           >
-            <div style={{ position: 'absolute', top: 0, bottom: 0, width: 2, backgroundColor: 'var(--synapse-playhead)' }} />
-            <div style={{ position: 'absolute', top: -6, left: -5, width: 10, height: 10, backgroundColor: 'var(--synapse-playhead)', borderRadius: 2 }} />
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                width: 2,
+                backgroundColor: 'var(--synapse-playhead)',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                top: -6,
+                left: -5,
+                width: 10,
+                height: 10,
+                backgroundColor: 'var(--synapse-playhead)',
+                borderRadius: 2,
+              }}
+            />
           </div>
 
           {/* Track Lines */}
-          {Array.from({ length: maxTrack + 1 }).map((_, trackIndex) => (
+{Array.from({ length: maxTrack + 1 }).map((_, trackIndex) => (
             <div
               key={trackIndex}
               className="absolute left-0 right-0 border-b border-border-subtle opacity-50"
@@ -485,14 +524,23 @@ export function Timeline({ className = '' }: TimelineProps) {
                 height: `${TRACK_HEIGHT}px`,
               }}
             >
-              <div className="absolute left-2 top-2 text-xs text-text-tertiary flex items-center gap-1">
+              <div className="absolute left-2 top-2 text-xs text-text-tertiary flex items-center gap-2">
+                <span>Track {trackIndex + 1}</span>
                 <div className="relative group">
                   <button
                     className="p-1 rounded hover:bg-synapse-surface-hover text-text-tertiary hover:text-text-primary"
                     aria-describedby={`tl-tip-${trackIndex}`}
                     aria-label={`Tips for track ${trackIndex + 1}`}
                   >
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      className="w-3.5 h-3.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M12 18h.01" />
                       <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
                       <circle cx="12" cy="12" r="9" />
@@ -503,7 +551,9 @@ export function Timeline({ className = '' }: TimelineProps) {
                     id={`tl-tip-${trackIndex}`}
                     className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-background-tertiary border border-border-subtle text-text-primary text-xs rounded-md shadow-lg w-60"
                   >
-                    <div className="px-3 py-2 border-b border-border-subtle font-medium">Timeline Tips</div>
+                    <div className="px-3 py-2 border-b border-border-subtle font-medium">
+                      Timeline Tips
+                    </div>
                     <div className="px-3 py-2">
                       <ul className="list-disc pl-4 space-y-1">
                         <li>Drag clips to move; drag edges to trim</li>
@@ -600,9 +650,7 @@ function TimelineClip({
         <div className="font-medium truncate">
           {asset?.name || 'Unknown Asset'}
         </div>
-        <div>
-          {Math.round(item.duration * 10) / 10}s
-        </div>
+        <div>{Math.round(item.duration * 10) / 10}s</div>
       </div>
 
       {/* Overlap Indicator */}

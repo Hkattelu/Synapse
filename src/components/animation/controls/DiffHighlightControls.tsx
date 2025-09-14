@@ -1,7 +1,10 @@
 import React from 'react';
 import type { AnimationConfig } from '../../../lib/types';
 
-type DiffHighlightConfig = Extract<AnimationConfig, { preset: 'diffHighlight' }>;
+type DiffHighlightConfig = Extract<
+  AnimationConfig,
+  { preset: 'diffHighlight' }
+>;
 
 const DURATION_MIN = 10;
 const DURATION_MAX = 300;

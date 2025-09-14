@@ -64,63 +64,92 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
       <AbsoluteFill>
         {talkingHead ? (
           <div style={style}>
-            {asset.type === 'video' && (
-              <Video
-                src={asset.url}
-                volume={item.properties.volume ?? 1}
-                playbackRate={item.properties.playbackRate ?? 1}
-                muted={item.muted}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                }}
-              />
-            )}
-          </div>
-        ) : (
-          <div style={style}>
-            {asset.type === 'video' && (
-              <Video
-                src={asset.url}
-                volume={item.properties.volume ?? 1}
-                playbackRate={item.properties.playbackRate ?? 1}
-                muted={item.muted}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                }}
-              />
-            )}
-
-            {asset.type === 'image' && (
-              <Img
-                src={asset.url}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                }}
-              />
-            )}
-
-            {asset.type === 'audio' && (
-              <>
-                {/* Visual placeholder */}
+            {asset.type === 'video' &&
+              (asset.url ? (
+                <Video
+                  src={asset.url}
+                  volume={item.properties.volume ?? 1}
+                  playbackRate={item.properties.playbackRate ?? 1}
+                  muted={item.muted}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  }}
+                />
+              ) : (
                 <AbsoluteFill
                   style={{
-                    backgroundColor: 'rgba(0, 255, 0, 0.3)',
+                    backgroundColor: 'rgba(0,0,0,0.4)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '24px',
+                    fontSize: '18px',
                     color: 'white',
                   }}
                 >
-                  🎵 {asset.name}
+                  ▶ {asset.name}
                 </AbsoluteFill>
-                {/* Actual audio playback (guarded for test mocks) */}
+              ))}
+          </div>
+        ) : (
+          <div style={style}>
+            {asset.type === 'video' &&
+              (asset.url ? (
+                <Video
+                  src={asset.url}
+                  volume={item.properties.volume ?? 1}
+                  playbackRate={item.properties.playbackRate ?? 1}
+                  muted={item.muted}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                  }}
+                />
+              ) : (
+                <AbsoluteFill
+                  style={{
+                    backgroundColor: 'rgba(0,0,0,0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '18px',
+                    color: 'white',
+                  }}
+                >
+                  ▶ {asset.name}
+                </AbsoluteFill>
+              ))}
+
+            {asset.type === 'image' &&
+              (asset.url ? (
+                <Img
+                  src={asset.url}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                  }}
+                />
+              ) : (
+                <AbsoluteFill
+                  style={{
+                    backgroundColor: 'rgba(0,0,0,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '18px',
+                    color: 'white',
+                  }}
+                >
+                  🖼 {asset.name}
+                </AbsoluteFill>
+              ))}
+
+            {asset.type === 'audio' && (
+              <>
+                {/* Audio playback only; no visual overlay for narration */}
                 {(() => {
                   type AudioProps = {
                     src: string;
@@ -137,6 +166,7 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
                       Audio: React.ComponentType<AudioProps>;
                     }
                   ).Audio;
+                  if (!asset.url) return null;
                   return (
                     <AudioComp
                       src={asset.url}

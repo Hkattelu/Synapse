@@ -194,7 +194,9 @@ export function TimelineMarkerManager({
     >
       {/* Header */}
       <div className="p-4 border-b border-border-subtle">
-        <h3 className="text-lg font-semibold text-text-primary">Timeline Markers</h3>
+        <h3 className="text-lg font-semibold text-text-primary">
+          Timeline Markers
+        </h3>
         <div className="text-sm text-text-secondary">
           {markers.length} markers • {regions.length} regions
         </div>
@@ -363,7 +365,7 @@ export function TimelineMarkerManager({
                 placeholder="Region name..."
                 value={newRegionName}
                 onChange={(e) => setNewRegionName(e.target.value)}
-                    className="w-full px-2 py-1 text-sm bg-background-secondary border border-border-subtle rounded text-text-primary mb-2"
+                className="w-full px-2 py-1 text-sm bg-background-secondary border border-border-subtle rounded text-text-primary mb-2"
               />
 
               <div className="grid grid-cols-2 gap-2 mb-2">
@@ -494,7 +496,9 @@ function MarkerItem({
   return (
     <div
       className={`p-2 rounded border transition-all ${
-        isActive ? 'bg-background-secondary border-synapse-primary' : 'bg-background-tertiary border-border-subtle'
+        isActive
+          ? 'bg-background-secondary border-synapse-primary'
+          : 'bg-background-tertiary border-border-subtle'
       }`}
     >
       <div className="flex items-center justify-between">
@@ -705,7 +709,9 @@ function RegionItem({
       {isEditing ? (
         <div className="grid grid-cols-2 gap-2 mt-2">
           <div>
-            <label className="block text-xs text-text-secondary mb-1">Start</label>
+            <label className="block text-xs text-text-secondary mb-1">
+              Start
+            </label>
             <input
               type="number"
               min="0"
@@ -717,7 +723,9 @@ function RegionItem({
             />
           </div>
           <div>
-            <label className="block text-xs text-text-secondary mb-1">End</label>
+            <label className="block text-xs text-text-secondary mb-1">
+              End
+            </label>
             <input
               type="number"
               min="0"

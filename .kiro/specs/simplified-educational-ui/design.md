@@ -67,6 +67,7 @@ interface EducationalTimelineProps {
 ```
 
 **Key Features**:
+
 - Fixed 4-track layout with semantic labels
 - Track-specific styling and colors
 - Smart content placement suggestions
@@ -87,6 +88,7 @@ interface ContentAdditionToolbarProps {
 ```
 
 **Button Specifications**:
+
 - **Add Code**: Opens code editor, creates item on Code track
 - **Add Video**: Provides screen recording vs talking head options
 - **Add Assets**: Opens media library with educational asset categories
@@ -107,6 +109,7 @@ interface EducationalTrackProps {
 ```
 
 **Track-Specific Features**:
+
 - **Code Track**: Syntax highlighting preview, language indicators
 - **Visual Track**: Thumbnail previews, screen recording indicators
 - **Narration Track**: Waveform visualization, audio level meters
@@ -133,6 +136,7 @@ function suggestTrackPlacement(
 ```
 
 **Placement Logic**:
+
 - Code files → Code track
 - Screen recordings → Visual track
 - Personal videos → You track
@@ -153,9 +157,7 @@ interface MigrationResult {
   warnings: string[];
 }
 
-function migrateProjectToEducationalTracks(
-  project: Project
-): MigrationResult;
+function migrateProjectToEducationalTracks(project: Project): MigrationResult;
 ```
 
 ## Data Models
@@ -174,10 +176,10 @@ const EDUCATIONAL_TRACKS: EducationalTrack[] = [
       theme: 'vscode-dark-plus',
       fontSize: 16,
       showLineNumbers: true,
-      animationMode: 'typing'
+      animationMode: 'typing',
     },
     allowedContentTypes: ['code'],
-    suggestedAnimations: ['typewriter', 'lineFocus', 'diffHighlight']
+    suggestedAnimations: ['typewriter', 'lineFocus', 'diffHighlight'],
   },
   {
     id: 'visual',
@@ -187,10 +189,10 @@ const EDUCATIONAL_TRACKS: EducationalTrack[] = [
     icon: 'monitor',
     defaultProperties: {
       autoFocus: true,
-      focusScale: 1.2
+      focusScale: 1.2,
     },
     allowedContentTypes: ['video', 'image', 'visual-asset'],
-    suggestedAnimations: ['kenBurns', 'slide', 'fade']
+    suggestedAnimations: ['kenBurns', 'slide', 'fade'],
   },
   {
     id: 'narration',
@@ -199,10 +201,10 @@ const EDUCATIONAL_TRACKS: EducationalTrack[] = [
     color: '#F59E0B', // Amber
     icon: 'mic',
     defaultProperties: {
-      volume: 0.8
+      volume: 0.8,
     },
     allowedContentTypes: ['audio'],
-    suggestedAnimations: ['fade']
+    suggestedAnimations: ['fade'],
   },
   {
     id: 'you',
@@ -213,11 +215,11 @@ const EDUCATIONAL_TRACKS: EducationalTrack[] = [
     defaultProperties: {
       talkingHeadEnabled: true,
       talkingHeadCorner: 'bottom-right',
-      talkingHeadSize: 'md'
+      talkingHeadSize: 'md',
     },
     allowedContentTypes: ['video'],
-    suggestedAnimations: ['fade', 'slide']
-  }
+    suggestedAnimations: ['fade', 'slide'],
+  },
 ];
 ```
 
@@ -252,6 +254,7 @@ interface TrackConflictHandler {
 ```
 
 **Conflict Resolution**:
+
 1. Show warning dialog with explanation
 2. Suggest appropriate alternative tracks
 3. Allow override with confirmation
@@ -263,7 +266,10 @@ For existing projects with complex track arrangements:
 
 ```typescript
 interface MigrationConflictResolver {
-  onMultipleItemsPerTrack: (items: TimelineItem[], track: number) => EducationalTrack[];
+  onMultipleItemsPerTrack: (
+    items: TimelineItem[],
+    track: number
+  ) => EducationalTrack[];
   onUnknownContentType: (item: TimelineItem) => EducationalTrack;
   onUserDecision: (conflicts: MigrationConflict[]) => MigrationDecision[];
 }
@@ -351,7 +357,11 @@ Enhanced track headers with educational context:
 
 ```css
 .educational-track-header {
-  background: linear-gradient(135deg, var(--track-color), var(--track-color-light));
+  background: linear-gradient(
+    135deg,
+    var(--track-color),
+    var(--track-color-light)
+  );
   padding: 12px 16px;
   border-radius: 8px 8px 0 0;
   display: flex;

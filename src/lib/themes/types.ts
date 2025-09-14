@@ -8,7 +8,7 @@ export interface ThemeDefinition {
     // Core editor colors
     background: string;
     foreground: string;
-    
+
     // Syntax highlighting colors
     comment: string;
     keyword: string;
@@ -18,7 +18,7 @@ export interface ThemeDefinition {
     punctuation: string;
     function: string;
     variable: string;
-    
+
     // Additional syntax elements
     type: string;
     class: string;
@@ -29,12 +29,12 @@ export interface ThemeDefinition {
     boolean: string;
     regex: string;
     escape: string;
-    
+
     // UI elements
     selection: string;
     lineHighlight: string;
     cursor: string;
-    
+
     // Diff colors
     diffAdded: string;
     diffRemoved: string;

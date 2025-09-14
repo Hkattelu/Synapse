@@ -26,7 +26,7 @@ const CODE_TEMPLATES: CodeTemplate[] = [
     language: 'javascript',
     code: '// Welcome to JavaScript!\nconsole.log("Hello, World!");\n\n// Try modifying this message\nconst message = "Learning is fun!";\nconsole.log(message);',
     description: 'Basic JavaScript introduction',
-    category: 'basic'
+    category: 'basic',
   },
   {
     id: 'function-js',
@@ -34,7 +34,7 @@ const CODE_TEMPLATES: CodeTemplate[] = [
     language: 'javascript',
     code: '// Function definition\nfunction greetUser(name) {\n  return `Hello, ${name}! Welcome to coding.`;\n}\n\n// Function call\nconst greeting = greetUser("Student");\nconsole.log(greeting);',
     description: 'JavaScript function demonstration',
-    category: 'intermediate'
+    category: 'intermediate',
   },
   {
     id: 'hello-world-python',
@@ -42,7 +42,7 @@ const CODE_TEMPLATES: CodeTemplate[] = [
     language: 'python',
     code: '# Welcome to Python!\nprint("Hello, World!")\n\n# Try modifying this message\nmessage = "Learning Python is awesome!"\nprint(message)',
     description: 'Basic Python introduction',
-    category: 'basic'
+    category: 'basic',
   },
   {
     id: 'class-python',
@@ -50,7 +50,7 @@ const CODE_TEMPLATES: CodeTemplate[] = [
     language: 'python',
     code: '# Class definition\nclass Student:\n    def __init__(self, name):\n        self.name = name\n    \n    def introduce(self):\n        return f"Hi, I\'m {self.name}!"\n\n# Create instance\nstudent = Student("Alice")\nprint(student.introduce())',
     description: 'Python class demonstration',
-    category: 'intermediate'
+    category: 'intermediate',
   },
   {
     id: 'component-react',
@@ -58,8 +58,8 @@ const CODE_TEMPLATES: CodeTemplate[] = [
     language: 'typescript',
     code: 'import React from \'react\';\n\ninterface Props {\n  name: string;\n}\n\nexport function Welcome({ name }: Props) {\n  return (\n    <div className="welcome">\n      <h1>Hello, {name}!</h1>\n      <p>Welcome to React development.</p>\n    </div>\n  );\n}',
     description: 'React component with TypeScript',
-    category: 'advanced'
-  }
+    category: 'advanced',
+  },
 ];
 
 const SUPPORTED_LANGUAGES = [
@@ -73,11 +73,15 @@ const SUPPORTED_LANGUAGES = [
   { id: 'json', name: 'JSON', extension: '.json' },
 ];
 
-export function CodeEditorWorkflow({ isOpen, onClose, onCodeAdded }: CodeEditorWorkflowProps) {
+export function CodeEditorWorkflow({
+  isOpen,
+  onClose,
+  onCodeAdded,
+}: CodeEditorWorkflowProps) {
   const { addTimelineItem } = useTimeline();
   const { addMediaAsset } = useMediaAssets();
   const { notify } = useNotifications();
-  
+
   const [codeContent, setCodeContent] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('javascript');
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -89,13 +93,14 @@ export function CodeEditorWorkflow({ isOpen, onClose, onCodeAdded }: CodeEditorW
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+      textareaRef.current.style.height =
+        textareaRef.current.scrollHeight + 'px';
     }
   }, [codeContent]);
 
   // Load template
   const loadTemplate = useCallback((templateId: string) => {
-    const template = CODE_TEMPLATES.find(t => t.id === templateId);
+    const template = CODE_TEMPLATES.find((t) => t.id === templateId);
     if (template) {
       setCodeContent(template.code);
       setSelectedLanguage(template.language);
@@ -120,7 +125,7 @@ export function CodeEditorWorkflow({ isOpen, onClose, onCodeAdded }: CodeEditorW
     if (!codeTrack) return;
 
     const title = codeTitle.trim() || `Code Snippet (${selectedLanguage})`;
-    
+
     const codeAsset = {
       name: title,
       type: 'code' as const,
@@ -162,13 +167,22 @@ export function CodeEditorWorkflow({ isOpen, onClose, onCodeAdded }: CodeEditorW
 
     onCodeAdded();
     onClose();
-    
+
     // Reset form
     setCodeContent('');
     setCodeTitle('');
     setSelectedTemplate(null);
     setShowTemplates(true);
-  }, [codeContent, selectedLanguage, codeTitle, addMediaAsset, addTimelineItem, notify, onCodeAdded, onClose]);
+  }, [
+    codeContent,
+    selectedLanguage,
+    codeTitle,
+    addMediaAsset,
+    addTimelineItem,
+    notify,
+    onCodeAdded,
+    onClose,
+  ]);
 
   if (!isOpen) return null;
 
@@ -178,17 +192,39 @@ export function CodeEditorWorkflow({ isOpen, onClose, onCodeAdded }: CodeEditorW
         {/* Header */}
         <div className="bg-purple-600 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            <svg
+              className="w-6 h-6 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+              />
             </svg>
-            <h2 className="text-xl font-bold text-white">Add Code to Timeline</h2>
+            <h2 className="text-xl font-bold text-white">
+              Add Code to Timeline
+            </h2>
           </div>
           <button
             onClick={onClose}
             className="text-white hover:text-gray-200 transition-colors"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -198,7 +234,9 @@ export function CodeEditorWorkflow({ isOpen, onClose, onCodeAdded }: CodeEditorW
           {showTemplates && (
             <div className="w-80 bg-gray-700 border-r border-gray-600 overflow-y-auto flex flex-col">
               <div className="p-4 flex-1 flex flex-col">
-                <h3 className="text-lg font-semibold text-white mb-4">Code Templates</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">
+                  Code Templates
+                </h3>
                 <div className="space-y-3 flex-1 overflow-y-auto">
                   {CODE_TEMPLATES.map((template) => (
                     <button
@@ -211,16 +249,22 @@ export function CodeEditorWorkflow({ isOpen, onClose, onCodeAdded }: CodeEditorW
                       }`}
                     >
                       <div className="font-medium">{template.name}</div>
-                      <div className="text-sm opacity-75 mt-1">{template.description}</div>
+                      <div className="text-sm opacity-75 mt-1">
+                        {template.description}
+                      </div>
                       <div className="flex items-center justify-between mt-2">
                         <span className="text-xs px-2 py-1 bg-gray-800 rounded">
                           {template.language}
                         </span>
-                        <span className={`text-xs px-2 py-1 rounded ${
-                          template.category === 'basic' ? 'bg-green-600' :
-                          template.category === 'intermediate' ? 'bg-yellow-600' :
-                          'bg-red-600'
-                        }`}>
+                        <span
+                          className={`text-xs px-2 py-1 rounded ${
+                            template.category === 'basic'
+                              ? 'bg-green-600'
+                              : template.category === 'intermediate'
+                                ? 'bg-yellow-600'
+                                : 'bg-red-600'
+                          }`}
+                        >
                           {template.category}
                         </span>
                       </div>
@@ -233,7 +277,7 @@ export function CodeEditorWorkflow({ isOpen, onClose, onCodeAdded }: CodeEditorW
                 >
                   Start from Scratch
                 </button>
-                
+
                 {/* Contextual Help */}
                 <div className="mt-4">
                   <ContextualHelp type="code" />
@@ -276,7 +320,7 @@ export function CodeEditorWorkflow({ isOpen, onClose, onCodeAdded }: CodeEditorW
                   </select>
                 </div>
               </div>
-              
+
               {!showTemplates && (
                 <button
                   onClick={() => setShowTemplates(true)}
@@ -298,14 +342,17 @@ export function CodeEditorWorkflow({ isOpen, onClose, onCodeAdded }: CodeEditorW
                 onChange={(e) => setCodeContent(e.target.value)}
                 placeholder="Enter your code here..."
                 className="w-full h-full min-h-[300px] px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white font-mono text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
-                style={{ fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace' }}
+                style={{
+                  fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
+                }}
               />
             </div>
 
             {/* Footer */}
             <div className="bg-gray-700 px-6 py-4 border-t border-gray-600 flex items-center justify-between">
               <div className="text-sm text-gray-400">
-                {codeContent.length} characters • Estimated duration: {Math.max(10, Math.ceil(codeContent.length / 10))}s
+                {codeContent.length} characters • Estimated duration:{' '}
+                {Math.max(10, Math.ceil(codeContent.length / 10))}s
               </div>
               <div className="flex items-center space-x-3">
                 <button

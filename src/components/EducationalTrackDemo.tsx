@@ -14,7 +14,8 @@ const mockTimelineItems: TimelineItem[] = [
     track: 0,
     type: 'code',
     properties: {
-      codeText: 'function fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n-1) + fibonacci(n-2);\n}',
+      codeText:
+        'function fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n-1) + fibonacci(n-2);\n}',
       language: 'javascript',
       theme: 'vscode-dark-plus',
     },
@@ -75,7 +76,8 @@ const mockMediaAssets = {
     metadata: {
       fileSize: 256,
       mimeType: 'text/javascript',
-      codeContent: 'function fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n-1) + fibonacci(n-2);\n}',
+      codeContent:
+        'function fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n-1) + fibonacci(n-2);\n}',
       language: 'javascript',
     },
     createdAt: new Date(),
@@ -93,7 +95,8 @@ const mockMediaAssets = {
       fileSize: 5242880,
       mimeType: 'video/mp4',
     },
-    thumbnail: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMTAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjMTBCOTgxIiBmaWxsLW9wYWNpdHk9IjAuMiIvPgo8dGV4dCB4PSI1MCIgeT0iMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzEwQjk4MSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VmlkZW88L3RleHQ+Cjwvc3ZnPgo=',
+    thumbnail:
+      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMTAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjMTBCOTgxIiBmaWxsLW9wYWNpdHk9IjAuMiIvPgo8dGV4dCB4PSI1MCIgeT0iMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzEwQjk4MSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VmlkZW88L3RleHQ+Cjwvc3ZnPgo=',
     createdAt: new Date(),
   },
   'narration-asset-1': {
@@ -121,7 +124,8 @@ const mockMediaAssets = {
       fileSize: 8388608,
       mimeType: 'video/mp4',
     },
-    thumbnail: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMTAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjRUY0NDQ0IiBmaWxsLW9wYWNpdHk9IjAuMiIvPgo8Y2lyY2xlIGN4PSI1MCIgY3k9IjMwIiByPSIxNSIgZmlsbD0iI0VGNDQzNCIgZmlsbC1vcGFjaXR5PSIwLjMiLz4KPHN2ZyB4PSI0MiIgeT0iMjIiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNFRjQ0NDQiIHN0cm9rZS13aWR0aD0iMiI+CjxwYXRoIGQ9Ik0xOSAyMXYtMmE0IDQgMCAwIDAtNC00SDlhNCA0IDAgMCAwLTQgNHYyIi8+CjxjaXJjbGUgY3g9IjEyIiBjeT0iNyIgcj0iNCIvPgo8L3N2Zz4KPC9zdmc+Cg==',
+    thumbnail:
+      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMTAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjRUY0NDQ0IiBmaWxsLW9wYWNpdHk9IjAuMiIvPgo8Y2lyY2xlIGN4PSI1MCIgY3k9IjMwIiByPSIxNSIgZmlsbD0iI0VGNDQzNCIgZmlsbC1vcGFjaXR5PSIwLjMiLz4KPHN2ZyB4PSI0MiIgeT0iMjIiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNFRjQ0NDQiIHN0cm9rZS13aWR0aD0iMiI+CjxwYXRoIGQ9Ik0xOSAyMXYtMmE0IDQgMCAwIDAtNC00SDlhNCA0IDAgMCAwLTQgNHYyIi8+CjxjaXJjbGUgY3g9IjEyIiBjeT0iNyIgcj0iNCIvPgo8L3N2Zz4KPC9zdmc+Cg==',
     createdAt: new Date(),
   },
 };
@@ -165,7 +169,7 @@ export function EducationalTrackDemo() {
         <h2 className="text-2xl font-bold text-text-primary mb-6">
           Educational Track Component Demo
         </h2>
-        
+
         <div className="bg-background rounded-lg p-4 mb-6">
           <h3 className="text-lg font-semibold text-text-primary mb-4">
             Track Overview
@@ -187,7 +191,8 @@ export function EducationalTrackDemo() {
                   </span>
                 </div>
                 <p className="text-xs text-text-secondary">
-                  Track {track.trackNumber + 1} • {track.allowedContentTypes.join(', ')}
+                  Track {track.trackNumber + 1} •{' '}
+                  {track.allowedContentTypes.join(', ')}
                 </p>
               </div>
             ))}

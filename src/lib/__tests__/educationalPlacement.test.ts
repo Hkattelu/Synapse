@@ -6,9 +6,12 @@ import {
   suggestTrackPlacement,
   validateTrackPlacement,
   suggestBatchTrackPlacement,
-  getTrackUsageStatistics
+  getTrackUsageStatistics,
 } from '../educationalPlacement';
-import { EDUCATIONAL_TRACKS, getEducationalTrackByName } from '../educationalTypes';
+import {
+  EDUCATIONAL_TRACKS,
+  getEducationalTrackByName,
+} from '../educationalTypes';
 
 // Test data factories
 function createMockMediaAsset(overrides: Partial<MediaAsset> = {}): MediaAsset {
@@ -21,14 +24,16 @@ function createMockMediaAsset(overrides: Partial<MediaAsset> = {}): MediaAsset {
     metadata: {
       fileSize: 1024,
       mimeType: 'text/plain',
-      ...overrides.metadata
+      ...overrides.metadata,
     },
     createdAt: new Date(),
-    ...overrides
+    ...overrides,
   };
 }
 
-function createMockTimelineItem(overrides: Partial<TimelineItem> = {}): TimelineItem {
+function createMockTimelineItem(
+  overrides: Partial<TimelineItem> = {}
+): TimelineItem {
   return {
     id: 'test-item-1',
     assetId: 'test-asset-1',
@@ -39,7 +44,7 @@ function createMockTimelineItem(overrides: Partial<TimelineItem> = {}): Timeline
     properties: {},
     animations: [],
     keyframes: [],
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -52,8 +57,8 @@ describe('suggestTrackPlacement', () => {
         metadata: {
           fileSize: 1024,
           mimeType: 'text/javascript',
-          language: 'javascript'
-        }
+          language: 'javascript',
+        },
       });
 
       const suggestion = suggestTrackPlacement(asset);
@@ -69,8 +74,8 @@ describe('suggestTrackPlacement', () => {
         name: 'narration.mp3',
         metadata: {
           fileSize: 2048,
-          mimeType: 'audio/mpeg'
-        }
+          mimeType: 'audio/mpeg',
+        },
       });
 
       const suggestion = suggestTrackPlacement(asset);
@@ -87,8 +92,8 @@ describe('suggestTrackPlacement', () => {
           fileSize: 10240,
           mimeType: 'video/mp4',
           width: 1920,
-          height: 1080
-        }
+          height: 1080,
+        },
       });
 
       const suggestion = suggestTrackPlacement(asset);
@@ -104,8 +109,8 @@ describe('suggestTrackPlacement', () => {
         metadata: {
           fileSize: 512,
           mimeType: 'image/svg+xml',
-          visualAssetType: 'arrow'
-        }
+          visualAssetType: 'arrow',
+        },
       });
 
       const suggestion = suggestTrackPlacement(asset);
@@ -122,8 +127,8 @@ describe('suggestTrackPlacement', () => {
         name: 'screen-recording-demo.mp4',
         metadata: {
           fileSize: 20480,
-          mimeType: 'video/mp4'
-        }
+          mimeType: 'video/mp4',
+        },
       });
 
       const suggestion = suggestTrackPlacement(asset);
@@ -139,8 +144,8 @@ describe('suggestTrackPlacement', () => {
         name: 'talking-head-intro.mp4',
         metadata: {
           fileSize: 15360,
-          mimeType: 'video/mp4'
-        }
+          mimeType: 'video/mp4',
+        },
       });
 
       const suggestion = suggestTrackPlacement(asset);
@@ -156,8 +161,8 @@ describe('suggestTrackPlacement', () => {
         name: 'webcam-presentation.mp4',
         metadata: {
           fileSize: 12288,
-          mimeType: 'video/mp4'
-        }
+          mimeType: 'video/mp4',
+        },
       });
 
       const suggestion = suggestTrackPlacement(asset);
@@ -173,13 +178,13 @@ describe('suggestTrackPlacement', () => {
         'styles.css',
         'main.py',
         'App.java',
-        'script.php'
+        'script.php',
       ];
 
-      codeFiles.forEach(filename => {
+      codeFiles.forEach((filename) => {
         const asset = createMockMediaAsset({
           type: 'code',
-          name: filename
+          name: filename,
         });
 
         const suggestion = suggestTrackPlacement(asset);
@@ -194,8 +199,8 @@ describe('suggestTrackPlacement', () => {
         name: 'voiceover-explanation.wav',
         metadata: {
           fileSize: 5120,
-          mimeType: 'audio/wav'
-        }
+          mimeType: 'audio/wav',
+        },
       });
 
       const suggestion = suggestTrackPlacement(asset);
@@ -211,8 +216,8 @@ describe('suggestTrackPlacement', () => {
         name: 'background-music.mp3',
         metadata: {
           fileSize: 3072,
-          mimeType: 'audio/mpeg'
-        }
+          mimeType: 'audio/mpeg',
+        },
       });
 
       const suggestion = suggestTrackPlacement(asset);
@@ -229,8 +234,8 @@ describe('suggestTrackPlacement', () => {
           fileSize: 2048,
           mimeType: 'image/png',
           width: 800,
-          height: 600
-        }
+          height: 600,
+        },
       });
 
       const suggestion = suggestTrackPlacement(asset);
@@ -244,11 +249,11 @@ describe('suggestTrackPlacement', () => {
     it('should boost confidence when content matches selected track', () => {
       const asset = createMockMediaAsset({
         type: 'code',
-        name: 'example.js'
+        name: 'example.js',
       });
 
       const context = {
-        selectedTrack: 0 // Code track
+        selectedTrack: 0, // Code track
       };
 
       const suggestion = suggestTrackPlacement(asset, context);
@@ -261,18 +266,18 @@ describe('suggestTrackPlacement', () => {
     it('should maintain consistency with recent track usage', () => {
       const asset = createMockMediaAsset({
         type: 'video',
-        name: 'demo.mp4'
+        name: 'demo.mp4',
       });
 
       const existingItems = [
         createMockTimelineItem({ track: 1, type: 'video' }), // Visual track
         createMockTimelineItem({ track: 1, type: 'video' }), // Visual track
-        createMockTimelineItem({ track: 1, type: 'visual-asset' }) // Visual track
+        createMockTimelineItem({ track: 1, type: 'visual-asset' }), // Visual track
       ];
 
       const context = {
         existingItems,
-        currentTime: 10
+        currentTime: 10,
       };
 
       const suggestion = suggestTrackPlacement(asset, context);
@@ -284,7 +289,7 @@ describe('suggestTrackPlacement', () => {
     it('should handle empty context gracefully', () => {
       const asset = createMockMediaAsset({
         type: 'code',
-        name: 'test.js'
+        name: 'test.js',
       });
 
       const suggestion = suggestTrackPlacement(asset, {});
@@ -298,37 +303,45 @@ describe('suggestTrackPlacement', () => {
     it('should provide meaningful alternatives for video content', () => {
       const asset = createMockMediaAsset({
         type: 'video',
-        name: 'tutorial.mp4'
+        name: 'tutorial.mp4',
       });
 
       const suggestion = suggestTrackPlacement(asset);
 
       // Video content can only go on Visual and You tracks, so only 1 alternative
       expect(suggestion.alternatives).toHaveLength(1);
-      expect(suggestion.alternatives.some(alt => alt.name === 'You')).toBe(true);
+      expect(suggestion.alternatives.some((alt) => alt.name === 'You')).toBe(
+        true
+      );
     });
 
     it('should provide alternatives for code content', () => {
       const asset = createMockMediaAsset({
         type: 'code',
-        name: 'example.py'
+        name: 'example.py',
       });
 
       const suggestion = suggestTrackPlacement(asset);
 
       expect(suggestion.alternatives.length).toBeGreaterThan(0);
-      expect(suggestion.alternatives.some(alt => alt.name === 'Visual')).toBe(true);
+      expect(suggestion.alternatives.some((alt) => alt.name === 'Visual')).toBe(
+        true
+      );
     });
 
     it('should not include the suggested track in alternatives', () => {
       const asset = createMockMediaAsset({
         type: 'audio',
-        name: 'narration.mp3'
+        name: 'narration.mp3',
       });
 
       const suggestion = suggestTrackPlacement(asset);
 
-      expect(suggestion.alternatives.every(alt => alt.id !== suggestion.suggestedTrack.id)).toBe(true);
+      expect(
+        suggestion.alternatives.every(
+          (alt) => alt.id !== suggestion.suggestedTrack.id
+        )
+      ).toBe(true);
     });
   });
 
@@ -337,7 +350,7 @@ describe('suggestTrackPlacement', () => {
       const asset = createMockMediaAsset({
         // @ts-expect-error - Testing unknown type
         type: 'unknown',
-        name: 'mystery-file.xyz'
+        name: 'mystery-file.xyz',
       });
 
       const suggestion = suggestTrackPlacement(asset);
@@ -353,7 +366,7 @@ describe('validateTrackPlacement', () => {
   it('should validate appropriate placements', () => {
     const asset = createMockMediaAsset({
       type: 'code',
-      name: 'example.js'
+      name: 'example.js',
     });
     const codeTrack = getEducationalTrackByName('Code')!;
 
@@ -366,7 +379,7 @@ describe('validateTrackPlacement', () => {
   it('should detect invalid placements', () => {
     const asset = createMockMediaAsset({
       type: 'audio',
-      name: 'narration.mp3'
+      name: 'narration.mp3',
     });
     const codeTrack = getEducationalTrackByName('Code')!;
 
@@ -374,13 +387,15 @@ describe('validateTrackPlacement', () => {
 
     expect(validation.isValid).toBe(false);
     expect(validation.conflicts.length).toBeGreaterThan(0);
-    expect(validation.conflicts[0]).toContain('audio content is not typically placed on Code track');
+    expect(validation.conflicts[0]).toContain(
+      'audio content is not typically placed on Code track'
+    );
   });
 
   it('should provide warnings for suboptimal placements', () => {
     const asset = createMockMediaAsset({
       type: 'video',
-      name: 'talking-head.mp4'
+      name: 'talking-head.mp4',
     });
     const visualTrack = getEducationalTrackByName('Visual')!;
 
@@ -394,7 +409,7 @@ describe('validateTrackPlacement', () => {
   it('should provide suggestions for invalid placements', () => {
     const asset = createMockMediaAsset({
       type: 'audio',
-      name: 'voice.wav'
+      name: 'voice.wav',
     });
     const visualTrack = getEducationalTrackByName('Visual')!;
 
@@ -408,25 +423,29 @@ describe('validateTrackPlacement', () => {
   it('should warn about video on Code track', () => {
     const asset = createMockMediaAsset({
       type: 'video',
-      name: 'demo.mp4'
+      name: 'demo.mp4',
     });
     const codeTrack = getEducationalTrackByName('Code')!;
 
     const validation = validateTrackPlacement(asset, codeTrack);
 
-    expect(validation.warnings.some(w => w.includes('syntax highlighting'))).toBe(true);
+    expect(
+      validation.warnings.some((w) => w.includes('syntax highlighting'))
+    ).toBe(true);
   });
 
   it('should warn about audio not on Narration track', () => {
     const asset = createMockMediaAsset({
       type: 'audio',
-      name: 'sound.mp3'
+      name: 'sound.mp3',
     });
     const visualTrack = getEducationalTrackByName('Visual')!;
 
     const validation = validateTrackPlacement(asset, visualTrack);
 
-    expect(validation.warnings.some(w => w.includes('Narration track'))).toBe(true);
+    expect(validation.warnings.some((w) => w.includes('Narration track'))).toBe(
+      true
+    );
   });
 });
 
@@ -435,7 +454,7 @@ describe('suggestBatchTrackPlacement', () => {
     const assets = [
       createMockMediaAsset({ type: 'code', name: 'main.js' }),
       createMockMediaAsset({ type: 'audio', name: 'narration.mp3' }),
-      createMockMediaAsset({ type: 'video', name: 'screen-recording.mp4' })
+      createMockMediaAsset({ type: 'video', name: 'screen-recording.mp4' }),
     ];
 
     const suggestions = suggestBatchTrackPlacement(assets);
@@ -449,16 +468,16 @@ describe('suggestBatchTrackPlacement', () => {
   it('should apply context to all assets', () => {
     const assets = [
       createMockMediaAsset({ type: 'video', name: 'demo1.mp4' }),
-      createMockMediaAsset({ type: 'video', name: 'demo2.mp4' })
+      createMockMediaAsset({ type: 'video', name: 'demo2.mp4' }),
     ];
 
     const context = {
-      selectedTrack: 1 // Visual track
+      selectedTrack: 1, // Visual track
     };
 
     const suggestions = suggestBatchTrackPlacement(assets, context);
 
-    suggestions.forEach(suggestion => {
+    suggestions.forEach((suggestion) => {
       expect(suggestion.suggestedTrack.name).toBe('Visual');
     });
   });
@@ -476,7 +495,7 @@ describe('getTrackUsageStatistics', () => {
       createMockTimelineItem({ track: 0, type: 'code' }), // Code track
       createMockTimelineItem({ track: 1, type: 'video' }), // Visual track
       createMockTimelineItem({ track: 2, type: 'audio' }), // Narration track
-      createMockTimelineItem({ track: 3, type: 'video' })  // You track
+      createMockTimelineItem({ track: 3, type: 'video' }), // You track
     ];
 
     const stats = getTrackUsageStatistics(items);
@@ -493,7 +512,7 @@ describe('getTrackUsageStatistics', () => {
       createMockTimelineItem({ track: 0, type: 'code' }),
       createMockTimelineItem({ track: 1, type: 'video' }),
       createMockTimelineItem({ track: 1, type: 'video' }),
-      createMockTimelineItem({ track: 2, type: 'audio' })
+      createMockTimelineItem({ track: 2, type: 'audio' }),
     ];
 
     const stats = getTrackUsageStatistics(items);
@@ -517,7 +536,7 @@ describe('getTrackUsageStatistics', () => {
     const items = [
       createMockTimelineItem({ track: 0, type: 'code' }),
       createMockTimelineItem({ track: 99, type: 'video' }), // Invalid track
-      createMockTimelineItem({ track: 1, type: 'video' })
+      createMockTimelineItem({ track: 1, type: 'video' }),
     ];
 
     const stats = getTrackUsageStatistics(items);
@@ -536,9 +555,9 @@ describe('edge cases and error handling', () => {
       name: 'test.mp4',
       metadata: {
         fileSize: 1024,
-        mimeType: 'video/mp4'
+        mimeType: 'video/mp4',
         // Missing other metadata
-      }
+      },
     });
 
     const suggestion = suggestTrackPlacement(asset);
@@ -553,8 +572,8 @@ describe('edge cases and error handling', () => {
       name: '',
       metadata: {
         fileSize: 1024,
-        mimeType: 'text/plain'
-      }
+        mimeType: 'text/plain',
+      },
     });
 
     const suggestion = suggestTrackPlacement(asset);
@@ -566,7 +585,7 @@ describe('edge cases and error handling', () => {
     const longName = 'a'.repeat(1000) + '.js';
     const asset = createMockMediaAsset({
       type: 'code',
-      name: longName
+      name: longName,
     });
 
     const suggestion = suggestTrackPlacement(asset);
@@ -577,7 +596,7 @@ describe('edge cases and error handling', () => {
   it('should handle special characters in asset names', () => {
     const asset = createMockMediaAsset({
       type: 'code',
-      name: 'test-file_with@special#chars$.js'
+      name: 'test-file_with@special#chars$.js',
     });
 
     const suggestion = suggestTrackPlacement(asset);

@@ -51,15 +51,21 @@ vi.mock('../../state/hooks', () => ({
 
 // Mock Lucide React icons
 vi.mock('lucide-react/dist/esm/icons/settings.js', () => ({
-  default: ({ className }: { className?: string }) => <div className={className} data-testid="settings-icon" />,
+  default: ({ className }: { className?: string }) => (
+    <div className={className} data-testid="settings-icon" />
+  ),
 }));
 
 vi.mock('lucide-react/dist/esm/icons/eye.js', () => ({
-  default: ({ className }: { className?: string }) => <div className={className} data-testid="eye-icon" />,
+  default: ({ className }: { className?: string }) => (
+    <div className={className} data-testid="eye-icon" />
+  ),
 }));
 
 vi.mock('lucide-react/dist/esm/icons/eye-off.js', () => ({
-  default: ({ className }: { className?: string }) => <div className={className} data-testid="eye-off-icon" />,
+  default: ({ className }: { className?: string }) => (
+    <div className={className} data-testid="eye-off-icon" />
+  ),
 }));
 
 describe('EducationalTimeline', () => {
@@ -102,22 +108,20 @@ describe('EducationalTimeline', () => {
     };
 
     return render(
-      <AppProvider initialState={mockState}>
-        {component}
-      </AppProvider>
+      <AppProvider initialState={mockState}>{component}</AppProvider>
     );
   };
 
   it('renders educational timeline with header', () => {
     renderWithProvider(<EducationalTimeline />);
-    
+
     expect(screen.getByText('Educational Timeline')).toBeInTheDocument();
     expect(screen.getByText('Simplified')).toBeInTheDocument();
   });
 
   it('displays mode toggle button', () => {
     renderWithProvider(<EducationalTimeline />);
-    
+
     const modeToggle = screen.getByTitle('Switch to Advanced Mode');
     expect(modeToggle).toBeInTheDocument();
   });
@@ -125,16 +129,16 @@ describe('EducationalTimeline', () => {
   it('calls onModeChange when mode toggle is clicked', () => {
     const onModeChange = vi.fn();
     renderWithProvider(<EducationalTimeline onModeChange={onModeChange} />);
-    
+
     const modeToggle = screen.getByTitle('Switch to Advanced Mode');
     fireEvent.click(modeToggle);
-    
+
     expect(onModeChange).toHaveBeenCalledWith('advanced');
   });
 
   it('displays zoom controls', () => {
     renderWithProvider(<EducationalTimeline />);
-    
+
     expect(screen.getByTitle('Zoom Out')).toBeInTheDocument();
     expect(screen.getByTitle('Zoom In')).toBeInTheDocument();
     expect(screen.getByText('100%')).toBeInTheDocument();
@@ -142,32 +146,34 @@ describe('EducationalTimeline', () => {
 
   it('displays snap to grid toggle', () => {
     renderWithProvider(<EducationalTimeline />);
-    
+
     expect(screen.getByText('Snap')).toBeInTheDocument();
   });
 
   it('displays timeline duration', () => {
     renderWithProvider(<EducationalTimeline />);
-    
+
     expect(screen.getByText('Duration: 30s')).toBeInTheDocument();
   });
 
   it('renders with custom className', () => {
-    const { container } = renderWithProvider(<EducationalTimeline className="custom-class" />);
-    
+    const { container } = renderWithProvider(
+      <EducationalTimeline className="custom-class" />
+    );
+
     expect(container.firstChild).toHaveClass('custom-class');
   });
 
   it('starts in simplified mode by default', () => {
     renderWithProvider(<EducationalTimeline />);
-    
+
     expect(screen.getByText('Simplified')).toBeInTheDocument();
     expect(screen.getByTestId('eye-icon')).toBeInTheDocument();
   });
 
   it('can be initialized in advanced mode', () => {
     renderWithProvider(<EducationalTimeline mode="advanced" />);
-    
+
     expect(screen.getByText('Advanced')).toBeInTheDocument();
     expect(screen.getByTestId('settings-icon')).toBeInTheDocument();
   });

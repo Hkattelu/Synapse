@@ -47,7 +47,7 @@ describe('Performance Optimizations', () => {
   describe('useIntersectionObserver', () => {
     it('should create intersection observer with default options', () => {
       const { result } = renderHook(() => useIntersectionObserver());
-      
+
       expect(result.current[0]).toBeDefined(); // ref
       expect(result.current[1]).toBe(false); // isIntersecting
       expect(mockIntersectionObserver).toHaveBeenCalledWith(
@@ -62,7 +62,7 @@ describe('Performance Optimizations', () => {
     it('should accept custom options', () => {
       const customOptions = { threshold: 0.5, rootMargin: '100px' };
       renderHook(() => useIntersectionObserver(customOptions));
-      
+
       expect(mockIntersectionObserver).toHaveBeenCalledWith(
         expect.any(Function),
         expect.objectContaining(customOptions)
@@ -111,9 +111,12 @@ describe('Performance Optimizations', () => {
         useVirtualization(mockItems, 1000, 100, overscan)
       );
 
-      const visibleCount = result.current.visibleRange.endIndex - result.current.visibleRange.startIndex + 1;
+      const visibleCount =
+        result.current.visibleRange.endIndex -
+        result.current.visibleRange.startIndex +
+        1;
       const baseVisible = Math.ceil(1000 / 100);
-      
+
       // Should have at least the base visible items
       expect(visibleCount).toBeGreaterThanOrEqual(baseVisible);
     });
@@ -123,7 +126,7 @@ describe('Performance Optimizations', () => {
     it('should create resize observer', () => {
       const callback = vi.fn();
       const { result } = renderHook(() => useResizeObserver(callback, 100));
-      
+
       expect(result.current).toBeDefined(); // ref
       expect(mockResizeObserver).toHaveBeenCalledWith(expect.any(Function));
     });
@@ -131,23 +134,23 @@ describe('Performance Optimizations', () => {
     it('should debounce callback calls', async () => {
       const callback = vi.fn();
       renderHook(() => useResizeObserver(callback, 100));
-      
+
       // Check if ResizeObserver was called
       if (mockResizeObserver.mock.calls.length > 0) {
         // Simulate multiple resize events
         const observerCallback = mockResizeObserver.mock.calls[0][0];
         const mockEntry = { contentRect: { width: 100, height: 100 } };
-        
+
         observerCallback([mockEntry]);
         observerCallback([mockEntry]);
         observerCallback([mockEntry]);
-        
+
         // Should not call immediately due to debouncing
         expect(callback).not.toHaveBeenCalled();
-        
+
         // Wait for debounce delay
-        await new Promise(resolve => setTimeout(resolve, 150));
-        
+        await new Promise((resolve) => setTimeout(resolve, 150));
+
         expect(callback).toHaveBeenCalledTimes(1);
         expect(callback).toHaveBeenCalledWith(mockEntry);
       } else {
@@ -184,46 +187,54 @@ describe('Performance Optimizations', () => {
     ];
 
     const mockAssets = new Map<string, MediaAsset>([
-      ['asset-1', {
-        id: 'asset-1',
-        name: 'Test Asset',
-        type: 'code',
-        url: 'test-url',
-        duration: 5,
-        metadata: {},
-      }],
+      [
+        'asset-1',
+        {
+          id: 'asset-1',
+          name: 'Test Asset',
+          type: 'code',
+          url: 'test-url',
+          duration: 5,
+          metadata: {},
+        },
+      ],
     ]);
 
     it('should memoize track content', () => {
       const { result, rerender } = renderHook(
-        ({ items, assets }) => useMemoizedTrackContent(mockTrack, items, assets),
+        ({ items, assets }) =>
+          useMemoizedTrackContent(mockTrack, items, assets),
         { initialProps: { items: mockItems, assets: mockAssets } }
       );
 
       const firstResult = result.current;
-      
+
       // Rerender with same props
       rerender({ items: mockItems, assets: mockAssets });
-      
+
       expect(result.current).toBe(firstResult); // Should be same reference
     });
 
     it('should update when dependencies change', () => {
       const { result, rerender } = renderHook(
-        ({ items, assets }) => useMemoizedTrackContent(mockTrack, items, assets),
+        ({ items, assets }) =>
+          useMemoizedTrackContent(mockTrack, items, assets),
         { initialProps: { items: mockItems, assets: mockAssets } }
       );
 
       const firstResult = result.current;
-      
-      const newItems = [...mockItems, {
-        ...mockItems[0],
-        id: 'item-2',
-        assetId: 'asset-2',
-      }];
-      
+
+      const newItems = [
+        ...mockItems,
+        {
+          ...mockItems[0],
+          id: 'item-2',
+          assetId: 'asset-2',
+        },
+      ];
+
       rerender({ items: newItems, assets: mockAssets });
-      
+
       expect(result.current).not.toBe(firstResult); // Should be different reference
     });
   });
@@ -232,7 +243,7 @@ describe('Performance Optimizations', () => {
     it('should throttle scroll events', async () => {
       const callback = vi.fn();
       const { result } = renderHook(() => useThrottledScroll(callback, 100));
-      
+
       const mockEvent = {
         currentTarget: {
           scrollLeft: 100,
@@ -259,7 +270,7 @@ describe('Performance Optimizations', () => {
         onload: (() => void) | null = null;
         onerror: (() => void) | null = null;
         src = '';
-        
+
         constructor() {
           setTimeout(() => {
             if (this.onload) this.onload();
@@ -269,7 +280,7 @@ describe('Performance Optimizations', () => {
     });
 
     it('should load image lazily', async () => {
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useLazyImage('test-image.jpg', 'placeholder.jpg')
       );
 
@@ -279,7 +290,7 @@ describe('Performance Optimizations', () => {
 
       // Wait for image to load
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 20));
+        await new Promise((resolve) => setTimeout(resolve, 20));
       });
 
       expect(result.current.imageSrc).toBe('test-image.jpg');
@@ -328,12 +339,17 @@ describe('Performance Optimizations', () => {
 
     it('should cache calculations', () => {
       const cacheKey = 'test-key';
-      
+
       TimelineCalculations.getTimeToPixels(10, 100, 1.5, cacheKey);
       expect(TimelineCalculations.getCacheSize()).toBe(1);
-      
+
       // Second call should use cache
-      const result = TimelineCalculations.getTimeToPixels(10, 100, 1.5, cacheKey);
+      const result = TimelineCalculations.getTimeToPixels(
+        10,
+        100,
+        1.5,
+        cacheKey
+      );
       expect(result).toBe(1500);
       expect(TimelineCalculations.getCacheSize()).toBe(1);
     });
@@ -341,7 +357,7 @@ describe('Performance Optimizations', () => {
     it('should clear cache', () => {
       TimelineCalculations.getTimeToPixels(10, 100, 1.5, 'test');
       expect(TimelineCalculations.getCacheSize()).toBeGreaterThan(0);
-      
+
       TimelineCalculations.clearCache();
       expect(TimelineCalculations.getCacheSize()).toBe(0);
     });
@@ -351,25 +367,25 @@ describe('Performance Optimizations', () => {
     it('should batch updates', async () => {
       const batchUpdater = new BatchUpdater();
       const updates = [vi.fn(), vi.fn(), vi.fn()];
-      
-      updates.forEach(update => batchUpdater.addUpdate(update));
-      
+
+      updates.forEach((update) => batchUpdater.addUpdate(update));
+
       // Updates should not be called immediately
-      updates.forEach(update => expect(update).not.toHaveBeenCalled());
-      
+      updates.forEach((update) => expect(update).not.toHaveBeenCalled());
+
       // Wait for batch to flush
-      await new Promise(resolve => setTimeout(resolve, 10));
-      
-      updates.forEach(update => expect(update).toHaveBeenCalledTimes(1));
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      updates.forEach((update) => expect(update).toHaveBeenCalledTimes(1));
     });
 
     it('should clear pending updates', () => {
       const batchUpdater = new BatchUpdater();
       const update = vi.fn();
-      
+
       batchUpdater.addUpdate(update);
       batchUpdater.clear();
-      
+
       // Wait to ensure update doesn't get called
       setTimeout(() => {
         expect(update).not.toHaveBeenCalled();

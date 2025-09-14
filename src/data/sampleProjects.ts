@@ -270,8 +270,172 @@ export const Root = () => {
   ],
 };
 
+// Minimal, simple starter project showcasing each track
+const simpleProject: Project = {
+  id: 'simplified-starter',
+  name: '✨ Simplified Starter',
+  createdAt: new Date('2025-01-01T00:00:00Z'),
+  updatedAt: new Date('2025-01-01T00:00:00Z'),
+  version: '1.0.0',
+  settings: {
+    width: 1920,
+    height: 1080,
+    fps: 30,
+    duration: 12,
+    backgroundColor: '#0f172a',
+    audioSampleRate: 48000,
+  },
+  // One simple item per educational track
+  timeline: [
+    // Track 0: Code (showcases Inspector theme/font/background and typing mode)
+    {
+      id: 't-code',
+      assetId: 'asset-code-snippet',
+      startTime: 0,
+      duration: 6,
+      track: 0,
+      type: 'code',
+      properties: {
+        language: 'typescript',
+        theme: 'vscode-dark-plus',
+        fontFamily: 'JetBrains Mono, Menlo, Monaco, "Courier New", monospace',
+        fontSize: 16,
+        showLineNumbers: true,
+        animationMode: 'typing',
+        typingSpeedCps: 24,
+        // Background: subtle linear gradient
+        backgroundType: 'gradient',
+        backgroundGradient: {
+          type: 'linear',
+          angle: 135,
+          colors: [
+            { color: '#1f2937', position: 0 },
+            { color: '#0b1324', position: 1 },
+          ],
+        },
+        codeText:
+          "import React from 'react';\n\nexport function Hello() {\n  return <h1>Hello Synapse 👋</h1>;\n}",
+      },
+      animations: [],
+      keyframes: [],
+    },
+
+    // Track 1: Visual (simple arrow overlay)
+    {
+      id: 't-visual',
+      assetId: 'asset-visual',
+      startTime: 0,
+      duration: 12,
+      track: 1,
+      type: 'visual-asset',
+      properties: {
+        visualAssetType: 'arrow',
+        arrowDirection: 'right',
+        arrowStyle: 'solid',
+        strokeColor: '#22d3ee',
+        strokeWidth: 4,
+        x: 200,
+        y: 400,
+        scale: 1,
+        animateIn: 'fade',
+      },
+      animations: [],
+      keyframes: [],
+    },
+
+    // Track 2: Narration (audio placeholder)
+    {
+      id: 't-audio',
+      assetId: 'asset-audio',
+      startTime: 0,
+      duration: 12,
+      track: 2,
+      type: 'audio',
+      properties: {
+        volume: 0.8,
+      },
+      animations: [],
+      keyframes: [],
+    },
+
+    // Track 3: You (talking head placeholder)
+    {
+      id: 't-you',
+      assetId: 'asset-you',
+      startTime: 0,
+      duration: 12,
+      track: 3,
+      type: 'video',
+      properties: {
+        talkingHeadEnabled: true,
+        talkingHeadCorner: 'bottom-right',
+        talkingHeadSize: 'sm',
+        volume: 0,
+        opacity: 1,
+      },
+      animations: [],
+      keyframes: [],
+    },
+  ],
+  mediaAssets: [
+    {
+      id: 'asset-code-snippet',
+      name: 'Hello Synapse Code',
+      type: 'code',
+      url: '',
+      metadata: {
+        fileSize: 320,
+        mimeType: 'text/plain',
+        codeContent:
+          "import React from 'react';\n\nexport function Hello() {\n  return <h1>Hello Synapse 👋</h1>;\n}",
+        language: 'typescript',
+      },
+      createdAt: new Date('2025-01-01T00:00:00Z'),
+    },
+    {
+      id: 'asset-visual',
+      name: 'Arrow Overlay',
+      type: 'visual-asset',
+      url: '',
+      metadata: {
+        fileSize: 0,
+        mimeType: 'application/json',
+      },
+      createdAt: new Date('2025-01-01T00:00:00Z'),
+    },
+    {
+      id: 'asset-audio',
+      name: 'Narration Placeholder',
+      type: 'audio',
+      url: '',
+      metadata: {
+        fileSize: 204800,
+        mimeType: 'audio/mpeg',
+      },
+      createdAt: new Date('2025-01-01T00:00:00Z'),
+    },
+    {
+      id: 'asset-you',
+      name: 'Talking Head Placeholder',
+      type: 'video',
+      url: '',
+      metadata: {
+        width: 1280,
+        height: 720,
+        fileSize: 1048576,
+        mimeType: 'video/mp4',
+      },
+      createdAt: new Date('2025-01-01T00:00:00Z'),
+    },
+  ],
+  // Keep extras minimal for clarity
+  trackGroups: undefined,
+  markers: undefined,
+  regions: undefined,
+};
+
 // Export sample projects array
-export const sampleProjects: Project[] = [sampleProject];
+export const sampleProjects: Project[] = [simpleProject];
 
 // Export sample stored projects for development
 export const sampleStoredProjects: StoredProject[] = sampleProjects.map(

@@ -9,98 +9,114 @@ interface BackgroundPickerProps {
   opacity?: number;
   onOpacityChange?: (opacity: number) => void;
   blendMode?: 'normal' | 'multiply' | 'overlay' | 'soft-light';
-  onBlendModeChange?: (blendMode: 'normal' | 'multiply' | 'overlay' | 'soft-light') => void;
+  onBlendModeChange?: (
+    blendMode: 'normal' | 'multiply' | 'overlay' | 'soft-light'
+  ) => void;
   className?: string;
 }
 
-export function BackgroundPicker({ 
-  value, 
-  onChange, 
+export function BackgroundPicker({
+  value,
+  onChange,
   opacity = 1,
   onOpacityChange,
   blendMode = 'normal',
   onBlendModeChange,
-  className = '' 
+  className = '',
 }: BackgroundPickerProps) {
-  const [activeTab, setActiveTab] = useState<'none' | 'color' | 'gradient' | 'wallpaper'>(
-    value?.type || 'none'
-  );
+  const [activeTab, setActiveTab] = useState<
+    'none' | 'color' | 'gradient' | 'wallpaper'
+  >(value?.type || 'none');
 
   // Handle tab change
-  const handleTabChange = useCallback((tab: typeof activeTab) => {
-    setActiveTab(tab);
-    
-    if (tab === 'none') {
-      onChange(null);
-    } else if (tab === 'color') {
-      onChange({
-        type: 'color',
-        color: '#1e1e1e'
-      });
-    } else if (tab === 'gradient') {
-      onChange({
-        type: 'gradient',
-        gradient: {
-          type: 'linear',
-          angle: 45,
-          colors: [
-            { color: '#667eea', position: 0 },
-            { color: '#764ba2', position: 1 }
-          ]
-        }
-      });
-    } else if (tab === 'wallpaper') {
-      onChange({
-        type: 'wallpaper',
-        wallpaper: {
-          assetId: '',
-          opacity: 1,
-          blendMode: 'normal'
-        }
-      });
-    }
-  }, [onChange]);
+  const handleTabChange = useCallback(
+    (tab: typeof activeTab) => {
+      setActiveTab(tab);
+
+      if (tab === 'none') {
+        onChange(null);
+      } else if (tab === 'color') {
+        onChange({
+          type: 'color',
+          color: '#1e1e1e',
+        });
+      } else if (tab === 'gradient') {
+        onChange({
+          type: 'gradient',
+          gradient: {
+            type: 'linear',
+            angle: 45,
+            colors: [
+              { color: '#667eea', position: 0 },
+              { color: '#764ba2', position: 1 },
+            ],
+          },
+        });
+      } else if (tab === 'wallpaper') {
+        onChange({
+          type: 'wallpaper',
+          wallpaper: {
+            assetId: '',
+            opacity: 1,
+            blendMode: 'normal',
+          },
+        });
+      }
+    },
+    [onChange]
+  );
 
   // Handle color change
-  const handleColorChange = useCallback((color: string) => {
-    onChange({
-      type: 'color',
-      color
-    });
-  }, [onChange]);
+  const handleColorChange = useCallback(
+    (color: string) => {
+      onChange({
+        type: 'color',
+        color,
+      });
+    },
+    [onChange]
+  );
 
   // Handle gradient change
-  const handleGradientChange = useCallback((gradient: GradientConfig | null) => {
-    if (gradient) {
-      onChange({
-        type: 'gradient',
-        gradient
-      });
-    } else {
-      onChange(null);
-    }
-  }, [onChange]);
+  const handleGradientChange = useCallback(
+    (gradient: GradientConfig | null) => {
+      if (gradient) {
+        onChange({
+          type: 'gradient',
+          gradient,
+        });
+      } else {
+        onChange(null);
+      }
+    },
+    [onChange]
+  );
 
   // Handle wallpaper change
-  const handleWallpaperChange = useCallback((wallpaperId: string | null) => {
-    if (wallpaperId) {
-      onChange({
-        type: 'wallpaper',
-        wallpaper: {
-          assetId: wallpaperId,
-          opacity: opacity,
-          blendMode: blendMode
-        }
-      });
-    } else {
-      onChange(null);
-    }
-  }, [onChange, opacity, blendMode]);
+  const handleWallpaperChange = useCallback(
+    (wallpaperId: string | null) => {
+      if (wallpaperId) {
+        onChange({
+          type: 'wallpaper',
+          wallpaper: {
+            assetId: wallpaperId,
+            opacity: opacity,
+            blendMode: blendMode,
+          },
+        });
+      } else {
+        onChange(null);
+      }
+    },
+    [onChange, opacity, blendMode]
+  );
 
   // Get current values for each type
   const currentColor = value?.type === 'color' ? value.color : '#1e1e1e';
-  const currentGradient = value?.type === 'gradient' ? value.gradient : undefined;
-  const currentWallpaper = value?.type === 'wallpaper' ? value.wallpaper?.assetId : undefined;
+  const currentGradient =
+    value?.type === 'gradient' ? value.gradient : undefined;
+  const currentWallpaper =
+    value?.type === 'wallpaper' ? value.wallpaper?.assetId : undefined;
 
   return (
     <div className={`background-picker ${className}`}>
@@ -114,8 +130,8 @@ export function BackgroundPicker({
           { id: 'none', label: 'None', icon: '○' },
           { id: 'color', label: 'Color', icon: '●' },
           { id: 'gradient', label: 'Gradient', icon: '◐' },
-          { id: 'wallpaper', label: 'Image', icon: '🖼' }
-        ].map(tab => (
+          { id: 'wallpaper', label: 'Image', icon: '🖼' },
+        ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => handleTabChange(tab.id as typeof activeTab)}
@@ -135,8 +151,18 @@ export function BackgroundPicker({
       <div className="min-h-[100px]">
         {activeTab === 'none' && (
           <div className="text-center py-8 text-text-secondary">
-            <svg className="w-8 h-8 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-8 h-8 mx-auto mb-2 opacity-50"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
             <p className="text-sm">No background selected</p>
           </div>
@@ -164,9 +190,9 @@ export function BackgroundPicker({
                 />
               </div>
             </div>
-            
+
             {/* Color preview */}
-            <div 
+            <div
               className="w-full h-16 rounded border border-border-subtle"
               style={{ backgroundColor: currentColor }}
             />
@@ -189,7 +215,9 @@ export function BackgroundPicker({
       </div>
 
       {/* Advanced Options */}
-      {(activeTab === 'wallpaper' || activeTab === 'gradient' || activeTab === 'color') && (
+      {(activeTab === 'wallpaper' ||
+        activeTab === 'gradient' ||
+        activeTab === 'color') && (
         <div className="mt-4 pt-3 border-t border-border-subtle space-y-3">
           {/* Opacity Control */}
           {onOpacityChange && (
@@ -217,7 +245,9 @@ export function BackgroundPicker({
               </label>
               <select
                 value={blendMode}
-                onChange={(e) => onBlendModeChange(e.target.value as typeof blendMode)}
+                onChange={(e) =>
+                  onBlendModeChange(e.target.value as typeof blendMode)
+                }
                 className="w-full bg-background-tertiary border border-border-subtle rounded px-2 py-1 text-text-primary text-sm focus:outline-none focus:border-primary-500"
               >
                 <option value="normal">Normal</option>

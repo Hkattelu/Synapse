@@ -12,7 +12,7 @@ export const RedoButton: React.FC<Props> = ({
 }) => {
   let temporal;
   let canRedo = false;
-  
+
   try {
     temporal = useProjectTemporal();
     canRedo = (temporal?.futureStates?.length ?? 0) > 0;

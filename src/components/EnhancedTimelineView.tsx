@@ -1,9 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useTimeline, usePlayback } from '../state/hooks';
-import type {
-  TimelineMarker,
-  TimelineRegion,
-} from '../lib/types';
+import type { TimelineMarker, TimelineRegion } from '../lib/types';
 import { AdvancedTimeline } from './AdvancedTimeline';
 import { KeyframePropertiesPanel } from './KeyframePropertiesPanel';
 import { TimelineMarkerManager } from './TimelineMarkerManager';
@@ -17,8 +14,7 @@ type PanelType = 'keyframes' | 'tracks' | 'markers' | null;
 export function EnhancedTimelineView({
   className = '',
 }: EnhancedTimelineViewProps) {
-  const { timeline, selectedItems, setCurrentTime } =
-    useTimeline();
+  const { timeline, selectedItems, setCurrentTime } = useTimeline();
   const { playback, togglePlayback, seek } = usePlayback();
 
   const [activePanel, setActivePanel] = useState<PanelType>('keyframes');
@@ -78,10 +74,11 @@ export function EnhancedTimelineView({
             <div className="flex items-center space-x-1 bg-synapse-surface rounded p-0.5">
               <button
                 onClick={() => togglePanel('keyframes')}
-                className={`px-3 py-1.5 text-xs rounded transition-colors ${activePanel === 'keyframes'
-                  ? 'bg-synapse-primary text-synapse-text-inverse'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover'
-                  }`}
+                className={`px-3 py-1.5 text-xs rounded transition-colors ${
+                  activePanel === 'keyframes'
+                    ? 'bg-synapse-primary text-synapse-text-inverse'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover'
+                }`}
                 title="Keyframe Properties"
               >
                 <svg
@@ -102,10 +99,11 @@ export function EnhancedTimelineView({
 
               <button
                 onClick={() => togglePanel('markers')}
-                className={`px-3 py-1.5 text-xs rounded transition-colors ${activePanel === 'markers'
-                  ? 'bg-synapse-primary text-synapse-text-inverse'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover'
-                  }`}
+                className={`px-3 py-1.5 text-xs rounded transition-colors ${
+                  activePanel === 'markers'
+                    ? 'bg-synapse-primary text-synapse-text-inverse'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover'
+                }`}
                 title="Timeline Markers"
               >
                 <svg
@@ -144,9 +142,7 @@ export function EnhancedTimelineView({
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path
-                      d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"
-                    />
+                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                   </svg>
                 ) : (
                   <svg
@@ -154,9 +150,7 @@ export function EnhancedTimelineView({
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path
-                      d="M8 5v14l11-7z"
-                    />
+                    <path d="M8 5v14l11-7z" />
                   </svg>
                 )}
               </button>
@@ -174,9 +168,7 @@ export function EnhancedTimelineView({
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    d="M6 6h2v12H6V6zm3.5 6l8.5 6V6l-8.5 6z"
-                  />
+                  <path d="M6 6h2v12H6V6zm3.5 6l8.5 6V6l-8.5 6z" />
                 </svg>
               </button>
 

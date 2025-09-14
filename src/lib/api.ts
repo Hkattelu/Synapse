@@ -131,21 +131,42 @@ export const api = {
       body: JSON.stringify(inputProps),
     });
   },
-  async getRenderStatus(id: string): Promise<{ status: string; output?: string; error?: string }> {
+  async getRenderStatus(
+    id: string
+  ): Promise<{ status: string; output?: string; error?: string }> {
     return request(`/api/render/${id}/status`);
   },
   renderDownloadUrl(id: string): string {
     return `/api/render/${id}/download`;
   },
+  async listRenders(projectId: string): Promise<{ items: Array<{ id: string; filename: string; publicUrl: string; size: number; createdAt: string }> }> {
+    const url = `/api/render?projectId=${encodeURIComponent(projectId)}`;
+    return request(url);
+  },
+  async deleteRender(id: string): Promise<{ ok: boolean }> {
+    return request(`/api/render/${id}` , { method: 'DELETE' });
+  },
   // AI
-  async aiGenerateFromRepo(input: { repoUrl: string; branch?: string }): Promise<any> {
+  async aiGenerateFromRepo(input: {
+    repoUrl: string;
+    branch?: string;
+  }): Promise<any> {
     return request('/api/ai/generate-from-repo', {
       method: 'POST',
       body: JSON.stringify(input),
     });
   },
   // Contact
-  async submitContact(input: { name: string; email: string; message: string }): Promise<{ queued?: boolean; messageId?: string; simulated?: boolean; success?: boolean }> {
+  async submitContact(input: {
+    name: string;
+    email: string;
+    message: string;
+  }): Promise<{
+    queued?: boolean;
+    messageId?: string;
+    simulated?: boolean;
+    success?: boolean;
+  }> {
     return request('/api/contact', {
       method: 'POST',
       body: JSON.stringify({

@@ -1,9 +1,9 @@
 import React, { memo, useMemo, useCallback, useRef, useEffect } from 'react';
-import { 
-  useVirtualization, 
-  useMemoizedTrackContent, 
+import {
+  useVirtualization,
+  useMemoizedTrackContent,
   TimelineCalculations,
-  BatchUpdater 
+  BatchUpdater,
 } from '../lib/performanceOptimizations';
 import { LazyTrackContent } from './LazyTrackContent';
 import type { TimelineItem, MediaAsset } from '../lib/types';
@@ -44,14 +44,14 @@ export const VirtualizedTimelineItems = memo(function VirtualizedTimelineItems({
   const batchUpdater = useRef(new BatchUpdater());
 
   // Filter items for this track
-  const trackItems = useMemo(() => 
-    items.filter(item => item.track === track.trackNumber),
+  const trackItems = useMemo(
+    () => items.filter((item) => item.track === track.trackNumber),
     [items, track.trackNumber]
   );
 
   // Calculate item positions and dimensions
   const itemPositions = useMemo(() => {
-    return trackItems.map(item => {
+    return trackItems.map((item) => {
       const left = TimelineCalculations.getTimeToPixels(
         item.startTime,
         pixelsPerSecond,
@@ -84,9 +84,9 @@ export const VirtualizedTimelineItems = memo(function VirtualizedTimelineItems({
 
     return itemPositions.filter(({ left, right }) => {
       // Item is visible if it overlaps with viewport (with overscan)
-      const overscanLeft = viewportLeft - (ITEM_OVERSCAN * MIN_ITEM_WIDTH);
-      const overscanRight = viewportRight + (ITEM_OVERSCAN * MIN_ITEM_WIDTH);
-      
+      const overscanLeft = viewportLeft - ITEM_OVERSCAN * MIN_ITEM_WIDTH;
+      const overscanRight = viewportRight + ITEM_OVERSCAN * MIN_ITEM_WIDTH;
+
       return right >= overscanLeft && left <= overscanRight;
     });
   }, [itemPositions, scrollLeft, containerWidth]);
@@ -94,17 +94,20 @@ export const VirtualizedTimelineItems = memo(function VirtualizedTimelineItems({
   // Memoized track content for visible items
   const memoizedContent = useMemoizedTrackContent(
     track,
-    visibleItems.map(v => v.item),
+    visibleItems.map((v) => v.item),
     assets,
     [zoom, scrollLeft] // Additional dependencies for re-memoization
   );
 
   // Batch item updates
-  const handleItemUpdate = useCallback((item: TimelineItem) => {
-    if (onItemUpdate) {
-      batchUpdater.current.addUpdate(() => onItemUpdate(item));
-    }
-  }, [onItemUpdate]);
+  const handleItemUpdate = useCallback(
+    (item: TimelineItem) => {
+      if (onItemUpdate) {
+        batchUpdater.current.addUpdate(() => onItemUpdate(item));
+      }
+    },
+    [onItemUpdate]
+  );
 
   // Cleanup batch updater on unmount
   useEffect(() => {
@@ -173,15 +176,18 @@ const VirtualizedTimelineItem = memo(function VirtualizedTimelineItem({
   );
 
   // Optimize style object to prevent unnecessary re-renders
-  const itemStyle = useMemo(() => ({
-    position: 'absolute' as const,
-    left: `${left}px`,
-    width: `${width}px`,
-    height: `${height}px`,
-    top: '4px',
-    backgroundColor: track.color,
-    borderColor: isSelected ? '#F59E0B' : track.color,
-  }), [left, width, height, track.color, isSelected]);
+  const itemStyle = useMemo(
+    () => ({
+      position: 'absolute' as const,
+      left: `${left}px`,
+      width: `${width}px`,
+      height: `${height}px`,
+      top: '4px',
+      backgroundColor: track.color,
+      borderColor: isSelected ? '#F59E0B' : track.color,
+    }),
+    [left, width, height, track.color, isSelected]
+  );
 
   return (
     <div
@@ -209,7 +215,7 @@ const VirtualizedTimelineItem = memo(function VirtualizedTimelineItem({
           maxLines={2}
           showLanguage={false}
         />
-        
+
         {/* Duration indicator */}
         <div className="text-white mt-1 text-xs">
           {Math.round(item.duration * 10) / 10}s
@@ -220,28 +226,37 @@ const VirtualizedTimelineItem = memo(function VirtualizedTimelineItem({
 });
 
 // Performance monitoring wrapper
-export const PerformanceMonitoredTimelineItems = memo(function PerformanceMonitoredTimelineItems(
-  props: VirtualizedTimelineItemsProps
-) {
-  const renderCount = useRef(0);
-  const lastRenderTime = useRef(performance.now());
+export const PerformanceMonitoredTimelineItems = memo(
+  function PerformanceMonitoredTimelineItems(
+    props: VirtualizedTimelineItemsProps
+  ) {
+    const renderCount = useRef(0);
+    const lastRenderTime = useRef(performance.now());
 
-  useEffect(() => {
-    renderCount.current += 1;
-    const currentTime = performance.now();
-    const renderTime = currentTime - lastRenderTime.current;
+    useEffect(() => {
+      renderCount.current += 1;
+      const currentTime = performance.now();
+      const renderTime = currentTime - lastRenderTime.current;
 
-    if (process.env.NODE_ENV === 'development' && renderCount.current % 10 === 0) {
-      console.log(`Timeline items render #${renderCount.current}: ${renderTime.toFixed(2)}ms`);
-      console.log(`Visible items: ${props.items.filter(item => item.track === props.track.trackNumber).length}`);
-      console.log(`Cache size: ${TimelineCalculations.getCacheSize()}`);
-    }
+      if (
+        process.env.NODE_ENV === 'development' &&
+        renderCount.current % 10 === 0
+      ) {
+        console.log(
+          `Timeline items render #${renderCount.current}: ${renderTime.toFixed(2)}ms`
+        );
+        console.log(
+          `Visible items: ${props.items.filter((item) => item.track === props.track.trackNumber).length}`
+        );
+        console.log(`Cache size: ${TimelineCalculations.getCacheSize()}`);
+      }
 
-    lastRenderTime.current = currentTime;
-  });
+      lastRenderTime.current = currentTime;
+    });
 
-  return <VirtualizedTimelineItems {...props} />;
-});
+    return <VirtualizedTimelineItems {...props} />;
+  }
+);
 
 // Utility hook for managing timeline item performance
 export function useTimelineItemPerformance(
@@ -258,10 +273,13 @@ export function useTimelineItemPerformance(
 
   const updateMetrics = useCallback(() => {
     const startTime = performance.now();
-    
+
     // Simulate render calculation
-    const visibleItems = Math.min(items.length, Math.ceil(containerWidth / (100 * zoom)));
-    
+    const visibleItems = Math.min(
+      items.length,
+      Math.ceil(containerWidth / (100 * zoom))
+    );
+
     const endTime = performance.now();
     const renderTime = endTime - startTime;
 

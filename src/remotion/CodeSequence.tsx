@@ -74,12 +74,12 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
   // Get font settings from theme or fallback to item properties
   const themeId = LEGACY_THEMES[theme as keyof typeof LEGACY_THEMES] || theme;
   const themeDefinition = themeManager.getTheme(themeId);
-  
 
-  
-  const fontSize = item.properties.fontSize || themeDefinition?.fonts?.size || 16;
-  const fontFamily = item.properties.fontFamily || 
-    themeDefinition?.fonts?.monospace || 
+  const fontSize =
+    item.properties.fontSize || themeDefinition?.fonts?.size || 16;
+  const fontFamily =
+    item.properties.fontFamily ||
+    themeDefinition?.fonts?.monospace ||
     'Monaco, Menlo, "Ubuntu Mono", monospace';
   const lineHeight = themeDefinition?.fonts?.lineHeight || 1.5;
   const showLineNumbers = item.properties.showLineNumbers ?? false;
@@ -97,7 +97,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
   const getThemeColors = useMemo(() => {
     // Map legacy theme names to new theme IDs
     const themeId = LEGACY_THEMES[theme as keyof typeof LEGACY_THEMES] || theme;
-    
+
     // Try to get theme from new system
     const themeDefinition = themeManager.getTheme(themeId);
     if (themeDefinition) {
@@ -105,96 +105,108 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
       themeManager.recordThemeUsage(themeId);
       return themeDefinition.colors;
     }
-    
+
     // Fallback to default dark theme
     const fallbackTheme = themeManager.getTheme('vscode-dark-plus');
-    return fallbackTheme?.colors || {
-      background: '#1e1e1e',
-      foreground: '#d4d4d4',
-      comment: '#6a9955',
-      keyword: '#569cd6',
-      string: '#ce9178',
-      number: '#b5cea8',
-      operator: '#d4d4d4',
-      punctuation: '#d4d4d4',
-      function: '#dcdcaa',
-      variable: '#9cdcfe',
-      type: '#4ec9b0',
-      class: '#4ec9b0',
-      constant: '#4fc1ff',
-      property: '#9cdcfe',
-      tag: '#569cd6',
-      attribute: '#92c5f8',
-      boolean: '#569cd6',
-      regex: '#d16969',
-      escape: '#d7ba7d',
-      selection: '#264f78',
-      lineHighlight: '#2a2d2e',
-      cursor: '#d4d4d4',
-      diffAdded: '#144212',
-      diffRemoved: '#5a1e1e',
-      diffModified: '#1e3a8a',
-    };
+    return (
+      fallbackTheme?.colors || {
+        background: '#1e1e1e',
+        foreground: '#d4d4d4',
+        comment: '#6a9955',
+        keyword: '#569cd6',
+        string: '#ce9178',
+        number: '#b5cea8',
+        operator: '#d4d4d4',
+        punctuation: '#d4d4d4',
+        function: '#dcdcaa',
+        variable: '#9cdcfe',
+        type: '#4ec9b0',
+        class: '#4ec9b0',
+        constant: '#4fc1ff',
+        property: '#9cdcfe',
+        tag: '#569cd6',
+        attribute: '#92c5f8',
+        boolean: '#569cd6',
+        regex: '#d16969',
+        escape: '#d7ba7d',
+        selection: '#264f78',
+        lineHighlight: '#2a2d2e',
+        cursor: '#d4d4d4',
+        diffAdded: '#144212',
+        diffRemoved: '#5a1e1e',
+        diffModified: '#1e3a8a',
+      }
+    );
   }, [theme]);
 
   const themeColors = getThemeColors;
 
   // Background configuration with export settings consideration
   const backgroundConfig = useMemo(() => {
-    const { backgroundType, backgroundWallpaper, backgroundGradient, backgroundOpacity } = item.properties;
-    
+    const {
+      backgroundType,
+      backgroundWallpaper,
+      backgroundGradient,
+      backgroundOpacity,
+    } = item.properties;
+
     // If transparent background export is enabled, check inclusion settings
     if (exportSettings?.transparentBackground) {
       // Skip wallpaper if not included in transparent export
       if (backgroundType === 'wallpaper' && !exportSettings.includeWallpaper) {
         return null;
       }
-      
+
       // Skip gradient if not included in transparent export
       if (backgroundType === 'gradient' && !exportSettings.includeGradient) {
         return null;
       }
     }
-    
+
     if (!backgroundType || backgroundType === 'none') {
       return null;
     }
-    
+
     switch (backgroundType) {
       case 'wallpaper':
-        return backgroundWallpaper ? {
-          type: 'wallpaper' as const,
-          wallpaper: {
-            assetId: backgroundWallpaper,
-            opacity: backgroundOpacity || 1,
-            blendMode: 'normal' as const
-          }
-        } : null;
-        
+        return backgroundWallpaper
+          ? {
+              type: 'wallpaper' as const,
+              wallpaper: {
+                assetId: backgroundWallpaper,
+                opacity: backgroundOpacity || 1,
+                blendMode: 'normal' as const,
+              },
+            }
+          : null;
+
       case 'gradient':
-        return backgroundGradient ? {
-          type: 'gradient' as const,
-          gradient: backgroundGradient
-        } : null;
-        
+        return backgroundGradient
+          ? {
+              type: 'gradient' as const,
+              gradient: backgroundGradient,
+            }
+          : null;
+
       case 'color':
         return {
           type: 'color' as const,
-          color: themeColors.background
+          color: item.properties.backgroundColor || themeColors.background,
         };
-        
+
       default:
         return null;
     }
   }, [
-    item.properties.backgroundType, 
-    item.properties.backgroundWallpaper, 
-    item.properties.backgroundGradient, 
-    item.properties.backgroundOpacity, 
+    item.properties.backgroundType,
+    item.properties.backgroundWallpaper,
+    item.properties.backgroundGradient,
+    item.properties.backgroundOpacity,
+    item.properties.backgroundColor,
     themeColors.background,
     exportSettings?.transparentBackground,
     exportSettings?.includeWallpaper,
-    exportSettings?.includeGradient
+    exportSettings?.includeGradient,
   ]);
 
   // Calculate position and transformations
@@ -254,7 +266,11 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
     return (code: string, lang: string) => {
       const prismLanguage = Prism.languages[lang] ? lang : 'javascript';
       try {
-        return Prism.highlight(code, Prism.languages[prismLanguage], prismLanguage);
+        return Prism.highlight(
+          code,
+          Prism.languages[prismLanguage],
+          prismLanguage
+        );
       } catch {
         return encodeForHtml(code);
       }
@@ -277,7 +293,12 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
     const prismLanguage = Prism.languages[language] ? language : 'javascript';
 
     // Handle new diff animation presets
-    if (anim && ['diffSlide', 'diffFade', 'diffHighlight', 'typewriterDiff'].includes(anim.preset)) {
+    if (
+      anim &&
+      ['diffSlide', 'diffFade', 'diffHighlight', 'typewriterDiff'].includes(
+        anim.preset
+      )
+    ) {
       return diffAnimationResult.animatedHtml;
     }
 
@@ -583,12 +604,16 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
             style={{ zIndex: 0 }}
           />
         )}
-        
+
         {/* Code content layer */}
         <div style={codeContainerStyle}>
           <style>{syntaxStyles}</style>
           <pre
-            style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+            style={{
+              margin: 0,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+            }}
           >
             <code
               dangerouslySetInnerHTML={{ __html: animatedCode }}
@@ -623,13 +648,15 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
                    code .code-line { counter-increment: line; }
                    code .code-line::before { content: counter(line); display: inline-block; width: 2.5em; margin-right: 1em; text-align: right; color: ${themeColors.comment}; }`
               : '';
-            
-            const diffAnimationCss = diffAnimationResult.needsSpecialStyling ? `
+
+            const diffAnimationCss = diffAnimationResult.needsSpecialStyling
+              ? `
               .diff-added { display: block; transition: all 0.3s ease; }
               .diff-removed { display: block; transition: all 0.3s ease; }
               .diff-unchanged { display: block; }
               .typewriter-cursor { animation: blink 1s infinite; }
-            ` : `
+            `
+              : `
               .diff-added { 
                 background-color: ${themeColors.diffAdded}; 
                 display: block; 
@@ -646,7 +673,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
               }
               .diff-unchanged { display: block; }
             `;
-            
+
             return `
             @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
             ${diffAnimationCss}

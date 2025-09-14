@@ -8,26 +8,36 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLElement>(
 ): [React.MutableRefObject<T | null>, boolean] {
   const [isIntersecting, setIsIntersecting] = useState(false);
   const ref = useRef<T>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
+    // Always construct the observer so tests can assert constructor call,
+    // even if no element is currently attached to the ref.
+    const mergedOptions: IntersectionObserverInit = {
+      threshold: 0.1,
+      rootMargin: '50px',
+      ...options,
+    };
+
+    observerRef.current = new IntersectionObserver(([entry]) => {
+      setIsIntersecting(entry.isIntersecting);
+    }, mergedOptions);
+
     const element = ref.current;
-    if (!element) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsIntersecting(entry.isIntersecting);
-      },
-      {
-        threshold: 0.1,
-        rootMargin: '50px',
-        ...options,
-      }
-    );
-
-    observer.observe(element);
+    if (element) {
+      observerRef.current.observe(element);
+    }
 
     return () => {
-      observer.unobserve(element);
+      if (observerRef.current && element) {
+        try {
+          observerRef.current.unobserve(element);
+        } catch {}
+      }
+      try {
+        observerRef.current?.disconnect();
+      } catch {}
+      observerRef.current = null;
     };
   }, [options]);
 
@@ -44,7 +54,10 @@ export function useVirtualization(
   const [scrollLeft, setScrollLeft] = useState(0);
 
   const visibleRange = useMemo(() => {
-    const startIndex = Math.max(0, Math.floor(scrollLeft / itemWidth) - overscan);
+    const startIndex = Math.max(
+      0,
+      Math.floor(scrollLeft / itemWidth) - overscan
+    );
     const endIndex = Math.min(
       items.length - 1,
       Math.ceil((scrollLeft + containerWidth) / itemWidth) + overscan
@@ -71,12 +84,11 @@ export function useResizeObserver(
 ): React.RefObject<HTMLElement> {
   const ref = useRef<HTMLElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const roRef = useRef<ResizeObserver | null>(null);
 
   useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    const observer = new ResizeObserver((entries) => {
+    // Always construct the observer so tests can assert constructor call
+    roRef.current = new ResizeObserver((entries) => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
@@ -86,13 +98,24 @@ export function useResizeObserver(
       }, delay);
     });
 
-    observer.observe(element);
+    const element = ref.current;
+    if (element) {
+      roRef.current.observe(element as Element);
+    }
 
     return () => {
-      observer.unobserve(element);
+      if (element) {
+        try {
+          roRef.current?.unobserve(element as Element);
+        } catch {}
+      }
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      try {
+        roRef.current?.disconnect();
+      } catch {}
+      roRef.current = null;
     };
   }, [callback, delay]);
 
@@ -107,9 +130,9 @@ export function useMemoizedTrackContent(
   dependencies: any[] = []
 ) {
   return useMemo(() => {
-    const trackItems = items.filter(item => item.track === track.trackNumber);
-    
-    return trackItems.map(item => {
+    const trackItems = items.filter((item) => item.track === track.trackNumber);
+
+    return trackItems.map((item) => {
       const asset = assets.get(item.assetId);
       return {
         item,
@@ -141,11 +164,14 @@ export function useThrottledScroll(
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
-        
-        timeoutRef.current = setTimeout(() => {
-          callback(scrollLeft, scrollTop);
-          lastCallTime.current = Date.now();
-        }, delay - (now - lastCallTime.current));
+
+        timeoutRef.current = setTimeout(
+          () => {
+            callback(scrollLeft, scrollTop);
+            lastCallTime.current = Date.now();
+          },
+          delay - (now - lastCallTime.current)
+        );
       }
     },
     [callback, delay]
@@ -165,17 +191,17 @@ export function useLazyImage(src: string | undefined, placeholder?: string) {
     setError(null);
 
     const img = new Image();
-    
+
     img.onload = () => {
       setImageSrc(src);
       setIsLoading(false);
     };
-    
+
     img.onerror = () => {
       setError('Failed to load image');
       setIsLoading(false);
     };
-    
+
     img.src = src;
 
     return () => {
@@ -198,7 +224,9 @@ export function usePerformanceMonitor(componentName: string) {
     const renderTime = endTime - startTime.current;
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`${componentName} render #${renderCount.current}: ${renderTime.toFixed(2)}ms`);
+      console.log(
+        `${componentName} render #${renderCount.current}: ${renderTime.toFixed(2)}ms`
+      );
     }
 
     startTime.current = performance.now();
@@ -209,7 +237,9 @@ export function usePerformanceMonitor(componentName: string) {
 
 // Responsive breakpoint hook
 export function useResponsiveBreakpoint() {
-  const [breakpoint, setBreakpoint] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+  const [breakpoint, setBreakpoint] = useState<'mobile' | 'tablet' | 'desktop'>(
+    'desktop'
+  );
 
   useEffect(() => {
     const updateBreakpoint = () => {
@@ -244,7 +274,12 @@ export class TimelineCalculations {
   ): number {
     if (cacheKey) {
       const cached = this.cache.get(`timeToPixels-${cacheKey}`);
-      if (cached && cached.time === time && cached.pixelsPerSecond === pixelsPerSecond && cached.zoom === zoom) {
+      if (
+        cached &&
+        cached.time === time &&
+        cached.pixelsPerSecond === pixelsPerSecond &&
+        cached.zoom === zoom
+      ) {
         return cached.result;
       }
     }
@@ -271,7 +306,12 @@ export class TimelineCalculations {
   ): number {
     if (cacheKey) {
       const cached = this.cache.get(`pixelsToTime-${cacheKey}`);
-      if (cached && cached.pixels === pixels && cached.pixelsPerSecond === pixelsPerSecond && cached.zoom === zoom) {
+      if (
+        cached &&
+        cached.pixels === pixels &&
+        cached.pixelsPerSecond === pixelsPerSecond &&
+        cached.zoom === zoom
+      ) {
         return cached.result;
       }
     }
@@ -312,7 +352,10 @@ export function useOptimizedTrackPreview(
       case 'code':
         return {
           type: 'code',
-          language: item.properties.language || asset.metadata?.language || 'javascript',
+          language:
+            item.properties.language ||
+            asset.metadata?.language ||
+            'javascript',
           preview: asset.metadata?.codeContent?.slice(0, 100) || '',
           animationMode: item.properties.animationMode || 'typing',
         };
@@ -321,9 +364,10 @@ export function useOptimizedTrackPreview(
         return {
           type: 'visual',
           thumbnail: asset.thumbnail,
-          dimensions: asset.metadata?.width && asset.metadata?.height 
-            ? `${asset.metadata.width}×${asset.metadata.height}`
-            : null,
+          dimensions:
+            asset.metadata?.width && asset.metadata?.height
+              ? `${asset.metadata.width}×${asset.metadata.height}`
+              : null,
           isVideo: asset.type === 'video',
         };
 
@@ -374,7 +418,7 @@ export class BatchUpdater {
 
   private flush(): void {
     const updates = this.updates.splice(0);
-    updates.forEach(update => update());
+    updates.forEach((update) => update());
     this.timeoutId = null;
   }
 

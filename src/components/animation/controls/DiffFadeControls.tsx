@@ -78,7 +78,11 @@ export function DiffFadeControls({
             step={0.01}
             value={value.highlightIntensity}
             onChange={(e) => {
-              const next = clampFloat(e.target.value, INTENSITY_MIN, INTENSITY_MAX);
+              const next = clampFloat(
+                e.target.value,
+                INTENSITY_MIN,
+                INTENSITY_MAX
+              );
               onChange({ ...value, highlightIntensity: next });
             }}
             className="w-full"

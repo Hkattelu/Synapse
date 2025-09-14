@@ -14,7 +14,9 @@ interface HelpTipsOverlayProps {
 }
 
 export function HelpTipsOverlay({ active, onClose }: HelpTipsOverlayProps) {
-  const [positions, setPositions] = useState<Record<string, DOMRect | null>>({});
+  const [positions, setPositions] = useState<Record<string, DOMRect | null>>(
+    {}
+  );
 
   const tips: Tip[] = useMemo(
     () => [
@@ -63,7 +65,9 @@ export function HelpTipsOverlay({ active, onClose }: HelpTipsOverlayProps) {
     const update = () => {
       const next: Record<string, DOMRect | null> = {};
       for (const tip of tips) {
-        const el = document.querySelector(tip.targetSelector) as HTMLElement | null;
+        const el = document.querySelector(
+          tip.targetSelector
+        ) as HTMLElement | null;
         next[tip.id] = el ? el.getBoundingClientRect() : null;
       }
       setPositions(next);
@@ -106,7 +110,10 @@ export function HelpTipsOverlay({ active, onClose }: HelpTipsOverlayProps) {
           <div
             key={tip.id}
             className="absolute max-w-sm p-4 rounded-lg shadow-xl bg-white border border-purple-200 text-sm"
-            style={{ left: Math.max(8, left), top: Math.min(top, window.innerHeight - 100) }}
+            style={{
+              left: Math.max(8, left),
+              top: Math.min(top, window.innerHeight - 100),
+            }}
           >
             <div className="font-semibold text-gray-900 mb-1">{tip.title}</div>
             <div className="text-gray-700 leading-relaxed">{tip.body}</div>
@@ -116,4 +123,3 @@ export function HelpTipsOverlay({ active, onClose }: HelpTipsOverlayProps) {
     </div>
   );
 }
-

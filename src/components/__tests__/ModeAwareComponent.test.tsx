@@ -1,7 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { ModeAwareComponent, useFeatureVisibility, useModeClasses } from '../ModeAwareComponent';
+import {
+  ModeAwareComponent,
+  useFeatureVisibility,
+  useModeClasses,
+} from '../ModeAwareComponent';
 import { useUI } from '../../state/hooks';
 import { renderHook } from '@testing-library/react';
 
@@ -28,7 +32,7 @@ describe('ModeAwareComponent', () => {
           <div>Test content</div>
         </ModeAwareComponent>
       );
-      
+
       expect(screen.getByText('Test content')).toBeInTheDocument();
     });
 
@@ -38,7 +42,7 @@ describe('ModeAwareComponent', () => {
           <div>Simplified content</div>
         </ModeAwareComponent>
       );
-      
+
       expect(screen.getByText('Simplified content')).toBeInTheDocument();
     });
 
@@ -48,17 +52,20 @@ describe('ModeAwareComponent', () => {
           <div>Advanced content</div>
         </ModeAwareComponent>
       );
-      
+
       expect(screen.queryByText('Advanced content')).not.toBeInTheDocument();
     });
 
     it('renders fallback when mode does not match and fallback is provided', () => {
       render(
-        <ModeAwareComponent mode="advanced" fallback={<div>Fallback content</div>}>
+        <ModeAwareComponent
+          mode="advanced"
+          fallback={<div>Fallback content</div>}
+        >
           <div>Advanced content</div>
         </ModeAwareComponent>
       );
-      
+
       expect(screen.queryByText('Advanced content')).not.toBeInTheDocument();
       expect(screen.getByText('Fallback content')).toBeInTheDocument();
     });
@@ -69,7 +76,7 @@ describe('ModeAwareComponent', () => {
           <div>Test content</div>
         </ModeAwareComponent>
       );
-      
+
       expect(container.firstChild).toHaveClass('test-class');
     });
   });
@@ -87,7 +94,7 @@ describe('ModeAwareComponent', () => {
           <div>Advanced content</div>
         </ModeAwareComponent>
       );
-      
+
       expect(screen.getByText('Advanced content')).toBeInTheDocument();
     });
 
@@ -97,7 +104,7 @@ describe('ModeAwareComponent', () => {
           <div>Simplified content</div>
         </ModeAwareComponent>
       );
-      
+
       expect(screen.queryByText('Simplified content')).not.toBeInTheDocument();
     });
   });
@@ -145,7 +152,9 @@ describe('useModeClasses', () => {
       ui: { mode: 'simplified' },
     });
 
-    const { result } = renderHook(() => useModeClasses('simple-class', 'advanced-class'));
+    const { result } = renderHook(() =>
+      useModeClasses('simple-class', 'advanced-class')
+    );
     expect(result.current).toBe('simple-class');
   });
 
@@ -154,7 +163,9 @@ describe('useModeClasses', () => {
       ui: { mode: 'advanced' },
     });
 
-    const { result } = renderHook(() => useModeClasses('simple-class', 'advanced-class'));
+    const { result } = renderHook(() =>
+      useModeClasses('simple-class', 'advanced-class')
+    );
     expect(result.current).toBe('advanced-class');
   });
 

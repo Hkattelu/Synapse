@@ -138,8 +138,12 @@ describe('ContentAdditionToolbar', () => {
 
     expect(screen.getByText('Screen Recording')).toBeInTheDocument();
     expect(screen.getByText('Talking Head')).toBeInTheDocument();
-    expect(screen.getByText('For demonstrations and tutorials')).toBeInTheDocument();
-    expect(screen.getByText('For personal commentary and explanations')).toBeInTheDocument();
+    expect(
+      screen.getByText('For demonstrations and tutorials')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('For personal commentary and explanations')
+    ).toBeInTheDocument();
   });
 
   it('closes video menu when clicking outside', () => {

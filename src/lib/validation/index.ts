@@ -6,9 +6,7 @@ export * from './backgroundValidation';
 export * from './exportValidation';
 
 // Re-export commonly used types
-export type {
-  ColorValidationResult,
-} from './colorValidation';
+export type { ColorValidationResult } from './colorValidation';
 
 export type {
   ThemeValidationResult,
@@ -24,5 +22,5 @@ export type {
 export type {
   ExportValidationResult,
   ExportCompatibilityIssue,
-  FormatCapabilities
+  FormatCapabilities,
 } from './exportValidation';

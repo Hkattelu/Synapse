@@ -14,10 +14,14 @@ import type { EducationalTrackName } from '../lib/educationalTypes';
 import type { TimelineItem } from '../lib/types';
 
 export function EducationalAnimationPresetsDemo() {
-  const [selectedTrack, setSelectedTrack] = useState<EducationalTrackName>('Code');
-  const [selectedPreset, setSelectedPreset] = useState<EducationalAnimationPreset | null>(null);
+  const [selectedTrack, setSelectedTrack] =
+    useState<EducationalTrackName>('Code');
+  const [selectedPreset, setSelectedPreset] =
+    useState<EducationalAnimationPreset | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<
+    'all' | 'beginner' | 'intermediate' | 'advanced'
+  >('all');
 
   // Mock timeline item for demonstration
   const mockTimelineItem: TimelineItem = {
@@ -35,14 +39,20 @@ export function EducationalAnimationPresetsDemo() {
       showLineNumbers: true,
     },
     animations: [],
-    keyframes: []
+    keyframes: [],
   };
 
-  const trackTypes: EducationalTrackName[] = ['Code', 'Visual', 'Narration', 'You'];
-  
-  const filteredPresets = selectedDifficulty === 'all' 
-    ? getPresetsForTrack(selectedTrack)
-    : getPresetsByDifficulty(selectedTrack, selectedDifficulty);
+  const trackTypes: EducationalTrackName[] = [
+    'Code',
+    'Visual',
+    'Narration',
+    'You',
+  ];
+
+  const filteredPresets =
+    selectedDifficulty === 'all'
+      ? getPresetsForTrack(selectedTrack)
+      : getPresetsByDifficulty(selectedTrack, selectedDifficulty);
 
   const handlePlayPreset = (preset: EducationalAnimationPreset) => {
     setSelectedPreset(preset);
@@ -65,8 +75,9 @@ export function EducationalAnimationPresetsDemo() {
           Educational Animation Presets
         </h1>
         <p className="text-lg text-gray-600 mb-6">
-          Explore track-specific animation presets designed for educational content creation.
-          Each track has specialized animations that enhance learning and engagement.
+          Explore track-specific animation presets designed for educational
+          content creation. Each track has specialized animations that enhance
+          learning and engagement.
         </p>
       </div>
 
@@ -74,8 +85,10 @@ export function EducationalAnimationPresetsDemo() {
         {/* Controls Panel */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Controls</h2>
-            
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Controls
+            </h2>
+
             {/* Track Selection */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -120,11 +133,15 @@ export function EducationalAnimationPresetsDemo() {
 
             {/* Track Statistics */}
             <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium text-gray-900 mb-2">Track Statistics</h3>
+              <h3 className="font-medium text-gray-900 mb-2">
+                Track Statistics
+              </h3>
               <div className="space-y-2 text-sm text-gray-600">
                 <div className="flex justify-between">
                   <span>Total Presets:</span>
-                  <span className="font-medium">{getPresetsForTrack(selectedTrack).length}</span>
+                  <span className="font-medium">
+                    {getPresetsForTrack(selectedTrack).length}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Beginner:</span>
@@ -135,7 +152,10 @@ export function EducationalAnimationPresetsDemo() {
                 <div className="flex justify-between">
                   <span>Intermediate:</span>
                   <span className="font-medium text-blue-600">
-                    {getPresetsByDifficulty(selectedTrack, 'intermediate').length}
+                    {
+                      getPresetsByDifficulty(selectedTrack, 'intermediate')
+                        .length
+                    }
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -155,7 +175,7 @@ export function EducationalAnimationPresetsDemo() {
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               {selectedTrack} Track Presets ({filteredPresets.length})
             </h2>
-            
+
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {filteredPresets.map((preset) => (
                 <PresetCard
@@ -174,8 +194,10 @@ export function EducationalAnimationPresetsDemo() {
         {/* Preview Panel */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Preview</h2>
-            
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Preview
+            </h2>
+
             {selectedPreset ? (
               <div>
                 <EducationalAnimationPreview
@@ -185,37 +207,50 @@ export function EducationalAnimationPresetsDemo() {
                   onPlayComplete={handlePlayComplete}
                   className="mb-4"
                 />
-                
+
                 <div className="space-y-3">
                   <div>
-                    <h3 className="font-medium text-gray-900 mb-1">{selectedPreset.name}</h3>
-                    <p className="text-sm text-gray-600">{selectedPreset.educationalPurpose}</p>
+                    <h3 className="font-medium text-gray-900 mb-1">
+                      {selectedPreset.name}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {selectedPreset.educationalPurpose}
+                    </p>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      selectedPreset.difficulty === 'beginner' ? 'bg-green-100 text-green-800' :
-                      selectedPreset.difficulty === 'intermediate' ? 'bg-blue-100 text-blue-800' :
-                      'bg-purple-100 text-purple-800'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${
+                        selectedPreset.difficulty === 'beginner'
+                          ? 'bg-green-100 text-green-800'
+                          : selectedPreset.difficulty === 'intermediate'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-purple-100 text-purple-800'
+                      }`}
+                    >
                       {selectedPreset.difficulty}
                     </span>
                     <span className="text-xs text-gray-500">
                       {selectedPreset.duration}s • {selectedPreset.easing}
                     </span>
                   </div>
-                  
+
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-1">Recommended for:</h4>
+                    <h4 className="text-sm font-medium text-gray-700 mb-1">
+                      Recommended for:
+                    </h4>
                     <div className="flex flex-wrap gap-1">
                       {selectedPreset.recommendedFor.map((tag) => (
-                        <span key={tag} className="px-2 py-0.5 text-xs bg-gray-100 text-gray-700 rounded">
+                        <span
+                          key={tag}
+                          className="px-2 py-0.5 text-xs bg-gray-100 text-gray-700 rounded"
+                        >
                           {tag}
                         </span>
                       ))}
                     </div>
                   </div>
-                  
+
                   <div className="pt-3 border-t border-gray-200">
                     <button
                       onClick={() => handlePlayPreset(selectedPreset)}
@@ -230,8 +265,18 @@ export function EducationalAnimationPresetsDemo() {
             ) : (
               <div className="text-center text-gray-500 py-12">
                 <div className="w-16 h-16 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-8 h-8 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                 </div>
                 <p className="text-sm">Select a preset to see preview</p>
@@ -256,7 +301,9 @@ export function EducationalAnimationPresetsDemo() {
 
       {/* Usage Examples */}
       <div className="mt-12">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Usage Examples</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+          Usage Examples
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {trackTypes.map((track) => (
             <UsageExampleCard key={track} trackType={track} />
@@ -275,33 +322,51 @@ interface PresetCardProps {
   onPlay: () => void;
 }
 
-function PresetCard({ preset, isSelected, isPlaying, onSelect, onPlay }: PresetCardProps) {
+function PresetCard({
+  preset,
+  isSelected,
+  isPlaying,
+  onSelect,
+  onPlay,
+}: PresetCardProps) {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'text-green-600 bg-green-100';
-      case 'intermediate': return 'text-blue-600 bg-blue-100';
-      case 'advanced': return 'text-purple-600 bg-purple-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'beginner':
+        return 'text-green-600 bg-green-100';
+      case 'intermediate':
+        return 'text-blue-600 bg-blue-100';
+      case 'advanced':
+        return 'text-purple-600 bg-purple-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
     }
   };
 
   return (
-    <div 
+    <div
       className={`preset-card border rounded-lg p-3 cursor-pointer transition-all ${
-        isSelected ? 'border-purple-300 bg-purple-50' : 'border-gray-200 hover:border-gray-300'
+        isSelected
+          ? 'border-purple-300 bg-purple-50'
+          : 'border-gray-200 hover:border-gray-300'
       }`}
       onClick={onSelect}
     >
       <div className="flex items-start justify-between mb-2">
         <div className="flex-1">
-          <h4 className="font-medium text-gray-900 text-sm mb-1">{preset.name}</h4>
-          <p className="text-xs text-gray-600 mb-2">{preset.previewDescription}</p>
+          <h4 className="font-medium text-gray-900 text-sm mb-1">
+            {preset.name}
+          </h4>
+          <p className="text-xs text-gray-600 mb-2">
+            {preset.previewDescription}
+          </p>
         </div>
-        <span className={`px-2 py-0.5 text-xs rounded-full ${getDifficultyColor(preset.difficulty)}`}>
+        <span
+          className={`px-2 py-0.5 text-xs rounded-full ${getDifficultyColor(preset.difficulty)}`}
+        >
           {preset.difficulty}
         </span>
       </div>
-      
+
       <div className="flex items-center justify-between">
         <span className="text-xs text-gray-500">{preset.duration}s</span>
         <button
@@ -372,15 +437,17 @@ function UsageExampleCard({ trackType }: UsageExampleCardProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">{example.title}</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        {example.title}
+      </h3>
       <p className="text-sm text-gray-600 mb-4">{example.description}</p>
-      
+
       <div className="mb-4">
         <span className="text-sm font-medium text-gray-700">
           {presetCount} available presets
         </span>
       </div>
-      
+
       <ul className="space-y-2">
         {example.scenarios.map((scenario, index) => (
           <li key={index} className="flex items-start text-sm text-gray-600">

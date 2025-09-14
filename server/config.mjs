@@ -30,8 +30,7 @@ export const config = {
     outputDir:
       process.env.RENDER_OUTPUT_DIR ||
       fileURLToPath(new URL('./output', import.meta.url)),
-    compositionId:
-      process.env.REMOTION_COMPOSITION_ID || 'MainComposition',
+    compositionId: process.env.REMOTION_COMPOSITION_ID || 'MainComposition',
     entryPoint:
       process.env.REMOTION_ENTRY ||
       fileURLToPath(new URL('../src/remotion/index.ts', import.meta.url)),

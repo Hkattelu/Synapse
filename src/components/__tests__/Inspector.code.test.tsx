@@ -75,7 +75,7 @@ describe('Inspector - Code Properties', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('Code')).toBeInTheDocument();
+expect(screen.getAllByText('Code').length).toBeGreaterThan(0);
     expect(screen.getByLabelText('Code Content')).toBeInTheDocument();
     expect(screen.getByLabelText('Language')).toBeInTheDocument();
     expect(screen.getByText('Theme')).toBeInTheDocument(); // ThemePicker uses text, not labelText
@@ -143,13 +143,16 @@ describe('Inspector - Code Properties', () => {
       </TestProviders>
     );
 
-    // ThemePicker uses a button interface - find the specific theme picker button
-    const themeButton = screen.getByRole('button', { name: /Unknown Theme/i });
-    fireEvent.click(themeButton);
+// ThemePicker replaced by a standard select input labeled 'Theme'
+    const themeSelect = screen.getByLabelText('Theme');
+    fireEvent.change(themeSelect, { target: { value: 'vscode-light-plus' } });
 
-    // After expanding, we should see theme options
     await waitFor(() => {
-      expect(screen.getByText('Theme Selection')).toBeInTheDocument();
+      expect(mockUpdateTimelineItem).toHaveBeenCalledWith('test-code-item', {
+        properties: expect.objectContaining({
+          theme: 'vscode-light-plus',
+        }),
+      });
     });
   });
 
@@ -202,17 +205,9 @@ describe('Inspector - Code Properties', () => {
       </TestProviders>
     );
 
-    // Click the theme button to expand the theme picker
-    const themeButton = screen.getByRole('button', { name: /Unknown Theme/i });
-    fireEvent.click(themeButton);
-
-    // Wait for the expanded theme picker to appear
-    await waitFor(() => {
-      expect(screen.getByText('Theme Selection')).toBeInTheDocument();
-    });
-
-    // The theme picker should be expanded and show theme options
-    expect(screen.getByPlaceholderText('Search themes...')).toBeInTheDocument();
+// Not applicable with select-based theme picker; assert the select exists
+    const themeSelect = screen.getByLabelText('Theme');
+    expect(themeSelect).toBeInTheDocument();
   });
 
   it('applies monospace font to code textarea', () => {

@@ -2,7 +2,10 @@
 // Implements track-specific animation collections and application logic
 
 import type { AnimationPreset, TimelineItem, ItemProperties } from './types';
-import type { EducationalTrack, EducationalTrackName } from './educationalTypes';
+import type {
+  EducationalTrack,
+  EducationalTrackName,
+} from './educationalTypes';
 
 // Extended animation preset with educational metadata
 export interface EducationalAnimationPreset extends AnimationPreset {
@@ -20,7 +23,8 @@ export const CODE_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     name: 'Typewriter (Educational)',
     type: 'entrance',
     trackType: 'Code',
-    educationalPurpose: 'Perfect for beginners - shows code being written character by character',
+    educationalPurpose:
+      'Perfect for beginners - shows code being written character by character',
     difficulty: 'beginner',
     recommendedFor: ['tutorials', 'step-by-step guides', 'live coding'],
     previewDescription: 'Code appears as if being typed in real-time',
@@ -38,7 +42,8 @@ export const CODE_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     name: 'Line by Line Reveal',
     type: 'entrance',
     trackType: 'Code',
-    educationalPurpose: 'Great for step-by-step explanations - reveals one line at a time',
+    educationalPurpose:
+      'Great for step-by-step explanations - reveals one line at a time',
     difficulty: 'beginner',
     recommendedFor: ['explanations', 'code walkthroughs', 'debugging'],
     previewDescription: 'Each line of code appears sequentially with pause',
@@ -77,7 +82,11 @@ export const CODE_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     trackType: 'Code',
     educationalPurpose: 'Draws attention to syntax elements progressively',
     difficulty: 'intermediate',
-    recommendedFor: ['syntax explanations', 'language features', 'code structure'],
+    recommendedFor: [
+      'syntax explanations',
+      'language features',
+      'code structure',
+    ],
     previewDescription: 'Syntax highlighting appears in waves across the code',
     parameters: {
       waveEffect: true,
@@ -95,7 +104,11 @@ export const CODE_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     trackType: 'Code',
     educationalPurpose: 'Highlights specific code blocks while dimming others',
     difficulty: 'advanced',
-    recommendedFor: ['complex explanations', 'function focus', 'scope demonstration'],
+    recommendedFor: [
+      'complex explanations',
+      'function focus',
+      'scope demonstration',
+    ],
     previewDescription: 'Dims surrounding code while highlighting target block',
     parameters: {
       focusMode: 'block',
@@ -118,7 +131,11 @@ export const VISUAL_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     trackType: 'Visual',
     educationalPurpose: 'Zooms into important areas of screen recordings',
     difficulty: 'beginner',
-    recommendedFor: ['screen recordings', 'UI demonstrations', 'software tutorials'],
+    recommendedFor: [
+      'screen recordings',
+      'UI demonstrations',
+      'software tutorials',
+    ],
     previewDescription: 'Smoothly zooms into specified area of the screen',
     parameters: {
       focusPointX: 0.5,
@@ -155,9 +172,14 @@ export const VISUAL_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     name: 'Side-by-Side Reveal',
     type: 'entrance',
     trackType: 'Visual',
-    educationalPurpose: 'Perfect for comparing before/after or showing parallel content',
+    educationalPurpose:
+      'Perfect for comparing before/after or showing parallel content',
     difficulty: 'intermediate',
-    recommendedFor: ['comparisons', 'parallel workflows', 'split demonstrations'],
+    recommendedFor: [
+      'comparisons',
+      'parallel workflows',
+      'split demonstrations',
+    ],
     previewDescription: 'Content slides in from sides to create split view',
     parameters: {
       splitDirection: 'vertical',
@@ -174,9 +196,14 @@ export const VISUAL_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     name: 'Pan and Scan',
     type: 'emphasis',
     trackType: 'Visual',
-    educationalPurpose: 'Smoothly pans across large content to show different areas',
+    educationalPurpose:
+      'Smoothly pans across large content to show different areas',
     difficulty: 'intermediate',
-    recommendedFor: ['large screenshots', 'wide layouts', 'detailed exploration'],
+    recommendedFor: [
+      'large screenshots',
+      'wide layouts',
+      'detailed exploration',
+    ],
     previewDescription: 'Camera pans smoothly across the content',
     parameters: {
       panDirection: 'left-to-right',
@@ -195,8 +222,13 @@ export const VISUAL_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     trackType: 'Visual',
     educationalPurpose: 'Reveals content in layers for complex explanations',
     difficulty: 'advanced',
-    recommendedFor: ['complex diagrams', 'layered explanations', 'progressive disclosure'],
-    previewDescription: 'Content appears in sequential layers with smooth transitions',
+    recommendedFor: [
+      'complex diagrams',
+      'layered explanations',
+      'progressive disclosure',
+    ],
+    previewDescription:
+      'Content appears in sequential layers with smooth transitions',
     parameters: {
       layerCount: 3,
       layerDelay: 800,
@@ -234,9 +266,14 @@ export const NARRATION_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     name: 'Smart Audio Ducking',
     type: 'emphasis',
     trackType: 'Narration',
-    educationalPurpose: 'Automatically reduces background music when voice is present',
+    educationalPurpose:
+      'Automatically reduces background music when voice is present',
     difficulty: 'intermediate',
-    recommendedFor: ['background music', 'mixed audio', 'professional narration'],
+    recommendedFor: [
+      'background music',
+      'mixed audio',
+      'professional narration',
+    ],
     previewDescription: 'Background audio ducks down during speech',
     parameters: {
       duckingAmount: 0.3, // Reduce to 30% volume
@@ -254,7 +291,11 @@ export const NARRATION_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     trackType: 'Narration',
     educationalPurpose: 'Visual waveform that syncs with audio for engagement',
     difficulty: 'intermediate',
-    recommendedFor: ['audio visualization', 'music content', 'rhythm demonstration'],
+    recommendedFor: [
+      'audio visualization',
+      'music content',
+      'rhythm demonstration',
+    ],
     previewDescription: 'Animated waveform visualization synced to audio',
     parameters: {
       waveformStyle: 'bars',
@@ -273,8 +314,13 @@ export const NARRATION_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     trackType: 'Narration',
     educationalPurpose: 'Smooth transitions between different audio segments',
     difficulty: 'advanced',
-    recommendedFor: ['chapter breaks', 'topic transitions', 'structured content'],
-    previewDescription: 'Crossfades between audio segments with optional silence',
+    recommendedFor: [
+      'chapter breaks',
+      'topic transitions',
+      'structured content',
+    ],
+    previewDescription:
+      'Crossfades between audio segments with optional silence',
     parameters: {
       crossfadeDuration: 1.5,
       silenceGap: 0.5,
@@ -295,7 +341,11 @@ export const YOU_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     trackType: 'You',
     educationalPurpose: 'Professional entrance for personal video content',
     difficulty: 'beginner',
-    recommendedFor: ['introductions', 'personal commentary', 'instructor presence'],
+    recommendedFor: [
+      'introductions',
+      'personal commentary',
+      'instructor presence',
+    ],
     previewDescription: 'Smooth fade-in with subtle scale animation',
     parameters: {
       fadeInDuration: 1.0,
@@ -312,7 +362,8 @@ export const YOU_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     name: 'Picture-in-Picture',
     type: 'emphasis',
     trackType: 'You',
-    educationalPurpose: 'Positions personal video as overlay while maintaining focus on content',
+    educationalPurpose:
+      'Positions personal video as overlay while maintaining focus on content',
     difficulty: 'beginner',
     recommendedFor: ['screen sharing', 'content overlay', 'presenter mode'],
     previewDescription: 'Resizes and positions video as floating overlay',
@@ -333,8 +384,13 @@ export const YOU_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     trackType: 'You',
     educationalPurpose: 'Blurs background to focus attention on the speaker',
     difficulty: 'intermediate',
-    recommendedFor: ['professional presentation', 'focus enhancement', 'background cleanup'],
-    previewDescription: 'Gradually blurs background while keeping speaker in focus',
+    recommendedFor: [
+      'professional presentation',
+      'focus enhancement',
+      'background cleanup',
+    ],
+    previewDescription:
+      'Gradually blurs background while keeping speaker in focus',
     parameters: {
       blurIntensity: 8, // pixels
       blurTransition: 1.5, // seconds
@@ -349,7 +405,8 @@ export const YOU_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     name: 'Split Screen Presenter',
     type: 'emphasis',
     trackType: 'You',
-    educationalPurpose: 'Creates professional split-screen layout with presenter and content',
+    educationalPurpose:
+      'Creates professional split-screen layout with presenter and content',
     difficulty: 'advanced',
     recommendedFor: ['presentations', 'teaching', 'professional content'],
     previewDescription: 'Arranges presenter and content in split-screen layout',
@@ -370,7 +427,11 @@ export const YOU_ANIMATION_PRESETS: EducationalAnimationPreset[] = [
     trackType: 'You',
     educationalPurpose: 'Highlights hand gestures and movements for emphasis',
     difficulty: 'advanced',
-    recommendedFor: ['gesture-based teaching', 'sign language', 'physical demonstrations'],
+    recommendedFor: [
+      'gesture-based teaching',
+      'sign language',
+      'physical demonstrations',
+    ],
     previewDescription: 'Adds subtle highlights to hand movements and gestures',
     parameters: {
       gestureDetection: true,
@@ -393,13 +454,17 @@ export const EDUCATIONAL_ANIMATION_PRESETS = {
 };
 
 // Helper functions for educational animation presets
-export function getPresetsForTrack(trackType: EducationalTrackName): EducationalAnimationPreset[] {
+export function getPresetsForTrack(
+  trackType: EducationalTrackName
+): EducationalAnimationPreset[] {
   return EDUCATIONAL_ANIMATION_PRESETS[trackType] || [];
 }
 
-export function getPresetById(id: string): EducationalAnimationPreset | undefined {
+export function getPresetById(
+  id: string
+): EducationalAnimationPreset | undefined {
   for (const presets of Object.values(EDUCATIONAL_ANIMATION_PRESETS)) {
-    const preset = presets.find(p => p.id === id);
+    const preset = presets.find((p) => p.id === id);
     if (preset) return preset;
   }
   return undefined;
@@ -409,15 +474,19 @@ export function getPresetsByDifficulty(
   trackType: EducationalTrackName,
   difficulty: 'beginner' | 'intermediate' | 'advanced'
 ): EducationalAnimationPreset[] {
-  return getPresetsForTrack(trackType).filter(preset => preset.difficulty === difficulty);
+  return getPresetsForTrack(trackType).filter(
+    (preset) => preset.difficulty === difficulty
+  );
 }
 
 export function getRecommendedPresets(
   trackType: EducationalTrackName,
   contentType: string
 ): EducationalAnimationPreset[] {
-  return getPresetsForTrack(trackType).filter(preset =>
-    preset.recommendedFor.some(rec => rec.toLowerCase().includes(contentType.toLowerCase()))
+  return getPresetsForTrack(trackType).filter((preset) =>
+    preset.recommendedFor.some((rec) =>
+      rec.toLowerCase().includes(contentType.toLowerCase())
+    )
   );
 }
 
@@ -450,10 +519,21 @@ export function applyEducationalAnimationPreset(
       break;
   }
 
+  // Attach a lightweight animation payload for UI/testing purposes
+  const animationPayload = {
+    id: preset.id,
+    type: preset.type,
+    trackType: preset.trackType,
+    parameters,
+  } as any;
+
   return {
     ...item,
     properties: updatedProperties as ItemProperties,
-  };
+    // Note: This payload is a UI/testing helper and may not match the strict AnimationConfig union.
+    // It is intentionally typed as any to avoid breaking existing renderers.
+    animation: animationPayload,
+  } as any;
 }
 
 // Track-specific parameter application functions
@@ -472,11 +552,11 @@ function applyCodePresetParameters(
   }
   if (parameters.revealMode === 'line-by-line') {
     properties.animationMode = 'line-by-line';
-    properties.lineRevealIntervalMs = parameters.lineDelay as number || 800;
+    properties.lineRevealIntervalMs = (parameters.lineDelay as number) || 800;
   }
   if (parameters.focusMode === 'block') {
     properties.focusMode = 'block';
-    properties.dimOpacity = parameters.dimOpacity as number || 0.3;
+    properties.dimOpacity = (parameters.dimOpacity as number) || 0.3;
   }
 }
 

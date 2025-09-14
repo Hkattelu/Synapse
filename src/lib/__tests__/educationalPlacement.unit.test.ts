@@ -6,7 +6,10 @@ import {
   suggestBatchTrackPlacement,
   getTrackUsageStatistics,
 } from '../educationalPlacement';
-import { EDUCATIONAL_TRACKS, getEducationalTrackByName } from '../educationalTypes';
+import {
+  EDUCATIONAL_TRACKS,
+  getEducationalTrackByName,
+} from '../educationalTypes';
 
 function asset(partial: Partial<MediaAsset>): MediaAsset {
   // Minimal viable MediaAsset; tests only rely on a subset of fields
@@ -43,7 +46,11 @@ function item(partial: Partial<TimelineItem>): TimelineItem {
 describe('educationalPlacement (unit)', () => {
   describe('suggestTrackPlacement', () => {
     it('suggests Code track for code assets with high confidence', () => {
-      const a = asset({ type: 'code', name: 'snippet.ts', metadata: { language: 'typescript', fileSize: 10 } });
+      const a = asset({
+        type: 'code',
+        name: 'snippet.ts',
+        metadata: { language: 'typescript', fileSize: 10 },
+      });
       const res = suggestTrackPlacement(a);
 
       expect(res.suggestedTrack.name).toBe('Code');
@@ -52,7 +59,11 @@ describe('educationalPlacement (unit)', () => {
     });
 
     it('detects talking-head videos and routes to You track', () => {
-      const a = asset({ type: 'video', name: 'presenter-talking-head.mp4', metadata: { fileSize: 123, mimeType: 'video/mp4' } });
+      const a = asset({
+        type: 'video',
+        name: 'presenter-talking-head.mp4',
+        metadata: { fileSize: 123, mimeType: 'video/mp4' },
+      });
       const res = suggestTrackPlacement(a);
       expect(['You', 'Visual']).toContain(res.suggestedTrack.name);
       // Because of analysis pattern, confidence should be >= 0.95 for You
@@ -75,13 +86,21 @@ describe('educationalPlacement (unit)', () => {
       expect(res.suggestedTrack.name).toBe('Visual');
       expect(res.confidence).toBeCloseTo(0.5, 2);
       // Alternatives exclude the selected one
-      expect(res.alternatives.every((t) => t.id !== res.suggestedTrack.id)).toBe(true);
+      expect(
+        res.alternatives.every((t) => t.id !== res.suggestedTrack.id)
+      ).toBe(true);
     });
 
     it('boosts confidence when selectedTrack in context matches and is compatible', () => {
-      const a = asset({ type: 'audio', name: 'voiceover.wav', metadata: { mimeType: 'audio/wav', fileSize: 100 } });
+      const a = asset({
+        type: 'audio',
+        name: 'voiceover.wav',
+        metadata: { mimeType: 'audio/wav', fileSize: 100 },
+      });
       const narration = getEducationalTrackByName('Narration')!;
-      const res = suggestTrackPlacement(a, { selectedTrack: narration.trackNumber });
+      const res = suggestTrackPlacement(a, {
+        selectedTrack: narration.trackNumber,
+      });
       expect(res.suggestedTrack.id).toBe('narration');
       expect(res.confidence).toBeGreaterThan(0.9); // boosted to near 0.98
     });
@@ -93,7 +112,10 @@ describe('educationalPlacement (unit)', () => {
         item({ track: 1, type: 'visual-asset' }),
         item({ track: 1, type: 'video' }),
       ];
-      const res = suggestTrackPlacement(a, { existingItems: recent, currentTime: 10 });
+      const res = suggestTrackPlacement(a, {
+        existingItems: recent,
+        currentTime: 10,
+      });
       expect(res.suggestedTrack.name).toBe('Visual');
       expect(res.confidence).toBeGreaterThan(0.8);
       expect(res.reason.toLowerCase()).toContain('consistency');
@@ -102,7 +124,11 @@ describe('educationalPlacement (unit)', () => {
 
   describe('validateTrackPlacement', () => {
     it('flags conflicts when content type is not allowed on target track', () => {
-      const a = asset({ type: 'audio', name: 'bgm.mp3', metadata: { mimeType: 'audio/mp3', fileSize: 42 } });
+      const a = asset({
+        type: 'audio',
+        name: 'bgm.mp3',
+        metadata: { mimeType: 'audio/mp3', fileSize: 42 },
+      });
       const target = getEducationalTrackByName('Visual')!; // Visual does not accept audio
       const res = validateTrackPlacement(a, target);
       expect(res.isValid).toBe(false);
@@ -122,9 +148,19 @@ describe('educationalPlacement (unit)', () => {
   describe('suggestBatchTrackPlacement', () => {
     it('returns suggestions for each asset', () => {
       const assets = [
-        asset({ id: 'c1', type: 'code', name: 'index.ts', metadata: { language: 'typescript', fileSize: 1 } }),
+        asset({
+          id: 'c1',
+          type: 'code',
+          name: 'index.ts',
+          metadata: { language: 'typescript', fileSize: 1 },
+        }),
         asset({ id: 'v1', type: 'video', name: 'screen-demo.mp4' }),
-        asset({ id: 'a1', type: 'audio', name: 'voiceover.wav', metadata: { mimeType: 'audio/wav', fileSize: 2 } }),
+        asset({
+          id: 'a1',
+          type: 'audio',
+          name: 'voiceover.wav',
+          metadata: { mimeType: 'audio/wav', fileSize: 2 },
+        }),
       ];
       const res = suggestBatchTrackPlacement(assets);
       expect(res).toHaveLength(3);

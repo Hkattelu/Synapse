@@ -172,7 +172,9 @@ describe('Export System', () => {
       expect(screen.getByText('Export Video')).toBeInTheDocument();
       expect(
         screen.getAllByText((content, element) =>
-          (element?.textContent || '').includes('Export "Test Project" as video')
+          (element?.textContent || '').includes(
+            'Export "Test Project" as video'
+          )
         ).length
       ).toBeGreaterThan(0);
     });

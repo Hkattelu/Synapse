@@ -215,7 +215,7 @@ export class KeyframeManager {
     // Prefer the new single-preset field `animation`; when it is present,
     // ignore the legacy `animations` array. Fall back to the legacy list
     // only when the new field is absent to maintain backward compatibility.
-    const presets = item.animation ? [item.animation] : item.animations ?? [];
+    const presets = item.animation ? [item.animation] : (item.animations ?? []);
 
     if (presets.length === 0) {
       return item;
@@ -262,7 +262,9 @@ export class KeyframeManager {
   // Optimize keyframes by removing redundant ones
   static optimizeKeyframes(item: TimelineItem): TimelineItem {
     const optimized: Keyframe[] = [];
-    const keyframes = [...((item.keyframes ?? []) as Keyframe[])].sort((a, b) => a.time - b.time);
+    const keyframes = [...((item.keyframes ?? []) as Keyframe[])].sort(
+      (a, b) => a.time - b.time
+    );
 
     for (let i = 0; i < keyframes.length; i++) {
       const current = keyframes[i];

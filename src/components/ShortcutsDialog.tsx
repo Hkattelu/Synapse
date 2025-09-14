@@ -35,15 +35,28 @@ export function ShortcutsDialog({ isOpen, onClose }: ShortcutsDialogProps) {
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
-          
+
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {shortcuts.map((shortcut, index) => (
-              <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+              <div
+                key={index}
+                className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0"
+              >
                 <span className="text-gray-700">{shortcut.description}</span>
                 <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded">
                   {shortcut.key}
@@ -51,7 +64,7 @@ export function ShortcutsDialog({ isOpen, onClose }: ShortcutsDialogProps) {
               </div>
             ))}
           </div>
-          
+
           <div className="mt-6 flex justify-end">
             <button
               onClick={onClose}

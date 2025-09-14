@@ -1,15 +1,16 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { AppProvider } from './state/context';
 import { AuthProvider } from './state/authContext';
-import { DashboardView } from './components/DashboardView';
-import { StudioView } from './components/StudioView';
+import { BootProgressProvider } from './state/bootProgress';
 import { LoadingOverlay } from './components/LoadingOverlay';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NotificationsProvider } from './state/notifications';
 import { HistoryProvider } from './state/history';
-import Landing from './components/Landing';
-import DownloadsPage from './components/DownloadsPage';
+const Landing = React.lazy(() => import('./components/Landing'));
+const DownloadsPage = React.lazy(() => import('./components/DownloadsPage'));
+const DashboardView = React.lazy(() => import('./components/DashboardView').then(m => ({ default: m.DashboardView })));
+const StudioView = React.lazy(() => import('./components/StudioView').then(m => ({ default: m.StudioView })));
 import './App.css';
 import './styles/responsive-educational.css';
 import { useProjectStore } from './state/projectStore';
@@ -18,6 +19,9 @@ import { UpdateBanner } from './components/UpdateBanner';
 import { LicenseGate } from './components/LicenseGate';
 import { PerformanceMonitor } from './components/PerformanceMonitor';
 import { FLAGS } from './lib/flags';
+import { StudioLoader } from './components/ui/StudioLoader';
+import { StudioBootLoader } from './components/ui/StudioBootLoader';
+import { BootProgressMarker } from './components/BootProgressMarker';
 
 function GlobalShortcutsAndBridge() {
   // Global shortcuts only; no store subscription needed here
@@ -84,30 +88,36 @@ function GlobalShortcutsAndBridge() {
 function App() {
   return (
     <AuthProvider>
-      <AppProvider>
-        <LicenseProvider>
-          <NotificationsProvider>
-            <ErrorBoundary>
-              <HistoryProvider>
-                <GlobalShortcutsAndBridge />
-                <Router>
-                  <UpdateBanner />
-                  <Routes>
-                    <Route path="/" element={<Landing />} />
-                    <Route path="/projects" element={<DashboardView />} />
-                    <Route path="/studio" element={<StudioView />} />
-                    <Route path="/downloads" element={<DownloadsPage />} />
-                  </Routes>
-                  {/* License gate must be inside Router to scope by route */}
-                  <LicenseGate />
-                </Router>
-                <LoadingOverlay />
-                {FLAGS.SHOW_FPS && <PerformanceMonitor enabled />}
-              </HistoryProvider>
-            </ErrorBoundary>
-          </NotificationsProvider>
-        </LicenseProvider>
-      </AppProvider>
+      <BootProgressProvider>
+        <AppProvider>
+          <LicenseProvider>
+            <NotificationsProvider>
+              <ErrorBoundary>
+                <HistoryProvider>
+                  <GlobalShortcutsAndBridge />
+                  <React.Suspense fallback={<StudioBootLoader />}> 
+                    <Router>
+                      <UpdateBanner />
+                      <Routes>
+                        <Route path="/" element={<Landing />} />
+                        <Route path="/projects" element={<DashboardView />} />
+                        <Route path="/studio" element={<StudioView />} />
+                        <Route path="/downloads" element={<DownloadsPage />} />
+                      </Routes>
+                      {/* License gate must be inside Router to scope by route */}
+                      <LicenseGate />
+                      {/* When the routed content mounts, finish the boot progress */}
+                      <BootProgressMarker />
+                    </Router>
+                  </React.Suspense>
+                  <LoadingOverlay />
+                  {FLAGS.SHOW_FPS && <PerformanceMonitor enabled />}
+                </HistoryProvider>
+              </ErrorBoundary>
+            </NotificationsProvider>
+          </LicenseProvider>
+        </AppProvider>
+      </BootProgressProvider>
     </AuthProvider>
   );
 }

@@ -5,6 +5,7 @@ Synapse Studio supports syntax highlighting for a wide variety of programming la
 ## Supported Languages
 
 ### Web Technologies
+
 - **JavaScript** - Modern JavaScript with ES6+ features
 - **TypeScript** - TypeScript with type annotations
 - **JSX** - React JSX components
@@ -14,6 +15,7 @@ Synapse Studio supports syntax highlighting for a wide variety of programming la
 - **JSON** - JSON data format
 
 ### Programming Languages
+
 - **Python** - Python 3.x syntax
 - **Java** - Java programming language
 - **C++** - C++ with modern standards
@@ -22,14 +24,17 @@ Synapse Studio supports syntax highlighting for a wide variety of programming la
 - **SQL** - SQL database queries
 
 ### Markup & Configuration
+
 - **Markdown** - Markdown documentation
 - **YAML** - YAML configuration files
 - **XML** - XML markup language
 
 ### Shell & Scripting
+
 - **Bash** - Bash shell scripts
 
 ### Game Development
+
 - **GLSL** - OpenGL Shading Language for graphics programming
 - **GDScript** - Godot's built-in scripting language
 
@@ -43,6 +48,7 @@ GLSL (OpenGL Shading Language) is now fully supported with syntax highlighting f
 - Compute shaders
 
 ### GLSL Features Highlighted:
+
 - **Keywords**: `attribute`, `uniform`, `varying`, `in`, `out`, `void`, `main`
 - **Types**: `vec2`, `vec3`, `vec4`, `mat4`, `sampler2D`, `float`, `int`, `bool`
 - **Built-in Functions**: `texture2D`, `sin`, `cos`, `normalize`, `dot`, `cross`
@@ -50,6 +56,7 @@ GLSL (OpenGL Shading Language) is now fully supported with syntax highlighting f
 - **Preprocessor Directives**: `#version`, `#define`, `#ifdef`
 
 ### Example GLSL Code:
+
 ```glsl
 #version 330 core
 
@@ -67,6 +74,7 @@ void main()
 GDScript is Godot's Python-like scripting language, now with full syntax highlighting support.
 
 ### GDScript Features Highlighted:
+
 - **Keywords**: `extends`, `class_name`, `func`, `var`, `const`, `signal`, `enum`
 - **Decorators**: `@export`, `@onready`, `@tool`
 - **Built-in Types**: `Vector2`, `Vector3`, `Color`, `Node`, `Resource`
@@ -75,6 +83,7 @@ GDScript is Godot's Python-like scripting language, now with full syntax highlig
 - **Node Methods**: `get_node`, `find_child`, `queue_free`, `connect`
 
 ### Example GDScript Code:
+
 ```gdscript
 extends CharacterBody2D
 

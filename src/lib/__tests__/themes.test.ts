@@ -24,7 +24,7 @@ describe('ThemeManager', () => {
     localStorageMock.setItem.mockClear();
     localStorageMock.removeItem.mockClear();
     localStorageMock.clear.mockClear();
-    
+
     // Create fresh instance
     themeManager = new ThemeManager();
   });
@@ -52,7 +52,7 @@ describe('ThemeManager', () => {
         'high-contrast-light',
       ];
 
-      expectedThemes.forEach(themeId => {
+      expectedThemes.forEach((themeId) => {
         const theme = themeManager.getTheme(themeId);
         expect(theme).toBeTruthy();
         expect(theme?.id).toBe(themeId);
@@ -62,8 +62,8 @@ describe('ThemeManager', () => {
     it('should initialize categories', () => {
       const categories = themeManager.getCategories();
       expect(categories.length).toBeGreaterThan(0);
-      
-      const categoryIds = categories.map(cat => cat.id);
+
+      const categoryIds = categories.map((cat) => cat.id);
       expect(categoryIds).toContain('popular');
       expect(categoryIds).toContain('light');
       expect(categoryIds).toContain('dark');
@@ -87,7 +87,7 @@ describe('ThemeManager', () => {
     it('should get themes by category', () => {
       const darkThemes = themeManager.getThemesByCategory('dark');
       expect(darkThemes.length).toBeGreaterThan(0);
-      darkThemes.forEach(theme => {
+      darkThemes.forEach((theme) => {
         expect(theme.category).toBe('dark');
       });
     });
@@ -102,7 +102,9 @@ describe('ThemeManager', () => {
     it('should search themes by name', () => {
       const results = themeManager.searchThemes('dracula');
       expect(results.length).toBeGreaterThan(0);
-      expect(results.some(theme => theme.name.toLowerCase().includes('dracula'))).toBe(true);
+      expect(
+        results.some((theme) => theme.name.toLowerCase().includes('dracula'))
+      ).toBe(true);
     });
 
     it('should search themes by tag', () => {
@@ -178,7 +180,7 @@ describe('ThemeManager', () => {
     it('should remove custom theme', () => {
       themeManager.registerTheme(customTheme);
       expect(themeManager.getTheme('custom-test')).toBeTruthy();
-      
+
       const removed = themeManager.removeTheme('custom-test');
       expect(removed).toBe(true);
       expect(themeManager.getTheme('custom-test')).toBeNull();
@@ -195,15 +197,15 @@ describe('ThemeManager', () => {
     it('should add theme to favorites', () => {
       themeManager.addToFavorites('dracula');
       expect(themeManager.isFavorite('dracula')).toBe(true);
-      
+
       const favorites = themeManager.getFavoriteThemes();
-      expect(favorites.some(theme => theme.id === 'dracula')).toBe(true);
+      expect(favorites.some((theme) => theme.id === 'dracula')).toBe(true);
     });
 
     it('should remove theme from favorites', () => {
       themeManager.addToFavorites('dracula');
       expect(themeManager.isFavorite('dracula')).toBe(true);
-      
+
       themeManager.removeFromFavorites('dracula');
       expect(themeManager.isFavorite('dracula')).toBe(false);
     });
@@ -218,7 +220,7 @@ describe('ThemeManager', () => {
     it('should record theme usage', () => {
       themeManager.recordThemeUsage('dracula');
       themeManager.recordThemeUsage('monokai');
-      
+
       const recent = themeManager.getRecentThemes();
       expect(recent.length).toBeGreaterThan(0);
       expect(recent[0].id).toBe('monokai'); // Most recent first
@@ -227,10 +229,10 @@ describe('ThemeManager', () => {
     it('should limit recent themes to 10', () => {
       // Add more than 10 themes
       const themes = themeManager.getAllThemes();
-      themes.slice(0, 15).forEach(theme => {
+      themes.slice(0, 15).forEach((theme) => {
         themeManager.recordThemeUsage(theme.id);
       });
-      
+
       const recent = themeManager.getRecentThemes();
       expect(recent.length).toBeLessThanOrEqual(10);
     });
@@ -289,7 +291,7 @@ describe('ThemeManager', () => {
       themeManager.registerTheme(customTheme);
       const exported = themeManager.exportTheme('export-test');
       expect(exported).toBeTruthy();
-      
+
       const parsed = JSON.parse(exported!);
       expect(parsed.id).toBe('export-test');
       expect(parsed.name).toBe('Export Test Theme');
@@ -298,7 +300,7 @@ describe('ThemeManager', () => {
     it('should import theme from JSON', () => {
       const themeJson = JSON.stringify(customTheme);
       const imported = themeManager.importTheme(themeJson);
-      
+
       expect(imported).toEqual(customTheme);
       expect(themeManager.getTheme('export-test')).toEqual(customTheme);
     });
@@ -333,7 +335,7 @@ describe('Theme Preview Utilities', () => {
     it('should handle different languages', () => {
       const jsPreview = generateThemePreview('dracula', 'javascript');
       const pyPreview = generateThemePreview('dracula', 'python');
-      
+
       expect(jsPreview).toContain('function');
       expect(pyPreview).toContain('def');
     });
@@ -361,32 +363,40 @@ describe('Theme Preview Utilities', () => {
 
 describe('Built-in Themes Validation', () => {
   it('should have valid structure for all built-in themes', () => {
-    BUILT_IN_THEMES.forEach(theme => {
+    BUILT_IN_THEMES.forEach((theme) => {
       expect(theme.id).toBeTruthy();
       expect(theme.name).toBeTruthy();
       expect(['light', 'dark', 'high-contrast']).toContain(theme.category);
-      
+
       // Check required colors
       const requiredColors = [
-        'background', 'foreground', 'comment', 'keyword', 'string',
-        'number', 'operator', 'punctuation', 'function', 'variable'
+        'background',
+        'foreground',
+        'comment',
+        'keyword',
+        'string',
+        'number',
+        'operator',
+        'punctuation',
+        'function',
+        'variable',
       ];
-      
-      requiredColors.forEach(color => {
+
+      requiredColors.forEach((color) => {
         expect(theme.colors[color as keyof typeof theme.colors]).toBeTruthy();
       });
     });
   });
 
   it('should have unique IDs for all themes', () => {
-    const ids = BUILT_IN_THEMES.map(theme => theme.id);
+    const ids = BUILT_IN_THEMES.map((theme) => theme.id);
     const uniqueIds = new Set(ids);
     expect(uniqueIds.size).toBe(ids.length);
   });
 
   it('should have proper color format (hex)', () => {
-    BUILT_IN_THEMES.forEach(theme => {
-      Object.values(theme.colors).forEach(color => {
+    BUILT_IN_THEMES.forEach((theme) => {
+      Object.values(theme.colors).forEach((color) => {
         expect(color).toMatch(/^#[0-9a-fA-F]{6}$/);
       });
     });

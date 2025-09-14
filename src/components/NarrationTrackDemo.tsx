@@ -12,7 +12,9 @@ import { EDUCATIONAL_TRACKS } from '../lib/educationalTypes';
 export function NarrationTrackDemo() {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [selectedDemo, setSelectedDemo] = useState<'waveform' | 'levels' | 'ducking' | 'sync' | 'full'>('full');
+  const [selectedDemo, setSelectedDemo] = useState<
+    'waveform' | 'levels' | 'ducking' | 'sync' | 'full'
+  >('full');
 
   // Mock data
   const mockAsset: MediaAsset = {
@@ -73,8 +75,8 @@ export function NarrationTrackDemo() {
     keyframes: [],
   };
 
-  const narrationTrack = EDUCATIONAL_TRACKS.find(t => t.id === 'narration')!;
-  
+  const narrationTrack = EDUCATIONAL_TRACKS.find((t) => t.id === 'narration')!;
+
   const availableTracks = [
     { id: 0, name: 'Code', color: '#8B5CF6' },
     { id: 1, name: 'Visual', color: '#10B981' },
@@ -94,11 +96,31 @@ export function NarrationTrackDemo() {
   };
 
   const demos = [
-    { id: 'full', label: 'Full Features', description: 'Complete narration track interface' },
-    { id: 'waveform', label: 'Waveform', description: 'Audio waveform visualization' },
-    { id: 'levels', label: 'Level Meters', description: 'Real-time audio level monitoring' },
-    { id: 'ducking', label: 'Audio Ducking', description: 'Automatic volume reduction controls' },
-    { id: 'sync', label: 'Timing Sync', description: 'Narration timing synchronization tools' },
+    {
+      id: 'full',
+      label: 'Full Features',
+      description: 'Complete narration track interface',
+    },
+    {
+      id: 'waveform',
+      label: 'Waveform',
+      description: 'Audio waveform visualization',
+    },
+    {
+      id: 'levels',
+      label: 'Level Meters',
+      description: 'Real-time audio level monitoring',
+    },
+    {
+      id: 'ducking',
+      label: 'Audio Ducking',
+      description: 'Automatic volume reduction controls',
+    },
+    {
+      id: 'sync',
+      label: 'Timing Sync',
+      description: 'Narration timing synchronization tools',
+    },
   ] as const;
 
   return (
@@ -108,7 +130,8 @@ export function NarrationTrackDemo() {
           Narration Track Audio Features
         </h1>
         <p className="text-text-secondary">
-          Advanced audio processing and synchronization tools for educational content narration.
+          Advanced audio processing and synchronization tools for educational
+          content narration.
         </p>
       </div>
 
@@ -130,7 +153,7 @@ export function NarrationTrackDemo() {
           ))}
         </div>
         <p className="text-sm text-text-secondary mt-2">
-          {demos.find(d => d.id === selectedDemo)?.description}
+          {demos.find((d) => d.id === selectedDemo)?.description}
         </p>
       </div>
 
@@ -190,7 +213,9 @@ export function NarrationTrackDemo() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
-                <h4 className="font-medium text-text-primary mb-4">Bar Style</h4>
+                <h4 className="font-medium text-text-primary mb-4">
+                  Bar Style
+                </h4>
                 <div className="flex justify-center">
                   <AudioLevelMeter
                     style="bars"
@@ -202,9 +227,11 @@ export function NarrationTrackDemo() {
                   />
                 </div>
               </div>
-              
+
               <div className="text-center">
-                <h4 className="font-medium text-text-primary mb-4">Circular Style</h4>
+                <h4 className="font-medium text-text-primary mb-4">
+                  Circular Style
+                </h4>
                 <div className="flex justify-center">
                   <AudioLevelMeter
                     style="circular"
@@ -215,9 +242,11 @@ export function NarrationTrackDemo() {
                   />
                 </div>
               </div>
-              
+
               <div className="text-center">
-                <h4 className="font-medium text-text-primary mb-4">Linear Style</h4>
+                <h4 className="font-medium text-text-primary mb-4">
+                  Linear Style
+                </h4>
                 <div className="flex justify-center">
                   <AudioLevelMeter
                     style="linear"
@@ -232,8 +261,9 @@ export function NarrationTrackDemo() {
             </div>
             <div className="mt-6 p-4 bg-background-hover rounded text-sm text-text-secondary">
               <p>
-                Level meters show real-time audio levels with peak and average indicators.
-                Different styles are available to match your workflow preferences.
+                Level meters show real-time audio levels with peak and average
+                indicators. Different styles are available to match your
+                workflow preferences.
               </p>
             </div>
           </div>
@@ -246,7 +276,9 @@ export function NarrationTrackDemo() {
             </h3>
             <AudioDuckingControls
               duckingConfig={mockItem.properties.ducking as AudioDuckingConfig}
-              onConfigChange={(config) => console.log('Ducking config:', config)}
+              onConfigChange={(config) =>
+                console.log('Ducking config:', config)
+              }
               availableTracks={availableTracks}
             />
           </div>
@@ -259,7 +291,9 @@ export function NarrationTrackDemo() {
             </h3>
             <TimingSyncTools
               syncPoints={mockItem.properties.syncPoints as TimingSyncPoint[]}
-              onSyncPointsChange={(syncPoints) => console.log('Sync points:', syncPoints)}
+              onSyncPointsChange={(syncPoints) =>
+                console.log('Sync points:', syncPoints)
+              }
               currentTime={currentTime}
               duration={mockAsset.duration || 0}
               isPlaying={isPlaying}
@@ -274,33 +308,41 @@ export function NarrationTrackDemo() {
       <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-background-subtle rounded-lg p-4">
           <div className="text-2xl mb-2">🎵</div>
-          <h4 className="font-semibold text-text-primary mb-2">Waveform Visualization</h4>
+          <h4 className="font-semibold text-text-primary mb-2">
+            Waveform Visualization
+          </h4>
           <p className="text-sm text-text-secondary">
-            Interactive waveform display with sync point markers and timeline scrubbing.
+            Interactive waveform display with sync point markers and timeline
+            scrubbing.
           </p>
         </div>
-        
+
         <div className="bg-background-subtle rounded-lg p-4">
           <div className="text-2xl mb-2">📊</div>
-          <h4 className="font-semibold text-text-primary mb-2">Audio Level Meters</h4>
+          <h4 className="font-semibold text-text-primary mb-2">
+            Audio Level Meters
+          </h4>
           <p className="text-sm text-text-secondary">
             Real-time audio level monitoring with multiple visualization styles.
           </p>
         </div>
-        
+
         <div className="bg-background-subtle rounded-lg p-4">
           <div className="text-2xl mb-2">🔊</div>
-          <h4 className="font-semibold text-text-primary mb-2">Audio Ducking</h4>
+          <h4 className="font-semibold text-text-primary mb-2">
+            Audio Ducking
+          </h4>
           <p className="text-sm text-text-secondary">
             Automatic volume reduction of background tracks during narration.
           </p>
         </div>
-        
+
         <div className="bg-background-subtle rounded-lg p-4">
           <div className="text-2xl mb-2">⏱️</div>
           <h4 className="font-semibold text-text-primary mb-2">Timing Sync</h4>
           <p className="text-sm text-text-secondary">
-            Precise timing synchronization tools for aligning narration with visuals.
+            Precise timing synchronization tools for aligning narration with
+            visuals.
           </p>
         </div>
       </div>

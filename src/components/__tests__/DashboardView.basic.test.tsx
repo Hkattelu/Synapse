@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { DashboardView } from '../DashboardView';
+import { MemoryRouter } from 'react-router-dom';
 
 const createProject = vi.fn();
 const setCurrentView = vi.fn();
@@ -13,9 +14,13 @@ vi.mock('../../state/hooks', () => ({
 
 describe('DashboardView (basic)', () => {
   it('shows create project call-to-action and can open form', () => {
-    render(<DashboardView />);
+    render(
+      <MemoryRouter>
+        <DashboardView />
+      </MemoryRouter>
+    );
 
-    const cta = screen.getByRole('button', { name: /Create New Project/i });
+    const cta = screen.getByRole('button', { name: /New Project/i });
     expect(cta).toBeInTheDocument();
 
     fireEvent.click(cta);

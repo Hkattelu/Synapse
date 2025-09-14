@@ -16,11 +16,13 @@ Purpose: collect, organize, prioritize, and act on feedback from the first clien
 ## Issue and bug reporting expectations
 
 Ask clients to include:
+
 - Summary, steps to reproduce, expected vs actual
 - Sample project or files (if possible)
 - Browser/OS and approximate time
 
 Triage guidelines:
+
 - Security and data loss → highest priority
 - Rendering failures and blockers → next priority
 - UI papercuts and suggestions → backlog unless frequently reported

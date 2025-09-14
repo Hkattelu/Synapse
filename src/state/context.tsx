@@ -1,6 +1,12 @@
 // React Context for global state management
 
-import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  useRef,
+} from 'react';
 import type { ReactNode } from 'react';
 import type { AppState, AppAction, AppContextType } from './types';
 import { appReducer, initialState } from './reducers';
@@ -57,26 +63,27 @@ export function AppProvider({ children }: AppProviderProps) {
 
         // In development mode, always ensure sample data exists and load starter project
         if (import.meta.env.DEV) {
-          const sampleProjects = loadSampleDataForDev();
+          const sampleStored = loadSampleDataForDev();
+          const sampleIds = new Set(sampleStored.map((s) => s.project.id));
 
-          // Check if sample projects exist in storage
-          const hasStarterProject = projects.some(
-            (p) => p.project.id === 'remotion-tutorial-sample'
+          // Ensure sample projects exist in storage
+          const missingSamples = sampleStored.filter(
+            (s) => !projects.some((p) => p.project.id === s.project.id)
           );
-
-          if (!hasStarterProject && sampleProjects.length > 0) {
-            // Save sample projects to storage if they don't exist
-            for (const sampleProject of sampleProjects) {
-              await ProjectManager.saveProject(sampleProject.project);
+          if (missingSamples.length > 0) {
+            for (const s of missingSamples) {
+              await ProjectManager.saveProject(s.project);
             }
-            // Reload projects after saving samples
             projects = await ProjectManager.getAllProjects();
           }
 
-          // Always load the starter project in development
-          const starterProject = projects.find(
-            (p) => p.project.id === 'remotion-tutorial-sample'
-          );
+          // Prefer loading the first sample project in dev
+          const preferredId = sampleStored[0]?.project.id;
+          const starterProject =
+            (preferredId &&
+              projects.find((p) => p.project.id === preferredId)) ||
+            projects.find((p) => sampleIds.has(p.project.id));
+
           if (starterProject) {
             console.log('🎬 Loading starter project for development');
             dispatch({
@@ -117,8 +124,9 @@ export function AppProvider({ children }: AppProviderProps) {
         // Fetch Music Library metadata (public JSON) in parallel to startup
         // Non-fatal if it fails; UI will simply show empty library
         try {
-          // Skip in non-window environments (e.g., Node tests) to avoid noisy fetches
-          if (typeof window !== 'undefined') {
+          // Skip in tests and non-window environments to avoid noisy fetches
+          const isVitest = Boolean((import.meta as any)?.vitest);
+          if (typeof window !== 'undefined' && !isVitest) {
             // Build URL from Vite base so non-root deployments work (e.g., /app/)
             const rawBase = (import.meta as any)?.env?.BASE_URL ?? '/';
             const origin = window.location?.origin ?? 'http://localhost';

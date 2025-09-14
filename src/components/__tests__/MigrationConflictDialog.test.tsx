@@ -3,8 +3,14 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { MigrationConflictDialog, MigrationPreviewDialog } from '../MigrationConflictDialog';
-import type { MigrationConflict, EducationalTrack } from '../../lib/educationalTypes';
+import {
+  MigrationConflictDialog,
+  MigrationPreviewDialog,
+} from '../MigrationConflictDialog';
+import type {
+  MigrationConflict,
+  EducationalTrack,
+} from '../../lib/educationalTypes';
 import { EDUCATIONAL_TRACKS } from '../../lib/educationalTypes';
 import { beforeEach } from 'node:test';
 import { beforeEach } from 'node:test';
@@ -16,15 +22,15 @@ const mockConflicts: MigrationConflict[] = [
     currentTrack: 0,
     suggestedTrack: EDUCATIONAL_TRACKS[0], // Code track
     reason: 'Content appears to be code-related',
-    alternatives: [EDUCATIONAL_TRACKS[1], EDUCATIONAL_TRACKS[2]] // Visual and Narration tracks
+    alternatives: [EDUCATIONAL_TRACKS[1], EDUCATIONAL_TRACKS[2]], // Visual and Narration tracks
   },
   {
     itemId: 'item-2',
     currentTrack: 1,
     suggestedTrack: EDUCATIONAL_TRACKS[2], // Narration track
     reason: 'Audio content detected',
-    alternatives: [EDUCATIONAL_TRACKS[3]] // You track
-  }
+    alternatives: [EDUCATIONAL_TRACKS[3]], // You track
+  },
 ];
 
 const mockStatistics = {
@@ -33,17 +39,17 @@ const mockStatistics = {
     Code: 2,
     Visual: 1,
     Narration: 1,
-    You: 1
+    You: 1,
   },
   itemsByType: {
     code: 2,
     video: 2,
     audio: 1,
     title: 0,
-    'visual-asset': 0
+    'visual-asset': 0,
   },
   averageConfidence: 85,
-  conflictCount: 2
+  conflictCount: 2,
 };
 
 describe('MigrationConflictDialog', () => {
@@ -79,7 +85,9 @@ describe('MigrationConflictDialog', () => {
       />
     );
 
-    expect(screen.queryByText('Resolve Migration Conflicts')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Resolve Migration Conflicts')
+    ).not.toBeInTheDocument();
   });
 
   it('should display conflict details correctly', () => {
@@ -93,13 +101,17 @@ describe('MigrationConflictDialog', () => {
     );
 
     // Check first conflict
-    expect(screen.getByText('Content appears to be code-related')).toBeInTheDocument();
+    expect(
+      screen.getByText('Content appears to be code-related')
+    ).toBeInTheDocument();
     expect(screen.getByText('Code Track (Recommended)')).toBeInTheDocument();
     expect(screen.getByText('Currently on Track 1')).toBeInTheDocument();
 
     // Check second conflict
     expect(screen.getByText('Audio content detected')).toBeInTheDocument();
-    expect(screen.getByText('Narration Track (Recommended)')).toBeInTheDocument();
+    expect(
+      screen.getByText('Narration Track (Recommended)')
+    ).toBeInTheDocument();
     expect(screen.getByText('Currently on Track 2')).toBeInTheDocument();
   });
 
@@ -129,8 +141,10 @@ describe('MigrationConflictDialog', () => {
 
     // Click on an alternative track for the first conflict
     const visualTrackButton = screen.getAllByText('Visual Track')[0];
-    const overrideButton = visualTrackButton.closest('.bg-gray-50')?.querySelector('button');
-    
+    const overrideButton = visualTrackButton
+      .closest('.bg-gray-50')
+      ?.querySelector('button');
+
     if (overrideButton) {
       fireEvent.click(overrideButton);
     }
@@ -144,13 +158,13 @@ describe('MigrationConflictDialog', () => {
         {
           conflictId: 'item-1',
           selectedTrack: EDUCATIONAL_TRACKS[1], // Visual track
-          userOverride: true
+          userOverride: true,
         },
         {
           conflictId: 'item-2',
           selectedTrack: EDUCATIONAL_TRACKS[2], // Narration track (default)
-          userOverride: false
-        }
+          userOverride: false,
+        },
       ]);
     });
   });
@@ -182,9 +196,9 @@ describe('MigrationConflictDialog', () => {
     );
 
     expect(screen.getAllByText('All Available Tracks:')).toHaveLength(2);
-    
+
     // Should show all 4 educational tracks
-    EDUCATIONAL_TRACKS.forEach(track => {
+    EDUCATIONAL_TRACKS.forEach((track) => {
       expect(screen.getAllByText(track.name).length).toBeGreaterThan(0);
     });
   });
@@ -223,7 +237,11 @@ describe('MigrationPreviewDialog', () => {
     );
 
     expect(screen.getByText('Migration Preview')).toBeInTheDocument();
-    expect(screen.getByText('Preview how "Test Project" will be migrated to educational tracks')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Preview how "Test Project" will be migrated to educational tracks'
+      )
+    ).toBeInTheDocument();
   });
 
   it('should not render when closed', () => {
@@ -285,12 +303,16 @@ describe('MigrationPreviewDialog', () => {
     );
 
     expect(screen.getByText('2 conflicts detected')).toBeInTheDocument();
-    expect(screen.getByText('Some items require manual track assignment and will need your review.')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Some items require manual track assignment and will need your review.'
+      )
+    ).toBeInTheDocument();
   });
 
   it('should not show conflict warning when no conflicts', () => {
     const statsWithoutConflicts = { ...mockStatistics, conflictCount: 0 };
-    
+
     render(
       <MigrationPreviewDialog
         projectName="Test Project"
@@ -377,10 +399,22 @@ describe('MigrationPreviewDialog', () => {
       />
     );
 
-    expect(screen.getByText('What happens during migration:')).toBeInTheDocument();
-    expect(screen.getByText(/Timeline items will be automatically assigned/)).toBeInTheDocument();
-    expect(screen.getByText(/Track-specific default properties will be applied/)).toBeInTheDocument();
-    expect(screen.getByText(/Your existing properties and animations will be preserved/)).toBeInTheDocument();
-    expect(screen.getByText(/A backup will be created for rollback/)).toBeInTheDocument();
+    expect(
+      screen.getByText('What happens during migration:')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Timeline items will be automatically assigned/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Track-specific default properties will be applied/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Your existing properties and animations will be preserved/
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/A backup will be created for rollback/)
+    ).toBeInTheDocument();
   });
 });

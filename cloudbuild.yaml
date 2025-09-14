@@ -12,19 +12,16 @@ steps:
   - name: gcr.io/cloud-builders/docker
     args:
       [
-        "build",
-        "-t",
-        "$_REGION-docker.pkg.dev/$PROJECT_ID/synapse/synapse:$SHORT_SHA",
-        ".",
+        'build',
+        '-t',
+        '$_REGION-docker.pkg.dev/$PROJECT_ID/synapse/synapse:$SHORT_SHA',
+        '.',
       ]
 
   # Push the image to Artifact Registry
   - name: gcr.io/cloud-builders/docker
     args:
-      [
-        "push",
-        "$_REGION-docker.pkg.dev/$PROJECT_ID/synapse/synapse:$SHORT_SHA",
-      ]
+      ['push', '$_REGION-docker.pkg.dev/$PROJECT_ID/synapse/synapse:$SHORT_SHA']
 
   # Deploy to Cloud Run using the just-built image
   # NOTE: We do NOT pass --set-env-vars here, so existing service env vars
@@ -33,15 +30,15 @@ steps:
     entrypoint: gcloud
     args:
       [
-        "run",
-        "deploy",
-        "synapse",
-        "--image",
-        "$_REGION-docker.pkg.dev/$PROJECT_ID/synapse/synapse:$SHORT_SHA",
-        "--region",
-        "$_REGION",
-        "--allow-unauthenticated",
+        'run',
+        'deploy',
+        'synapse',
+        '--image',
+        '$_REGION-docker.pkg.dev/$PROJECT_ID/synapse/synapse:$SHORT_SHA',
+        '--region',
+        '$_REGION',
+        '--allow-unauthenticated',
       ]
 
 images:
-  - "$_REGION-docker.pkg.dev/$PROJECT_ID/synapse/synapse:$SHORT_SHA"
+  - '$_REGION-docker.pkg.dev/$PROJECT_ID/synapse/synapse:$SHORT_SHA'

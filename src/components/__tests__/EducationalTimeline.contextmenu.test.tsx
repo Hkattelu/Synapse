@@ -17,21 +17,39 @@ vi.mock('../ContentAdditionToolbar', () => ({
 
 // Make intersection observer always consider tracks visible and simplify other perf hooks
 vi.mock('../../lib/performanceOptimizations', () => ({
-  useIntersectionObserver: () => [({ current: null } as any), true],
+  useIntersectionObserver: () => [{ current: null } as any, true],
   useResponsiveBreakpoint: () => 'desktop',
   TimelineCalculations: {
-    getTimeToPixels: (time: number, pps: number = 100, zoom: number = 1) => time * pps * zoom,
-    getPixelsToTime: (px: number, pps: number = 100, zoom: number = 1) => px / (pps * zoom),
+    getTimeToPixels: (time: number, pps: number = 100, zoom: number = 1) =>
+      time * pps * zoom,
+    getPixelsToTime: (px: number, pps: number = 100, zoom: number = 1) =>
+      px / (pps * zoom),
     getCacheSize: () => 0,
   },
   useOptimizedTrackPreview: (track: any, item: any, asset: any) => {
     if (track?.id === 'code') {
-      return { type: 'code', language: 'javascript', preview: false, animationMode: 'none' };
+      return {
+        type: 'code',
+        language: 'javascript',
+        preview: false,
+        animationMode: 'none',
+      };
     }
     if (track?.id === 'narration') {
-      return { type: 'narration', volume: 0.8, syncPoints: 0, hasWaveform: false, hasDucking: false };
+      return {
+        type: 'narration',
+        volume: 0.8,
+        syncPoints: 0,
+        hasWaveform: false,
+        hasDucking: false,
+      };
     }
-    return { type: 'visual', isVideo: asset?.type === 'video', dimensions: '1920×1080', thumbnail: null };
+    return {
+      type: 'visual',
+      isVideo: asset?.type === 'video',
+      dimensions: '1920×1080',
+      thumbnail: null,
+    };
   },
   useThrottledScroll: (cb: any) => cb,
   useResizeObserver: () => ({ current: null }),
@@ -90,6 +108,7 @@ vi.mock('../../state/hooks', () => {
       updateTimelineView: vi.fn(),
     }),
     usePlayback: () => ({ playback: { currentTime: 0 }, seek: vi.fn() }),
+    useProject: () => ({ project: { settings: { duration: 10 } } }),
   };
 });
 
@@ -110,4 +129,3 @@ describe('EducationalTimeline context menu', () => {
     expect(screen.getByText('Duplicate (Ctrl+D)')).toBeInTheDocument();
   });
 });
-

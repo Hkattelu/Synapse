@@ -1,13 +1,29 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { TimelineItem, MediaAsset } from '../lib/types';
 import type { EducationalTrack } from '../lib/educationalTypes';
-import type { AudioDuckingConfig, TimingSyncPoint, NarrationTrackProperties } from '../lib/audioUtils';
-import { DEFAULT_NARRATION_PROPERTIES, validateAudioForNarration } from '../lib/audioUtils';
+import type {
+  AudioDuckingConfig,
+  TimingSyncPoint,
+  NarrationTrackProperties,
+} from '../lib/audioUtils';
+import {
+  DEFAULT_NARRATION_PROPERTIES,
+  validateAudioForNarration,
+} from '../lib/audioUtils';
 import { WaveformVisualization } from './WaveformVisualization';
 import { AudioLevelMeter } from './AudioLevelMeter';
-import { AudioDuckingControls, DuckingPresetSelector } from './AudioDuckingControls';
+import {
+  AudioDuckingControls,
+  DuckingPresetSelector,
+} from './AudioDuckingControls';
 import { TimingSyncTools } from './TimingSyncTools';
-import { Mic, Volume2, Settings, Activity as Waveform, Clock } from 'lucide-react';
+import {
+  Mic,
+  Volume2,
+  Settings,
+  Activity as Waveform,
+  Clock,
+} from 'lucide-react';
 
 interface NarrationTrackFeaturesProps {
   item: TimelineItem;
@@ -34,7 +50,9 @@ export function NarrationTrackFeatures({
   availableTracks,
   className = '',
 }: NarrationTrackFeaturesProps) {
-  const [activeTab, setActiveTab] = useState<'waveform' | 'levels' | 'ducking' | 'sync' | 'processing'>('waveform');
+  const [activeTab, setActiveTab] = useState<
+    'waveform' | 'levels' | 'ducking' | 'sync' | 'processing'
+  >('waveform');
   const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [audioSource, setAudioSource] = useState<AudioNode | null>(null);
@@ -48,7 +66,9 @@ export function NarrationTrackFeatures({
       ...DEFAULT_NARRATION_PROPERTIES.ducking,
       ...(item.properties.ducking ?? {}),
     },
-    syncPoints: (item.properties.syncPoints as any) ?? DEFAULT_NARRATION_PROPERTIES.syncPoints,
+    syncPoints:
+      (item.properties.syncPoints as any) ??
+      DEFAULT_NARRATION_PROPERTIES.syncPoints,
   };
 
   // Load audio buffer for analysis
@@ -61,47 +81,66 @@ export function NarrationTrackFeatures({
   // Set up audio context for real-time analysis
   useEffect(() => {
     if (asset?.url && audioRef.current) {
-      const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const context = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
       const source = context.createMediaElementSource(audioRef.current);
-      
+
       setAudioContext(context);
       setAudioSource(source);
-      
+
       return () => {
         context.close();
       };
     }
   }, [asset?.url]);
 
-  const handlePropertyUpdate = useCallback((updates: Partial<NarrationTrackProperties>) => {
-    onItemUpdate({
-      ...item,
-      properties: {
-        ...item.properties,
-        ...updates,
-      },
-    });
-  }, [item, onItemUpdate]);
+  const handlePropertyUpdate = useCallback(
+    (updates: Partial<NarrationTrackProperties>) => {
+      onItemUpdate({
+        ...item,
+        properties: {
+          ...item.properties,
+          ...updates,
+        },
+      });
+    },
+    [item, onItemUpdate]
+  );
 
-  const handleDuckingConfigChange = useCallback((ducking: AudioDuckingConfig) => {
-    handlePropertyUpdate({ ducking });
-  }, [handlePropertyUpdate]);
+  const handleDuckingConfigChange = useCallback(
+    (ducking: AudioDuckingConfig) => {
+      handlePropertyUpdate({ ducking });
+    },
+    [handlePropertyUpdate]
+  );
 
-  const handleSyncPointsChange = useCallback((syncPoints: TimingSyncPoint[]) => {
-    handlePropertyUpdate({ syncPoints });
-  }, [handlePropertyUpdate]);
+  const handleSyncPointsChange = useCallback(
+    (syncPoints: TimingSyncPoint[]) => {
+      handlePropertyUpdate({ syncPoints });
+    },
+    [handlePropertyUpdate]
+  );
 
-  const handleVolumeChange = useCallback((volume: number) => {
-    handlePropertyUpdate({ volume });
-  }, [handlePropertyUpdate]);
+  const handleVolumeChange = useCallback(
+    (volume: number) => {
+      handlePropertyUpdate({ volume });
+    },
+    [handlePropertyUpdate]
+  );
 
-  const handleGainChange = useCallback((gain: number) => {
-    handlePropertyUpdate({ gain });
-  }, [handlePropertyUpdate]);
+  const handleGainChange = useCallback(
+    (gain: number) => {
+      handlePropertyUpdate({ gain });
+    },
+    [handlePropertyUpdate]
+  );
 
-  const handleProcessingToggle = useCallback((property: keyof NarrationTrackProperties, value: boolean) => {
-    handlePropertyUpdate({ [property]: value });
-  }, [handlePropertyUpdate]);
+  const handleProcessingToggle = useCallback(
+    (property: keyof NarrationTrackProperties, value: boolean) => {
+      handlePropertyUpdate({ [property]: value });
+    },
+    [handlePropertyUpdate]
+  );
 
   const tabs = [
     { id: 'waveform', label: 'Waveform', icon: Waveform },
@@ -113,7 +152,9 @@ export function NarrationTrackFeatures({
 
   if (!asset || asset.type !== 'audio') {
     return (
-      <div className={`narration-track-features bg-background-subtle rounded-lg p-4 ${className}`}>
+      <div
+        className={`narration-track-features bg-background-subtle rounded-lg p-4 ${className}`}
+      >
         <div className="text-center text-text-secondary">
           <Mic className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p>No audio asset selected</p>
@@ -123,13 +164,11 @@ export function NarrationTrackFeatures({
   }
 
   return (
-    <div className={`narration-track-features bg-background-subtle rounded-lg ${className}`}>
+    <div
+      className={`narration-track-features bg-background-subtle rounded-lg ${className}`}
+    >
       {/* Hidden audio element for real-time analysis */}
-      <audio
-        ref={audioRef}
-        src={asset.url}
-        style={{ display: 'none' }}
-      />
+      <audio ref={audioRef} src={asset.url} style={{ display: 'none' }} />
 
       {/* Tab Navigation */}
       <div className="flex border-b border-border-subtle">
@@ -241,9 +280,12 @@ function WaveformTab({
           className="w-full"
         />
       </div>
-      
+
       <div className="text-sm text-text-secondary">
-        <p>Click on the waveform to seek to that position. Sync points are shown as blue markers.</p>
+        <p>
+          Click on the waveform to seek to that position. Sync points are shown
+          as blue markers.
+        </p>
       </div>
     </div>
   );
@@ -269,7 +311,7 @@ function LevelsTab({
       {/* Real-time level meters */}
       <div className="bg-background-hover rounded-lg p-4">
         <h4 className="font-medium text-text-primary mb-4">Audio Levels</h4>
-        
+
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center">
             <div className="mb-2">
@@ -284,7 +326,7 @@ function LevelsTab({
             </div>
             <span className="text-xs text-text-secondary">Bars</span>
           </div>
-          
+
           <div className="text-center">
             <div className="mb-2">
               <AudioLevelMeter
@@ -297,7 +339,7 @@ function LevelsTab({
             </div>
             <span className="text-xs text-text-secondary">Circular</span>
           </div>
-          
+
           <div className="text-center">
             <div className="mb-2">
               <AudioLevelMeter
@@ -333,7 +375,8 @@ function LevelsTab({
 
         <div>
           <label className="block text-sm font-medium text-text-primary mb-2">
-            Gain ({gain > 0 ? '+' : ''}{gain}dB)
+            Gain ({gain > 0 ? '+' : ''}
+            {gain}dB)
           </label>
           <input
             type="range"
@@ -370,7 +413,7 @@ function DuckingTab({
         currentConfig={duckingConfig}
         onPresetSelect={onConfigChange}
       />
-      
+
       <AudioDuckingControls
         duckingConfig={duckingConfig}
         onConfigChange={onConfigChange}
@@ -422,34 +465,44 @@ function ProcessingTab({
   onPropertyUpdate: (updates: Partial<NarrationTrackProperties>) => void;
   asset: MediaAsset;
 }) {
-  const validation = validateAudioForNarration(new File([], asset.name, { type: asset.metadata.mimeType }));
+  const validation = validateAudioForNarration(
+    new File([], asset.name, { type: asset.metadata.mimeType })
+  );
 
   return (
     <div className="space-y-6">
       {/* Audio Processing Options */}
       <div className="space-y-4">
         <h4 className="font-medium text-text-primary">Audio Processing</h4>
-        
+
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
             checked={properties.highPassFilter}
-            onChange={(e) => onPropertyUpdate({ highPassFilter: e.target.checked })}
+            onChange={(e) =>
+              onPropertyUpdate({ highPassFilter: e.target.checked })
+            }
             className="rounded"
           />
           <span className="text-sm text-text-primary">High-pass filter</span>
-          <span className="text-xs text-text-secondary">(Remove low frequencies)</span>
+          <span className="text-xs text-text-secondary">
+            (Remove low frequencies)
+          </span>
         </label>
 
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
             checked={properties.noiseReduction}
-            onChange={(e) => onPropertyUpdate({ noiseReduction: e.target.checked })}
+            onChange={(e) =>
+              onPropertyUpdate({ noiseReduction: e.target.checked })
+            }
             className="rounded"
           />
           <span className="text-sm text-text-primary">Noise reduction</span>
-          <span className="text-xs text-text-secondary">(Reduce background noise)</span>
+          <span className="text-xs text-text-secondary">
+            (Reduce background noise)
+          </span>
         </label>
 
         <label className="flex items-center gap-2 cursor-pointer">
@@ -460,14 +513,16 @@ function ProcessingTab({
             className="rounded"
           />
           <span className="text-sm text-text-primary">Normalize audio</span>
-          <span className="text-xs text-text-secondary">(Optimize volume levels)</span>
+          <span className="text-xs text-text-secondary">
+            (Optimize volume levels)
+          </span>
         </label>
       </div>
 
       {/* Visualization Settings */}
       <div className="space-y-4">
         <h4 className="font-medium text-text-primary">Visualization</h4>
-        
+
         <div>
           <label className="block text-sm font-medium text-text-primary mb-2">
             Waveform Color
@@ -475,7 +530,9 @@ function ProcessingTab({
           <input
             type="color"
             value={properties.waveformColor}
-            onChange={(e) => onPropertyUpdate({ waveformColor: e.target.value })}
+            onChange={(e) =>
+              onPropertyUpdate({ waveformColor: e.target.value })
+            }
             className="w-full h-8 rounded border border-border-subtle"
           />
         </div>
@@ -496,7 +553,14 @@ function ProcessingTab({
           </label>
           <select
             value={properties.levelMeterStyle}
-            onChange={(e) => onPropertyUpdate({ levelMeterStyle: e.target.value as 'bars' | 'circular' | 'linear' })}
+            onChange={(e) =>
+              onPropertyUpdate({
+                levelMeterStyle: e.target.value as
+                  | 'bars'
+                  | 'circular'
+                  | 'linear',
+              })
+            }
             className="w-full px-3 py-2 bg-background-subtle border border-border-subtle rounded-md text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue"
           >
             <option value="bars">Bars</option>
@@ -510,13 +574,13 @@ function ProcessingTab({
       {(!validation.isValid || validation.warnings.length > 0) && (
         <div className="p-3 bg-background-hover rounded border border-border-subtle">
           <h4 className="font-medium text-text-primary mb-2">Audio Quality</h4>
-          
+
           {validation.warnings.map((warning, index) => (
             <div key={index} className="text-sm text-yellow-400 mb-1">
               ⚠️ {warning}
             </div>
           ))}
-          
+
           {validation.recommendations.map((recommendation, index) => (
             <div key={index} className="text-sm text-text-secondary mb-1">
               💡 {recommendation}
@@ -532,6 +596,7 @@ function ProcessingTab({
 async function loadAudioBuffer(url: string): Promise<AudioBuffer> {
   const response = await fetch(url);
   const arrayBuffer = await response.arrayBuffer();
-  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const audioContext = new (window.AudioContext ||
+    (window as any).webkitAudioContext)();
   return audioContext.decodeAudioData(arrayBuffer);
 }

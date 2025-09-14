@@ -21,7 +21,10 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
   const sequences = timeline
     .map((item) => {
       const startSec = Number.isFinite(item.startTime) ? item.startTime : 0;
-      const itemDurSec = Number.isFinite(item.duration) && item.duration! > 0 ? item.duration : fallbackDurationSec;
+      const itemDurSec =
+        Number.isFinite(item.duration) && item.duration! > 0
+          ? item.duration
+          : fallbackDurationSec;
       const startFrame = Math.round(startSec * fps);
       const durationInFrames = Math.round(itemDurSec * fps);
 
@@ -96,12 +99,15 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
     .filter(Boolean);
 
   // Determine if background should be transparent
-  const shouldUseTransparentBackground = exportSettings?.transparentBackground ?? false;
-  
+  const shouldUseTransparentBackground =
+    exportSettings?.transparentBackground ?? false;
+
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: shouldUseTransparentBackground ? 'transparent' : settings.backgroundColor,
+        backgroundColor: shouldUseTransparentBackground
+          ? 'transparent'
+          : settings.backgroundColor,
       }}
     >
       {sequences.length > 0 ? (
@@ -114,7 +120,9 @@ export const MainComposition: React.FC<MainCompositionProps> = ({
             justifyContent: 'center',
             color: 'white',
             fontSize: '24px',
-            backgroundColor: shouldUseTransparentBackground ? 'transparent' : undefined,
+            backgroundColor: shouldUseTransparentBackground
+              ? 'transparent'
+              : undefined,
           }}
         >
           No content to display
