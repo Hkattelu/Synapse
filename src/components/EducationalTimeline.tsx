@@ -73,7 +73,7 @@ interface PlacementWarning {
 const TRACK_HEIGHT = 80; // Base track height (header moved to left column)
 const MIN_NONEMPTY_TRACK_HEIGHT = 56; // Minimum height to keep clips usable
 const MIN_EMPTY_TRACK_HEIGHT = 28; // Collapsed height for empty tracks
-const HEADER_COL_WIDTH = 176; // Left sticky header column width (px) - slightly reduced for compactness
+const HEADER_COL_WIDTH = 156; // Left sticky header column width (px) - slightly reduced for compactness
 const PIXELS_PER_SECOND = 100;
 const MIN_CLIP_DURATION = 0.1;
 
@@ -933,12 +933,9 @@ export function EducationalTimeline({
 
           {/* Timeline Controls */}
           <div className="flex items-center space-x-2">
-            <button
+<button
               onClick={() => handleZoom(-0.2)}
               className="p-1 text-text-secondary hover:text-text-primary transition-colors hover:bg-synapse-surface-hover rounded"
-              title="Zoom Out"
-            >
-              className="p-1 text-text-secondary hover:text-text-primary transition-colors hover:bg-neutral-700 rounded"
               title="Zoom Out"
             >
               <svg
@@ -1140,7 +1137,7 @@ export function EducationalTimeline({
                     <IconComponent className="w-4 h-4" />
                   </div>
                   <div className="min-w-0 flex items-center gap-1">
-                    <div className="text-xs font-medium text-text-primary truncate">
+                    <div className="text-xs select-none font-medium text-text-primary truncate">
                       {track.name}
                     </div>
                     <div className="relative group">

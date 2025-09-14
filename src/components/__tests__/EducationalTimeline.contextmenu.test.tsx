@@ -108,6 +108,7 @@ vi.mock('../../state/hooks', () => {
       updateTimelineView: vi.fn(),
     }),
     usePlayback: () => ({ playback: { currentTime: 0 }, seek: vi.fn() }),
+    useProject: () => ({ project: { settings: { duration: 10 } } }),
   };
 });
 

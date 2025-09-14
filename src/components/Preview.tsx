@@ -588,6 +588,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               className="h-2 bg-gray-600 rounded-full cursor-pointer relative"
               onMouseDown={handleTimelineDragStart}
               onClick={handleTimelineScrub}
+              data-testid="timeline-scrubber"
             >
               {/* Progress bar (colored left side) */}
               <div
@@ -619,12 +620,6 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
               <circle cx="12" cy="12" r="5" />
             </svg>
           </button>
-        </div>
-      </div>
-          <div className="flex justify-between text-xs text-text-secondary mt-1">
-            <span>0:00</span>
-            <span>{formatTime(compositionProps.settings.duration)}</span>
-          </div>
         </div>
       </div>
 

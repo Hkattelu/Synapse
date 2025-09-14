@@ -726,6 +726,17 @@ function ClipProperties({
     [localProperties, validateAndUpdate]
   );
 
+  // Bulk update helper to apply multiple property changes atomically (prevents debounce race conditions)
+  const updatePropertiesBulk = useCallback(
+    (updates: Partial<ItemProperties>) => {
+      const newProperties = { ...localProperties, ...updates };
+      setLocalProperties(newProperties);
+      // Apply immediately to avoid intermediate states being lost
+      validateAndUpdate(newProperties);
+    },
+    [localProperties, validateAndUpdate]
+  );
+
   const renderTransformProperties = () => (
     <div className="space-y-3">
       <NumberInput
@@ -1118,25 +1129,35 @@ function ClipProperties({
 
     const handleBackgroundChange = (config: any | null) => {
       if (!config) {
-        updateProperty('backgroundType', 'none' as any);
-        updateProperty('backgroundWallpaper', undefined as any);
-        updateProperty('backgroundGradient', undefined as any);
-        updateProperty('backgroundColor', undefined as any);
+        updatePropertiesBulk({
+          backgroundType: 'none' as any,
+          backgroundWallpaper: undefined as any,
+          backgroundGradient: undefined as any,
+          backgroundColor: undefined as any,
+        });
         return;
       }
-      updateProperty('backgroundType', config.type as any);
       if (config.type === 'color') {
-        updateProperty('backgroundColor', config.color);
-        updateProperty('backgroundWallpaper', undefined as any);
-        updateProperty('backgroundGradient', undefined as any);
+        updatePropertiesBulk({
+          backgroundType: 'color' as any,
+          backgroundColor: config.color,
+          backgroundWallpaper: undefined as any,
+          backgroundGradient: undefined as any,
+        });
       } else if (config.type === 'gradient') {
-        updateProperty('backgroundGradient', config.gradient);
-        updateProperty('backgroundColor', undefined as any);
-        updateProperty('backgroundWallpaper', undefined as any);
+        updatePropertiesBulk({
+          backgroundType: 'gradient' as any,
+          backgroundGradient: config.gradient,
+          backgroundColor: undefined as any,
+          backgroundWallpaper: undefined as any,
+        });
       } else if (config.type === 'wallpaper') {
-        updateProperty('backgroundWallpaper', config.wallpaper?.assetId);
-        updateProperty('backgroundColor', undefined as any);
-        updateProperty('backgroundGradient', undefined as any);
+        updatePropertiesBulk({
+          backgroundType: 'wallpaper' as any,
+          backgroundWallpaper: config.wallpaper?.assetId,
+          backgroundColor: undefined as any,
+          backgroundGradient: undefined as any,
+        });
       }
     };
 

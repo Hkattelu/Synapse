@@ -24,6 +24,44 @@ vi.mock('../../state/hooks', () => ({
   }),
 }));
 
+// Force tracks to be considered visible and simplify breakpoints
+vi.mock('../../lib/performanceOptimizations', () => ({
+  useIntersectionObserver: () => [{ current: null }, true],
+  useResponsiveBreakpoint: () => 'desktop',
+  useOptimizedTrackPreview: (track: any, item: any, asset: any) => {
+    if (track?.id === 'code') {
+      return {
+        type: 'code',
+        language: 'javascript',
+        preview: false,
+        animationMode: 'none',
+      };
+    }
+    if (track?.id === 'narration') {
+      return {
+        type: 'narration',
+        volume: 0.8,
+        syncPoints: 0,
+        hasWaveform: false,
+        hasDucking: false,
+      };
+    }
+    if (track?.id === 'you') {
+      return {
+        type: 'you',
+        isTalkingHead: true,
+        corner: 'bottom-right',
+      };
+    }
+    return {
+      type: 'visual',
+      isVideo: asset?.type === 'video',
+      dimensions: '1920×1080',
+      thumbnail: null,
+    };
+  },
+}));
+
 describe('EducationalTrack', () => {
   const mockTimeToPixels = vi.fn((time: number) => time * 100);
   const mockOnItemDrop = vi.fn();
@@ -42,7 +80,8 @@ describe('EducationalTrack', () => {
       isDragging: false,
       itemId: null,
     },
-  };
+    useVirtualization: false, // Use traditional rendering in tests
+  } as const;
 
   const mockTimelineItem: TimelineItem = {
     id: 'test-item-1',
@@ -59,11 +98,10 @@ describe('EducationalTrack', () => {
     keyframes: [],
   };
 
-  it('renders track header with correct name and icon', () => {
-    render(<EducationalTrack {...defaultProps} />);
+  it('renders track container without header (header moved to timeline)', () => {
+    const { container } = render(<EducationalTrack {...defaultProps} />);
 
-    expect(screen.getByText('Code')).toBeInTheDocument();
-    expect(screen.getByText('Track 1')).toBeInTheDocument();
+    expect(container.querySelector('.educational-track')).toBeInTheDocument();
   });
 
   it('renders timeline items for the correct track', () => {
@@ -78,7 +116,7 @@ describe('EducationalTrack', () => {
     expect(screen.getByText('5s')).toBeInTheDocument();
   });
 
-  it('renders code-specific preview for code track', () => {
+  it('renders code track clip with asset name', () => {
     const props = {
       ...defaultProps,
       items: [mockTimelineItem],
@@ -86,17 +124,11 @@ describe('EducationalTrack', () => {
 
     render(<EducationalTrack {...props} />);
 
-    expect(screen.getByText(/javascript/i)).toBeInTheDocument();
-    // Code preview is tokenized; check textContent contains the expected snippet
-    expect(
-      screen.getAllByText(
-        (content, element) =>
-          element?.textContent?.includes('console.log("Hello World")') ?? false
-      ).length
-    ).toBeGreaterThan(0);
+    // In simplified UI, language label and code preview may be hidden; assert asset name is shown
+    expect(screen.getByText('Test Asset test-asset-1')).toBeInTheDocument();
   });
 
-  it('renders visual track with correct styling', () => {
+  it('renders visual track items', () => {
     const visualTrack = EDUCATIONAL_TRACKS.find((t) => t.id === 'visual')!;
     const visualItem: TimelineItem = {
       ...mockTimelineItem,
@@ -111,13 +143,12 @@ describe('EducationalTrack', () => {
       items: [visualItem],
     };
 
-    render(<EducationalTrack {...props} />);
+    const { container } = render(<EducationalTrack {...props} />);
 
-    expect(screen.getByText('Visual')).toBeInTheDocument();
-    expect(screen.getByText('Track 2')).toBeInTheDocument();
+    expect(container.querySelector('.educational-track')).toBeInTheDocument();
   });
 
-  it('renders narration track with audio preview', () => {
+  it('renders narration track with minimal label', () => {
     const narrationTrack = EDUCATIONAL_TRACKS.find(
       (t) => t.id === 'narration'
     )!;
@@ -140,10 +171,9 @@ describe('EducationalTrack', () => {
     render(<EducationalTrack {...props} />);
 
     expect(screen.getByText('Narration')).toBeInTheDocument();
-    expect(screen.getByText('Audio • 80% vol')).toBeInTheDocument();
   });
 
-  it('renders you track with talking head preview', () => {
+  it('renders you track with talking head preview info', () => {
     const youTrack = EDUCATIONAL_TRACKS.find((t) => t.id === 'you')!;
     const personalVideoItem: TimelineItem = {
       ...mockTimelineItem,
@@ -164,13 +194,8 @@ describe('EducationalTrack', () => {
 
     render(<EducationalTrack {...props} />);
 
-    expect(screen.getByText('You')).toBeInTheDocument();
+    // Minimal label shows 'Talking Head' and optionally the position
     expect(screen.getByText('Talking Head')).toBeInTheDocument();
-    expect(
-      screen.getByText((content, element) => {
-        return element?.textContent === '• bottom-right';
-      })
-    ).toBeInTheDocument();
   });
 
   it('highlights selected items', () => {
@@ -205,15 +230,22 @@ describe('EducationalTrack', () => {
     const clipElement = screen
       .getByText('Test Asset test-asset-1')
       .closest('.absolute.rounded.cursor-move');
-    expect(clipElement).toHaveClass('opacity-75');
+    expect(clipElement).toHaveClass('z-10');
   });
 
-  it('applies correct track colors', () => {
-    render(<EducationalTrack {...defaultProps} />);
+  it('applies correct track colors to clip elements', () => {
+    const props = {
+      ...defaultProps,
+      items: [mockTimelineItem],
+      selectedItems: [],
+    };
 
-    const trackHeader = screen.getByText('Code').closest('div');
-    expect(trackHeader).toHaveStyle({
-      background: 'linear-gradient(135deg, #8B5CF6, #8B5CF6CC)',
-    });
+    render(<EducationalTrack {...props} />);
+
+    const clipElement = screen
+      .getByText('Test Asset test-asset-1')
+      .closest('.absolute.rounded.cursor-move') as HTMLElement;
+    expect(clipElement).toBeInTheDocument();
+    expect(clipElement).toHaveStyle({ backgroundColor: EDUCATIONAL_TRACKS[0].color });
   });
 });

@@ -10,7 +10,7 @@ export default defineConfig((env) => {
       globals: true,
       environment: 'jsdom',
       setupFiles: ['./src/test/setup.ts'],
-      exclude: ['**/.worktrees/**'],
+exclude: ['**/.worktrees/**', 'node_modules/**/?(*.)+(spec|test).[tj]s?(x)'],
     },
   });
 });

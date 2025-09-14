@@ -191,7 +191,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
       case 'color':
         return {
           type: 'color' as const,
-          color: themeColors.background,
+          color: item.properties.backgroundColor || themeColors.background,
         };
 
       default:
@@ -202,6 +202,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
     item.properties.backgroundWallpaper,
     item.properties.backgroundGradient,
     item.properties.backgroundOpacity,
+    item.properties.backgroundColor,
     themeColors.background,
     exportSettings?.transparentBackground,
     exportSettings?.includeWallpaper,

@@ -178,23 +178,6 @@ export function EducationalTrack({
   );
 }
 
-interface EducationalTrackHeaderProps {
-  track: EducationalTrack;
-  IconComponent: React.ComponentType<{ className?: string }>;
-  height: number;
-  breakpoint: 'mobile' | 'tablet' | 'desktop';
-}
-
-function EducationalTrackHeader({
-  track,
-  IconComponent,
-  height,
-  breakpoint,
-}: EducationalTrackHeaderProps) {
-  // Deprecated: header is now rendered in the left sticky column by EducationalTimeline
-  return null;
-}
-
 interface EducationalTimelineClipProps {
   item: TimelineItem;
   asset: MediaAsset | undefined;

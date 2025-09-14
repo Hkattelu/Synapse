@@ -124,8 +124,9 @@ export function AppProvider({ children }: AppProviderProps) {
         // Fetch Music Library metadata (public JSON) in parallel to startup
         // Non-fatal if it fails; UI will simply show empty library
         try {
-          // Skip in non-window environments (e.g., Node tests) to avoid noisy fetches
-          if (typeof window !== 'undefined') {
+          // Skip in tests and non-window environments to avoid noisy fetches
+          const isVitest = Boolean((import.meta as any)?.vitest);
+          if (typeof window !== 'undefined' && !isVitest) {
             // Build URL from Vite base so non-root deployments work (e.g., /app/)
             const rawBase = (import.meta as any)?.env?.BASE_URL ?? '/';
             const origin = window.location?.origin ?? 'http://localhost';

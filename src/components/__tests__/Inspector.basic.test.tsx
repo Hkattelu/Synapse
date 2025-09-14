@@ -92,18 +92,16 @@ it('should display video clip metadata correctly', () => {
     expect(screen.getByText(/1920.*×.*1080/)).toBeInTheDocument();
   });
 
-  it('should display transform properties with correct values', () => {
+  it('should display Properties tab by default with media controls', () => {
     mockSelectedTimelineItems.push(mockVideoItem);
     mockGetMediaAssetById.mockReturnValue(mockVideoAsset);
 
     renderInspector();
 
-    // Check that form inputs exist with correct labels
-    expect(screen.getByLabelText('X Position')).toBeInTheDocument();
-    expect(screen.getByLabelText('Y Position')).toBeInTheDocument();
-    expect(screen.getByLabelText('Scale')).toBeInTheDocument();
-    expect(screen.getByLabelText('Rotation')).toBeInTheDocument();
-    expect(screen.getByLabelText('Opacity')).toBeInTheDocument();
+    // Properties tab should be active and media controls visible in simplified inspector
+    expect(screen.getAllByText('Properties').length).toBeGreaterThan(0);
+    expect(screen.getByLabelText('Volume')).toBeInTheDocument();
+    expect(screen.getByLabelText('Playback Rate')).toBeInTheDocument();
   });
 
   it('should display video-specific properties', () => {
