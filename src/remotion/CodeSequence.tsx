@@ -438,7 +438,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
     diffAnimationResult.animatedHtml,
   ]);
 
-  // Style for the container
+  // Style for the container (secondary background wrapper)
   const motionAnim =
     anim && (anim.preset === 'slide' || anim.preset === 'kenBurns')
       ? anim
@@ -448,40 +448,40 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
     durationInFrames,
   });
 
+  // Outer container is a full-size wrapper; keep transparent so background layer shows
   const containerStyle: React.CSSProperties = {
+    backgroundColor: 'transparent',
+    width: '100%',
+    height: '100%',
+    boxSizing: 'border-box',
+    position: 'relative',
+    // font and color can inherit from inner panel
+  };
+
+  // Inner code panel: theme background and transforms applied here
+  const codePanelStyle: React.CSSProperties = {
+    position: 'relative',
+    zIndex: 1,
+    display: 'inline-block',
     transform:
       `${animStyles.transform ?? ''} translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`.trim(),
     opacity: (animStyles.opacity ?? 1) * opacity,
-    // Handle background color based on export settings and background configuration
-    backgroundColor: (() => {
-      // If transparent background export is enabled, use transparent
-      if (exportSettings?.transparentBackground) {
-        return 'transparent';
-      }
-      // If custom background is configured, use transparent to let background layer show
-      if (backgroundConfig) {
-        return 'transparent';
-      }
-      // Otherwise use theme background
-      return themeColors.background;
-    })(),
+    backgroundColor: themeColors.background,
     color: themeColors.foreground,
     fontFamily,
     fontSize: `${fontSize}px`,
     lineHeight,
     padding: '20px',
+    borderRadius: typeof item.properties.codePanelRadius === 'number' ? item.properties.codePanelRadius : 12,
+    boxShadow: item.properties.codePanelShadow === false ? 'none' : '0 4px 24px rgba(0,0,0,0.25)',
     overflow: 'hidden',
-    width: '100%',
-    height: '100%',
-    boxSizing: 'border-box',
+    // Allow the panel to size to content; no fixed width/height
   };
 
-  // Code container style for proper layering over background
+  // Code container inside the panel (for proper layering)
   const codeContainerStyle: React.CSSProperties = {
     position: 'relative',
     zIndex: 1,
-    width: '100%',
-    height: '100%',
   };
 
   // Enhanced CSS for comprehensive syntax highlighting

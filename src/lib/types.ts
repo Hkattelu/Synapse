@@ -233,6 +233,10 @@ export interface ItemProperties {
   backgroundGradient?: GradientConfig;
   backgroundOpacity?: number; // 0-1 opacity for background elements
 
+  // Code panel styling (theme background container)
+  codePanelRadius?: number; // px
+  codePanelShadow?: boolean; // enable drop shadow
+
   // Side-by-side companion media with code
   sideBySideAssetId?: string; // media asset (image/video) to render alongside code
   sideBySideLayout?: 'left-right' | 'right-left' | 'top-bottom' | 'bottom-top';

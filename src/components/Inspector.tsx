@@ -838,6 +838,30 @@ function ClipProperties({
       {/* Background settings moved here for code items */}
       {renderBackgroundControlsInline()}
 
+      {/* Panel Style */}
+      <div className="space-y-2">
+        <h6 className="text-xs font-medium text-text-secondary">Panel Style</h6>
+        <NumberInput
+          label="Panel Radius"
+          value={localProperties.codePanelRadius ?? 12}
+          onChange={(value) => updateProperty('codePanelRadius', value)}
+          error={validationErrors.codePanelRadius}
+          min={0}
+          max={48}
+          step={1}
+          suffix="px"
+        />
+        <SelectInput
+          label="Panel Shadow"
+          value={(localProperties.codePanelShadow ?? true) ? 'on' : 'off'}
+          onChange={(value) => updateProperty('codePanelShadow', value === 'on')}
+          options={[
+            { value: 'off', label: 'Off' },
+            { value: 'on', label: 'On' },
+          ]}
+        />
+      </div>
+
       {/* Code content */}
       <TextAreaWithFormat
         label="Code Content"
