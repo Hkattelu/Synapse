@@ -841,25 +841,41 @@ function ClipProperties({
       {/* Panel Style */}
       <div className="space-y-2">
         <h6 className="text-xs font-medium text-text-secondary">Panel Style</h6>
-        <NumberInput
-          label="Panel Radius"
-          value={localProperties.codePanelRadius ?? 12}
-          onChange={(value) => updateProperty('codePanelRadius', value)}
-          error={validationErrors.codePanelRadius}
-          min={0}
-          max={48}
-          step={1}
-          suffix="px"
-        />
-        <SelectInput
-          label="Panel Shadow"
-          value={(localProperties.codePanelShadow ?? true) ? 'on' : 'off'}
-          onChange={(value) => updateProperty('codePanelShadow', value === 'on')}
-          options={[
-            { value: 'off', label: 'Off' },
-            { value: 'on', label: 'On' },
-          ]}
-        />
+        {(() => {
+          const radius = localProperties.codePanelRadius ?? 12;
+          const shadow = localProperties.codePanelShadow ?? true;
+          const isNoFrame = radius === 0 && shadow === false;
+          const isCard = radius === 12 && shadow === true;
+          const isStrong = radius === 16 && shadow === true;
+          const base = 'px-2 py-1 text-xs rounded border transition-colors';
+          const active = 'bg-synapse-primary text-synapse-text-inverse border-synapse-primary shadow-synapse-sm';
+          const inactive = 'bg-background-tertiary text-text-secondary border-border-subtle hover:text-text-primary';
+          return (
+            <div className="flex gap-1">
+              <button
+                onClick={() => updatePropertiesBulk({ codePanelRadius: 0, codePanelShadow: false })}
+                className={`${base} ${isNoFrame ? active : inactive}`}
+                title="No frame"
+              >
+                No frame
+              </button>
+              <button
+                onClick={() => updatePropertiesBulk({ codePanelRadius: 12, codePanelShadow: true })}
+                className={`${base} ${isCard ? active : inactive}`}
+                title="Card"
+              >
+                Card
+              </button>
+              <button
+                onClick={() => updatePropertiesBulk({ codePanelRadius: 16, codePanelShadow: true })}
+                className={`${base} ${isStrong ? active : inactive}`}
+                title="Strong card"
+              >
+                Strong
+              </button>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Code content */}
@@ -955,38 +971,36 @@ function ClipProperties({
         </div>
       </div>
       <div className="space-y-2">
-        <NumberInput
-          label="Typing Speed"
-          value={localProperties.typingSpeedCps ?? 30}
-          onChange={(value) => updateProperty('typingSpeedCps', value)}
-          error={validationErrors.typingSpeedCps}
-          min={1}
-          max={120}
-          step={1}
-          suffix="cps"
-        />
-
-        {/* Educational Speed Presets */}
-        <div className="flex gap-1">
-          <button
-            onClick={() => updateProperty('typingSpeedCps', 12)}
-            className="flex-1 px-2 py-1 text-xs bg-synapse-success/20 text-synapse-success rounded hover:opacity-80 transition-colors"
-          >
-            Beginner (12)
-          </button>
-          <button
-            onClick={() => updateProperty('typingSpeedCps', 20)}
-            className="flex-1 px-2 py-1 text-xs bg-synapse-info/20 text-synapse-info rounded hover:opacity-80 transition-colors"
-          >
-            Medium (20)
-          </button>
-          <button
-            onClick={() => updateProperty('typingSpeedCps', 35)}
-            className="flex-1 px-2 py-1 text-xs bg-synapse-clip-code/20 text-synapse-clip-code rounded hover:opacity-80 transition-colors"
-          >
-            Advanced (35)
-          </button>
-        </div>
+        <h6 className="text-xs font-medium text-text-secondary">Typing Speed</h6>
+        {(() => {
+          const speed = localProperties.typingSpeedCps ?? 30;
+          const base = 'flex-1 px-2 py-1 text-xs rounded border transition-colors';
+          const active = 'bg-synapse-primary text-synapse-text-inverse border-synapse-primary shadow-synapse-sm';
+          const inactive = 'bg-background-tertiary text-text-secondary border-border-subtle hover:text-text-primary';
+          const is = (v:number) => speed === v;
+          return (
+            <div className="flex gap-1">
+              <button
+                onClick={() => updateProperty('typingSpeedCps', 12)}
+                className={`${base} ${is(12) ? active : inactive}`}
+              >
+                Slow
+              </button>
+              <button
+                onClick={() => updateProperty('typingSpeedCps', 20)}
+                className={`${base} ${is(20) ? active : inactive}`}
+              >
+                Medium
+              </button>
+              <button
+                onClick={() => updateProperty('typingSpeedCps', 35)}
+                className={`${base} ${is(35) ? active : inactive}`}
+              >
+                Fast
+              </button>
+            </div>
+          );
+        })()}
       </div>
       <NumberInput
         label="Line Reveal Interval"
