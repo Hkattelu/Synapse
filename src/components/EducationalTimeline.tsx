@@ -1021,8 +1021,28 @@ export function EducationalTimeline({
                   });
                 } catch {}
               }}
-              className="px-2 py-1 text-xs rounded bg-background-tertiary text-text-secondary hover:text-text-primary border border-border-subtle transition-colors"
-              title="Toggle talking head on selected video clip"
+              disabled={(() => {
+                const selId = selectedItems[0];
+                const item = timeline.find((t) => t.id === selId);
+                return !item || item.type !== 'video';
+              })()}
+              className={`px-2 py-1 text-xs rounded border transition-colors ${(() => {
+                const selId = selectedItems[0];
+                const item = timeline.find((t) => t.id === selId);
+                const canToggle = !!item && item.type === 'video';
+                return canToggle
+                  ? 'bg-background-tertiary text-text-secondary hover:text-text-primary border-border-subtle'
+                  : 'bg-background-tertiary text-text-tertiary border-border-subtle opacity-50 cursor-not-allowed';
+              })()}`}
+              title={(() => {
+                const selId = selectedItems[0];
+                const item = timeline.find((t) => t.id === selId);
+                return !item
+                  ? 'Select a video clip to enable talking head'
+                  : item.type !== 'video'
+                  ? 'Talking head is only available for video clips'
+                  : 'Toggle talking head on selected video clip';
+              })()}
             >
               <span className="inline-flex items-center gap-1">
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M4 21v-2a4 4 0 0 1 3-3.87"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1046,7 +1066,7 @@ export function EducationalTimeline({
             containerRef as unknown as React.MutableRefObject<HTMLDivElement | null>
           ).current = el as HTMLDivElement;
         }}
-        className="educational-timeline-content overflow-x-auto overflow-y-hidden flex-1"
+        className={`educational-timeline-content overflow-x-auto overflow-y-auto flex-1 ${dragState.isDragging ? (dragState.dragType === 'move' ? 'cursor-grabbing' : 'cursor-ew-resize') : ''}`}
         onScroll={handleScroll}
         onDrop={handleDrop}
         onDragOver={handleDragOver}

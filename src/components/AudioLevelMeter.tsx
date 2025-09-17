@@ -73,9 +73,14 @@ export function AudioLevelMeter({
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      if (analyserRef.current) {
-        audioSource.disconnect(analyserRef.current);
-      }
+      try {
+        if (analyserRef.current) {
+          // In some flows the source may already be disconnected elsewhere.
+          // Guard to avoid: "Failed to execute 'disconnect' on 'AudioNode': the given destination is not connected."
+          audioSource.disconnect(analyserRef.current);
+        }
+      } catch {}
+      analyserRef.current = null;
     };
   }, [audioContext, audioSource]);
 

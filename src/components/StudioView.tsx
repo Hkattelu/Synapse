@@ -394,7 +394,7 @@ function StudioViewContent() {
           {/* Timeline Area - Resizable */}
           <ResizablePanel
             direction="vertical"
-            initialSize={300}
+            initialSize={400}
             minSize={250}
             maxSize={500}
             className="border-r border-synapse-surface2 bg-synapse-mantle flex-shrink-0 flex flex-col"

@@ -202,9 +202,9 @@ function EducationalTimelineClip({
   return (
     <div
       className={`
-        absolute rounded cursor-move select-none border-2 transition-all overflow-hidden
+        absolute rounded select-none border-2 transition-all overflow-hidden
         ${isSelected ? 'border-accent-yellow shadow-glow' : 'border-transparent'}
-        ${isDragging ? 'z-10' : ''}
+        ${isDragging ? 'z-10 cursor-grabbing' : 'cursor-grab'}
         hover:border-text-secondary
       `}
       style={{
@@ -216,8 +216,8 @@ function EducationalTimelineClip({
       onContextMenu={onContextMenu}
     >
       {/* Resize Handles */}
-      <div className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize bg-text-primary bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
-      <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize bg-text-primary bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
+      <div className="absolute left-0 top-0 bottom-0 w-3 cursor-ew-resize bg-text-primary/10 opacity-0 hover:opacity-100 transition-opacity" />
+      <div className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize bg-text-primary/10 opacity-0 hover:opacity-100 transition-opacity" />
 
       {/* Clip Content (lazy) */}
       <div className="p-1.5 h-full flex flex-col justify-between text-[11px] overflow-hidden text-synapse-text-inverse">

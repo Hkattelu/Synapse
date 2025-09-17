@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, Suspense, lazy } from 'react';
-import { useMediaAssets, useTimeline } from '../state/hooks';
+import { useMediaAssets, useTimeline, useProject, usePlayback } from '../state/hooks';
 import { useNotifications } from '../state/notifications';
-import { usePlayback } from '../state/hooks';
+import { generateId } from '../lib/utils';
 
 interface RecorderDialogProps {
   isOpen: boolean;
@@ -16,6 +16,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
   const { addMediaAsset } = useMediaAssets();
   const { addTimelineItem } = useTimeline();
   const { playback } = usePlayback();
+  const { project, updateProject } = useProject();
   const { notify } = useNotifications();
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -141,6 +142,10 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       audioCtxRef.current = ctx;
       const src = ctx.createMediaStreamSource(stream);
       audioSourceRef.current = src;
+      // Try to resume immediately so level meter works before recording
+      try {
+        if (ctx.state === 'suspended') void ctx.resume();
+      } catch {}
     } catch {}
     return () => {
       try {
@@ -373,6 +378,8 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                   type="checkbox"
                   checked={withCamera}
                   onChange={(e) => setWithCamera(e.target.checked)}
+                  disabled={isRecording}
+                  title={isRecording ? 'Stop recording to change camera option' : ''}
                 />
                 <span>Include camera video</span>
               </label>
@@ -398,22 +405,52 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                 />
                 <span>Record microphone narration</span>
               </label>
-              {withMic && stream && (
+              {withMic && (
                 <div className="pt-1">
-                  {/* Lightweight live level meter */}
-                  {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-                  {/* @ts-ignore - component accepts AudioNode */}
-                  <Suspense
-                    fallback={<div className="h-3 bg-gray-200 rounded" />}
-                  >
-                    <AudioLevelMeter
-                      audioContext={audioCtxRef.current || undefined}
-                      audioSource={audioSourceRef.current || undefined}
-                      style="bars"
-                      width={180}
-                      height={12}
-                    />
-                  </Suspense>
+                  <div className="flex items-center gap-2 p-2 rounded-md border bg-gray-50">
+                    <div className="w-5 h-5 flex items-center justify-center text-gray-600">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="w-4 h-4"
+                      >
+                        <path d="M12 14a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3z" />
+                        <path d="M19 11a1 1 0 10-2 0 5 5 0 11-10 0 1 1 0 10-2 0 7 7 0 0011 5.197V20h-3a1 1 0 100 2h6a1 1 0 100-2h-1v-3a7 7 0 001-6z" />
+                      </svg>
+                    </div>
+                    {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                    {/* @ts-ignore - component accepts AudioNode */}
+                    <Suspense
+                      fallback={<div className="h-3 bg-gray-200 rounded w-[240px]" />}
+                    >
+                      <AudioLevelMeter
+                        audioContext={audioCtxRef.current || undefined}
+                        audioSource={audioSourceRef.current || undefined}
+                        style="linear"
+                        width={240}
+                        height={10}
+                        color="#22c55e"
+                        backgroundColor="#111827"
+                      />
+                    </Suspense>
+                    {!stream && (
+                      <button
+                        onClick={async () => {
+                          // Explicitly request mic and resume context on user gesture
+                          const s = await requestStream();
+                          try {
+                            const ctx = audioCtxRef.current;
+                            if (ctx && ctx.state === 'suspended') await ctx.resume();
+                          } catch {}
+                        }}
+                        className="ml-2 text-xs px-2 py-1 rounded border text-gray-700 hover:bg-gray-100"
+                        title="Enable mic monitoring"
+                      >
+                        Test mic
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -467,7 +504,8 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                       assetId: id,
                       startTime: start,
                       duration: Math.max(0.1, pending.duration ?? 5),
-                      track: 0,
+                      // Smart placement: camera video -> You track (3), narration audio -> Narration track (2)
+                      track: pending.withCamera ? 3 : 2,
                       type: pending.withCamera ? 'video' : 'audio',
                       properties:
                         pending.withCamera && bubbleEnabled
@@ -481,6 +519,31 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                       animations: [],
                       keyframes: [],
                     });
+
+                    // Ensure the 'You' track group exists so the track is displayed
+                    try {
+                      if (pending.withCamera) {
+                        const groups = project?.trackGroups || [];
+                        const hasYou = groups.some(
+                          (g) =>
+                            g.tracks.includes(3) ||
+                            g.name.trim().toLowerCase() === 'you'
+                        );
+                        if (!hasYou) {
+                          const newGroup = {
+                            id: generateId(),
+                            name: 'You',
+                            tracks: [3],
+                            color: '#EF4444',
+                            visible: true,
+                            locked: false,
+                            solo: false,
+                          } as const;
+                          updateProject?.({ trackGroups: [...groups, newGroup] });
+                        }
+                      }
+                    } catch {}
+
                     notify({
                       type: 'success',
                       title: 'Recorder',

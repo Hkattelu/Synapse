@@ -193,8 +193,9 @@ const VirtualizedTimelineItem = memo(function VirtualizedTimelineItem({
     <div
       ref={itemRef}
       className={`
-        timeline-item rounded cursor-move select-none border-2 transition-all overflow-hidden
+        timeline-item rounded select-none border-2 transition-all overflow-hidden
         ${isSelected ? 'border-accent-yellow shadow-glow z-10' : 'border-transparent'}
+        cursor-grab
         hover:border-text-secondary
       `}
       style={itemStyle}
@@ -202,8 +203,8 @@ const VirtualizedTimelineItem = memo(function VirtualizedTimelineItem({
       onContextMenu={onContextMenu ? (e) => onContextMenu(e, item) : undefined}
     >
       {/* Resize Handles */}
-      <div className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize bg-text-primary bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
-      <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize bg-text-primary bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity" />
+      <div className="absolute left-0 top-0 bottom-0 w-3 cursor-ew-resize bg-text-primary/10 opacity-0 hover:opacity-100 transition-opacity" />
+      <div className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize bg-text-primary/10 opacity-0 hover:opacity-100 transition-opacity" />
 
       {/* Item Content */}
       <div className="p-2 h-full flex flex-col justify-between text-xs overflow-hidden">
