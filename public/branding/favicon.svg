@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Synapse Studio mark">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C3AED" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+  </defs>
+  <!-- Mark-only favicon derived from logo.svg -->
+  <g transform="translate(4,4)">
+    <circle cx="16" cy="24" r="8" fill="url(#g1)" />
+    <circle cx="40" cy="12" r="6" fill="url(#g1)" />
+    <circle cx="44" cy="34" r="6" fill="url(#g1)" />
+    <path d="M21 22 L35 14" stroke="#7C3AED" stroke-width="2.5" stroke-linecap="round" />
+    <path d="M22 26 L39 32" stroke="#06B6D4" stroke-width="2.5" stroke-linecap="round" />
+    <path d="M40 12 Q32 24 44 34" stroke="#0F172A" stroke-opacity="0.18" stroke-width="2" fill="none" />
+  </g>
+  <style>
+    @media (prefers-color-scheme: dark) {
+      /* Lighten subtle arc on dark UI so it remains visible */
+      path[stroke="#0F172A"] { stroke: #E5E7EB !important; stroke-opacity: 0.35 !important; }
+    }
+  </style>
+</svg>

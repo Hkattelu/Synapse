@@ -53,10 +53,11 @@ interface ContactFormProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({
-  title = 'Human-Powered Video Creation for Authentic Storytellers',
-  subtitle = '🚀 Launching on Product Hunt September 5th, 2025!',
-  description = 'Create compelling educational content and game devlogs without the AI fluff. Synapse Studio puts the power back in your hands with intuitive tools designed for authentic storytelling.',
-  primaryCtaText = 'Start Creating',
+  title = 'Create Engaging Lessons and Tutorials',
+  subtitle = 'Built for educators and learning creators',
+  description =
+    'Plan, record, and polish educational videos with tools for AI-assisted drafting, accessible captions, interactive callouts, and gamified pacing — without sacrificing your voice.',
+  primaryCtaText = 'Create a Lesson',
   secondaryCtaText = 'Get Notified',
 }) => {
   const navigate = useNavigate();
@@ -175,13 +176,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             transition={{ duration: 0.6, delay: 0.3 }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
-            <Button
+<Button
               size="lg"
               onClick={() => navigate('/projects')}
               className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse px-8 py-4 rounded-full font-semibold text-lg shadow-synapse-md hover:shadow-synapse-lg transition-all duration-200 hover:scale-105"
             >
               <Play className="w-5 h-5 mr-2" />
-              Start Creating
+              Create a Lesson
             </Button>
             {isEnabled('PRODUCT_HUNT') && (
               <Button
@@ -237,11 +238,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({
 
             {/* Stats */}
             <div className="flex items-center justify-center space-x-8 text-sm text-text-tertiary">
-              <div className="text-center">
+<div className="text-center">
                 <div className="font-semibold text-text-primary text-lg">
                   10K+
                 </div>
-                <div>Creators</div>
+                <div>Educators & Creators</div>
               </div>
               <Separator orientation="vertical" className="h-8" />
               <div className="text-center">
@@ -251,11 +252,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 <div>Videos Created</div>
               </div>
               <Separator orientation="vertical" className="h-8" />
-              <div className="text-center">
+<div className="text-center">
                 <div className="font-semibold text-text-primary text-lg">
-                  Human
+                  Inclusive
                 </div>
-                <div>Powered</div>
+                <div>By Design</div>
               </div>
             </div>
           </motion.div>
@@ -350,28 +351,28 @@ const ProductHuntSection: React.FC = () => {
 const FeaturesSection: React.FC = () => {
   const features = [
     {
-      icon: <Video className="w-8 h-8 text-purple-600" />,
-      title: 'Intuitive Video Editor',
+      icon: <Sparkles className="w-8 h-8 text-purple-600" />,
+      title: 'AI Assist for Lesson Building',
       description:
-        'Drag-and-drop simplicity meets professional power. Create stunning educational content without the learning curve.',
+        'Draft outlines, objectives, and chapter markers faster — you stay in control of the final lesson.',
     },
     {
-      icon: <Users className="w-8 h-8 text-purple-600" />,
-      title: 'Built for Creators',
+      icon: <Video className="w-8 h-8 text-purple-600" />,
+      title: 'Accessible by Design',
       description:
-        'Designed specifically for YouTubers, educators, and game developers who want to tell their story authentically.',
+        'Effortless captions, transcripts, and readable templates help every learner follow along.',
+    },
+    {
+      icon: <Layers className="w-8 h-8 text-purple-600" />,
+      title: 'Tools for Teachers',
+      description:
+        'Reusable lesson templates, brand kits, and curriculum-friendly timelines fit your classroom workflow.',
     },
     {
       icon: <Heart className="w-8 h-8 text-purple-600" />,
-      title: 'Human-Centered',
+      title: 'Student Wellness & Productivity',
       description:
-        'No AI shortcuts or automated content. Just pure creative tools that amplify your unique voice and vision.',
-    },
-    {
-      icon: <Sparkles className="w-8 h-8 text-purple-600" />,
-      title: 'Devlog Ready',
-      description:
-        'Perfect templates and tools for game developers to showcase their progress and connect with their community.',
+        'Clear pacing, distraction-aware layouts, and breaks built into templates support healthier learning.',
     },
   ];
 
@@ -385,13 +386,11 @@ const FeaturesSection: React.FC = () => {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
-              Why Creators Choose Synapse Studio
+<h2 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
+              Why Educators Choose Synapse Studio
             </h2>
             <p className="text-xl text-text-secondary max-w-2xl mx-auto">
-              Built by a creator who understands the struggle of making
-              authentic, engaging content in a world full of generic
-              AI-generated videos.
+              Build clear, inclusive, and engaging learning videos — with your expertise front and center.
             </p>
           </motion.div>
         </div>
@@ -420,12 +419,11 @@ const PowerSection: React.FC = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-text-primary mb-6">
-              Powerful Tools for Authentic Storytelling
+<h2 className="text-4xl md:text-5xl font-bold text-text-primary mb-6">
+              Purpose-Built for Teaching Impact
             </h2>
             <p className="text-xl text-text-secondary max-w-3xl mx-auto">
-              Every feature is designed with one goal: helping you create
-              content that truly represents your voice and vision.
+              Everything you need to shape effective lessons — from curriculum-friendly timelines to inclusive viewing experiences.
             </p>
           </motion.div>
 
@@ -440,25 +438,24 @@ const PowerSection: React.FC = () => {
               <div className="w-16 h-16 bg-synapse-primary/10 rounded-xl flex items-center justify-center mb-6">
                 <Zap className="w-8 h-8 text-purple-600" />
               </div>
-              <h3 className="text-2xl font-bold text-text-primary mb-4">
-                Lightning Fast
+<h3 className="text-2xl font-bold text-text-primary mb-4">
+                Curriculum-Aligned Workflow
               </h3>
               <p className="text-text-secondary mb-6">
-                Real-time preview and rendering powered by Remotion. See your
-                changes instantly without waiting for exports.
+                Plan modules, objectives, and chapter markers with a clear, flexible timeline.
               </p>
               <ul className="space-y-2 text-sm text-text-secondary">
                 <li className="flex items-center">
                   <div className="w-1.5 h-1.5 bg-synapse-primary rounded-full mr-3"></div>
-                  Real-time timeline editing
+                  Chapter and objective markers
                 </li>
                 <li className="flex items-center">
                   <div className="w-1.5 h-1.5 bg-purple-600 rounded-full mr-3"></div>
-                  Instant preview updates
+                  Reusable lesson templates
                 </li>
                 <li className="flex items-center">
                   <div className="w-1.5 h-1.5 bg-purple-600 rounded-full mr-3"></div>
-                  Fast export rendering
+                  Interactive callouts and overlays
                 </li>
               </ul>
             </motion.div>
@@ -473,25 +470,24 @@ const PowerSection: React.FC = () => {
               <div className="w-16 h-16 bg-synapse-success/10 rounded-xl flex items-center justify-center mb-6">
                 <Shield className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="text-2xl font-bold text-text-primary mb-4">
-                Privacy First
+<h3 className="text-2xl font-bold text-text-primary mb-4">
+                Accessible by Default
               </h3>
               <p className="text-text-secondary mb-6">
-                Your content stays on your machine. No cloud uploads, no data
-                mining, no privacy concerns.
+                Reach every learner with built-in accessibility tools and best practices.
               </p>
               <ul className="space-y-2 text-sm text-text-secondary">
                 <li className="flex items-center">
                   <div className="w-1.5 h-1.5 bg-synapse-success rounded-full mr-3"></div>
-                  Local-only processing
+                  Captions and transcripts
                 </li>
                 <li className="flex items-center">
                   <div className="w-1.5 h-1.5 bg-green-600 rounded-full mr-3"></div>
-                  No cloud dependencies
+                  Readable color contrast
                 </li>
                 <li className="flex items-center">
                   <div className="w-1.5 h-1.5 bg-green-600 rounded-full mr-3"></div>
-                  Complete data ownership
+                  Keyboard-friendly UI
                 </li>
               </ul>
             </motion.div>
@@ -506,12 +502,11 @@ const PowerSection: React.FC = () => {
               <div className="w-16 h-16 bg-synapse-info/10 rounded-xl flex items-center justify-center mb-6">
                 <Layers className="w-8 h-8 text-blue-600" />
               </div>
-              <h3 className="text-2xl font-bold text-text-primary mb-4">
-                Flexible Workflow
+<h3 className="text-2xl font-bold text-text-primary mb-4">
+                Teacher-First Flexibility
               </h3>
               <p className="text-text-secondary mb-6">
-                Adapt to your creative process with customizable templates and
-                unlimited creative freedom.
+                Fit lectures, tutorials, labs, and flipped-class workflows without friction.
               </p>
               <ul className="space-y-2 text-sm text-text-secondary">
                 <li className="flex items-center">
@@ -524,7 +519,7 @@ const PowerSection: React.FC = () => {
                 </li>
                 <li className="flex items-center">
                   <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-3"></div>
-                  Unlimited creativity
+                  Brand kits for courses
                 </li>
               </ul>
             </motion.div>
@@ -662,10 +657,8 @@ const ContactSection: React.FC<ContactFormProps> = ({
                       <SelectValue placeholder="What are you creating?" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="educational">
-                        Educational Content
-                      </SelectItem>
-                      <SelectItem value="devlog">Game Devlog</SelectItem>
+                      <SelectItem value="lesson">Lesson or Lecture</SelectItem>
+                      <SelectItem value="module">Course Module</SelectItem>
                       <SelectItem value="tutorial">Tutorial Series</SelectItem>
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
@@ -674,12 +667,12 @@ const ContactSection: React.FC<ContactFormProps> = ({
 
                 <div>
                   <Label htmlFor="message">Tell us about your project</Label>
-                  <Textarea
+<Textarea
                     id="message"
                     name="message"
                     rows={4}
                     className="mt-2"
-                    placeholder="What kind of content are you excited to create?"
+                    placeholder="What kind of learning experience are you planning?"
                   />
                 </div>
 
@@ -765,8 +758,8 @@ const Footer: React.FC = () => {
               />
               <span className="sr-only">Synapse Studio</span>
             </div>
-            <p className="text-text-tertiary text-sm">
-              Human-powered video creation for authentic storytellers.
+<p className="text-text-tertiary text-sm">
+              Human-powered video creation for educators and learning creators.
             </p>
           </div>
 

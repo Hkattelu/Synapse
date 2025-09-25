@@ -143,7 +143,7 @@ function AddMediaMenu({
 }
 
 export function MediaBin({ className = '' }: MediaBinProps) {
-  const { mediaAssets, addMediaAsset, removeMediaAsset } = useMediaAssets();
+  const { mediaAssets, addMediaAsset, removeMediaAsset, updateMediaAsset } = useMediaAssets();
 
   const { addTimelineItem } = useTimeline();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -156,6 +156,38 @@ export function MediaBin({ className = '' }: MediaBinProps) {
     'code' | 'visual' | 'audio' | 'you'
   >('visual');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Background: reconcile any existing blob: URLs by uploading them to the server
+  const reconciledRef = React.useRef<Set<string>>(new Set());
+  React.useEffect(() => {
+    const run = async () => {
+      for (const asset of mediaAssets) {
+        if (!asset.url || !asset.url.startsWith('blob:')) continue;
+        if (reconciledRef.current.has(asset.id)) continue;
+        reconciledRef.current.add(asset.id);
+        try {
+          const resp = await fetch(asset.url);
+          const blob = await resp.blob();
+          const filename = asset.name || `asset-${asset.id}`;
+          const up = await fetch('/api/uploads', {
+            method: 'POST',
+            headers: {
+              'x-filename': filename,
+              'content-type': blob.type || 'application/octet-stream',
+            },
+            body: blob,
+          });
+          if (up.ok) {
+            const body = (await up.json()) as { url?: string };
+            if (body?.url) updateMediaAsset(asset.id, { url: body.url });
+          }
+        } catch (e) {
+          console.warn('Background upload failed for', asset.name, e);
+        }
+      }
+    };
+    void run();
+  }, [mediaAssets, updateMediaAsset]);
 
   // Category counts for dropdown labels
   const categoryCounts = React.useMemo(() => {
@@ -346,7 +378,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
           });
         }
 
-        // Create media asset
+        // Create media asset (start with blob: URL for immediate preview)
         const mediaAsset: Omit<MediaAsset, 'id' | 'createdAt'> = {
           name: file.name,
           type: mediaType,
@@ -375,13 +407,38 @@ export function MediaBin({ className = '' }: MediaBinProps) {
           continue;
         }
 
-        // Add to media assets
-        addMediaAsset(mediaAsset);
+        // Add to media assets and then upload in background to get a stable HTTP URL for server-side rendering
+        const newId = addMediaAsset(mediaAsset);
         notify({
           type: 'success',
           title: 'Imported',
           message: `${file.name} added to Media Bin`,
         });
+
+        // Attempt to persist the file on the server for rendering (non-blocking)
+        try {
+          const resp = await fetch('/api/uploads', {
+            method: 'POST',
+            headers: {
+              'x-filename': file.name,
+              'content-type': file.type || 'application/octet-stream',
+            },
+            body: file,
+          });
+          if (resp.ok) {
+            const body = (await resp.json()) as { url?: string };
+            if (body?.url && typeof body.url === 'string') {
+              // Update the asset to use absolute HTTP URL; revoke the blob URL
+              updateMediaAsset(newId, { url: body.url });
+              if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+            }
+          } else {
+            // Silent warning; user can still preview but export may fail until uploaded
+            console.warn('Upload to server failed:', resp.status, resp.statusText);
+          }
+        } catch (e) {
+          console.warn('Upload to server failed:', e);
+        }
       } catch (error) {
         errors.push({
           file: file.name,

@@ -17,7 +17,7 @@ export function MusicLibrary({
       musicLibrary: { tracks },
     },
   } = useAppState();
-  const { mediaAssets, addMediaAsset } = useMediaAssets();
+  const { mediaAssets, addMediaAsset, removeMediaAsset } = useMediaAssets();
   const { addTimelineItem, timeline } = useTimeline();
 
   const [playingId, setPlayingId] = React.useState<string | null>(null);
@@ -198,6 +198,20 @@ export function MusicLibrary({
                     >
                       Add
                     </button>
+                    <button
+                      aria-label="Delete recording"
+                      title="Remove from Media Bin"
+                      className="w-6 h-6 inline-flex items-center justify-center rounded-full bg-synapse-error text-synapse-text-inverse hover:opacity-90"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeMediaAsset(a.id);
+                        try {
+                          if (a.url?.startsWith('blob:')) URL.revokeObjectURL(a.url);
+                        } catch {}
+                      }}
+                    >
+                      ×
+                    </button>
                   </div>
                 </div>
               ))}
@@ -308,6 +322,20 @@ export function MusicLibrary({
                       }
                     >
                       Add
+                    </button>
+                    <button
+                      aria-label="Delete uploaded audio"
+                      title="Remove from Media Bin"
+                      className="w-6 h-6 inline-flex items-center justify-center rounded-full bg-synapse-error text-synapse-text-inverse hover:opacity-90"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeMediaAsset(a.id);
+                        try {
+                          if (a.url?.startsWith('blob:')) URL.revokeObjectURL(a.url);
+                        } catch {}
+                      }}
+                    >
+                      ×
                     </button>
                   </div>
                 </div>

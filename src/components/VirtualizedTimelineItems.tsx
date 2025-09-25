@@ -1,4 +1,5 @@
 import React, { memo, useMemo, useCallback, useRef, useEffect } from 'react';
+import { ArrowLeftRight } from 'lucide-react';
 import {
   useVirtualization,
   useMemoizedTrackContent,
@@ -193,7 +194,7 @@ const VirtualizedTimelineItem = memo(function VirtualizedTimelineItem({
     <div
       ref={itemRef}
       className={`
-        timeline-item rounded select-none border-2 transition-all overflow-hidden
+        group timeline-item rounded select-none border-2 transition-all overflow-hidden
         ${isSelected ? 'border-accent-yellow shadow-glow z-10' : 'border-transparent'}
         cursor-grab
         hover:border-text-secondary
@@ -202,12 +203,45 @@ const VirtualizedTimelineItem = memo(function VirtualizedTimelineItem({
       onMouseDown={handleMouseDown}
       onContextMenu={onContextMenu ? (e) => onContextMenu(e, item) : undefined}
     >
-      {/* Resize Handles */}
-      <div className="absolute left-0 top-0 bottom-0 w-3 cursor-ew-resize bg-text-primary/10 opacity-0 hover:opacity-100 transition-opacity" />
-      <div className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize bg-text-primary/10 opacity-0 hover:opacity-100 transition-opacity" />
+      {/* Resize Handles with grip icons */}
+      <div className="absolute left-0 top-0 bottom-0 w-3 cursor-ew-resize">
+        <div className="absolute inset-0 bg-text-primary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-center opacity-0 group-hover:opacity-100 text-white/80">
+          <ArrowLeftRight className="w-3 h-3" />
+        </div>
+      </div>
+      <div className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize">
+        <div className="absolute inset-0 bg-text-primary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-center opacity-0 group-hover:opacity-100 text-white/80">
+          <ArrowLeftRight className="w-3 h-3" />
+        </div>
+      </div>
+
+      {/* Bottom gradient overlay for text contrast */}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-black/35 to-transparent" />
+      {(() => {
+        try {
+          const steps = (item.properties as any).codeSteps as Array<{ duration: number }> | undefined;
+          if (!steps || steps.length <= 1) return null;
+          const total = steps.reduce((s, st) => s + Math.max(0, st.duration || 0), 0) || item.duration;
+          let acc = 0;
+          const markers: JSX.Element[] = [];
+          for (let i = 0; i < steps.length - 1; i++) {
+            acc += Math.max(0, steps[i].duration || 0);
+            const ratio = total > 0 ? acc / total : (i + 1) / steps.length;
+            const leftPx = Math.max(0, Math.min(width, ratio * width));
+            markers.push(
+              <div key={`v-step-${i}`} className="absolute bottom-0 w-[2px] h-3 bg-white/90" style={{ left: `${leftPx - 1}px` }} />
+            );
+          }
+          return <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3">{markers}</div>;
+        } catch {
+          return null;
+        }
+      })()}
 
       {/* Item Content */}
-      <div className="p-2 h-full flex flex-col justify-between text-xs overflow-hidden">
+      <div className="relative p-2 h-full flex flex-col justify-between text-xs overflow-hidden text-white" style={{ textShadow: '0 1px 1px rgba(0,0,0,0.5)' }}>
         <LazyTrackContent
           track={track}
           item={item}
@@ -218,7 +252,7 @@ const VirtualizedTimelineItem = memo(function VirtualizedTimelineItem({
         />
 
         {/* Duration indicator */}
-        <div className="text-white mt-1 text-xs">
+        <div className="text-white/90 mt-1 text-xs">
           {Math.round(item.duration * 10) / 10}s
         </div>
       </div>

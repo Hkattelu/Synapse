@@ -36,4 +36,9 @@ export const config = {
       fileURLToPath(new URL('../src/remotion/index.ts', import.meta.url)),
     concurrency: number(process.env.RENDER_CONCURRENCY, 1),
   },
+  storage: {
+    uploadsDir:
+      process.env.UPLOADS_DIR ||
+      fileURLToPath(new URL('./uploads', import.meta.url)),
+  },
 };

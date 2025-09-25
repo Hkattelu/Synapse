@@ -135,8 +135,8 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
         onClose();
       }, 3000); // Auto-close after 3 seconds
       return () => clearTimeout(timer);
-    } else if (progress?.status && progress.status !== 'completed') {
-      // Reset flag if a new export starts
+    } else {
+      // Reset flag if a new export starts or status changes away from completed
       if (hasTriggeredDownload) setHasTriggeredDownload(false);
     }
   }, [progress?.status, currentJob?.outputPath, onClose, hasTriggeredDownload]);
@@ -421,9 +421,6 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                         <div className="flex items-start justify-between">
                           <div>
                             <h3 className="font-medium text-text-primary flex items-center gap-2">
-                              <span
-                                className={`inline-block w-3 h-3 rounded-full border ${selectedPresetId === preset.id ? 'bg-primary-600 border-primary-600' : 'border-border-subtle'}`}
-                              />
                               {preset.name}
                               {selectedPresetId === preset.id && (
                                 <span className="ml-2 text-xxs uppercase tracking-wide text-primary-300 bg-primary-900/40 px-2 py-0.5 rounded">
@@ -952,7 +949,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                       !(membership?.active || trialsRemaining > 0)) ||
                     !validateTransparencySettings(settings).isValid
                   }
-                  className="px-6 py-3 min-w-[180px] inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 active:translate-y-[1px] transition-all disabled:bg-neutral-600 disabled:cursor-not-allowed"
+                  className="px-6 py-3 min-w-[180px] inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 border-border-subtle rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 active:translate-y-[1px] transition-all disabled:bg-neutral-600 disabled:cursor-not-allowed"
                 >
                   <svg
                     aria-hidden="true"

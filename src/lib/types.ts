@@ -236,6 +236,16 @@ export interface ItemProperties {
   // Code panel styling (theme background container)
   codePanelRadius?: number; // px
   codePanelShadow?: boolean; // enable drop shadow
+  // Code panel background (renamed from background* to avoid theme conflicts)
+  codePanelType?: 'none' | 'color' | 'gradient' | 'wallpaper';
+  codePanelColor?: string; // solid background color
+  codePanelWallpaper?: string; // URL or asset ID
+  codePanelGradient?: GradientConfig;
+  codePanelOpacity?: number; // 0-1 opacity for background elements
+  // Code panel sizing (fixed-size panel with hidden overflow by default)
+  codePanelWidth?: number; // px
+  codePanelHeight?: number; // px
+  codePanelAutoSize?: boolean; // if true, panel grows with code; default false
 
   // Side-by-side companion media with code
   sideBySideAssetId?: string; // media asset (image/video) to render alongside code
@@ -253,6 +263,15 @@ export interface ItemProperties {
   color?: string;
   title?: string; // display-only title for some workflows
   description?: string;
+
+  // Code multi-step "Snippets" animation model
+  codeSteps?: Array<{
+    code: string;
+    duration: number; // seconds for this step
+    annotate?: string;
+    highlightRanges?: Array<[number, number]>; // inclusive 1-based line ranges
+  }>;
+  codeStepsTransition?: 'none' | 'crossfade' | 'line-morph' | 'type-in';
 
   // Talking head bubble overlay
   // When enabled on a video timeline item, the video is rendered as a small

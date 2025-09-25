@@ -538,7 +538,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                             visible: true,
                             locked: false,
                             solo: false,
-                          } as const;
+                          };
                           updateProject?.({ trackGroups: [...groups, newGroup] });
                         }
                       }

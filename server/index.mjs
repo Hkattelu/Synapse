@@ -29,6 +29,8 @@ app.use('/api', apiRouter);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use('/downloads', express.static(path.join(__dirname, 'output')));
+// Static uploads (optional direct access); API also exposes /api/uploads/:id
+app.use('/uploads', express.static(config.storage.uploadsDir));
 
 // Serve frontend (static) in production from /dist for same-origin web+API
 if (process.env.NODE_ENV === 'production') {

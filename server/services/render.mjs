@@ -66,13 +66,49 @@ export const deleteRenderById = async (id) => {
 };
 
 const ensureBundle = async (inputProps) => {
-  // Bundle once and reuse; compositions may depend on inputProps, so query fresh each time
-  if (!bundleLocation) {
-    bundleLocation = await bundle({
+  // Helper to verify a bundle directory contains an index.html
+  const hasIndexHtml = async (dir) => {
+    try {
+      const p = path.join(dir, 'index.html');
+      await fs.promises.access(p, fs.constants.R_OK);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Build (or rebuild) if we don't have a valid bundle yet
+  if (!bundleLocation || !(await hasIndexHtml(bundleLocation))) {
+    // Use a unique temp dir to avoid partial/locked bundles on Windows
+    const outDir = path.join(
+      os.tmpdir(),
+      `synapse-remotion-bundle-${randomUUID().slice(0, 8)}`
+    );
+    await fs.promises.mkdir(outDir, { recursive: true }).catch(() => {});
+
+    console.log('[render] bundling Remotion project…', {
       entryPoint: config.render.entryPoint,
-      outDir: path.join(os.tmpdir(), 'synapse-remotion-bundle'),
+      outDir,
     });
+
+    const serveUrl = await bundle({
+      entryPoint: config.render.entryPoint,
+      outDir,
+    });
+
+    // Validate bundle has index.html; if not, fail fast with a helpful error
+    if (!(await hasIndexHtml(serveUrl))) {
+      throw new Error(
+        `Remotion bundle is missing index.html at ${path.join(
+          serveUrl,
+          'index.html'
+        )}`
+      );
+    }
+
+    bundleLocation = serveUrl;
   }
+
   // Always fetch compositions with the current inputProps so any prop-dependent logic applies
   const compositions = await getCompositions(bundleLocation, { inputProps });
   return { bundleLocation, compositions };

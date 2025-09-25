@@ -785,22 +785,7 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
                 );
               })()}
             </div>
-            <button
-              onClick={() =>
-                window.dispatchEvent(new CustomEvent('openRecorderDialog'))
-              }
-              className="text-red-400 hover:text-red-300 p-1.5 rounded hover:bg-neutral-700"
-              title="Record Narration"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="currentColor"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <circle cx="12" cy="12" r="8" strokeWidth={0} />
-              </svg>
-            </button>
+            {/* Removed per UX request: recording shortcut button from playback bar */}
           </div>
         </div>
       </div>

@@ -835,7 +835,8 @@ function ClipProperties({
         suffix="px"
       />
 
-      {/* Background settings moved here for code items */}
+      {/* Canvas Background */}
+      <h6 className="text-xs font-medium text-text-secondary">Canvas Background</h6>
       {renderBackgroundControlsInline()}
 
       {/* Panel Style */}
@@ -851,28 +852,50 @@ function ClipProperties({
           const active = 'bg-synapse-primary text-synapse-text-inverse border-synapse-primary shadow-synapse-sm';
           const inactive = 'bg-background-tertiary text-text-secondary border-border-subtle hover:text-text-primary';
           return (
-            <div className="flex gap-1">
-              <button
-                onClick={() => updatePropertiesBulk({ codePanelRadius: 0, codePanelShadow: false })}
-                className={`${base} ${isNoFrame ? active : inactive}`}
-                title="No frame"
-              >
-                No frame
-              </button>
-              <button
-                onClick={() => updatePropertiesBulk({ codePanelRadius: 12, codePanelShadow: true })}
-                className={`${base} ${isCard ? active : inactive}`}
-                title="Card"
-              >
-                Card
-              </button>
-              <button
-                onClick={() => updatePropertiesBulk({ codePanelRadius: 16, codePanelShadow: true })}
-                className={`${base} ${isStrong ? active : inactive}`}
-                title="Strong card"
-              >
-                Strong
-              </button>
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-1">
+                <button
+                  onClick={() => updatePropertiesBulk({ codePanelRadius: 0, codePanelShadow: false })}
+                  className={`${base} ${isNoFrame ? active : inactive}`}
+                  title="No frame"
+                >
+                  No frame
+                </button>
+                <button
+                  onClick={() => updatePropertiesBulk({ codePanelRadius: 12, codePanelShadow: true })}
+                  className={`${base} ${isCard ? active : inactive}`}
+                  title="Card"
+                >
+                  Card
+                </button>
+                <button
+                  onClick={() => updatePropertiesBulk({ codePanelRadius: 16, codePanelShadow: true })}
+                  className={`${base} ${isStrong ? active : inactive}`}
+                  title="Strong card"
+                >
+                  Strong
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <NumberInput
+                  label="Panel Width"
+                  value={(localProperties as any).codePanelWidth ?? 800}
+                  onChange={(value) => updateProperty('codePanelWidth' as any, value)}
+                  min={100}
+                  max={4096}
+                  step={1}
+                  suffix="px"
+                />
+                <NumberInput
+                  label="Panel Height"
+                  value={(localProperties as any).codePanelHeight ?? 450}
+                  onChange={(value) => updateProperty('codePanelHeight' as any, value)}
+                  min={100}
+                  max={4096}
+                  step={1}
+                  suffix="px"
+                />
+              </div>
             </div>
           );
         })()}
@@ -941,6 +964,219 @@ function ClipProperties({
           🔍 Auto-Detect Language & Apply Defaults
         </button>
       </div>
+
+      {/* Snippets (Multi-step) */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h6 className="text-xs font-medium text-text-secondary">Snippets (Multi‑step)</h6>
+          <SelectInput
+            label="Transition"
+            value={localProperties.codeStepsTransition ?? 'none'}
+            onChange={(value) => updateProperty('codeStepsTransition', value as any)}
+            options={[
+              { value: 'none', label: 'None' },
+              { value: 'crossfade', label: 'Crossfade' },
+              { value: 'line-morph', label: 'Line Morph' },
+              { value: 'type-in', label: 'Type In (changed lines)' },
+            ]}
+          />
+        </div>
+
+        {(() => {
+          const steps = (localProperties as any).codeSteps as Array<{
+            code: string;
+            duration: number;
+            annotate?: string;
+            highlightRanges?: Array<[number, number]>;
+          }> | undefined;
+
+          const parsedSteps = Array.isArray(steps) ? steps : [];
+
+          const addFromCurrent = () => {
+            const codeText = localProperties.codeText || localProperties.text || '';
+            const next = [...parsedSteps, { code: codeText, duration: 3 }];
+            updateProperty('codeSteps', next as any);
+          };
+
+          const addBlank = () => {
+            const next = [...parsedSteps, { code: '// step', duration: 3 }];
+            updateProperty('codeSteps', next as any);
+          };
+
+          const fromTwoCodes = () => {
+            const a = localProperties.codeText || localProperties.text || '';
+            const b = (localProperties as any).codeTextB || '';
+            const next = [
+              { code: a || '// step A', duration: Math.max(1, Math.round(((item.duration || 6) / 2))) },
+              { code: b || '// step B', duration: Math.max(1, Math.round(((item.duration || 6) / 2))) },
+            ];
+            updateProperty('codeSteps', next as any);
+          };
+
+          const parseRanges = (s: string): Array<[number, number]> => {
+            const out: Array<[number, number]> = [];
+            s.split(/[,;\s]+/).forEach((tok) => {
+              if (!tok) return;
+              const m = tok.split('-').map((x) => parseInt(x, 10));
+              if (m.length === 2 && Number.isFinite(m[0]) && Number.isFinite(m[1])) {
+                const a = Math.max(1, Math.min(m[0], m[1]));
+                const b = Math.max(1, Math.max(m[0], m[1]));
+                out.push([a, b]);
+              } else if (m.length === 1 && Number.isFinite(m[0])) {
+                const v = Math.max(1, m[0]);
+                out.push([v, v]);
+              }
+            });
+            return out;
+          };
+
+          const sumDur = parsedSteps.reduce((s, st) => s + Math.max(0, st.duration || 0), 0);
+
+          return (
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={addFromCurrent}
+                  className="px-2 py-1 text-xs rounded border bg-background-tertiary text-text-secondary hover:text-text-primary"
+                  title="Add a step from the current code content"
+                >
+                  + Add Step from Code
+                </button>
+                <button
+                  onClick={addBlank}
+                  className="px-2 py-1 text-xs rounded border bg-background-tertiary text-text-secondary hover:text-text-primary"
+                  title="Add a blank step"
+                >
+                  + Add Blank Step
+                </button>
+                <button
+                  onClick={fromTwoCodes}
+                  className="px-2 py-1 text-xs rounded border bg-background-tertiary text-text-secondary hover:text-text-primary"
+                  title="Create 2 steps from Code + Second Code"
+                >
+                  ↔ From Code + Second
+                </button>
+                <div className="ml-auto text-xs text-text-tertiary self-center">
+                  Total steps: {parsedSteps.length} • Sum duration: {Math.round(sumDur * 10) / 10}s
+                </div>
+              </div>
+
+              {parsedSteps.length === 0 && (
+                <div className="text-xs text-text-tertiary">
+                  No steps yet. Add one above to enable snippet transitions.
+                </div>
+              )}
+
+              {parsedSteps.map((step, idx) => (
+                <div key={idx} className="border border-border-subtle rounded p-2 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="text-xs font-medium text-text-secondary">Step {idx + 1}</div>
+                    <div className="ml-auto flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          const next = [...parsedSteps];
+                          if (idx > 0) {
+                            [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+                            updateProperty('codeSteps', next as any);
+                          }
+                        }}
+                        className="px-1.5 py-0.5 text-[11px] rounded border bg-background-tertiary text-text-secondary hover:text-text-primary"
+                        title="Move up"
+                      >
+                        ↑
+                      </button>
+                      <button
+                        onClick={() => {
+                          const next = [...parsedSteps];
+                          if (idx < next.length - 1) {
+                            [next[idx + 1], next[idx]] = [next[idx], next[idx + 1]];
+                            updateProperty('codeSteps', next as any);
+                          }
+                        }}
+                        className="px-1.5 py-0.5 text-[11px] rounded border bg-background-tertiary text-text-secondary hover:text-text-primary"
+                        title="Move down"
+                      >
+                        ↓
+                      </button>
+                      <button
+                        onClick={() => {
+                          const next = parsedSteps.filter((_, i) => i !== idx);
+                          updateProperty('codeSteps', next as any);
+                        }}
+                        className="px-1.5 py-0.5 text-[11px] rounded border bg-background-tertiary text-text-secondary hover:text-text-primary"
+                        title="Remove step"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                      <TextInput
+                        label="Annotate (optional)"
+                        value={(step as any).annotate ?? ''}
+                        onChange={(value) => {
+                          const next = [...parsedSteps];
+                          (next[idx] as any).annotate = value;
+                          updateProperty('codeSteps', next as any);
+                        }}
+                        multiline
+                      />
+                    </div>
+                    <div>
+                      <NumberInput
+                        label="Duration (s)"
+                        value={Math.max(0.1, step.duration || 3)}
+                        onChange={(value) => {
+                          const next = [...parsedSteps];
+                          next[idx] = { ...next[idx], duration: Math.max(0.1, value || 0) } as any;
+                          updateProperty('codeSteps', next as any);
+                        }}
+                        min={0.1}
+                        max={120}
+                        step={0.1}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-3">
+                      <TextAreaWithFormat
+                        label="Step Code"
+                        value={step.code || ''}
+                        language={localProperties.language ?? 'javascript'}
+                        onChange={(value) => {
+                          const next = [...parsedSteps];
+                          next[idx] = { ...next[idx], code: value } as any;
+                          updateProperty('codeSteps', next as any);
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <TextInput
+                      label="Highlight Ranges (e.g., 1-3,5,9-10)"
+                      value={(() => {
+                        const ranges = (step as any).highlightRanges as Array<[number, number]> | undefined;
+                        if (!ranges || ranges.length === 0) return '';
+                        return ranges.map(([a, b]) => (a === b ? `${a}` : `${a}-${b}`)).join(',');
+                      })()}
+                      onChange={(value) => {
+                        const next = [...parsedSteps];
+                        (next[idx] as any).highlightRanges = parseRanges(value);
+                        updateProperty('codeSteps', next as any);
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+      </div>
+
       <div className="space-y-2">
         <SelectInput
           label="Animation Mode"
@@ -1134,7 +1370,7 @@ function ClipProperties({
   );
 
   const renderBackgroundControlsInline = () => {
-    // Derive current background config
+    // Derive current canvas background config
     const getCurrentBackgroundConfig = () => {
       const props = localProperties;
       if (!props.backgroundType || props.backgroundType === 'none')
@@ -1201,14 +1437,78 @@ function ClipProperties({
 
     return (
       <div className="space-y-2">
-        <BackgroundPicker
-          value={getCurrentBackgroundConfig()}
-          onChange={handleBackgroundChange}
-          opacity={localProperties.backgroundOpacity || 1}
-          onOpacityChange={(opacity) =>
-            updateProperty('backgroundOpacity', opacity)
-          }
-        />
+        {(() => {
+          const t = localProperties.backgroundType ?? 'none';
+          const base = 'px-2 py-1 text-xs rounded border transition-colors';
+          const active = 'bg-synapse-primary text-synapse-text-inverse border-synapse-primary shadow-synapse-sm';
+          const inactive = 'bg-background-tertiary text-text-secondary border-border-subtle hover:text-text-primary';
+          return (
+            <div className="flex gap-1">
+              <button
+                className={`${base} ${t === 'none' ? active : inactive}`}
+                onClick={() => updatePropertiesBulk({
+                  backgroundType: 'none' as any,
+                  backgroundColor: undefined as any,
+                  backgroundGradient: undefined as any,
+                  backgroundWallpaper: undefined as any,
+                })}
+              >
+                None
+              </button>
+              <button
+                className={`${base} ${t === 'color' ? active : inactive}`}
+                onClick={() => updatePropertiesBulk({
+                  backgroundType: 'color' as any,
+                  backgroundColor: localProperties.backgroundColor ?? '#1e1e1e',
+                  backgroundGradient: undefined as any,
+                  backgroundWallpaper: undefined as any,
+                })}
+              >
+                Color
+              </button>
+              <button
+                className={`${base} ${t === 'gradient' ? active : inactive}`}
+                onClick={() => updatePropertiesBulk({
+                  backgroundType: 'gradient' as any,
+                  backgroundGradient: localProperties.backgroundGradient ?? ({} as any),
+                  backgroundColor: undefined as any,
+                  backgroundWallpaper: undefined as any,
+                })}
+              >
+                Gradient
+              </button>
+              <button
+                className={`${base} ${t === 'wallpaper' ? active : inactive}`}
+                onClick={() => updatePropertiesBulk({
+                  backgroundType: 'wallpaper' as any,
+                  backgroundWallpaper: localProperties.backgroundWallpaper,
+                  backgroundColor: undefined as any,
+                  backgroundGradient: undefined as any,
+                })}
+              >
+                Image
+              </button>
+            </div>
+          );
+        })()}
+
+        {localProperties.backgroundType === 'color' && (
+          <ColorInput
+            label="Color"
+            value={localProperties.backgroundColor ?? '#1e1e1e'}
+            onChange={(value) => updateProperty('backgroundColor', value)}
+            error={validationErrors.backgroundColor}
+          />
+        )}
+
+        {localProperties.backgroundType && localProperties.backgroundType !== 'none' && (
+          <BackgroundPicker
+            value={getCurrentBackgroundConfig()}
+            onChange={handleBackgroundChange}
+            opacity={localProperties.backgroundOpacity || 1}
+            onOpacityChange={(opacity) => updateProperty('backgroundOpacity', opacity)}
+          />
+        )}
       </div>
     );
   };

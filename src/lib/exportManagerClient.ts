@@ -401,134 +401,151 @@ export class ClientExportManager {
     this.abortController = new AbortController();
 
     try {
-      this.updateProgress({
-        status: 'preparing',
-        progress: 0,
-        startTime: new Date(),
-      });
-
-      // Generate output filename
-      const outputFilename = generateOutputFilename(project, settings);
-
-      // Prepare export payload for server (authorization + job orchestration)
-      const exportPayload = {
-        project: {
-          id: project.id,
-          name: project.name,
-          timeline: project.timeline,
-          mediaAssets: project.mediaAssets,
-          settings: project.settings,
-        },
-        settings,
-        outputFilename,
-        jobId: this.currentJob.id,
-      };
-
-      // Prefer new render API if available; fallback to legacy export jobs
-      let serverJobId: string | null = null;
-      let useRenderApi = false;
-      try {
-        const inputProps = {
-          // Pass project identifiers so server can attribute renders
-          project: { id: project.id, name: project.name },
-          timeline: project.timeline,
-          mediaAssets: project.mediaAssets,
-          settings: {
-            width: settings.width || project.settings.width,
-            height: settings.height || project.settings.height,
-            fps: project.settings.fps,
-            // Prefer explicit project duration; otherwise derive from timeline, fallback to 60s
-            duration:
-              project.settings.duration && project.settings.duration > 0
-                ? project.settings.duration
-                : Math.max(
-                    60,
-                    Math.ceil(
-                      (project.timeline || []).reduce(
-                        (max, item) =>
-                          Math.max(
-                            max,
-                            (Number(item.startTime) || 0) +
-                              (Number(item.duration) || 0)
-                          ),
-                        0
-                      ) || 0
-                    )
-                  ),
-            backgroundColor: project.settings.backgroundColor || '#000000',
-          },
-          exportSettings: {
-            format: settings.format,
-            codec: settings.codec,
-            quality: settings.quality,
-            audioCodec: settings.audioCodec,
-            transparentBackground: !!settings.transparentBackground,
-            includeWallpaper: settings.includeWallpaper !== false,
-            includeGradient: settings.includeGradient !== false,
-          },
-          // Pass desired filename to the server render pipeline as a hint
-          outputFilename,
-        };
-        const { jobId } = await api.startRender(inputProps);
-        serverJobId = jobId;
-        useRenderApi = true;
-      } catch (e) {
-        if (e instanceof ApiError && (e.status === 404 || e.status === 405)) {
-          // Fallback to legacy endpoint
-          const { id } = await api.createExportJob(exportPayload, {
-            signal: this.abortController?.signal,
+      // Attempt loop (avoids recursive re-entry while isExporting is true)
+      // Will retry up to maxRetries on transient failures.
+      // Status is updated between attempts to surface errors in UI.
+      while (true) {
+        try {
+          this.updateProgress({
+            status: 'preparing',
+            progress: 0,
+            startTime: this.currentJob?.progress?.startTime || new Date(),
           });
-          serverJobId = id;
-          useRenderApi = false;
-        } else {
-          throw e;
+
+          // Generate output filename (each attempt may time-stamp differently)
+          const outputFilename = generateOutputFilename(project, settings);
+
+          // Prevent export if any asset still uses a blob: URL (server cannot fetch them)
+          const blobAssets = (project.mediaAssets || []).filter(
+            (a) => typeof a?.url === 'string' && a.url.startsWith('blob:')
+          );
+          if (blobAssets.length > 0) {
+            const names = blobAssets.map((a) => a.name || a.id).join(', ');
+            throw new Error(
+              `Some media are not ready for export (still using blob: URLs): ${names}. Please wait until uploads finish, then try again.`
+            );
+          }
+
+          // Prepare export payload for legacy server (kept for backward compatibility)
+          const exportPayload = {
+            project: {
+              id: project.id,
+              name: project.name,
+              timeline: project.timeline,
+              mediaAssets: project.mediaAssets,
+              settings: project.settings,
+            },
+            settings,
+            outputFilename,
+            jobId: this.currentJob!.id,
+          };
+
+          // Prefer new render API if available; fallback to legacy export jobs
+          let serverJobId: string | null = null;
+          let useRenderApi = false;
+          try {
+            const inputProps = {
+              // Pass project identifiers so server can attribute renders
+              project: { id: project.id, name: project.name },
+              timeline: project.timeline,
+              mediaAssets: project.mediaAssets,
+              settings: {
+                width: settings.width || project.settings.width,
+                height: settings.height || project.settings.height,
+                fps: project.settings.fps,
+                // Prefer explicit project duration; otherwise derive from timeline, fallback to 60s
+                duration:
+                  project.settings.duration && project.settings.duration > 0
+                    ? project.settings.duration
+                    : Math.max(
+                        60,
+                        Math.ceil(
+                          (project.timeline || []).reduce(
+                            (max, item) =>
+                              Math.max(
+                                max,
+                                (Number(item.startTime) || 0) +
+                                  (Number(item.duration) || 0)
+                              ),
+                            0
+                          ) || 0
+                        )
+                      ),
+                backgroundColor: project.settings.backgroundColor || '#000000',
+              },
+              exportSettings: {
+                format: settings.format,
+                codec: settings.codec,
+                quality: settings.quality,
+                audioCodec: settings.audioCodec,
+                transparentBackground: !!settings.transparentBackground,
+                includeWallpaper: settings.includeWallpaper !== false,
+                includeGradient: settings.includeGradient !== false,
+              },
+              // Pass desired filename to the server render pipeline as a hint
+              outputFilename,
+            };
+            const { jobId } = await api.startRender(inputProps);
+            serverJobId = jobId;
+            useRenderApi = true;
+          } catch (e) {
+            if (e instanceof ApiError && (e.status === 404 || e.status === 405)) {
+              // Fallback to legacy endpoint
+              const { id } = await api.createExportJob(exportPayload, {
+                signal: this.abortController?.signal,
+              });
+              serverJobId = id;
+              useRenderApi = false;
+            } else {
+              throw e;
+            }
+          }
+
+          this.updateProgress({ status: 'preparing', progress: 10 });
+
+          // Poll server job for progress until completion
+          await this.pollServerJob(serverJobId!, useRenderApi);
+
+          console.log(`Export completed: ${outputFilename}`);
+          return this.currentJob!.outputPath as string;
+        } catch (error) {
+          console.error('Export failed:', error);
+
+          let errorMessage = 'Unknown error occurred';
+          if (error instanceof ApiError) {
+            if (error.status === 401)
+              errorMessage = 'Authentication required to export';
+            else if (error.status === 402)
+              errorMessage = 'Membership required to export';
+            else errorMessage = error.message;
+          } else if (error instanceof Error) {
+            errorMessage = error.message;
+          }
+
+          this.updateProgress({
+            status: 'failed',
+            errorMessage,
+            endTime: new Date(),
+          });
+
+          // Check if we should retry
+          if (
+            this.currentJob &&
+            this.currentJob.retryCount < this.currentJob.maxRetries
+          ) {
+            console.log(
+              `Retrying export (attempt ${this.currentJob.retryCount + 1}/${this.currentJob.maxRetries})`
+            );
+            this.currentJob.retryCount++;
+            // Wait before retrying
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            // Continue loop to retry without re-entering startExport()
+            continue;
+          }
+
+          throw new Error(`Export failed: ${errorMessage}`);
         }
       }
-
-      this.updateProgress({ status: 'preparing', progress: 10 });
-
-      // Poll server job for progress until completion
-      await this.pollServerJob(serverJobId!, useRenderApi);
-
-      console.log(`Export completed: ${outputFilename}`);
-      return this.currentJob.outputPath as string;
-    } catch (error) {
-      console.error('Export failed:', error);
-
-      let errorMessage = 'Unknown error occurred';
-      if (error instanceof ApiError) {
-        if (error.status === 401)
-          errorMessage = 'Authentication required to export';
-        else if (error.status === 402)
-          errorMessage = 'Membership required to export';
-        else errorMessage = error.message;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-
-      this.updateProgress({
-        status: 'failed',
-        errorMessage,
-        endTime: new Date(),
-      });
-
-      // Check if we should retry
-      if (
-        this.currentJob &&
-        this.currentJob.retryCount < this.currentJob.maxRetries
-      ) {
-        console.log(
-          `Retrying export (attempt ${this.currentJob.retryCount + 1}/${this.currentJob.maxRetries})`
-        );
-        this.currentJob.retryCount++;
-
-        // Wait before retrying
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-
-        return this.startExport(project, settings);
-      }
-
-      throw new Error(`Export failed: ${errorMessage}`);
     } finally {
       this.isExporting = false;
       this.abortController = null;
@@ -619,7 +636,10 @@ export class ClientExportManager {
         return;
       }
       if (status === 'failed' || status === 'cancelled') {
-        throw new Error(`Export ${status}`);
+        const reason =
+          (job as any).error ||
+          (status === 'cancelled' ? 'Export cancelled' : 'Export failed');
+        throw new Error(reason);
       }
 
       await new Promise((r) => setTimeout(r, delay));

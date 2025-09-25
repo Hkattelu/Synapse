@@ -66,9 +66,28 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Get code content from item properties
-  const codeContentRaw =
-    item.properties.codeText || item.properties.text || '// No code content';
+  // Get code content from item properties (supports multi-step codeSteps)
+  const codeContentRaw = useMemo(() => {
+    const steps = item.properties.codeSteps;
+    if (Array.isArray(steps) && steps.length > 0) {
+      // Determine active step by current frame using existing fps
+      const localFrame = Math.max(0, frame - startFrame);
+      // Build cumulative frames per step
+      let acc = 0;
+      for (let i = 0; i < steps.length; i++) {
+        const stepFrames = Math.max(1, Math.round((steps[i].duration || 0) * fps));
+        const start = acc;
+        const end = acc + stepFrames; // exclusive
+        if (localFrame >= start && localFrame < end) {
+          return steps[i].code ?? '// step';
+        }
+        acc = end;
+      }
+      // Fallback to last step if overflow
+      return steps[steps.length - 1].code ?? '// step';
+    }
+    return item.properties.codeText || item.properties.text || '// No code content';
+  }, [item.properties.codeSteps, item.properties.codeText, item.properties.text, frame, startFrame, fps]);
   const language = item.properties.language || 'javascript';
   const theme = item.properties.theme || 'dark';
   // Get font settings from theme or fallback to item properties
@@ -141,7 +160,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
 
   const themeColors = getThemeColors;
 
-  // Background configuration with export settings consideration
+  // Background configuration with export settings consideration (canvas background)
   const backgroundConfig = useMemo(() => {
     const {
       backgroundType,
@@ -207,6 +226,43 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
     exportSettings?.transparentBackground,
     exportSettings?.includeWallpaper,
     exportSettings?.includeGradient,
+  ]);
+
+  // Panel-local background configuration (inside the code panel)
+  const panelBackgroundConfig = useMemo(() => {
+    const t = (item.properties as any).codePanelType;
+    const w = (item.properties as any).codePanelWallpaper;
+    const g = (item.properties as any).codePanelGradient;
+    const c = (item.properties as any).codePanelColor;
+    const o = (item.properties as any).codePanelOpacity;
+
+    if (!t || t === 'none') return null;
+    switch (t) {
+      case 'wallpaper':
+        return w
+          ? {
+              type: 'wallpaper' as const,
+              wallpaper: {
+                assetId: w,
+                opacity: o ?? 1,
+                blendMode: 'normal' as const,
+              },
+            }
+          : null;
+      case 'gradient':
+        return g ? ({ type: 'gradient' as const, gradient: g } as const) : null;
+      case 'color':
+        return { type: 'color' as const, color: c || themeColors.background };
+      default:
+        return null;
+    }
+  }, [
+    (item.properties as any).codePanelType,
+    (item.properties as any).codePanelWallpaper,
+    (item.properties as any).codePanelGradient,
+    (item.properties as any).codePanelColor,
+    (item.properties as any).codePanelOpacity,
+    themeColors.background,
   ]);
 
   // Calculate position and transformations
@@ -459,6 +515,8 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
   };
 
   // Inner code panel: theme background and transforms applied here
+  const panelWidth = (item.properties as any).codePanelWidth ?? ((item.properties as any).codePanelAutoSize !== true ? 800 : undefined);
+  const panelHeight = (item.properties as any).codePanelHeight ?? ((item.properties as any).codePanelAutoSize !== true ? 450 : undefined);
   const codePanelStyle: React.CSSProperties = {
     position: 'relative',
     zIndex: 1,
@@ -466,16 +524,17 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
     transform:
       `${animStyles.transform ?? ''} translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`.trim(),
     opacity: (animStyles.opacity ?? 1) * opacity,
-    backgroundColor: themeColors.background,
+    backgroundColor: panelBackgroundConfig ? 'transparent' : themeColors.background,
     color: themeColors.foreground,
     fontFamily,
     fontSize: `${fontSize}px`,
     lineHeight,
     padding: '20px',
-    borderRadius: typeof item.properties.codePanelRadius === 'number' ? item.properties.codePanelRadius : 12,
-    boxShadow: item.properties.codePanelShadow === false ? 'none' : '0 4px 24px rgba(0,0,0,0.25)',
+    borderRadius: typeof (item.properties as any).codePanelRadius === 'number' ? (item.properties as any).codePanelRadius : 12,
+    boxShadow: (item.properties as any).codePanelShadow === false ? 'none' : '0 4px 24px rgba(0,0,0,0.25)',
     overflow: 'hidden',
-    // Allow the panel to size to content; no fixed width/height
+    width: panelWidth,
+    height: panelHeight,
   };
 
   // Code container inside the panel (for proper layering)
@@ -606,34 +665,44 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
         )}
 
         {/* Code content layer */}
-        <div style={codeContainerStyle}>
-          <style>{syntaxStyles}</style>
-          <pre
-            style={{
-              margin: 0,
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-            }}
-          >
-            <code
-              dangerouslySetInnerHTML={{ __html: animatedCode }}
-              style={{ fontFamily: 'inherit' }}
+        <div style={codePanelStyle}>
+          {/* Panel local background layer */}
+          {panelBackgroundConfig && (
+            <BackgroundRenderer
+              config={panelBackgroundConfig}
+              opacity={(item.properties as any).codePanelOpacity ?? 1}
+              style={{ position: 'absolute', inset: 0, zIndex: 0, borderRadius: (item.properties as any).codePanelRadius ?? 12 }}
             />
-            {/* Typing cursor */}
-            {(anim?.preset === 'typewriter' || animationMode === 'typing') &&
-              charactersToShow < totalCharacters && (
-                <span
-                  style={{
-                    backgroundColor: themeColors.cursor,
-                    width: '2px',
-                    height: `${fontSize}px`,
-                    display: 'inline-block',
-                    animation: 'blink 1s infinite',
-                    marginLeft: '2px',
-                  }}
-                />
-              )}
-          </pre>
+          )}
+          <div style={codeContainerStyle}>
+            <style>{syntaxStyles}</style>
+            <pre
+              style={{
+                margin: 0,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+              }}
+            >
+              <code
+                dangerouslySetInnerHTML={{ __html: animatedCode }}
+                style={{ fontFamily: 'inherit' }}
+              />
+              {/* Typing cursor */}
+              {(anim?.preset === 'typewriter' || animationMode === 'typing') &&
+                charactersToShow < totalCharacters && (
+                  <span
+                    style={{
+                      backgroundColor: themeColors.cursor,
+                      width: '2px',
+                      height: `${fontSize}px`,
+                      display: 'inline-block',
+                      animation: 'blink 1s infinite',
+                      marginLeft: '2px',
+                    }}
+                  />
+                )}
+            </pre>
+          </div>
         </div>
 
         {/* Blinking cursor animation */}

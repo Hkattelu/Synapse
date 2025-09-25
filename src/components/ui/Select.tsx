@@ -32,7 +32,7 @@ export const SelectContent: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   return (
-    <div className="absolute z-10 w-lg mt-1 bg-synapse-surface border border-synapse-border rounded-md shadow-synapse-lg">
+    <div className="z-10 mt-1 bg-synapse-surface border border-synapse-border rounded-md shadow-synapse-lg">
       {children}
     </div>
   );

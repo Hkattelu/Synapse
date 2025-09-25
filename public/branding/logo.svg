@@ -11,6 +11,13 @@
       <feGaussianBlur stdDeviation="0.6"/>
     </filter>
   </defs>
+  <style>
+    /* Improve contrast automatically in dark mode when embedded as an image */
+    @media (prefers-color-scheme: dark) {
+      text[fill="#0F172A"] { fill: #E5E7EB !important; }
+      path[stroke="#0F172A"] { stroke: #E5E7EB !important; stroke-opacity: 0.35 !important; }
+    }
+  </style>
 
   <!-- Mark: three connected nodes -->
   <g transform="translate(8,8)">

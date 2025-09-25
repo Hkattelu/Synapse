@@ -244,6 +244,35 @@ function applyTrackAssignments(
       },
     };
 
+    // Property migration: Move background* to codePanel* for code items and set fixed panel size by default
+    if (migratedItem.type === 'code') {
+      const p: any = migratedItem.properties || {};
+      if (p.backgroundType && p.backgroundType !== 'none') {
+        p.codePanelType = p.backgroundType;
+        if (p.backgroundColor !== undefined) p.codePanelColor = p.backgroundColor;
+        if (p.backgroundGradient !== undefined) p.codePanelGradient = p.backgroundGradient;
+        if (p.backgroundWallpaper !== undefined)
+          p.codePanelWallpaper = p.backgroundWallpaper;
+        if (p.backgroundOpacity !== undefined) p.codePanelOpacity = p.backgroundOpacity;
+        // Disable canvas background now that it's moved to panel
+        p.backgroundType = 'none';
+        p.backgroundColor = undefined;
+        p.backgroundGradient = undefined;
+        p.backgroundWallpaper = undefined;
+        // Keep backgroundOpacity as canvas opacity is irrelevant when type is none
+      }
+      if (p.codePanelAutoSize === undefined) {
+        p.codePanelAutoSize = false;
+      }
+      if (p.codePanelWidth === undefined) {
+        p.codePanelWidth = 800;
+      }
+      if (p.codePanelHeight === undefined) {
+        p.codePanelHeight = 450;
+      }
+      migratedItem.properties = p;
+    }
+
     // Add suggested track for items with low confidence
     if (confidence < 70) {
       migratedItem.suggestedTrack = targetTrack.id;
