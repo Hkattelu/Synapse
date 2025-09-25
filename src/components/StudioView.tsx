@@ -119,12 +119,17 @@ function StudioViewContent() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showLoader, setShowLoader] = useState(true);
 
-  // When a clip is selected, prefer showing the Inspector by closing Media Bin if open
+  // When selection changes to non-empty while Media Bin is open, prefer Inspector
+  // Do NOT auto-close if selection was already non-empty before the user opened Media Bin.
+  const prevSelectedCountRef = React.useRef<number>(selectedTimelineItems.length);
   useEffect(() => {
-    if (shouldShowInspector && ui.mediaBinVisible) {
+    const prev = prevSelectedCountRef.current;
+    const curr = selectedTimelineItems.length;
+    if (ui.mediaBinVisible && prev !== curr && curr > 0) {
       toggleMediaBin();
     }
-  }, [shouldShowInspector, ui.mediaBinVisible, toggleMediaBin]);
+    prevSelectedCountRef.current = curr;
+  }, [selectedTimelineItems.length, ui.mediaBinVisible, toggleMediaBin]);
 
   // Dev-time: Only prefetch when user intent indicates these panels might open soon,
   // to avoid ballooning initial load.
