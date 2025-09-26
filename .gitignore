@@ -45,3 +45,4 @@ server/output/
 # Temporary node modules backups
 node_modules.bak-*/
 node_modules.bak-*
+tsconfig.app.tsbuildinfo
