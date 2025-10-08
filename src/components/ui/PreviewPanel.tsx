@@ -32,6 +32,12 @@ export function PreviewPanel({
     item.properties.text ||
     `function greet(name) {\n  console.log(\`Hello, \${name}!\`);\n  return \`Welcome to Synapse!\`;\n}\n\nconst user = "Developer";\nconst message = greet(user);`;
 
+  // Normalize line endings to avoid CR rendering as extra newlines on Windows
+  const normalizedCode = useMemo(
+    () => sampleCode.replace(/\r\n/g, '\n').replace(/\r/g, '\n'),
+    [sampleCode]
+  );
+
   // Current theme
   const currentTheme = useMemo(() => {
     return themeManager.getTheme(item.properties.theme || 'vscode-dark-plus');
@@ -153,7 +159,7 @@ export function PreviewPanel({
   // Theme preview content
   const renderThemePreview = () => {
     if (!currentTheme) return null;
-    const lines = sampleCode.split('\n').slice(0, 8);
+    const lines = normalizedCode.split('\n').slice(0, 8);
     return (
       <div className="theme-preview h-full">
         <div className="flex items-center justify-between mb-2">
@@ -326,15 +332,15 @@ export function PreviewPanel({
 
   // Render animated snippet
   const renderAnimatedCode = () => {
-    const lines = sampleCode.split('\n').slice(0, 6);
+    const lines = normalizedCode.split('\n').slice(0, 6);
     const animationType =
       item.properties.diffAnimationType || item.properties.animationMode;
     const progress = animationFrame / 120;
     switch (animationType) {
       case 'typing': {
-        const totalChars = sampleCode.length;
+        const totalChars = normalizedCode.length;
         const visibleChars = Math.floor(totalChars * progress);
-        const visibleText = sampleCode.substring(0, visibleChars);
+        const visibleText = normalizedCode.substring(0, visibleChars);
         return (
           <div className="whitespace-pre-wrap">
             {visibleText}

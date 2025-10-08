@@ -17,10 +17,14 @@ async function ensureUploadsDir() {
 // Upload raw binary (single file). Avoids extra deps; client must send Content-Type and X-Filename.
 uploadsRouter.post(
   '/',
-  express.raw({ type: '*/*', limit: '2gb' }),
   async (req, res) => {
+    // Stream request body to disk with basic safeguards
+    const abortWith = (code, message) => {
+      try { res.status(code).json({ error: message }); } catch {}
+    };
     try {
       await ensureUploadsDir();
+
       const origName = String(req.header('x-filename') || 'upload.bin');
       const safeBase = origName
         .replace(/[^a-zA-Z0-9 _.-]+/g, '-')
@@ -31,10 +35,7 @@ uploadsRouter.post(
       const id = `${Date.now()}-${randomUUID().slice(0, 8)}`;
       const filename = `${safeBase.replace(/\.[a-zA-Z0-9]+$/, '')}-${id}${ext}`;
       const outPath = path.join(config.storage.uploadsDir, filename);
-      const buf = Buffer.isBuffer(req.body)
-        ? req.body
-        : Buffer.from(req.body || []);
-      await fs.promises.writeFile(outPath, buf);
+
       const host = req.get('host');
       const xfProto = (req.headers['x-forwarded-proto'] || '')
         .toString()
@@ -42,12 +43,47 @@ uploadsRouter.post(
         .trim();
       const inferredProto = xfProto || req.protocol || 'http';
       const protocol = inferredProto.replace(/:$/, '');
-      const absoluteUrl = `${protocol}://${host}/api/uploads/${encodeURIComponent(
-        filename
-      )}`;
-      res.json({ id: filename, url: absoluteUrl });
+
+      const ws = fs.createWriteStream(outPath);
+      let received = 0;
+      const contentLength = Number(req.header('content-length') || 0);
+      const MAX_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
+      if (contentLength && contentLength > MAX_BYTES) {
+        return abortWith(413, 'Upload exceeds maximum allowed size');
+      }
+
+      const onData = (chunk) => {
+        received += chunk.length;
+        if (received > MAX_BYTES) {
+          try { ws.destroy(); } catch {}
+          return abortWith(413, 'Upload exceeds maximum allowed size');
+        }
+      };
+
+      let responded = false;
+      const done = () => {
+        if (responded) return;
+        responded = true;
+        const absoluteUrl = `${protocol}://${host}/api/uploads/${encodeURIComponent(filename)}`;
+        res.json({ id: filename, url: absoluteUrl });
+      };
+
+      const fail = (err) => {
+        if (responded) return;
+        responded = true;
+        try { fs.promises.unlink(outPath).catch(() => {}); } catch {}
+        abortWith(400, String(err?.message || err || 'Upload failed'));
+      };
+
+      req.on('data', onData);
+      req.on('error', fail);
+      req.on('aborted', () => fail(new Error('Client aborted upload')));
+      ws.on('error', fail);
+      ws.on('finish', done);
+
+      req.pipe(ws);
     } catch (e) {
-      res.status(400).json({ error: String(e?.message || e) });
+      abortWith(400, String(e?.message || e));
     }
   }
 );

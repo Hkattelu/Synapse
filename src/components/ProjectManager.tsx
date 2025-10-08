@@ -101,7 +101,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                     onError={() => setThumbError(true)}
                   />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-synapse-surface">
+                  <div className="absolute inset-0 flex items-center justify-center bg-synapse-surface-active">
                     {/* Simple placeholder graphic */}
                     <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-text-secondary">
                       <rect x="3" y="3" width="18" height="14" rx="2" ry="2" stroke="currentColor" />
@@ -111,39 +111,39 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                     <span className="sr-only">No thumbnail</span>
                   </div>
                 )}
-                {/* Overlay metadata (chips) */}
-                <div className="absolute inset-x-2 bottom-2 flex flex-wrap items-center gap-2">
-                  <div
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary"
-                    title={`Resolution: ${(proj.settings?.width || 1920)}×${(proj.settings?.height || 1080)}`}
-                  >
-                    <Maximize className="w-3.5 h-3.5" aria-hidden="true" />
-                    <span className="text-[11px]">{proj.settings?.width || 1920}×{proj.settings?.height || 1080}</span>
-                  </div>
-                  <div
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary"
-                    title={`Frame rate: ${(proj.settings?.fps || 30)} fps`}
-                  >
-                    <Gauge className="w-3.5 h-3.5" aria-hidden="true" />
-                    <span className="text-[11px]">{proj.settings?.fps || 30} fps</span>
-                  </div>
-                  <div
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary"
-                    title={`Duration: ${Math.round(proj.settings?.duration || 60)} seconds`}
-                  >
-                    <Clock className="w-3.5 h-3.5" aria-hidden="true" />
-                    <span className="text-[11px]">{Math.round(proj.settings?.duration || 60)}s</span>
-                  </div>
-                  {firstVideo && (
-                    <div
-                      className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary"
-                      title="Contains video media"
-                    >
-                      <Video className="w-3.5 h-3.5" aria-hidden="true" />
-                      <span className="text-[11px]">Video</span>
-                    </div>
-                  )}
+              </div>
+              {/* Metadata chips below thumbnail */}
+              <div className="px-6 pt-2 flex flex-wrap items-center gap-2">
+                <div
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary"
+                  title={`Resolution: ${(proj.settings?.width || 1920)}×${(proj.settings?.height || 1080)}`}
+                >
+                  <Maximize className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span className="text-[11px]">{proj.settings?.width || 1920}×{proj.settings?.height || 1080}</span>
                 </div>
+                <div
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary"
+                  title={`Frame rate: ${(proj.settings?.fps || 30)} fps`}
+                >
+                  <Gauge className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span className="text-[11px]">{proj.settings?.fps || 30} fps</span>
+                </div>
+                <div
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary"
+                  title={`Duration: ${Math.round(proj.settings?.duration || 60)} seconds`}
+                >
+                  <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span className="text-[11px]">{Math.round(proj.settings?.duration || 60)}s</span>
+                </div>
+                {firstVideo && (
+                  <div
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary"
+                    title="Contains video media"
+                  >
+                    <Video className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span className="text-[11px]">Video</span>
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -275,7 +275,8 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                   <hr className="my-2 border-border-subtle" />
 
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setShowDeleteConfirm(true);
                       setShowMenu(false);
                     }}
@@ -332,15 +333,18 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-              onClick={() => setShowDeleteConfirm(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDeleteConfirm(false);
+              }}
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-synapse-surface rounded-xl p-6 max-w-md w-full"
+                className="bg-synapse-surface/98 border border-border-subtle rounded-xl p-6 max-w-md w-full shadow-synapse-lg"
               >
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="w-12 h-12 bg-status-error/10 rounded-full flex items-center justify-center">
@@ -403,6 +407,17 @@ export function ProjectManager() {
     importProject,
     createProject,
   } = useProject();
+
+  // Ensure deletion removes from persistent storage as well
+  const handleDeleteProject = async (projectId: string) => {
+    try {
+      await PM.deleteProject(projectId);
+    } catch (err) {
+      console.warn('Failed to delete from storage, removing from state anyway:', err);
+    } finally {
+      deleteProject(projectId);
+    }
+  };
 
   const [isImporting, setIsImporting] = useState(false);
 
@@ -507,7 +522,7 @@ export function ProjectManager() {
               onRename={renameProject}
               onDuplicate={handleDuplicateProject}
               onExport={handleExportProject}
-              onDelete={deleteProject}
+              onDelete={handleDeleteProject}
             />
           ))}
         </AnimatePresence>

@@ -404,9 +404,9 @@ export function DashboardView() {
                   }}
                   className="group text-left bg-synapse-surface border border-border-subtle hover:border-synapse-border-hover rounded-xl overflow-hidden transition-all hover:shadow-synapse-md focus:outline-none focus:ring-2 focus:ring-synapse-border-focus"
                 >
-                  {/* Visual banner */}
+                  {/* Mini preview banner */}
                   <div
-                    className="h-28 relative"
+                    className="h-32 relative"
                     style={{
                       background: `linear-gradient(135deg, ${tpl.colorFrom || '#6366f1'}, ${tpl.colorTo || '#a855f7'})`,
                     }}
@@ -416,10 +416,42 @@ export function DashboardView() {
                         Recommended
                       </span>
                     )}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-4xl drop-shadow-sm">
-                        {tpl.emoji || '✨'}
-                      </div>
+                    <div className="absolute inset-0 p-3">
+                      {tpl.previewKind === 'side-by-side' ? (
+                        <div className="w-full h-full grid grid-cols-2 gap-2">
+                          {/* Left code panel */}
+                          <div className="bg-black/40 rounded-md p-2 border border-white/10">
+                            <div className="space-y-1">
+                              <div className="h-2 bg-white/50 rounded w-5/6"></div>
+                              <div className="h-2 bg-white/40 rounded w-4/6"></div>
+                              <div className="h-2 bg-white/30 rounded w-3/6"></div>
+                              <div className="h-2 bg-white/40 rounded w-2/3"></div>
+                              <div className="h-2 bg-white/30 rounded w-1/2"></div>
+                            </div>
+                          </div>
+                          {/* Right preview panel */}
+                          <div className="bg-white/80 rounded-md border border-white/80 shadow-inner flex items-center justify-center">
+                            <div className="w-10 h-10 rounded bg-gray-300/80"></div>
+                          </div>
+                        </div>
+                      ) : tpl.previewKind === 'vertical' ? (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="h-full max-h-24 w-12 sm:w-14 bg-black/60 rounded-xl border border-white/20 shadow-inner p-1 flex flex-col gap-1">
+                            <div className="h-2 bg-white/50 rounded"></div>
+                            <div className="flex-1 bg-white/20 rounded"></div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="w-full h-full bg-black/40 rounded-md border border-white/10 p-2">
+                          <div className="space-y-1">
+                            <div className="h-2 bg-white/60 rounded w-4/5"></div>
+                            <div className="h-2 bg-white/40 rounded w-3/5"></div>
+                            <div className="h-2 bg-white/30 rounded w-2/5"></div>
+                            <div className="h-2 bg-white/40 rounded w-3/4"></div>
+                            <div className="h-2 bg-white/30 rounded w-1/2"></div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 

@@ -415,14 +415,42 @@ export class ClientExportManager {
           // Generate output filename (each attempt may time-stamp differently)
           const outputFilename = generateOutputFilename(project, settings);
 
-          // Prevent export if any asset still uses a blob: URL (server cannot fetch them)
-          const blobAssets = (project.mediaAssets || []).filter(
-            (a) => typeof a?.url === 'string' && a.url.startsWith('blob:')
-          );
-          if (blobAssets.length > 0) {
-            const names = blobAssets.map((a) => a.name || a.id).join(', ');
+          // Prevent export if any asset still uses a local-only URL scheme the server cannot fetch
+          const isElectron = (() => {
+            try {
+              // Presence of SynapseFS indicates Electron renderer with preload
+              // Fallback: process.versions.electron if available
+              return Boolean((globalThis as any)?.window?.SynapseFS) ||
+                Boolean((globalThis as any)?.process?.versions?.electron);
+            } catch {
+              return false;
+            }
+          })();
+
+          const mediaAssets = Array.isArray(project.mediaAssets)
+            ? project.mediaAssets
+            : [];
+
+          const offending: { name: string; url: string }[] = [];
+          for (const a of mediaAssets) {
+            const url = typeof a?.url === 'string' ? a.url : '';
+            if (!url) continue;
+            const name = String(a?.name || a?.id || 'unnamed');
+            if (url.startsWith('blob:')) offending.push({ name, url });
+            else if (url.startsWith('data:')) offending.push({ name, url });
+            else if (!isElectron && url.startsWith('file:')) offending.push({ name, url });
+          }
+
+          if (offending.length > 0) {
+            const details = offending
+              .slice(0, 5)
+              .map((o) => `${o.name} -> ${o.url.slice(0, 64)}…`)
+              .join('; ');
+            const hint = isElectron
+              ? 'Please upload local recordings (blob:/data:) before exporting.'
+              : 'Please wait for uploads to finish (blob:/data:/file:). Open the Uploads panel to retry/resolve.';
             throw new Error(
-              `Some media are not ready for export (still using blob: URLs): ${names}. Please wait until uploads finish, then try again.`
+              `Some media are not server-readable: ${details}. ${hint}`
             );
           }
 

@@ -6,8 +6,14 @@ import { bundle } from '@remotion/bundler';
 import { getCompositions, renderMedia } from '@remotion/renderer';
 import { config } from '../config.mjs';
 
-const jobs = new Map(); // id -> {status, output, error, progress?}
+const jobs = new Map(); // id -> {status, phase, output, error, progress?, lastUpdated}
 let bundleLocation = null;
+
+const setJob = (id, updates = {}) => {
+  const existing = jobs.get(id) || {};
+  const lastUpdated = new Date().toISOString();
+  jobs.set(id, { ...existing, ...updates, lastUpdated });
+};
 
 // Simple in-process queue control
 let active = 0;
@@ -144,6 +150,9 @@ const runNext = async () => {
   const { id, inputProps } = next;
 
   try {
+    // Mark phase: preparing/bundling
+    setJob(id, { status: 'preparing', phase: 'bundling' });
+
     // Log a small debug line for troubleshooting (safe, no PII)
     console.log('[render] starting job', id, {
       timeline: Array.isArray(inputProps?.timeline)
@@ -155,11 +164,16 @@ const runNext = async () => {
     });
 
     const { bundleLocation, compositions } = await ensureBundle(inputProps);
+
+    // After bundling, move to rendering phase (once composition is ready below)
     const composition = compositions.find(
       (c) => c.id === config.render.compositionId
     );
     if (!composition)
       throw new Error(`Composition ${config.render.compositionId} not found`);
+
+    // Transition to rendering
+    setJob(id, { status: 'rendering', phase: 'rendering', progress: 0 });
 
     const format = String(inputProps?.exportSettings?.format || 'mp4');
     const codec = String(inputProps?.exportSettings?.codec || 'h264');
@@ -173,7 +187,8 @@ const runNext = async () => {
     const filename = `${base || id}.${ext}`;
     const out = path.join(config.render.outputDir, filename);
 
-    jobs.set(id, { status: 'rendering', output: out, progress: 0 });
+    // Initialize job output before progress updates
+    setJob(id, { status: 'rendering', output: out, progress: 0 });
     await renderMedia({
       composition,
       serveUrl: bundleLocation,
@@ -189,9 +204,7 @@ const runNext = async () => {
         const rendered = (p && (p.encodedFrames || p.renderedFrames)) || 0;
         const percent =
           total > 0 ? Math.min(100, Math.round((rendered / total) * 100)) : 0;
-        const existing = jobs.get(id) || {};
-        jobs.set(id, {
-          ...existing,
+        setJob(id, {
           status: 'rendering',
           output: out,
           progress: percent,
@@ -222,9 +235,9 @@ const runNext = async () => {
     all.push(record);
     await writeMeta(all);
 
-    jobs.set(id, { status: 'completed', output: out, progress: 100 });
+    setJob(id, { status: 'completed', phase: 'completed', output: out, progress: 100, completedAt: new Date().toISOString() });
   } catch (e) {
-    jobs.set(id, { status: 'failed', error: String(e?.stack || e) });
+    setJob(id, { status: 'failed', phase: 'failed', error: String(e?.stack || e) });
   } finally {
     active = Math.max(0, active - 1);
     // Trigger next job
@@ -235,7 +248,7 @@ const runNext = async () => {
 export const startRender = async ({ inputProps }) => {
   await fs.promises.mkdir(config.render.outputDir, { recursive: true });
   const id = randomUUID();
-  jobs.set(id, { status: 'queued' });
+  setJob(id, { status: 'queued', phase: 'queued', progress: 0, createdAt: new Date().toISOString() });
   pending.push({ id, inputProps });
   // Try to run immediately if capacity
   void runNext();
@@ -254,10 +267,12 @@ export const getJobWithMeta = (id) => {
   if (!job) {
     return {
       status: 'queued',
+      phase: 'queued',
       queuePosition,
       pendingCount,
       activeCount,
       concurrency,
+      lastUpdated: new Date().toISOString(),
     };
   }
   return {

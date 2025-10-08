@@ -953,6 +953,43 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
             </div>
 
             <div className="flex flex-col gap-3">
+              {/* Invalid local source URLs preflight */}
+              {(() => {
+                try {
+                  const isElectron = Boolean((window as any)?.SynapseFS);
+                  const assets = Array.isArray(project?.mediaAssets)
+                    ? project!.mediaAssets
+                    : [];
+                  const offenders = assets.filter((a: any) => {
+                    const u = typeof a?.url === 'string' ? a.url : '';
+                    if (!u) return false;
+                    if (u.startsWith('blob:')) return true;
+                    if (u.startsWith('data:')) return true;
+                    if (!isElectron && u.startsWith('file:')) return true;
+                    return false;
+                  });
+                  if (offenders.length === 0) return null;
+                  const count = offenders.length;
+                  return (
+                    <div className="flex items-start gap-3 p-2 bg-amber-900/20 border border-amber-700 rounded">
+                      <svg className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/>
+                      </svg>
+                      <div className="text-xs text-amber-200">
+                        <div>
+                          {count} local source{count === 1 ? '' : 's'} detected (blob:/data:{!Boolean((window as any)?.SynapseFS) ? '/file:' : ''}). These must be uploaded before export.
+                        </div>
+                        <div className="mt-1 flex gap-2">
+                          <button onClick={() => showUploadsPanel(true)} className="px-2 py-1 text-xxs border border-border-subtle rounded text-text-secondary hover:text-text-primary hover:bg-background-secondary">Open uploads</button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                } catch {
+                  return null;
+                }
+              })()}
+
               {/* Uploads status (preflight) */}
               {(uploadCounts.inProgress > 0 || uploadCounts.failed > 0) && (
                 <div className="flex items-start gap-3 p-2 bg-blue-900/20 border border-blue-700 rounded">
@@ -1035,13 +1072,31 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   aria-label="Start export"
                   title="Start export"
                   onClick={handleStartExport}
-                  disabled={
-                    !canStartExport ||
-                    uploadsInProgress.length > 0 ||
-                    (!FLAGS.ALLOW_ANON_EXPORT && process.env.NODE_ENV !== 'development' && !authenticated) ||
-                    (!FLAGS.ALLOW_ANON_EXPORT && process.env.NODE_ENV !== 'development' && !(membership?.active || trialsRemaining > 0)) ||
-                    !validateTransparencySettings(settings).isValid
-                  }
+                  disabled={(() => {
+                    const basicDisabled =
+                      !canStartExport ||
+                      uploadsInProgress.length > 0 ||
+                      (!FLAGS.ALLOW_ANON_EXPORT && process.env.NODE_ENV !== 'development' && !authenticated) ||
+                      (!FLAGS.ALLOW_ANON_EXPORT && process.env.NODE_ENV !== 'development' && !(membership?.active || trialsRemaining > 0)) ||
+                      !validateTransparencySettings(settings).isValid;
+                    try {
+                      const isElectron = Boolean((window as any)?.SynapseFS);
+                      const assets = Array.isArray(project?.mediaAssets)
+                        ? project!.mediaAssets
+                        : [];
+                      const hasInvalidLocal = assets.some((a: any) => {
+                        const u = typeof a?.url === 'string' ? a.url : '';
+                        if (!u) return false;
+                        if (u.startsWith('blob:')) return true;
+                        if (u.startsWith('data:')) return true;
+                        if (!isElectron && u.startsWith('file:')) return true;
+                        return false;
+                      });
+                      return basicDisabled || hasInvalidLocal;
+                    } catch {
+                      return basicDisabled;
+                    }
+                  })()}
                   className="px-6 py-3 min-w-[180px] inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 border-border-subtle rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 active:translate-y-[1px] transition-all disabled:bg-neutral-600 disabled:cursor-not-allowed"
                 >
                   <svg

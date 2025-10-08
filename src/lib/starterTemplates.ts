@@ -7,10 +7,12 @@ export interface ProjectTemplateMeta {
   description: string;
   tags?: string[];
   recommended?: boolean;
-  // Visual adornments for gallery cards
-  emoji?: string; // e.g. "💻"
+  // Visual adornments for gallery cards (used for gradients)
+  emoji?: string; // e.g. "💻" (deprecated in favor of mini-previews)
   colorFrom?: string; // e.g. "#6366F1"
   colorTo?: string;   // e.g. "#A855F7"
+  // Mini-preview kind for gallery rendering
+  previewKind?: 'code' | 'vertical' | 'side-by-side';
 }
 
 export interface ProjectTemplate extends ProjectTemplateMeta {
@@ -34,39 +36,6 @@ function makeCodeAsset(displayName: string, code: string, language = 'plaintext'
   };
 }
 
-function blankProjectTemplate(): ProjectTemplate {
-  return {
-    id: 'blank',
-    name: 'Blank Project',
-    description: 'An empty project with default 1080p settings.',
-    tags: ['default', 'clean'],
-    recommended: true,
-    emoji: '🧪',
-    colorFrom: '#0ea5e9', // sky-500
-    colorTo: '#22d3ee',   // cyan-400
-    build: ({ name } = {}) => {
-      const now = new Date();
-      const project: Project = {
-        id: generateId(),
-        name: name || 'Blank Project',
-        createdAt: now,
-        updatedAt: now,
-        timeline: [],
-        mediaAssets: [],
-        settings: {
-          width: 1920,
-          height: 1080,
-          fps: 30,
-          duration: 60,
-          backgroundColor: '#000000',
-          audioSampleRate: 48000,
-        },
-        version: '1.0.0',
-      };
-      return project;
-    },
-  };
-}
 
 function codeTutorialTemplate(): ProjectTemplate {
   return {
@@ -78,6 +47,7 @@ function codeTutorialTemplate(): ProjectTemplate {
     emoji: '💻',
     colorFrom: '#6366f1', // indigo-500
     colorTo: '#a855f7',   // purple-500
+    previewKind: 'code',
     build: ({ name } = {}) => {
       const now = new Date();
       const titleAsset = makeCodeAsset('Title', 'Getting Started', 'text');
@@ -152,6 +122,7 @@ function socialVerticalTitleTemplate(): ProjectTemplate {
     emoji: '📱',
     colorFrom: '#f43f5e', // rose-500
     colorTo: '#f97316',   // orange-500
+    previewKind: 'vertical',
     build: ({ name } = {}) => {
       const now = new Date();
       const titleText = 'Your Title Here';
@@ -199,8 +170,81 @@ function socialVerticalTitleTemplate(): ProjectTemplate {
   };
 }
 
+function sideBySideTemplate(): ProjectTemplate {
+  return {
+    id: 'side-by-side',
+    name: 'Code + Preview (Side by Side)',
+    description: '1920×1080 split layout: code at left, content preview at right.',
+    tags: ['code', 'layout', 'side-by-side'],
+    recommended: true,
+    colorFrom: '#0ea5e9', // sky-500
+    colorTo: '#22c55e',   // green-500
+    previewKind: 'side-by-side',
+    build: ({ name } = {}) => {
+      const now = new Date();
+      const sampleCode = `// Side-by-side demo\nfunction App(){\n  return <UI left=\"code\" right=\"preview\" />\n}`;
+      const codeAsset = makeCodeAsset('Code Snippet', sampleCode, 'javascript');
+      const previewAsset = makeCodeAsset('Preview', 'Preview content', 'text');
+
+      const timeline: TimelineItem[] = [
+        {
+          id: generateId(),
+          assetId: codeAsset.id,
+          startTime: 0,
+          duration: 8,
+          track: 0,
+          type: 'code',
+          properties: {
+            language: 'javascript',
+            codeText: sampleCode,
+            showLineNumbers: true,
+            theme: 'vscode-dark-plus',
+          },
+          animations: [],
+          keyframes: [],
+        },
+        {
+          id: generateId(),
+          assetId: previewAsset.id,
+          startTime: 0,
+          duration: 8,
+          track: 1,
+          type: 'title',
+          properties: {
+            text: 'Preview',
+            color: '#ffffff',
+          },
+          animations: [],
+          keyframes: [],
+        },
+      ];
+
+      const project: Project = {
+        id: generateId(),
+        name: name || 'Side by Side',
+        createdAt: now,
+        updatedAt: now,
+        timeline,
+        mediaAssets: [codeAsset, previewAsset],
+        settings: {
+          width: 1920,
+          height: 1080,
+          fps: 30,
+          duration: 10,
+          backgroundColor: '#0b0b0b',
+          audioSampleRate: 48000,
+          defaultTheme: 'vscode-dark-plus',
+        },
+        version: '1.0.0',
+      };
+
+      return project;
+    },
+  };
+}
+
 export const starterTemplates: ProjectTemplate[] = [
-  blankProjectTemplate(),
+  sideBySideTemplate(),
   codeTutorialTemplate(),
   socialVerticalTitleTemplate(),
 ];
