@@ -38,6 +38,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [showRename, setShowRename] = useState(false);
     const [newName, setNewName] = useState(project.project.name);
+    const [thumbError, setThumbError] = useState(false);
 
     const handleRename = () => {
       if (newName.trim() && newName.trim() !== project.project.name) {
@@ -56,8 +57,62 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="relative bg-synapse-surface/80 backdrop-blur-sm border border-border-subtle rounded-xl p-6 hover:shadow-synapse-md transition-all duration-200 group"
+        className="relative bg-synapse-surface border border-border-subtle rounded-xl p-6 hover:shadow-synapse-md transition-all duration-200 group"
       >
+        {/* Thumbnail / Content-forward preview */}
+        {(() => {
+          const proj = project.project;
+          const firstImage = proj.mediaAssets?.find((a: any) => a.type === 'image' && a.url);
+          const firstVideo = proj.mediaAssets?.find((a: any) => a.type === 'video' && (a.thumbnail || a.url));
+          const thumbUrl = firstImage?.url || firstVideo?.thumbnail || firstVideo?.url || '';
+          const initials = (proj.name || 'Project')
+            .split(' ')
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((s: string) => s[0]?.toUpperCase())
+            .join('');
+          return (
+            <div className="-mt-2 -mx-6 mb-4">
+              <div className="relative w-full pt-[56.25%] overflow-hidden border-b border-border-subtle bg-synapse-surface">
+                {thumbUrl && !thumbError ? (
+                  <img
+                    src={thumbUrl}
+                    alt={`${proj.name} thumbnail`}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
+                    onError={() => setThumbError(true)}
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-synapse-surface">
+                    {/* Simple placeholder graphic */}
+                    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-text-secondary">
+                      <rect x="3" y="3" width="18" height="14" rx="2" ry="2" stroke="currentColor" />
+                      <path d="M3 13l4-4 5 5 3-3 6 6" stroke="currentColor" />
+                      <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+                    </svg>
+                    <span className="sr-only">No thumbnail</span>
+                  </div>
+                )}
+                {/* Overlay metadata */}
+                <div className="absolute inset-x-0 bottom-0 p-2 flex items-center justify-between text-[11px]">
+                  <div className="inline-flex items-center gap-2 bg-black/40 backdrop-blur-sm text-white px-2 py-1 rounded">
+                    <span>{proj.settings?.width || 1920}×{proj.settings?.height || 1080}</span>
+                    <span>•</span>
+                    <span>{proj.settings?.fps || 30} fps</span>
+                    <span>•</span>
+                    <span>{Math.round(proj.settings?.duration || 60)}s</span>
+                  </div>
+                  {firstVideo && (
+                    <div className="inline-flex items-center gap-1 bg-black/40 backdrop-blur-sm text-white px-2 py-1 rounded">
+                      <Video className="w-3.5 h-3.5" />
+                      <span>Video</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
         {/* Project Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-3 flex-1 min-w-0">
@@ -127,7 +182,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                   initial={{ opacity: 0, scale: 0.95, y: -5 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -5 }}
-                  className="absolute right-0 top-full mt-2 w-48 bg-synapse-surface rounded-lg shadow-synapse-lg border border-border-subtle py-2 z-50"
+                  className="absolute right-0 top-full mt-2 w-48 bg-synapse-surface rounded-lg shadow-synapse-lg border border-border-subtle py-2 z-50 synapse-solid-menu"
                   onBlur={() => setShowMenu(false)}
                 >
                   <button
@@ -384,7 +439,7 @@ export function ProjectManager() {
       </div>
 
       {/* Projects Grid */}
-      <motion.div layout className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
         <AnimatePresence mode="popLayout">
           {projects.map((project) => (
             <ProjectCard
@@ -400,27 +455,6 @@ export function ProjectManager() {
         </AnimatePresence>
       </motion.div>
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-border-subtle">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-synapse-primary">
-            {projects.length}
-          </div>
-          <div className="text-sm text-text-secondary">Total Projects</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-synapse-primary">
-            {projects.reduce((sum, p) => sum + p.project.timeline.length, 0)}
-          </div>
-          <div className="text-sm text-text-secondary">Total Clips</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-synapse-primary">
-            {projects.reduce((sum, p) => sum + p.project.mediaAssets.length, 0)}
-          </div>
-          <div className="text-sm text-text-secondary">Total Assets</div>
-        </div>
-      </div>
     </div>
   );
 }

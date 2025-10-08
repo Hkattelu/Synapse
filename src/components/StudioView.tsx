@@ -209,7 +209,7 @@ function StudioViewContent() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-synapse-surface/90 z-1 backdrop-blur-sm border-b border-synapse-border px-6 py-4 shadow-synapse-sm"
+        className="bg-synapse-surface z-1 border-b border-synapse-border px-6 py-4 shadow-synapse-sm"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">

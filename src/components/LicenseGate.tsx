@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { FLAGS } from '../lib/flags';
 import { useLicense } from '../state/license';
 import { useLocation } from 'react-router-dom';
 
@@ -21,6 +22,7 @@ export const LicenseGate: React.FC = () => {
     return pathname.startsWith('/studio') || pathname.startsWith('/projects');
   }, [pathname]);
 
+  if (FLAGS.ALLOW_ANON_EXPORT) return null;
   if (!routeRequiresLicense || !needsGate) return null;
 
   return (

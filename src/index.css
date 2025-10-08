@@ -252,6 +252,15 @@ body {
 
 /* ===== UTILITY CLASSES ===== */
 /* Map semantic utility classes used across components to CSS variables */
+
+/* Force-solid menu utility to avoid any perceived transparency */
+.synapse-solid-menu {
+  background-color: var(--synapse-surface) !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 .bg-background-primary {
   background-color: var(--synapse-background);
 }

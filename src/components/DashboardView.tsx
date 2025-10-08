@@ -185,18 +185,21 @@ export function DashboardView() {
   return (
     <div className="min-h-screen bg-synapse-background">
       {/* Navigation Header */}
-<nav className="bg-[color:var(--synapse-contrast-chip)] border-b border-synapse-border">
+<nav className="bg-synapse-surface border-b border-synapse-border">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <button
               onClick={() => navigate('/')}
-              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+              className="flex items-center space-x-3 hover:opacity-90 transition-opacity"
+              title="Synapse Studio Home"
             >
-              <img
-                src="/branding/logo.svg"
-                alt="Synapse Studio"
-                className="h-8 w-auto"
-              />
+              <div className="bg-[color:var(--synapse-contrast-chip)] rounded-md p-1 shadow-synapse-sm">
+                <img
+                  src="/branding/logo.svg"
+                  alt="Synapse Studio"
+                  className="h-8 w-auto"
+                />
+              </div>
               <span className="sr-only">Synapse Studio</span>
             </button>
             <div></div>
@@ -206,7 +209,7 @@ export function DashboardView() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-text-primary mb-2">

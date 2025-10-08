@@ -3,6 +3,8 @@ export const FLAGS = {
   ADVANCED_UI: (import.meta.env.VITE_FEATURE_ADVANCED_UI ?? '') === 'true',
   SHOW_FPS: (import.meta.env.VITE_SHOW_FPS ?? '') === 'true',
   PRODUCT_HUNT: (import.meta.env.VITE_FEATURE_PRODUCT_HUNT ?? '') === 'true',
+  // Allow running without auth/license for external testers; default true for MVP builds
+  ALLOW_ANON_EXPORT: (import.meta.env.VITE_ALLOW_ANON_EXPORT ?? 'true') === 'true',
 } as const;
 
 export type FlagKey = keyof typeof FLAGS;

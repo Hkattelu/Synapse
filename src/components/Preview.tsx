@@ -668,18 +668,64 @@ export const Preview: React.FC<PreviewProps> = ({ className = '' }) => {
             </button>
           </div>
 
-          {/* Center: Time display (secondary) */}
-          <div className="flex items-center gap-1 text-xs text-text-secondary">
-            <span className="font-mono">
-              {formatTime(playback.currentTime, compositionProps.settings.fps)}
-            </span>
-            <span>/</span>
-            <span className="font-mono">
-              {formatTime(
-                compositionProps.settings.duration,
-                compositionProps.settings.fps
-              )}
-            </span>
+          {/* Center: Duration controls */}
+          <div className="flex items-center gap-2 text-xs">
+            <div className="flex items-center gap-1 text-text-secondary">
+              <span className="font-mono">
+                {formatTime(playback.currentTime, compositionProps.settings.fps)}
+              </span>
+              <span>/</span>
+              <span className="font-mono">
+                {formatTime(
+                  compositionProps.settings.duration,
+                  compositionProps.settings.fps
+                )}
+              </span>
+            </div>
+            {/* Duration Controls */}
+            <div className="flex items-center gap-1 border-l border-border-subtle pl-2">
+              <span className="text-text-tertiary text-xs">Duration:</span>
+              <button
+                onClick={() => {
+                  const newDuration = Math.max(1, compositionProps.settings.duration - 1);
+                  updateProject({ settings: { ...project!.settings, duration: newDuration } });
+                  if (playback.currentTime > newDuration) {
+                    handleSeek(newDuration - 0.1);
+                  }
+                }}
+                className="text-text-secondary hover:text-text-primary px-1 py-0.5 rounded hover:bg-background-tertiary"
+                title="Decrease duration by 1 second"
+              >
+                −
+              </button>
+              <input
+                type="number"
+                min="1"
+                max="3600"
+                step="1"
+                value={Math.round(compositionProps.settings.duration)}
+                onChange={(e) => {
+                  const newDuration = Math.max(1, Math.min(3600, parseInt(e.target.value) || 1));
+                  updateProject({ settings: { ...project!.settings, duration: newDuration } });
+                  if (playback.currentTime > newDuration) {
+                    handleSeek(newDuration - 0.1);
+                  }
+                }}
+                className="w-12 px-1 py-0.5 text-xs bg-background-tertiary border border-border-subtle rounded text-center text-text-primary"
+                title="Video duration in seconds"
+              />
+              <button
+                onClick={() => {
+                  const newDuration = Math.min(3600, compositionProps.settings.duration + 1);
+                  updateProject({ settings: { ...project!.settings, duration: newDuration } });
+                }}
+                className="text-text-secondary hover:text-text-primary px-1 py-0.5 rounded hover:bg-background-tertiary"
+                title="Increase duration by 1 second"
+              >
+                +
+              </button>
+              <span className="text-text-tertiary text-xs">s</span>
+            </div>
           </div>
 
           {/* Right: Aspect ratio + Record (Export moved to header; Audio moved to overlay) */}

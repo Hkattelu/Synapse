@@ -86,7 +86,7 @@ const RendersDialog: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isO
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 6 }}
         transition={{ duration: 0.2 }}
-        className="bg-synapse-surface rounded-2xl shadow-synapse-lg border border-synapse-border w-full max-w-3xl overflow-hidden"
+        className="bg-background-primary rounded-2xl shadow-synapse-lg border border-synapse-border w-full max-w-3xl overflow-hidden"
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-synapse-border">
           <h3 className="text-lg font-semibold text-text-primary">Project Renders</h3>
@@ -107,7 +107,7 @@ const RendersDialog: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isO
           ) : (
             <div className="space-y-2 max-h-[60vh] overflow-auto pr-1">
               {items.map((item) => (
-                <div key={item.id} className="flex items-center justify-between bg-synapse-surface/60 border border-synapse-border rounded-xl px-4 py-3">
+                <div key={item.id} className="flex items-center justify-between bg-synapse-surface border border-synapse-border rounded-xl px-4 py-3">
                   <div className="min-w-0 flex-1">
                     <div className="font-medium text-text-primary truncate">{item.filename}</div>
                     <div className="text-xs text-text-secondary flex items-center space-x-3">

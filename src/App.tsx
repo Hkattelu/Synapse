@@ -105,7 +105,7 @@ function App() {
                         <Route path="/downloads" element={<DownloadsPage />} />
                       </Routes>
                       {/* License gate must be inside Router to scope by route */}
-                      <LicenseGate />
+                      {FLAGS.ALLOW_ANON_EXPORT ? null : <LicenseGate />}
                       {/* When the routed content mounts, finish the boot progress */}
                       <BootProgressMarker />
                     </Router>

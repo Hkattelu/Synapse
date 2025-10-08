@@ -20,6 +20,8 @@ import {
   validateTransparencySettings,
   downloadExportedFile,
 } from '../lib/exportManagerClient';
+import { FLAGS } from '../lib/flags';
+import { Youtube, Twitter, Instagram, Smartphone } from 'lucide-react';
 import { useAuth } from '../state/authContext';
 
 interface ExportDialogProps {
@@ -301,8 +303,8 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
           ) : (
             // Export Settings View
             <div className="overflow-y-auto max-h-96">
-              {/* Auth/Membership gating - Hidden in development mode */}
-              {process.env.NODE_ENV !== 'development' && !authenticated && (
+              {/* Auth/Membership gating - bypassed when ALLOW_ANON_EXPORT is on */}
+              {!FLAGS.ALLOW_ANON_EXPORT && process.env.NODE_ENV !== 'development' && !authenticated && (
                 <div className="p-6 border-b border-border-subtle">
                   <div className="mb-2">
                     <h3 className="text-lg font-semibold text-text-primary">
@@ -315,7 +317,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   <AuthInlineForm />
                 </div>
               )}
-              {process.env.NODE_ENV !== 'development' &&
+              {!FLAGS.ALLOW_ANON_EXPORT && process.env.NODE_ENV !== 'development' &&
                 authenticated &&
                 !membership?.active && (
                   <div className="p-6 border-b border-border-subtle">
@@ -339,7 +341,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   </div>
                 )}
               {/* Development mode notice */}
-              {process.env.NODE_ENV === 'development' && (
+              {!FLAGS.ALLOW_ANON_EXPORT && process.env.NODE_ENV === 'development' && (
                 <div className="p-6 border-b border-border-subtle">
                   <div className="mb-2">
                     <h3 className="text-lg font-semibold text-green-600">
@@ -352,7 +354,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   </div>
                 </div>
               )}
-              {/* Tabs */}
+              {/* Tabs (simplified when ALLOW_ANON_EXPORT is on) */}
               <div className="flex border-b border-border-subtle">
                 <button
                   onClick={() => setActiveTab('presets')}
@@ -364,16 +366,18 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                 >
                   Presets
                 </button>
-                <button
-                  onClick={() => setActiveTab('custom')}
-                  className={`px-6 py-3 text-sm font-medium transition-colors ${
-                    activeTab === 'custom'
-                      ? 'text-primary-400 border-b-2 border-primary-400'
-                      : 'text-text-secondary hover:text-primary-400'
-                  }`}
-                >
-                  Custom Settings
-                </button>
+                {!FLAGS.ALLOW_ANON_EXPORT && (
+                  <button
+                    onClick={() => setActiveTab('custom')}
+                    className={`px-6 py-3 text-sm font-medium transition-colors ${
+                      activeTab === 'custom'
+                        ? 'text-primary-400 border-b-2 border-primary-400'
+                        : 'text-text-secondary hover:text-primary-400'
+                    }`}
+                  >
+                    Custom Settings
+                  </button>
+                )}
               </div>
 
               <div className="p-6">
@@ -394,67 +398,80 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                     </span>
                   </div>
                 </div>
-                {activeTab === 'presets' ? (
+                {activeTab === 'presets' || FLAGS.ALLOW_ANON_EXPORT ? (
                   // Presets Tab
                   <div
                     className="space-y-4"
                     role="radiogroup"
                     aria-label="Export presets"
                   >
-                    {presets.map((preset) => (
-                      <div
-                        key={preset.id}
-                        role="radio"
-                        aria-checked={selectedPresetId === preset.id}
-                        tabIndex={0}
-                        className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                          selectedPresetId === preset.id
-                            ? 'border-primary-400 bg-primary-900/20 ring-1 ring-primary-500'
-                            : 'border-border-subtle hover:border-border-primary'
-                        }`}
-                        onClick={() => handlePresetSelect(preset)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ')
-                            handlePresetSelect(preset);
-                        }}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="font-medium text-text-primary flex items-center gap-2">
-                              {preset.name}
-                              {selectedPresetId === preset.id && (
-                                <span className="ml-2 text-xxs uppercase tracking-wide text-primary-300 bg-primary-900/40 px-2 py-0.5 rounded">
-                                  Selected
-                                </span>
-                              )}
-                            </h3>
-                            <p className="text-sm text-text-secondary mt-1">
-                              {preset.description}
-                            </p>
-                            <div className="flex items-center gap-4 mt-2 text-xs text-text-secondary">
-                              <span>
-                                {preset.settings.format?.toUpperCase()}
-                              </span>
-                              <span>{preset.settings.quality}</span>
-                              {preset.settings.width &&
-                                preset.settings.height && (
-                                  <span>
-                                    {preset.settings.width}×
-                                    {preset.settings.height}
+                    {presets.map((preset) => {
+                      const pid = preset.id.toLowerCase();
+                      const Icon = pid.includes('youtube')
+                        ? Youtube
+                        : pid.includes('twitter') || pid.includes('x')
+                        ? Twitter
+                        : pid.includes('instagram') || pid.includes('ig')
+                        ? Instagram
+                        : pid.includes('vertical')
+                        ? Smartphone
+                        : undefined;
+                      return (
+                        <div
+                          key={preset.id}
+                          role="radio"
+                          aria-checked={selectedPresetId === preset.id}
+                          tabIndex={0}
+                          className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                            selectedPresetId === preset.id
+                              ? 'border-primary-400 bg-primary-900/20 ring-1 ring-primary-500'
+                              : 'border-border-subtle hover:border-border-primary'
+                          }`}
+                          onClick={() => handlePresetSelect(preset)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ')
+                              handlePresetSelect(preset);
+                          }}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="font-medium text-text-primary flex items-center gap-2">
+                                {Icon && <Icon className="w-4 h-4 text-primary-300" />}
+                                {preset.name}
+                                {selectedPresetId === preset.id && (
+                                  <span className="ml-2 text-xxs uppercase tracking-wide text-primary-300 bg-primary-900/40 px-2 py-0.5 rounded">
+                                    Selected
                                   </span>
                                 )}
+                              </h3>
+                              <p className="text-sm text-text-secondary mt-1">
+                                {preset.description}
+                              </p>
+                              <div className="flex items-center gap-4 mt-2 text-xs text-text-secondary">
+                                <span>
+                                  {preset.settings.format?.toUpperCase()}
+                                </span>
+                                <span>{preset.settings.quality}</span>
+                                {preset.settings.width &&
+                                  preset.settings.height && (
+                                    <span>
+                                      {preset.settings.width}×
+                                      {preset.settings.height}
+                                    </span>
+                                  )}
+                              </div>
+                            </div>
+                            <div className="flex items-center">
+                              {selectedPresetId === preset.id && (
+                                <div className="w-4 h-4 bg-primary-600 rounded-full flex items-center justify-center">
+                                  <div className="w-2 h-2 bg-white rounded-full" />
+                                </div>
+                              )}
                             </div>
                           </div>
-                          <div className="flex items-center">
-                            {selectedPresetId === preset.id && (
-                              <div className="w-4 h-4 bg-primary-600 rounded-full flex items-center justify-center">
-                                <div className="w-2 h-2 bg-white rounded-full" />
-                              </div>
-                            )}
-                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   // Custom Settings Tab
@@ -943,10 +960,8 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   onClick={handleStartExport}
                   disabled={
                     !canStartExport ||
-                    (process.env.NODE_ENV !== 'development' &&
-                      !authenticated) ||
-                    (process.env.NODE_ENV !== 'development' &&
-                      !(membership?.active || trialsRemaining > 0)) ||
+                    (!FLAGS.ALLOW_ANON_EXPORT && process.env.NODE_ENV !== 'development' && !authenticated) ||
+                    (!FLAGS.ALLOW_ANON_EXPORT && process.env.NODE_ENV !== 'development' && !(membership?.active || trialsRemaining > 0)) ||
                     !validateTransparencySettings(settings).isValid
                   }
                   className="px-6 py-3 min-w-[180px] inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 border-border-subtle rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 active:translate-y-[1px] transition-all disabled:bg-neutral-600 disabled:cursor-not-allowed"
@@ -960,15 +975,17 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                     <path d="M6 4l10 6-10 6V4z" />
                   </svg>
                   <span>
-                    {process.env.NODE_ENV === 'development'
-                      ? 'Start Export (Dev Mode)'
-                      : !authenticated
-                        ? 'Sign in to export'
-                        : membership?.active
-                          ? 'Start Export'
-                          : trialsRemaining > 0
-                            ? `Start Export (trial ${trialsUsed + 1}/${trialsLimit || 2})`
-                            : 'Unlock to export'}
+                    {FLAGS.ALLOW_ANON_EXPORT
+                      ? 'Start Export'
+                      : process.env.NODE_ENV === 'development'
+                        ? 'Start Export (Dev Mode)'
+                        : !authenticated
+                          ? 'Sign in to export'
+                          : membership?.active
+                            ? 'Start Export'
+                            : trialsRemaining > 0
+                              ? `Start Export (trial ${trialsUsed + 1}/${trialsLimit || 2})`
+                              : 'Unlock to export'}
                   </span>
                 </button>
               </div>
