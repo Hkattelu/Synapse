@@ -224,9 +224,22 @@ export function MediaBin({ className = '' }: MediaBinProps) {
             },
             body: blob,
           });
-          if (up.ok) {
+if (up.ok) {
             const body = (await up.json()) as { url?: string };
-            if (body?.url) updateMediaAsset(asset.id, { url: body.url });
+            if (body?.url) {
+              let finalUrl = body.url;
+              try {
+                const loc = window.location;
+                if (
+                  loc.protocol === 'https:' &&
+                  finalUrl.startsWith('http://') &&
+                  finalUrl.includes(loc.host)
+                ) {
+                  finalUrl = finalUrl.replace(/^http:/, 'https:');
+                }
+              } catch {}
+              updateMediaAsset(asset.id, { url: finalUrl });
+            }
           }
         } catch (e) {
           console.warn('Background upload failed for', asset.name, e);

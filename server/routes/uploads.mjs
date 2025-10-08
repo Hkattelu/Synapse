@@ -36,7 +36,12 @@ uploadsRouter.post(
         : Buffer.from(req.body || []);
       await fs.promises.writeFile(outPath, buf);
       const host = req.get('host');
-      const protocol = (req.protocol || 'http').replace(/:$/, '');
+      const xfProto = (req.headers['x-forwarded-proto'] || '')
+        .toString()
+        .split(',')[0]
+        .trim();
+      const inferredProto = xfProto || req.protocol || 'http';
+      const protocol = inferredProto.replace(/:$/, '');
       const absoluteUrl = `${protocol}://${host}/api/uploads/${encodeURIComponent(
         filename
       )}`;

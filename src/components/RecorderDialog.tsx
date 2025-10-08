@@ -511,10 +511,22 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                           },
                           body: pending.blob,
                         });
-                        if (resp.ok) {
+if (resp.ok) {
                           const body = (await resp.json()) as { url?: string };
                           if (body?.url) {
-                            updateMediaAsset(id, { url: body.url });
+                            let finalUrl = body.url;
+                            try {
+                              const loc = window.location;
+                              // If returned as http on an https page for same host, upgrade scheme
+                              if (
+                                loc.protocol === 'https:' &&
+                                finalUrl.startsWith('http://') &&
+                                finalUrl.includes(loc.host)
+                              ) {
+                                finalUrl = finalUrl.replace(/^http:/, 'https:');
+                              }
+                            } catch {}
+                            updateMediaAsset(id, { url: finalUrl });
                             // Revoke the temporary blob URL
                             try { if (assetUrl.startsWith('blob:')) URL.revokeObjectURL(assetUrl); } catch {}
                           }
@@ -611,10 +623,21 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                           },
                           body: pending.blob,
                         });
-                        if (resp.ok) {
+if (resp.ok) {
                           const body = (await resp.json()) as { url?: string };
                           if (body?.url) {
-                            updateMediaAsset(id, { url: body.url });
+                            let finalUrl = body.url;
+                            try {
+                              const loc = window.location;
+                              if (
+                                loc.protocol === 'https:' &&
+                                finalUrl.startsWith('http://') &&
+                                finalUrl.includes(loc.host)
+                              ) {
+                                finalUrl = finalUrl.replace(/^http:/, 'https:');
+                              }
+                            } catch {}
+                            updateMediaAsset(id, { url: finalUrl });
                             try { if (assetUrl.startsWith('blob:')) URL.revokeObjectURL(assetUrl); } catch {}
                           }
                         }

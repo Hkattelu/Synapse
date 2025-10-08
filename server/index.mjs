@@ -8,6 +8,9 @@ import { router as apiRouter } from './routes.mjs';
 
 const app = express();
 
+// Trust proxy headers so req.protocol reflects 'https' behind load balancers (e.g., Cloud Run)
+app.set('trust proxy', true);
+
 app.use(
   cors({
     origin: config.cors.origin,
