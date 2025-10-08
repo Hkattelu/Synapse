@@ -142,6 +142,53 @@ function AddMediaMenu({
   );
 }
 
+// Lazy thumbnail generator for existing video assets without thumbnails
+function VideoThumbCapture({ url, onCapture }: { url: string; onCapture: (dataUrl: string) => void }) {
+  const doneRef = React.useRef(false);
+  React.useEffect(() => {
+    if (!url || doneRef.current) return;
+    const video = document.createElement('video');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const cleanup = () => {
+      try { URL.revokeObjectURL(video.src); } catch {}
+    };
+    video.crossOrigin = 'anonymous';
+    video.preload = 'metadata';
+    video.onloadedmetadata = () => {
+      if (doneRef.current) return;
+      canvas.width = Math.max(1, Math.min(640, video.videoWidth || 320));
+      const aspect = (video.videoHeight || 180) / (video.videoWidth || 320);
+      canvas.height = Math.round(canvas.width * aspect);
+      // Seek a little into the video to avoid black frames
+      try { video.currentTime = Math.min(1, Math.max(0.1, video.duration / 3)); } catch {}
+    };
+    video.onseeked = () => {
+      if (doneRef.current) return;
+      if (ctx) {
+        try {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const data = canvas.toDataURL('image/jpeg', 0.8);
+          doneRef.current = true;
+          onCapture(data);
+        } catch {}
+      }
+      cleanup();
+    };
+    video.onerror = () => {
+      cleanup();
+    };
+    // If the URL is not a blob, just set it; otherwise it is already a blob
+    video.src = url;
+    video.load();
+    return () => {
+      doneRef.current = true;
+      cleanup();
+    };
+  }, [url, onCapture]);
+  return null;
+}
+
 export function MediaBin({ className = '' }: MediaBinProps) {
   const { mediaAssets, addMediaAsset, removeMediaAsset, updateMediaAsset } = useMediaAssets();
 
@@ -843,6 +890,12 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                         />
                       ) : (
                         <div className="text-text-tertiary">
+{asset.type === 'video' && !asset.thumbnail && asset.url && (
+                            <VideoThumbCapture
+                              url={asset.url}
+                              onCapture={(data) => updateMediaAsset(asset.id, { thumbnail: data })}
+                            />
+                          )}
                           {asset.type === 'video' && (
                             <svg
                               className="w-8 h-8"
@@ -876,21 +929,9 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                           {asset.type === 'audio' && (
                             <AudioWaveform src={asset.url} />
                           )}
-                          {asset.type === 'code' && (
+{asset.type === 'code' && (
                             <div className="text-center">
-                              <svg
-                                className="w-8 h-8 mx-auto mb-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                                />
-                              </svg>
+                              {/* Simplified: show only language badge */}
                               <div className="text-xs font-mono bg-background-tertiary px-2 py-1 rounded">
                                 {displayLanguage(asset.metadata.language)}
                               </div>

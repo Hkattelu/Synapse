@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useTimeline, useMediaAssets } from '../../state/hooks';
 import { useNotifications } from '../../state/notifications';
 import { getEducationalTrackByName } from '../../lib/educationalTypes';
@@ -303,9 +304,9 @@ export function AssetsWorkflow({
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
+const modal = (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-gray-800 rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="bg-amber-600 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -589,4 +590,6 @@ export function AssetsWorkflow({
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }

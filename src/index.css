@@ -45,6 +45,8 @@
 
   /* ===== SEMANTIC COLOR TOKENS ===== */
   /* Brand Colors */
+  /* UI contrast chip for logos/badges that must remain readable on any header */
+  --synapse-contrast-chip: #f8fafc;
   --synapse-primary: var(--synapse-blue);
   --synapse-primary-hover: var(--synapse-sapphire);
   --synapse-primary-active: var(--synapse-sky);
@@ -150,6 +152,9 @@
 
   /* Ensure the Timeline playhead is clearly visible on light surfaces */
   --synapse-playhead: var(--synapse-primary);
+
+  /* Light variant for contrast chip */
+  --synapse-contrast-chip: #ffffff;
 }
 
 /* ===== BASE STYLES ===== */

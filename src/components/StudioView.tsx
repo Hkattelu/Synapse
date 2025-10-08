@@ -221,11 +221,13 @@ function StudioViewContent() {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center space-x-3">
-              <img
-                src="/branding/logo.svg"
-                alt="Synapse Studio"
-                className="h-10 w-auto"
-              />
+<div className="bg-[color:var(--synapse-contrast-chip)] rounded-md p-1 shadow-synapse-sm">
+                <img
+                  src="/branding/logo.svg"
+                  alt="Synapse Studio"
+                  className="h-10 w-auto"
+                />
+              </div>
               <div>
                 <h1 className="text-xl font-bold text-text-primary">
                   {project.name}

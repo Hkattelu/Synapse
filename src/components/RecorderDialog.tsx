@@ -13,7 +13,7 @@ const AudioLevelMeter = lazy(() =>
 );
 
 export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
-  const { addMediaAsset } = useMediaAssets();
+  const { addMediaAsset, updateMediaAsset } = useMediaAssets();
   const { addTimelineItem } = useTimeline();
   const { playback } = usePlayback();
   const { project, updateProject } = useProject();
@@ -483,13 +483,14 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
               </p>
               <div className="flex items-center space-x-2">
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     // Create a fresh URL for the saved asset; revoke the pending preview URL
                     const assetUrl = URL.createObjectURL(pending.blob);
+                    const name = pending.withCamera
+                      ? `Recording ${new Date().toISOString()}.webm`
+                      : `Narration ${new Date().toISOString()}.webm`;
                     const id = addMediaAsset({
-                      name: pending.withCamera
-                        ? `Recording ${new Date().toISOString()}.webm`
-                        : `Narration ${new Date().toISOString()}.webm`,
+                      name,
                       type: pending.withCamera ? 'video' : 'audio',
                       url: assetUrl,
                       duration: pending.duration ?? undefined,
@@ -498,6 +499,31 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                         mimeType: pending.mime,
                       },
                     });
+
+                    // Fire-and-forget: persist the blob to server and swap URL to absolute HTTP so export can proceed
+                    (async () => {
+                      try {
+                        const resp = await fetch('/api/uploads', {
+                          method: 'POST',
+                          headers: {
+                            'x-filename': name,
+                            'content-type': pending.mime || 'application/octet-stream',
+                          },
+                          body: pending.blob,
+                        });
+                        if (resp.ok) {
+                          const body = (await resp.json()) as { url?: string };
+                          if (body?.url) {
+                            updateMediaAsset(id, { url: body.url });
+                            // Revoke the temporary blob URL
+                            try { if (assetUrl.startsWith('blob:')) URL.revokeObjectURL(assetUrl); } catch {}
+                          }
+                        }
+                      } catch (e) {
+                        console.warn('Recorder upload failed:', e);
+                      }
+                    })();
+
                     // Add to timeline at playhead
                     const start = playback.currentTime || 0;
                     addTimelineItem({
@@ -550,11 +576,6 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                       message: 'Added to Media Bin and timeline.',
                     });
                     setPending(null);
-                    notify({
-                      type: 'success',
-                      title: 'Recorder',
-                      message: 'Added to Media Bin and timeline.',
-                    });
                     onClose();
                   }}
                   className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
@@ -562,13 +583,14 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                   Save & Add to timeline
                 </button>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     // Create a fresh URL for the saved asset; revoke the pending preview URL
                     const assetUrl = URL.createObjectURL(pending.blob);
-                    addMediaAsset({
-                      name: pending.withCamera
-                        ? `Recording ${new Date().toISOString()}.webm`
-                        : `Narration ${new Date().toISOString()}.webm`,
+                    const name = pending.withCamera
+                      ? `Recording ${new Date().toISOString()}.webm`
+                      : `Narration ${new Date().toISOString()}.webm`;
+                    const id = addMediaAsset({
+                      name,
                       type: pending.withCamera ? 'video' : 'audio',
                       url: assetUrl,
                       duration: pending.duration ?? undefined,
@@ -577,17 +599,36 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                         mimeType: pending.mime,
                       },
                     });
+
+                    // Persist blob to server in background and swap URL
+                    (async () => {
+                      try {
+                        const resp = await fetch('/api/uploads', {
+                          method: 'POST',
+                          headers: {
+                            'x-filename': name,
+                            'content-type': pending.mime || 'application/octet-stream',
+                          },
+                          body: pending.blob,
+                        });
+                        if (resp.ok) {
+                          const body = (await resp.json()) as { url?: string };
+                          if (body?.url) {
+                            updateMediaAsset(id, { url: body.url });
+                            try { if (assetUrl.startsWith('blob:')) URL.revokeObjectURL(assetUrl); } catch {}
+                          }
+                        }
+                      } catch (e) {
+                        console.warn('Recorder upload failed:', e);
+                      }
+                    })();
+
                     notify({
                       type: 'success',
                       title: 'Recorder',
                       message: 'Saved to Media Bin.',
                     });
                     setPending(null);
-                    notify({
-                      type: 'success',
-                      title: 'Recorder',
-                      message: 'Saved to Media Bin.',
-                    });
                     onClose();
                   }}
                   className="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded"

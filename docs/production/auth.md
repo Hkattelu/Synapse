@@ -10,7 +10,7 @@ Current state in this repo:
 
 - API exposes `/api/auth/register`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/me` (cookie‑based).
 - Client (webapp) expects `/api/auth/session` and related endpoints; there are mismatches to resolve before production (see owner actions).
-
+license
 Configuration items to document and decide:
 
 - Cookie attributes for cross‑origin deployments
