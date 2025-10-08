@@ -188,9 +188,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-text-primary">
-                    {progress?.status === 'preparing' && 'Preparing export...'}
-                    {progress?.status === 'rendering' && 'Rendering video...'}
-                    {progress?.status === 'finalizing' && 'Finalizing...'}
+                    {progress?.status === 'queued' && 'Queued…'}
+                    {progress?.status === 'preparing' && 'Preparing export…'}
+                    {progress?.status === 'rendering' && 'Rendering video…'}
+                    {progress?.status === 'finalizing' && 'Finalizing…'}
                     {progress?.status === 'completed' && 'Export completed!'}
                     {progress?.status === 'failed' && 'Export failed'}
                     {progress?.status === 'cancelled' && 'Export cancelled'}
@@ -208,6 +209,39 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   />
                 </div>
               </div>
+
+              {/* Queue/Worker Details for 0% */}
+              {progress && (progress.progress || 0) === 0 && (
+                <div className="mt-2 text-xs text-text-secondary">
+                  {progress.status === 'queued' ? (
+                    <>
+                      <div>
+                        In queue{typeof progress.queuePosition === 'number' && progress.queuePosition > 0
+                          ? `: position ${progress.queuePosition}`
+                          : ''}
+                        {typeof progress.pendingCount === 'number'
+                          ? ` (waiting ${progress.pendingCount})`
+                          : ''}
+                      </div>
+                      {typeof progress.activeCount === 'number' && typeof progress.concurrency === 'number' && (
+                        <div>
+                          Workers busy: {progress.activeCount}/{progress.concurrency}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {typeof progress.activeCount === 'number' && typeof progress.concurrency === 'number' && progress.activeCount >= progress.concurrency ? (
+                        <div>
+                          Waiting for renderer: {progress.activeCount}/{progress.concurrency} workers busy
+                        </div>
+                      ) : (
+                        <div>Starting renderer…</div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Progress Details */}
               {progress && (

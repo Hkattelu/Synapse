@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { startRender, getJob, listRendersByProject, findRenderById, deleteRenderById } from '../services/render.mjs';
+import { startRender, getJob, getJobWithMeta, listRendersByProject, findRenderById, deleteRenderById } from '../services/render.mjs';
 import path from 'node:path';
 import fs from 'node:fs';
 import { validateRenderInput } from '../validation/validators.mjs';
@@ -35,8 +35,13 @@ renderRouter.post('/', async (req, res) => {
 
 renderRouter.get('/:id/status', (req, res) => {
   const job = getJob(req.params.id);
-  if (!job) return res.status(404).json({ error: 'Not found' });
-  res.json(job);
+  if (!job) {
+    const enriched = getJobWithMeta(req.params.id);
+    if (!enriched) return res.status(404).json({ error: 'Not found' });
+    return res.json(enriched);
+  }
+  const enriched = getJobWithMeta(req.params.id);
+  res.json(enriched);
 });
 
 renderRouter.get('/:id/download', async (req, res) => {

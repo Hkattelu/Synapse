@@ -466,6 +466,7 @@ export type AudioCodec = 'aac' | 'mp3' | 'opus' | 'vorbis';
 export type ExportQuality = 'low' | 'medium' | 'high' | 'ultra';
 export type ExportStatus =
   | 'idle'
+  | 'queued'
   | 'preparing'
   | 'rendering'
   | 'finalizing'
@@ -521,6 +522,12 @@ export interface ExportProgress {
   renderedFrames?: number;
   estimatedTimeRemaining?: number; // in seconds
   averageFrameTime?: number; // milliseconds per frame
+  // Queue/worker meta (optional)
+  queuePosition?: number; // 1-based position if queued
+  pendingCount?: number; // number of jobs waiting
+  activeCount?: number; // number of workers busy
+  concurrency?: number; // total workers available
+
   errorMessage?: string;
   startTime?: Date;
   endTime?: Date;

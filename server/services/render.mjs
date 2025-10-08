@@ -243,3 +243,28 @@ export const startRender = async ({ inputProps }) => {
 };
 
 export const getJob = (id) => jobs.get(id) || null;
+
+export const getJobWithMeta = (id) => {
+  const job = getJob(id);
+  const position = pending.findIndex((p) => p && p.id === id);
+  const queuePosition = position >= 0 ? position + 1 : 0;
+  const pendingCount = pending.length;
+  const activeCount = active;
+  const concurrency = Math.max(1, Number(config.render.concurrency || 1));
+  if (!job) {
+    return {
+      status: 'queued',
+      queuePosition,
+      pendingCount,
+      activeCount,
+      concurrency,
+    };
+  }
+  return {
+    ...job,
+    queuePosition,
+    pendingCount,
+    activeCount,
+    concurrency,
+  };
+};

@@ -584,7 +584,7 @@ export class ClientExportManager {
             signal: this.abortController?.signal,
           });
 
-      const status = job.status as ExportProgress['status'];
+      const status = (job.status || 'preparing') as ExportProgress['status'];
       const progress = Number(
         (job as any).progress ??
           (status === 'completed' ? 100 : status === 'rendering' ? 50 : 0)
@@ -621,6 +621,10 @@ export class ClientExportManager {
         currentFrame: renderedFrames || undefined,
         totalFrames: totalFrames || undefined,
         estimatedTimeRemaining: etaSeconds,
+        queuePosition: (job as any).queuePosition,
+        pendingCount: (job as any).pendingCount,
+        activeCount: (job as any).activeCount,
+        concurrency: (job as any).concurrency,
       });
 
       if (status === 'completed') {
