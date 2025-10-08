@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { useTimeline, useMediaAssets } from '../state/hooks';
+import { useTimeline, useMediaAssets, usePlayback } from '../state/hooks';
 import { useNotifications } from '../state/notifications';
 import type { VisualAssetType } from '../lib/types';
 
@@ -8,9 +8,10 @@ interface TimelineToolbarProps {
 }
 
 export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
-  const { addTimelineItem } = useTimeline();
+  const { addTimelineItem, splitTimelineItemsAt, selectedItems } = useTimeline();
   const { addMediaAsset } = useMediaAssets();
   const { notify } = useNotifications();
+  const { playback } = usePlayback();
   const [showVisualAssets, setShowVisualAssets] = useState(false);
   const [showHint, setShowHint] = useState(() => {
     // Show hint if user hasn't seen it before
@@ -239,6 +240,18 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
           case 'a':
             e.preventDefault();
             setShowVisualAssets(!showVisualAssets);
+            break;
+          case 's':
+            e.preventDefault();
+            {
+              const t = playback.currentTime || 0;
+              if (selectedItems && selectedItems.length > 0) {
+                splitTimelineItemsAt(t, selectedItems);
+              } else {
+                splitTimelineItemsAt(t);
+              }
+              notify({ type: 'success', title: 'Split', message: 'Clips split at playhead' });
+            }
             break;
         }
       }
@@ -515,6 +528,36 @@ export function TimelineToolbar({ className = '' }: TimelineToolbarProps) {
               </div>
             )}
           </div>
+
+          {/* Split Button */}
+          <button
+            onClick={() => {
+              const t = playback.currentTime || 0;
+              if (selectedItems && selectedItems.length > 0) {
+                splitTimelineItemsAt(t, selectedItems);
+              } else {
+                splitTimelineItemsAt(t);
+              }
+              notify({ type: 'success', title: 'Split', message: 'Clips split at playhead' });
+            }}
+            className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium border border-border-subtle text-text-primary hover:bg-synapse-surface-hover"
+            title="Split at playhead (Ctrl+Shift+S)"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M14.121 14.121a3 3 0 01-4.242 0L3 7m18 0l-6.879 7.121M6 20l3-3m9 3l-3-3"
+              />
+            </svg>
+            <span>Split</span>
+          </button>
         </div>
 
         {/* Right side - Upload Media Button */}

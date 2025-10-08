@@ -156,7 +156,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl md:text-6xl lg:text-7xl font-bold text-text-primary mb-6 leading-tight"
+            className="text-5xl md:text-6xl lg:text-7xl font-extrabold synapse-text-gradient mb-6 leading-tight"
           >
             {title}
           </motion.h1>
@@ -179,7 +179,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
 <Button
               size="lg"
               onClick={() => navigate('/projects')}
-              className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse px-8 py-4 rounded-full font-semibold text-lg shadow-synapse-md hover:shadow-synapse-lg transition-all duration-200 hover:scale-105"
+className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse px-8 py-4 rounded-full font-semibold text-lg shadow-synapse-md hover:shadow-synapse-lg synapse-glow transition-all duration-200 hover:scale-105"
             >
               <Play className="w-5 h-5 mr-2" />
               Create a Lesson
@@ -200,6 +200,27 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 Support on Product Hunt
               </Button>
             )}
+          </motion.div>
+
+          {/* Credibility strip */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.35 }}
+            className="mt-6 flex flex-wrap justify-center gap-2"
+          >
+            <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary text-xs">
+              <Layers className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Built for devs</span>
+            </div>
+            <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary text-xs">
+              <Zap className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Local-first today</span>
+            </div>
+            <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary text-xs">
+              <Shield className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Studio-grade timeline</span>
+            </div>
           </motion.div>
 
           <motion.div
@@ -273,7 +294,7 @@ const Feature: React.FC<FeatureProps> = ({ icon, title, description }) => {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       viewport={{ once: true }}
-      className="text-center p-6"
+      className="text-center p-6 rounded-2xl bg-synapse-surface border border-border-subtle shadow-synapse-md hover:shadow-synapse-lg ring-1 ring-transparent hover:ring-synapse-primary/20 ring-offset-1 ring-offset-synapse-background transition-all"
     >
       <div className="inline-flex items-center justify-center w-16 h-16 bg-synapse-primary/10 rounded-full mb-4">
         {icon}
@@ -286,7 +307,7 @@ const Feature: React.FC<FeatureProps> = ({ icon, title, description }) => {
 
 const ProductHuntSection: React.FC = () => {
   return (
-    <section className="py-16 bg-synapse-primary">
+    <section className="py-16 synapse-brand-gradient">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -338,7 +359,7 @@ const ProductHuntSection: React.FC = () => {
           </div>
           <div className="mt-8 text-orange-100">
             <p className="text-sm">
-              🗓️ Launch Date: September 5th, 2025 • 🎯 Goal: #1 Product of the
+              📅 Launch Date: September 5th, 2025 • 🎯 Goal: #1 Product of the
               Day
             </p>
           </div>
@@ -351,25 +372,25 @@ const ProductHuntSection: React.FC = () => {
 const FeaturesSection: React.FC = () => {
   const features = [
     {
-      icon: <Sparkles className="w-8 h-8 text-purple-600" />,
+      icon: <Sparkles className="w-8 h-8 text-synapse-primary" />,
       title: 'AI Assist for Lesson Building',
       description:
         'Draft outlines, objectives, and chapter markers faster — you stay in control of the final lesson.',
     },
     {
-      icon: <Video className="w-8 h-8 text-purple-600" />,
+      icon: <Video className="w-8 h-8 text-synapse-primary" />,
       title: 'Accessible by Design',
       description:
         'Effortless captions, transcripts, and readable templates help every learner follow along.',
     },
     {
-      icon: <Layers className="w-8 h-8 text-purple-600" />,
+      icon: <Layers className="w-8 h-8 text-synapse-primary" />,
       title: 'Tools for Teachers',
       description:
         'Reusable lesson templates, brand kits, and curriculum-friendly timelines fit your classroom workflow.',
     },
     {
-      icon: <Heart className="w-8 h-8 text-purple-600" />,
+      icon: <Heart className="w-8 h-8 text-synapse-primary" />,
       title: 'Student Wellness & Productivity',
       description:
         'Clear pacing, distraction-aware layouts, and breaks built into templates support healthier learning.',
@@ -386,7 +407,10 @@ const FeaturesSection: React.FC = () => {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-<h2 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
+            <div className="mb-3">
+              <span className="uppercase tracking-wider text-xs text-text-secondary">Features</span>
+            </div>
+<h2 className="text-4xl md:text-5xl font-extrabold synapse-text-gradient mb-4">
               Why Educators Choose Synapse Studio
             </h2>
             <p className="text-xl text-text-secondary max-w-2xl mx-auto">
@@ -419,7 +443,10 @@ const PowerSection: React.FC = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-<h2 className="text-4xl md:text-5xl font-bold text-text-primary mb-6">
+            <div className="mb-3">
+              <span className="uppercase tracking-wider text-xs text-text-secondary">Why Synapse</span>
+            </div>
+<h2 className="text-4xl md:text-5xl font-extrabold synapse-text-gradient mb-6">
               Purpose-Built for Teaching Impact
             </h2>
             <p className="text-xl text-text-secondary max-w-3xl mx-auto">
@@ -433,10 +460,10 @@ const PowerSection: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
-              className="bg-synapse-surface rounded-2xl p-8 shadow-synapse-md hover:shadow-synapse-lg transition-shadow"
+              className="bg-synapse-surface rounded-2xl p-8 shadow-synapse-md hover:shadow-synapse-lg transition-shadow border border-border-subtle ring-1 ring-transparent hover:ring-synapse-primary/20 ring-offset-1 ring-offset-synapse-background"
             >
               <div className="w-16 h-16 bg-synapse-primary/10 rounded-xl flex items-center justify-center mb-6">
-                <Zap className="w-8 h-8 text-purple-600" />
+                <Zap className="w-8 h-8 text-synapse-primary" />
               </div>
 <h3 className="text-2xl font-bold text-text-primary mb-4">
                 Curriculum-Aligned Workflow
@@ -450,11 +477,11 @@ const PowerSection: React.FC = () => {
                   Chapter and objective markers
                 </li>
                 <li className="flex items-center">
-                  <div className="w-1.5 h-1.5 bg-purple-600 rounded-full mr-3"></div>
+                  <div className="w-1.5 h-1.5 bg-synapse-primary rounded-full mr-3"></div>
                   Reusable lesson templates
                 </li>
                 <li className="flex items-center">
-                  <div className="w-1.5 h-1.5 bg-purple-600 rounded-full mr-3"></div>
+                  <div className="w-1.5 h-1.5 bg-synapse-primary rounded-full mr-3"></div>
                   Interactive callouts and overlays
                 </li>
               </ul>
@@ -465,10 +492,10 @@ const PowerSection: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
-              className="bg-synapse-surface rounded-2xl p-8 shadow-synapse-md hover:shadow-synapse-lg transition-shadow"
+              className="bg-synapse-surface rounded-2xl p-8 shadow-synapse-md hover:shadow-synapse-lg transition-shadow border border-border-subtle ring-1 ring-transparent hover:ring-synapse-primary/20 ring-offset-1 ring-offset-synapse-background"
             >
               <div className="w-16 h-16 bg-synapse-success/10 rounded-xl flex items-center justify-center mb-6">
-                <Shield className="w-8 h-8 text-green-600" />
+                <Shield className="w-8 h-8 text-synapse-success" />
               </div>
 <h3 className="text-2xl font-bold text-text-primary mb-4">
                 Accessible by Default
@@ -482,11 +509,11 @@ const PowerSection: React.FC = () => {
                   Captions and transcripts
                 </li>
                 <li className="flex items-center">
-                  <div className="w-1.5 h-1.5 bg-green-600 rounded-full mr-3"></div>
+                  <div className="w-1.5 h-1.5 bg-synapse-success rounded-full mr-3"></div>
                   Readable color contrast
                 </li>
                 <li className="flex items-center">
-                  <div className="w-1.5 h-1.5 bg-green-600 rounded-full mr-3"></div>
+                  <div className="w-1.5 h-1.5 bg-synapse-success rounded-full mr-3"></div>
                   Keyboard-friendly UI
                 </li>
               </ul>
@@ -497,10 +524,10 @@ const PowerSection: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
-              className="bg-synapse-surface rounded-2xl p-8 shadow-synapse-md hover:shadow-synapse-lg transition-shadow"
+              className="bg-synapse-surface rounded-2xl p-8 shadow-synapse-md hover:shadow-synapse-lg transition-shadow border border-border-subtle ring-1 ring-transparent hover:ring-synapse-primary/20 ring-offset-1 ring-offset-synapse-background"
             >
               <div className="w-16 h-16 bg-synapse-info/10 rounded-xl flex items-center justify-center mb-6">
-                <Layers className="w-8 h-8 text-blue-600" />
+                <Layers className="w-8 h-8 text-synapse-info" />
               </div>
 <h3 className="text-2xl font-bold text-text-primary mb-4">
                 Teacher-First Flexibility
@@ -514,11 +541,11 @@ const PowerSection: React.FC = () => {
                   Custom templates
                 </li>
                 <li className="flex items-center">
-                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-3"></div>
+                  <div className="w-1.5 h-1.5 bg-synapse-info rounded-full mr-3"></div>
                   Multi-track timeline
                 </li>
                 <li className="flex items-center">
-                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-3"></div>
+                  <div className="w-1.5 h-1.5 bg-synapse-info rounded-full mr-3"></div>
                   Brand kits for courses
                 </li>
               </ul>
@@ -535,7 +562,7 @@ const PowerSection: React.FC = () => {
             <Button
               size="lg"
               onClick={() => navigate('/projects')}
-              className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse px-8 py-4 rounded-full font-semibold text-lg shadow-synapse-md hover:shadow-synapse-lg transition-all duration-200 hover:scale-105"
+className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse px-8 py-4 rounded-full font-semibold text-lg shadow-synapse-md hover:shadow-synapse-lg synapse-glow transition-all duration-200 hover:scale-105"
             >
               <ArrowRight className="w-5 h-5 mr-2" />
               Get Started Now
@@ -603,7 +630,7 @@ const ContactSection: React.FC<ContactFormProps> = ({
               </h3>
               <div className="space-y-4">
                 <div className="flex items-center">
-                  <Mail className="w-5 h-5 text-purple-600 mr-3" />
+<Mail className="w-5 h-5 text-synapse-primary mr-3" />
                   <a
                     href="mailto:glowstringman@gmail.com"
                     className="text-text-secondary hover:text-synapse-primary transition-colors"
@@ -612,13 +639,13 @@ const ContactSection: React.FC<ContactFormProps> = ({
                   </a>
                 </div>
                 <div className="flex items-center">
-                  <MapPin className="w-5 h-5 text-purple-600 mr-3" />
+<MapPin className="w-5 h-5 text-synapse-primary mr-3" />
                   <span className="text-text-secondary">
                     Built with love, globally distributed
                   </span>
                 </div>
                 <div className="flex items-center">
-                  <Phone className="w-5 h-5 text-purple-600 mr-3" />
+<Phone className="w-5 h-5 text-synapse-primary mr-3" />
                   <span className="text-text-secondary">
                     Community Discord available
                   </span>
@@ -750,15 +777,14 @@ const Footer: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-4 gap-8">
           <div>
-            <div className="flex items-center space-x-2 mb-4">
+            <div className="p-2">
               <img
                 src="/branding/logo.svg"
                 alt="Synapse Studio"
-                className="h-8 w-auto"
+                className="h-8 bg-[color:var(--synapse-contrast-chip)] rounded-md p-1 shadow-synapse-sm"
               />
-              <span className="sr-only">Synapse Studio</span>
             </div>
-<p className="text-text-tertiary text-sm">
+            <p className="text-text-tertiary text-sm">
               Human-powered video creation for educators and learning creators.
             </p>
           </div>
@@ -839,7 +865,7 @@ const Navigation: React.FC = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-synapse-surface/80 backdrop-blur-md border-b border-border-subtle">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-2">
+          <div className="bg-[color:var(--synapse-contrast-chip)] rounded-md p-1 shadow-synapse-sm">
             <img
               src="/branding/logo.svg"
               alt="Synapse Studio"

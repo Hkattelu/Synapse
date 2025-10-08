@@ -55,13 +55,14 @@ export function YouTrackFeatures({
       setPipConfig((prev) => ({
         ...prev,
         position:
-          props.talkingHeadCorner === 'bottom-left'
+          (props as any).talkingHeadPosition ||
+          (props.talkingHeadCorner === 'bottom-left'
             ? 'bottom-left'
             : props.talkingHeadCorner === 'top-right'
               ? 'top-right'
               : props.talkingHeadCorner === 'top-left'
                 ? 'top-left'
-                : 'bottom-right',
+                : 'bottom-right'),
         size:
           props.talkingHeadSize === 'sm'
             ? 'small'
@@ -119,6 +120,9 @@ export function YouTrackFeatures({
     // Convert to item properties
     const properties: Partial<ItemProperties> = {
       talkingHeadEnabled: true,
+      // New unified position value
+      talkingHeadPosition: newConfig.position as any,
+      // Preserve corner value for backward compatibility when applicable
       talkingHeadCorner:
         newConfig.position === 'bottom-left'
           ? 'bottom-left'
@@ -126,7 +130,9 @@ export function YouTrackFeatures({
             ? 'top-right'
             : newConfig.position === 'top-left'
               ? 'top-left'
-              : 'bottom-right',
+              : newConfig.position === 'bottom-right'
+                ? 'bottom-right'
+                : (undefined as any),
       talkingHeadSize:
         newConfig.size === 'small'
           ? 'sm'
@@ -295,9 +301,13 @@ export function YouTrackFeatures({
               {(
                 [
                   'top-left',
+                  'top-center',
                   'top-right',
+                  'left-center',
                   'center',
+                  'right-center',
                   'bottom-left',
+                  'bottom-center',
                   'bottom-right',
                 ] as const
               ).map((position) => (

@@ -44,6 +44,7 @@ import {
   User,
   Copy,
   Trash2,
+  Scissors,
 } from 'lucide-react';
 import { ContentAdditionToolbar } from './ContentAdditionToolbar';
 import { FLAGS } from '../lib/flags';
@@ -94,6 +95,7 @@ export function EducationalTimeline({
     clearTimelineSelection,
     timelineDuration,
     updateTimelineItem,
+    splitTimelineItemsAt,
   } = useTimeline();
 
   const { getMediaAssetById } = useMediaAssets();
@@ -999,9 +1001,29 @@ export function EducationalTimeline({
             Fit
           </button>
 
-          {/* Inline quick-add actions */}
+          {/* Inline quick actions */}
           <div className="ml-4 flex items-center gap-2">
             <ContentAdditionToolbar variant="inline" />
+
+            {/* Split at Playhead */}
+            <button
+              onClick={() => {
+                const t = playback.currentTime || 0;
+                if (selectedItems && selectedItems.length > 0) {
+                  splitTimelineItemsAt(t, selectedItems);
+                } else {
+                  splitTimelineItemsAt(t);
+                }
+              }}
+              className="px-2 py-1 text-xs rounded border bg-background-tertiary text-text-secondary hover:text-text-primary hover:bg-synapse-surface-hover border-border-subtle transition-colors"
+              title="Split clip(s) at playhead"
+            >
+              <span className="inline-flex items-center gap-1">
+                <Scissors className="w-3.5 h-3.5" />
+                <span>Split</span>
+              </span>
+            </button>
+
             {/* Quick toggle for Talking Head (You track) */}
             <button
               onClick={() => {
@@ -1265,7 +1287,18 @@ export function EducationalTimeline({
               zIndex: 10000,
             }}
             onMouseDown={(e) => e.stopPropagation()}
-          >
+> 
+            <button
+              className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-text-primary hover:bg-synapse-surface-hover"
+              onClick={() => {
+                const t = playback.currentTime || 0;
+                splitTimelineItemsAt(t, [contextMenu.itemId!]);
+                closeContextMenu();
+              }}
+            >
+              <Scissors className="w-4 h-4" />
+              Split at Playhead
+            </button>
             <button
               className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-text-primary hover:bg-synapse-surface-hover"
               onClick={() => {

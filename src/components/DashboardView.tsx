@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProject } from '../state/hooks';
 import { ProjectManager } from './ProjectManager';
 import { Sparkles, Plus, GitBranch, ArrowRight } from 'lucide-react';
+import { starterTemplates } from '../lib/starterTemplates';
 import { api } from '../lib/api';
 import { generateId } from '../lib/utils';
 import type { MediaAsset, Project, TimelineItem } from '../lib/types';
@@ -12,6 +13,7 @@ export function DashboardView() {
   const navigate = useNavigate();
   const [projectName, setProjectName] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
 
   // New from Repo modal state
   const [showRepoModal, setShowRepoModal] = useState(false);
@@ -212,12 +214,14 @@ export function DashboardView() {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-text-primary mb-2">
-              Your Projects
-            </h2>
-            <p className="text-text-secondary">
-              Create and manage your video projects
-            </p>
+            <div className="bg-synapse-surface border border-border-subtle rounded-xl p-6 shadow-synapse-sm">
+              <h2 className="text-3xl md:text-4xl font-extrabold synapse-text-gradient mb-3">
+                Orchestrate video from code.
+              </h2>
+              <p className="text-text-secondary max-w-2xl">
+                Studio-grade timeline, instant preview. Design, preview, and export programmatic videos — fast.
+              </p>
+            </div>
           </div>
 
           {/* Quick Actions */}
@@ -282,6 +286,15 @@ export function DashboardView() {
                 </button>
 
                 <button
+                  onClick={() => setShowTemplateModal(true)}
+                  title="Start quickly with a curated starter template (blank, code tutorial, social vertical, and more)."
+                  className="bg-synapse-surface border border-border-subtle hover:border-synapse-border-hover text-synapse-primary font-medium px-6 py-3 rounded-lg transition-colors flex items-center space-x-2"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  <span>New from Template</span>
+                </button>
+
+                <button
                   onClick={() => setShowRepoModal(true)}
                   title="Generate a starter video project from a Git repository. We clone shallowly and extract a handful of representative files to create an editable timeline."
                   className="bg-synapse-surface border border-border-subtle hover:border-synapse-border-hover text-synapse-primary font-medium px-6 py-3 rounded-lg transition-colors flex items-center space-x-2"
@@ -290,9 +303,7 @@ export function DashboardView() {
                   <span>New from Repo</span>
                 </button>
                 <p className="text-sm text-text-tertiary max-w-2xl">
-                  Tip: We clone the repo (depth 1), scan for code and docs, and
-                  propose a short timeline (titles and code segments). You can
-                  edit everything afterward.
+                  Tip: Templates are a fast way to start; use Repo to generate from code.
                 </p>
               </div>
             )}
@@ -355,6 +366,59 @@ export function DashboardView() {
           )}
         </div>
       </div>
+
+      {/* New from Template Modal */}
+      {showTemplateModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setShowTemplateModal(false)}
+        >
+          <div
+            className="bg-synapse-surface rounded-xl shadow-synapse-lg w-full max-w-3xl p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-text-primary">Start from Template</h3>
+              <button
+                className="text-text-secondary hover:text-text-primary"
+                onClick={() => setShowTemplateModal(false)}
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 10-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {starterTemplates.map((tpl) => (
+                <button
+                  key={tpl.id}
+                  onClick={() => {
+                    const project = tpl.build({ name: tpl.name });
+                    importProject(project);
+                    setShowTemplateModal(false);
+                    navigate('/studio');
+                  }}
+                  className="text-left bg-synapse-surface border border-border-subtle hover:border-synapse-border-hover rounded-lg p-4 transition-colors"
+                >
+                  <div className="font-semibold text-text-primary mb-1">{tpl.name}</div>
+                  <div className="text-sm text-text-secondary mb-2">{tpl.description}</div>
+                  {tpl.tags && (
+                    <div className="flex flex-wrap gap-2">
+                      {tpl.tags.map((t) => (
+                        <span key={t} className="text-[10px] uppercase tracking-wide px-2 py-0.5 bg-synapse-surface-active rounded text-text-secondary border border-border-subtle">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* New from Repo Modal */}
       {showRepoModal && (

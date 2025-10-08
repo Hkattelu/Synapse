@@ -21,6 +21,10 @@ import {
   Check,
   X,
   ExternalLink,
+  Plus,
+  Clock,
+  Gauge,
+  Maximize,
 } from 'lucide-react';
 
 interface ProjectCardProps {
@@ -50,6 +54,15 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
 
     const projectStats = PM.getProjectStats(project.project);
 
+    const handleOpen = () => onOpen(project.project.id);
+
+    const handleRootKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleOpen();
+      }
+    };
+
     return (
       <motion.div
         ref={ref}
@@ -57,7 +70,12 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="relative bg-synapse-surface border border-border-subtle rounded-xl p-6 hover:shadow-synapse-md transition-all duration-200 group"
+        role="button"
+        tabIndex={0}
+        aria-label={`Open project ${project.project.name}`}
+        onKeyDown={handleRootKeyDown}
+        onClick={handleOpen}
+        className="relative bg-synapse-surface border border-border-subtle rounded-xl p-6 hover:shadow-synapse-lg hover:border-synapse-border-hover ring-1 ring-transparent hover:ring-synapse-primary hover:ring-opacity-20 transition-all duration-200 group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-synapse-border-focus focus-visible:ring-offset-2 focus-visible:ring-offset-synapse-surface will-change-transform hover:-translate-y-0.5"
       >
         {/* Thumbnail / Content-forward preview */}
         {(() => {
@@ -93,19 +111,36 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                     <span className="sr-only">No thumbnail</span>
                   </div>
                 )}
-                {/* Overlay metadata */}
-                <div className="absolute inset-x-0 bottom-0 p-2 flex items-center justify-between text-[11px]">
-                  <div className="inline-flex items-center gap-2 bg-black/40 backdrop-blur-sm text-white px-2 py-1 rounded">
-                    <span>{proj.settings?.width || 1920}×{proj.settings?.height || 1080}</span>
-                    <span>•</span>
-                    <span>{proj.settings?.fps || 30} fps</span>
-                    <span>•</span>
-                    <span>{Math.round(proj.settings?.duration || 60)}s</span>
+                {/* Overlay metadata (chips) */}
+                <div className="absolute inset-x-2 bottom-2 flex flex-wrap items-center gap-2">
+                  <div
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary"
+                    title={`Resolution: ${(proj.settings?.width || 1920)}×${(proj.settings?.height || 1080)}`}
+                  >
+                    <Maximize className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span className="text-[11px]">{proj.settings?.width || 1920}×{proj.settings?.height || 1080}</span>
+                  </div>
+                  <div
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary"
+                    title={`Frame rate: ${(proj.settings?.fps || 30)} fps`}
+                  >
+                    <Gauge className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span className="text-[11px]">{proj.settings?.fps || 30} fps</span>
+                  </div>
+                  <div
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary"
+                    title={`Duration: ${Math.round(proj.settings?.duration || 60)} seconds`}
+                  >
+                    <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span className="text-[11px]">{Math.round(proj.settings?.duration || 60)}s</span>
                   </div>
                   {firstVideo && (
-                    <div className="inline-flex items-center gap-1 bg-black/40 backdrop-blur-sm text-white px-2 py-1 rounded">
-                      <Video className="w-3.5 h-3.5" />
-                      <span>Video</span>
+                    <div
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary"
+                      title="Contains video media"
+                    >
+                      <Video className="w-3.5 h-3.5" aria-hidden="true" />
+                      <span className="text-[11px]">Video</span>
                     </div>
                   )}
                 </div>
@@ -121,7 +156,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
             </div>
             <div className="flex-1 min-w-0">
               {showRename ? (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
                   <input
                     type="text"
                     value={newName}
@@ -155,7 +190,10 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                 </div>
               ) : (
                 <>
-                  <h3 className="font-semibold text-text-primary truncate group-hover:text-synapse-primary transition-colors">
+                  <h3
+                    className="font-semibold text-text-primary line-clamp-2 group-hover:text-synapse-primary transition-colors"
+                    title={project.project.name}
+                  >
                     {project.project.name}
                   </h3>
                   <p className="text-sm text-text-secondary truncate">
@@ -169,7 +207,11 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
           {/* Menu Button */}
           <div className="relative">
             <button
-              onClick={() => setShowMenu(!showMenu)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMenu(!showMenu);
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
               className="p-2 text-text-secondary hover:text-text-primary transition-colors rounded-full hover:bg-synapse-surface-hover"
             >
               <MoreVertical className="w-4 h-4" />
@@ -186,7 +228,8 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                   onBlur={() => setShowMenu(false)}
                 >
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       onOpen(project.project.id);
                       setShowMenu(false);
                     }}
@@ -247,15 +290,21 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
           </div>
         </div>
 
-        {/* Project Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="flex items-center text-sm text-text-secondary">
-            <Video className="w-4 h-4 mr-2" />
-            {projectStats.totalClips} clips
+        {/* Project Stats (chips) */}
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <div
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary"
+            title={`${projectStats.totalClips} total clips`}
+          >
+            <Video className="w-3.5 h-3.5" aria-hidden="true" />
+            <span className="text-[11px]">{projectStats.totalClips} clips</span>
           </div>
-          <div className="flex items-center text-sm text-text-secondary">
-            <Calendar className="w-4 h-4 mr-2" />
-            {project.lastOpened.toLocaleDateString()}
+          <div
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary"
+            title={`Last opened on ${project.lastOpened.toLocaleDateString()}`}
+          >
+            <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
+            <span className="text-[11px]">Opened {project.lastOpened.toLocaleDateString()}</span>
           </div>
         </div>
 
@@ -275,13 +324,6 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
           </div>
         </div>
 
-        {/* Open Button */}
-        <button
-          onClick={() => onOpen(project.project.id)}
-          className="w-full mt-4 bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse py-2 px-4 rounded-lg transition-colors font-medium"
-        >
-          Open Project
-        </button>
 
         {/* Delete Confirmation Modal */}
         <AnimatePresence>
@@ -340,6 +382,10 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
             </motion.div>
           )}
         </AnimatePresence>
+        {/* Subtle hover sheen (no text) */}
+        <div className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute inset-0 bg-gradient-to-br from-[color:var(--synapse-contrast-chip)]/5 to-transparent" />
+        </div>
       </motion.div>
     );
   }
@@ -355,6 +401,7 @@ export function ProjectManager() {
     renameProject,
     exportProject,
     importProject,
+    createProject,
   } = useProject();
 
   const [isImporting, setIsImporting] = useState(false);
@@ -405,29 +452,40 @@ export function ProjectManager() {
     return (
       <div className="text-center py-12">
         <FileText className="w-16 h-16 text-text-tertiary mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-text-primary mb-2">
-          No projects yet
+        <h3 className="text-lg font-semibold text-text-primary mb-2">
+          Welcome to Synapse Studio
         </h3>
-        <p className="text-text-secondary mb-6">
-          Create your first project to get started
+        <p className="text-text-secondary mb-6 max-w-md mx-auto">
+          Design, preview, and export programmatic videos — fast. Start fresh or bring an existing project.
         </p>
-        <button
-          onClick={handleImportProject}
-          disabled={isImporting}
-          className="inline-flex items-center px-4 py-2 bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse rounded-lg transition-colors space-x-2 disabled:opacity-50"
-        >
-          <Upload className="w-4 h-4" />
-          <span>{isImporting ? 'Importing...' : 'Import Project'}</span>
-        </button>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={() => {
+              createProject('Untitled Project');
+              navigate('/studio');
+            }}
+            className="inline-flex items-center px-4 py-2 bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse rounded-lg transition-colors space-x-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Project</span>
+          </button>
+          <button
+            onClick={handleImportProject}
+            disabled={isImporting}
+            className="inline-flex items-center px-4 py-2 bg-synapse-surface border border-border-subtle hover:border-synapse-border-hover text-synapse-primary rounded-lg transition-colors space-x-2 disabled:opacity-50"
+          >
+            <Upload className="w-4 h-4" />
+            <span>{isImporting ? 'Importing…' : 'Import Project'}</span>
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header with Import Button */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-text-primary">Your Projects</h2>
+      {/* Header actions (Import) */}
+      <div className="flex justify-end items-center">
         <button
           onClick={handleImportProject}
           disabled={isImporting}

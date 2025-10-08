@@ -211,6 +211,44 @@ export function useTimeline() {
     [timeline, dispatch]
   );
 
+  // Split items at a given time. If ids provided, only split those ids that intersect time;
+  // otherwise split all items that intersect the time.
+  const splitTimelineItemsAt = useCallback(
+    (time: number, ids?: string[]) => {
+      const EPS = 1e-6;
+      const targetIds = ids && ids.length > 0 ? new Set(ids) : null;
+      const updated: TimelineItem[] = [];
+      for (const item of timeline) {
+        const start = item.startTime;
+        const end = item.startTime + item.duration;
+        const intersects = time > start + EPS && time < end - EPS;
+        const shouldConsider = !targetIds || targetIds.has(item.id);
+        if (intersects && shouldConsider) {
+          // Keep original as left piece (update duration)
+          const left: TimelineItem = { ...item, duration: time - start };
+          // Create right piece
+          const right: TimelineItem = {
+            ...item,
+            id: generateId(),
+            startTime: time,
+            duration: end - time,
+            // Duplicate keyframes/animations by value to decouple references
+            keyframes: (item.keyframes ?? []).map((k) => ({ ...k, id: generateId() })),
+            animations: (item.animations ?? []).map((a) => ({ ...a })),
+            properties: { ...(item.properties ?? {}) },
+          };
+          updated.push(left, right);
+        } else {
+          updated.push(item);
+        }
+      }
+      if (updated !== timeline) {
+        dispatch({ type: 'UPDATE_PROJECT', payload: { timeline: updated } });
+      }
+    },
+    [timeline, dispatch]
+  );
+
   // Computed values
   const selectedItems = state.ui.timeline.selectedItems;
   const selectedTimelineItems = useMemo(
@@ -255,6 +293,7 @@ export function useTimeline() {
     selectTimelineItems,
     clearTimelineSelection,
     duplicateTimelineItem,
+    splitTimelineItemsAt,
     getItemsAtTime,
     getItemsByTrack,
   };

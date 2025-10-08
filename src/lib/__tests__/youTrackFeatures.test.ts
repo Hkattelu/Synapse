@@ -211,6 +211,42 @@ describe('youTrackFeatures', () => {
       expect(position).toEqual({ x: 760, y: 390 }); // (1920-400)/2, (1080-300)/2
     });
 
+    it('calculates top-center position correctly', () => {
+      const position = getPiPPositionCoordinates(
+        'top-center',
+        containerSize,
+        pipSize
+      );
+      expect(position).toEqual({ x: 760, y: 20 }); // (1920-400)/2, 20
+    });
+
+    it('calculates bottom-center position correctly', () => {
+      const position = getPiPPositionCoordinates(
+        'bottom-center',
+        containerSize,
+        pipSize
+      );
+      expect(position).toEqual({ x: 760, y: 760 }); // (1920-400)/2, 1080-300-20
+    });
+
+    it('calculates left-center position correctly', () => {
+      const position = getPiPPositionCoordinates(
+        'left-center',
+        containerSize,
+        pipSize
+      );
+      expect(position).toEqual({ x: 20, y: 390 }); // 20, (1080-300)/2
+    });
+
+    it('calculates right-center position correctly', () => {
+      const position = getPiPPositionCoordinates(
+        'right-center',
+        containerSize,
+        pipSize
+      );
+      expect(position).toEqual({ x: 1500, y: 390 }); // 1920-400-20, (1080-300)/2
+    });
+
     it('defaults to top-left for unknown position', () => {
       const position = getPiPPositionCoordinates(
         'custom' as PiPPosition,

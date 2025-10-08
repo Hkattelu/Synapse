@@ -6,6 +6,7 @@ import { validateMediaAsset } from '../lib/validation';
 import { AudioWaveform } from './Waveform';
 import { MusicLibrary } from './MusicLibrary';
 import type { MediaAsset, MediaAssetType, VisualAssetType } from '../lib/types';
+import { useUploadManager } from '../state/uploadManager';
 import { suggestTrackPlacement } from '../lib/educationalPlacement';
 import { EDUCATIONAL_TRACKS } from '../lib/educationalTypes';
 
@@ -206,6 +207,7 @@ export function MediaBin({ className = '' }: MediaBinProps) {
 
   // Background: reconcile any existing blob: URLs by uploading them to the server
   const reconciledRef = React.useRef<Set<string>>(new Set());
+  const { enqueueBlob, enqueueFile } = useUploadManager();
   React.useEffect(() => {
     const run = async () => {
       for (const asset of mediaAssets) {
@@ -216,38 +218,28 @@ export function MediaBin({ className = '' }: MediaBinProps) {
           const resp = await fetch(asset.url);
           const blob = await resp.blob();
           const filename = asset.name || `asset-${asset.id}`;
-          const up = await fetch('/api/uploads', {
-            method: 'POST',
-            headers: {
-              'x-filename': filename,
-              'content-type': blob.type || 'application/octet-stream',
-            },
-            body: blob,
-          });
-if (up.ok) {
-            const body = (await up.json()) as { url?: string };
-            if (body?.url) {
-              let finalUrl = body.url;
+          enqueueBlob(blob, {
+            assetId: asset.id,
+            name: filename,
+            mime: blob.type || 'application/octet-stream',
+            onComplete: (u) => {
+              let finalUrl = u;
               try {
                 const loc = window.location;
-                if (
-                  loc.protocol === 'https:' &&
-                  finalUrl.startsWith('http://') &&
-                  finalUrl.includes(loc.host)
-                ) {
+                if (loc.protocol === 'https:' && finalUrl.startsWith('http://') && finalUrl.includes(loc.host)) {
                   finalUrl = finalUrl.replace(/^http:/, 'https:');
                 }
               } catch {}
               updateMediaAsset(asset.id, { url: finalUrl });
-            }
-          }
+            },
+          });
         } catch (e) {
           console.warn('Background upload failed for', asset.name, e);
         }
       }
     };
     void run();
-  }, [mediaAssets, updateMediaAsset]);
+  }, [mediaAssets, updateMediaAsset, enqueueBlob]);
 
   // Category counts for dropdown labels
   const categoryCounts = React.useMemo(() => {
@@ -475,27 +467,23 @@ if (up.ok) {
           message: `${file.name} added to Media Bin`,
         });
 
-        // Attempt to persist the file on the server for rendering (non-blocking)
+        // Attempt to persist the file on the server for rendering (non-blocking) via UploadManager
         try {
-          const resp = await fetch('/api/uploads', {
-            method: 'POST',
-            headers: {
-              'x-filename': file.name,
-              'content-type': file.type || 'application/octet-stream',
-            },
-            body: file,
-          });
-          if (resp.ok) {
-            const body = (await resp.json()) as { url?: string };
-            if (body?.url && typeof body.url === 'string') {
-              // Update the asset to use absolute HTTP URL; revoke the blob URL
-              updateMediaAsset(newId, { url: body.url });
+          enqueueFile(file, {
+            assetId: newId,
+            name: file.name,
+            onComplete: (u) => {
+              let finalUrl = u;
+              try {
+                const loc = window.location;
+                if (loc.protocol === 'https:' && finalUrl.startsWith('http://') && finalUrl.includes(loc.host)) {
+                  finalUrl = finalUrl.replace(/^http:/, 'https:');
+                }
+              } catch {}
+              updateMediaAsset(newId, { url: finalUrl });
               if (url.startsWith('blob:')) URL.revokeObjectURL(url);
-            }
-          } else {
-            // Silent warning; user can still preview but export may fail until uploaded
-            console.warn('Upload to server failed:', resp.status, resp.statusText);
-          }
+            },
+          });
         } catch (e) {
           console.warn('Upload to server failed:', e);
         }

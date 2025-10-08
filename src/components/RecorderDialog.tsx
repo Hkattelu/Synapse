@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, Suspense, lazy } from 'react';
 import { useMediaAssets, useTimeline, useProject, usePlayback } from '../state/hooks';
 import { useNotifications } from '../state/notifications';
 import { generateId } from '../lib/utils';
+import { useUploadManager } from '../state/uploadManager';
 
 interface RecorderDialogProps {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     blob: Blob;
   } | null>(null);
   const [envError, setEnvError] = useState<string | null>(null);
+  const { enqueueBlob } = useUploadManager();
 
   // Basic bubble config for talking head overlay
   const [bubbleEnabled, setBubbleEnabled] = useState(true);
@@ -500,41 +502,27 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                       },
                     });
 
-                    // Fire-and-forget: persist the blob to server and swap URL to absolute HTTP so export can proceed
-                    (async () => {
-                      try {
-                        const resp = await fetch('/api/uploads', {
-                          method: 'POST',
-                          headers: {
-                            'x-filename': name,
-                            'content-type': pending.mime || 'application/octet-stream',
-                          },
-                          body: pending.blob,
-                        });
-if (resp.ok) {
-                          const body = (await resp.json()) as { url?: string };
-                          if (body?.url) {
-                            let finalUrl = body.url;
-                            try {
-                              const loc = window.location;
-                              // If returned as http on an https page for same host, upgrade scheme
-                              if (
-                                loc.protocol === 'https:' &&
-                                finalUrl.startsWith('http://') &&
-                                finalUrl.includes(loc.host)
-                              ) {
-                                finalUrl = finalUrl.replace(/^http:/, 'https:');
-                              }
-                            } catch {}
-                            updateMediaAsset(id, { url: finalUrl });
-                            // Revoke the temporary blob URL
-                            try { if (assetUrl.startsWith('blob:')) URL.revokeObjectURL(assetUrl); } catch {}
-                          }
-                        }
-                      } catch (e) {
-                        console.warn('Recorder upload failed:', e);
-                      }
-                    })();
+                    // Persist via UploadManager and swap URL
+                    try {
+                      enqueueBlob(pending.blob, {
+                        assetId: id,
+                        name,
+                        mime: pending.mime || 'application/octet-stream',
+                        onComplete: (u) => {
+                          let finalUrl = u;
+                          try {
+                            const loc = window.location;
+                            if (loc.protocol === 'https:' && finalUrl.startsWith('http://') && finalUrl.includes(loc.host)) {
+                              finalUrl = finalUrl.replace(/^http:/, 'https:');
+                            }
+                          } catch {}
+                          updateMediaAsset(id, { url: finalUrl });
+                          try { if (assetUrl.startsWith('blob:')) URL.revokeObjectURL(assetUrl); } catch {}
+                        },
+                      });
+                    } catch (e) {
+                      console.warn('Recorder upload failed:', e);
+                    }
 
                     // Add to timeline at playhead
                     const start = playback.currentTime || 0;
@@ -612,39 +600,27 @@ if (resp.ok) {
                       },
                     });
 
-                    // Persist blob to server in background and swap URL
-                    (async () => {
-                      try {
-                        const resp = await fetch('/api/uploads', {
-                          method: 'POST',
-                          headers: {
-                            'x-filename': name,
-                            'content-type': pending.mime || 'application/octet-stream',
-                          },
-                          body: pending.blob,
-                        });
-if (resp.ok) {
-                          const body = (await resp.json()) as { url?: string };
-                          if (body?.url) {
-                            let finalUrl = body.url;
-                            try {
-                              const loc = window.location;
-                              if (
-                                loc.protocol === 'https:' &&
-                                finalUrl.startsWith('http://') &&
-                                finalUrl.includes(loc.host)
-                              ) {
-                                finalUrl = finalUrl.replace(/^http:/, 'https:');
-                              }
-                            } catch {}
-                            updateMediaAsset(id, { url: finalUrl });
-                            try { if (assetUrl.startsWith('blob:')) URL.revokeObjectURL(assetUrl); } catch {}
-                          }
-                        }
-                      } catch (e) {
-                        console.warn('Recorder upload failed:', e);
-                      }
-                    })();
+                    // Persist via UploadManager and swap URL
+                    try {
+                      enqueueBlob(pending.blob, {
+                        assetId: id,
+                        name,
+                        mime: pending.mime || 'application/octet-stream',
+                        onComplete: (u) => {
+                          let finalUrl = u;
+                          try {
+                            const loc = window.location;
+                            if (loc.protocol === 'https:' && finalUrl.startsWith('http://') && finalUrl.includes(loc.host)) {
+                              finalUrl = finalUrl.replace(/^http:/, 'https:');
+                            }
+                          } catch {}
+                          updateMediaAsset(id, { url: finalUrl });
+                          try { if (assetUrl.startsWith('blob:')) URL.revokeObjectURL(assetUrl); } catch {}
+                        },
+                      });
+                    } catch (e) {
+                      console.warn('Recorder upload failed:', e);
+                    }
 
                     notify({
                       type: 'success',

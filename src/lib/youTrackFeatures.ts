@@ -27,10 +27,14 @@ export interface TalkingHeadOptimization {
 // Picture-in-picture positioning and sizing
 export type PiPPosition =
   | 'top-left'
+  | 'top-center'
   | 'top-right'
-  | 'bottom-left'
-  | 'bottom-right'
+  | 'left-center'
   | 'center'
+  | 'right-center'
+  | 'bottom-left'
+  | 'bottom-center'
+  | 'bottom-right'
   | 'custom';
 
 export type PiPSize = 'small' | 'medium' | 'large' | 'custom';
@@ -235,8 +239,22 @@ export function getPiPPositionCoordinates(
       return { x: margin, y: margin };
     case 'top-right':
       return { x: containerSize.width - pipSize.width - margin, y: margin };
+    case 'top-center':
+      return { x: (containerSize.width - pipSize.width) / 2, y: margin };
+    case 'left-center':
+      return { x: margin, y: (containerSize.height - pipSize.height) / 2 };
+    case 'right-center':
+      return {
+        x: containerSize.width - pipSize.width - margin,
+        y: (containerSize.height - pipSize.height) / 2,
+      };
     case 'bottom-left':
       return { x: margin, y: containerSize.height - pipSize.height - margin };
+    case 'bottom-center':
+      return {
+        x: (containerSize.width - pipSize.width) / 2,
+        y: containerSize.height - pipSize.height - margin,
+      };
     case 'bottom-right':
       return {
         x: containerSize.width - pipSize.width - margin,
@@ -432,6 +450,9 @@ export function applyPresentationTemplate(
   const properties: Partial<ItemProperties> = {
     // PiP configuration
     talkingHeadEnabled: true,
+    // New unified position property (used by renderer when present)
+    talkingHeadPosition: template.pipConfig.position as any,
+    // Backward-compatible corner (used when position maps to a corner)
     talkingHeadCorner:
       template.pipConfig.position === 'bottom-right'
         ? 'bottom-right'

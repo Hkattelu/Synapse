@@ -226,6 +226,12 @@ export interface ItemProperties {
   typewriterDiffShowCursor?: boolean;
   typewriterDiffHighlightChanges?: boolean;
 
+  // Diff viewer preferences (UI-only)
+  compareAgainst?: 'previous-step' | 'base';
+  diffViewMode?: 'inline' | 'side-by-side';
+  diffShowOnlyChanged?: boolean;
+  diffWrapLines?: boolean;
+
   // Background system properties
   backgroundType?: 'none' | 'color' | 'gradient' | 'wallpaper';
   backgroundColor?: string; // solid background color
@@ -280,6 +286,17 @@ export interface ItemProperties {
   talkingHeadEnabled?: boolean;
   talkingHeadShape?: 'circle' | 'rounded';
   talkingHeadCorner?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  // Extended position presets, superseding talkingHeadCorner when present
+  talkingHeadPosition?:
+    | 'top-left'
+    | 'top-center'
+    | 'top-right'
+    | 'center'
+    | 'left-center'
+    | 'right-center'
+    | 'bottom-left'
+    | 'bottom-center'
+    | 'bottom-right';
   talkingHeadSize?: 'sm' | 'md' | 'lg';
   // Viewer-controlled, non-destructive visibility toggle
   talkingHeadHidden?: boolean;

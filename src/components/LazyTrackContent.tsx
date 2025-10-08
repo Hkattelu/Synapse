@@ -3,6 +3,7 @@ import {
   useIntersectionObserver,
   useOptimizedTrackPreview,
 } from '../lib/performanceOptimizations';
+import { FilmstripThumbnails } from './FilmstripThumbnails';
 import type { TimelineItem, MediaAsset } from '../lib/types';
 import type { EducationalTrack } from '../lib/educationalTypes';
 
@@ -176,12 +177,8 @@ const TrackContentRenderer = memo(function TrackContentRenderer({
               {previewData.dimensions}
             </div>
           )}
-          {previewData.thumbnail && (
-            <div
-              className="w-full h-6 bg-cover bg-center rounded opacity-75"
-              style={{ backgroundImage: `url(${previewData.thumbnail})` }}
-            />
-          )}
+          {/* Filmstrip of thumbnails across the clip */}
+          <FilmstripThumbnails asset={asset} item={item} height={24} count={8} />
         </div>
       );
 
@@ -209,14 +206,8 @@ const TrackContentRenderer = memo(function TrackContentRenderer({
               Position: {previewData.corner}
             </div>
           )}
-          {previewData.thumbnail && (
-            <div
-              className={`w-full h-6 bg-cover bg-center opacity-75 ${
-                previewData.isTalkingHead ? 'rounded-full' : 'rounded'
-              }`}
-              style={{ backgroundImage: `url(${previewData.thumbnail})` }}
-            />
-          )}
+          {/* Filmstrip for personal video as well */}
+          <FilmstripThumbnails asset={asset} item={item} height={24} count={8} rounded={previewData.isTalkingHead ? 'full' : 'md'} />
         </div>
       );
 

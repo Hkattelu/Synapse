@@ -810,95 +810,47 @@ function ClipProperties({
 
   const renderCodeProperties = () => (
     <div className="space-y-3">
-      {/* Theme and font controls first (simplified dropdowns) */}
-      <SelectInput
-        label="Theme"
-        value={localProperties.theme ?? 'vscode-dark-plus'}
-        onChange={(value) => updateProperty('theme', value)}
-        options={themeOptions}
-      />
-      <SelectInput
-        label="Font Family"
-        value={localProperties.fontFamily ?? defaultFontOptions[0].value}
-        onChange={(value) => updateProperty('fontFamily', value)}
-        options={fontOptions}
-        error={validationErrors.fontFamily}
-      />
-      <NumberInput
-        label="Font Size"
-        value={localProperties.fontSize ?? 14}
-        onChange={(value) => updateProperty('fontSize', value)}
-        error={validationErrors.fontSize}
-        min={8}
-        max={48}
-        step={1}
-        suffix="px"
-      />
-
-      {/* Canvas Background */}
-      <h6 className="text-xs font-medium text-text-secondary">Canvas Background</h6>
-      {renderBackgroundControlsInline()}
-
-      {/* Panel Style */}
+      {/* Code Change */}
       <div className="space-y-2">
-        <h6 className="text-xs font-medium text-text-secondary">Panel Style</h6>
-        {(() => {
-          const radius = localProperties.codePanelRadius ?? 12;
-          const shadow = localProperties.codePanelShadow ?? true;
-          const isNoFrame = radius === 0 && shadow === false;
-          const isCard = radius === 12 && shadow === true;
-          const isStrong = radius === 16 && shadow === true;
-          const base = 'px-2 py-1 text-xs rounded border transition-colors';
-          const active = 'bg-synapse-primary text-synapse-text-inverse border-synapse-primary shadow-synapse-sm';
-          const inactive = 'bg-background-tertiary text-text-secondary border-border-subtle hover:text-text-primary';
-          return (
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-1">
-                <button
-                  onClick={() => updatePropertiesBulk({ codePanelRadius: 0, codePanelShadow: false })}
-                  className={`${base} ${isNoFrame ? active : inactive}`}
-                  title="No frame"
-                >
-                  No frame
-                </button>
-                <button
-                  onClick={() => updatePropertiesBulk({ codePanelRadius: 12, codePanelShadow: true })}
-                  className={`${base} ${isCard ? active : inactive}`}
-                  title="Card"
-                >
-                  Card
-                </button>
-                <button
-                  onClick={() => updatePropertiesBulk({ codePanelRadius: 16, codePanelShadow: true })}
-                  className={`${base} ${isStrong ? active : inactive}`}
-                  title="Strong card"
-                >
-                  Strong
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <NumberInput
-                  label="Panel Width"
-                  value={(localProperties as any).codePanelWidth ?? 800}
-                  onChange={(value) => updateProperty('codePanelWidth' as any, value)}
-                  min={100}
-                  max={4096}
-                  step={1}
-                  suffix="px"
-                />
-                <NumberInput
-                  label="Panel Height"
-                  value={(localProperties as any).codePanelHeight ?? 450}
-                  onChange={(value) => updateProperty('codePanelHeight' as any, value)}
-                  min={100}
-                  max={4096}
-                  step={1}
-                  suffix="px"
-                />
-              </div>
-            </div>
-          );
-        })()}
+        <h6 className="text-xs font-medium text-text-secondary">Code Change</h6>
+        <SelectInput
+          label="Compare against"
+          value={(localProperties as any).compareAgainst ?? 'previous-step'}
+          onChange={(value) => updateProperty('compareAgainst' as any, value)}
+          options={[
+            { value: 'previous-step', label: 'Previous step (default)' },
+            { value: 'base', label: 'Base' },
+          ]}
+        />
+        <div className="grid grid-cols-3 gap-2">
+          <SelectInput
+            label="Diff view"
+            value={(localProperties as any).diffViewMode ?? 'inline'}
+            onChange={(value) => updateProperty('diffViewMode' as any, value)}
+            options={[
+              { value: 'inline', label: 'Inline' },
+              { value: 'side-by-side', label: 'Side‑by‑side' },
+            ]}
+          />
+          <SelectInput
+            label="Show only changed files"
+            value={((localProperties as any).diffShowOnlyChanged ?? false) ? 'on' : 'off'}
+            onChange={(value) => updateProperty('diffShowOnlyChanged' as any, value === 'on')}
+            options={[
+              { value: 'off', label: 'Off' },
+              { value: 'on', label: 'On' },
+            ]}
+          />
+          <SelectInput
+            label="Wrap lines"
+            value={((localProperties as any).diffWrapLines ?? false) ? 'on' : 'off'}
+            onChange={(value) => updateProperty('diffWrapLines' as any, value === 'on')}
+            options={[
+              { value: 'off', label: 'Off' },
+              { value: 'on', label: 'On' },
+            ]}
+          />
+        </div>
       </div>
 
       {/* Code content */}
@@ -911,13 +863,6 @@ function ClipProperties({
           updateProperty('codeText', value);
         }}
         error={validationErrors.codeText}
-      />
-      <TextInput
-        label="Second Code (for Diff)"
-        value={localProperties.codeTextB ?? ''}
-        onChange={(value) => updateProperty('codeTextB', value)}
-        error={validationErrors.codeTextB}
-        multiline
       />
       <div className="space-y-2">
         <SelectInput
@@ -956,19 +901,17 @@ function ClipProperties({
                     updateProperty(key as keyof ItemProperties, value);
                   }
                 });
-              }
-            }
-          }}
+       }}}}
           className="w-full px-3 py-2 text-sm bg-synapse-primary text-synapse-text-inverse rounded hover:bg-synapse-primary-hover transition-colors"
         >
           🔍 Auto-Detect Language & Apply Defaults
         </button>
       </div>
 
-      {/* Snippets (Multi-step) */}
+      {/* Annotations */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h6 className="text-xs font-medium text-text-secondary">Snippets (Multi‑step)</h6>
+          <h6 className="text-xs font-medium text-text-secondary">Annotations & Snippets</h6>
           <SelectInput
             label="Transition"
             value={localProperties.codeStepsTransition ?? 'none'}
@@ -1003,15 +946,6 @@ function ClipProperties({
             updateProperty('codeSteps', next as any);
           };
 
-          const fromTwoCodes = () => {
-            const a = localProperties.codeText || localProperties.text || '';
-            const b = (localProperties as any).codeTextB || '';
-            const next = [
-              { code: a || '// step A', duration: Math.max(1, Math.round(((item.duration || 6) / 2))) },
-              { code: b || '// step B', duration: Math.max(1, Math.round(((item.duration || 6) / 2))) },
-            ];
-            updateProperty('codeSteps', next as any);
-          };
 
           const parseRanges = (s: string): Array<[number, number]> => {
             const out: Array<[number, number]> = [];
@@ -1048,13 +982,6 @@ function ClipProperties({
                   title="Add a blank step"
                 >
                   + Add Blank Step
-                </button>
-                <button
-                  onClick={fromTwoCodes}
-                  className="px-2 py-1 text-xs rounded border bg-background-tertiary text-text-secondary hover:text-text-primary"
-                  title="Create 2 steps from Code + Second Code"
-                >
-                  ↔ From Code + Second
                 </button>
                 <div className="ml-auto text-xs text-text-tertiary self-center">
                   Total steps: {parsedSteps.length} • Sum duration: {Math.round(sumDur * 10) / 10}s
@@ -1177,7 +1104,9 @@ function ClipProperties({
         })()}
       </div>
 
+      {/* Transitions */}
       <div className="space-y-2">
+        <h6 className="text-xs font-medium text-text-secondary">Transitions</h6>
         <SelectInput
           label="Animation Mode"
           value={localProperties.animationMode ?? 'typing'}
@@ -1257,6 +1186,101 @@ function ClipProperties({
           { value: 'on', label: 'On' },
         ]}
       />
+
+      {/* Advanced */}
+      <div className="space-y-3">
+        <h6 className="text-xs font-medium text-text-secondary">Advanced</h6>
+        {/* Theme and font controls */}
+        <SelectInput
+          label="Theme"
+          value={localProperties.theme ?? 'vscode-dark-plus'}
+          onChange={(value) => updateProperty('theme', value)}
+          options={themeOptions}
+        />
+        <SelectInput
+          label="Font Family"
+          value={localProperties.fontFamily ?? defaultFontOptions[0].value}
+          onChange={(value) => updateProperty('fontFamily', value)}
+          options={fontOptions}
+          error={validationErrors.fontFamily}
+        />
+        <NumberInput
+          label="Font Size"
+          value={localProperties.fontSize ?? 14}
+          onChange={(value) => updateProperty('fontSize', value)}
+          error={validationErrors.fontSize}
+          min={8}
+          max={48}
+          step={1}
+          suffix="px"
+        />
+
+        {/* Canvas Background */}
+        <h6 className="text-xs font-medium text-text-secondary">Canvas Background</h6>
+        {renderBackgroundControlsInline()}
+
+        {/* Panel Style */}
+        <div className="space-y-2">
+          <h6 className="text-xs font-medium text-text-secondary">Panel Style</h6>
+          {(() => {
+            const radius = localProperties.codePanelRadius ?? 12;
+            const shadow = localProperties.codePanelShadow ?? true;
+            const isNoFrame = radius === 0 && shadow === false;
+            const isCard = radius === 12 && shadow === true;
+            const isStrong = radius === 16 && shadow === true;
+            const base = 'px-2 py-1 text-xs rounded border transition-colors';
+            const active = 'bg-synapse-primary text-synapse-text-inverse border-synapse-primary shadow-synapse-sm';
+            const inactive = 'bg-background-tertiary text-text-secondary border-border-subtle hover:text-text-primary';
+            return (
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => updatePropertiesBulk({ codePanelRadius: 0, codePanelShadow: false })}
+                    className={`${base} ${isNoFrame ? active : inactive}`}
+                    title="No frame"
+                  >
+                    No frame
+                  </button>
+                  <button
+                    onClick={() => updatePropertiesBulk({ codePanelRadius: 12, codePanelShadow: true })}
+                    className={`${base} ${isCard ? active : inactive}`}
+                    title="Card"
+                  >
+                    Card
+                  </button>
+                  <button
+                    onClick={() => updatePropertiesBulk({ codePanelRadius: 16, codePanelShadow: true })}
+                    className={`${base} ${isStrong ? active : inactive}`}
+                    title="Strong card"
+                  >
+                    Strong
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <NumberInput
+                    label="Panel Width"
+                    value={(localProperties as any).codePanelWidth ?? 800}
+                    onChange={(value) => updateProperty('codePanelWidth' as any, value)}
+                    min={100}
+                    max={4096}
+                    step={1}
+                    suffix="px"
+                  />
+                  <NumberInput
+                    label="Panel Height"
+                    value={(localProperties as any).codePanelHeight ?? 450}
+                    onChange={(value) => updateProperty('codePanelHeight' as any, value)}
+                    min={100}
+                    max={4096}
+                    step={1}
+                    suffix="px"
+                  />
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      </div>
     </div>
   );
 
@@ -1747,7 +1771,25 @@ function ClipProperties({
 
         {mode === 'properties' && (
           <>
-            {/* If code, show Code properties first to avoid scrolling (no layout sections here) */}
+            {/* Step basics */}
+            <div className="mb-4">
+              <h5 className="text-sm font-medium text-text-secondary mb-2">Step basics</h5>
+              <TextInput
+                label="Title"
+                value={localProperties.title ?? ''}
+                onChange={(value) => updateProperty('title', value)}
+                error={validationErrors.title}
+              />
+              <TextInput
+                label="Description"
+                value={localProperties.description ?? ''}
+                onChange={(value) => updateProperty('description', value)}
+                error={validationErrors.description}
+                multiline
+              />
+            </div>
+
+            {/* If code, show Code properties grouped (Code change, Annotations, Transitions, Advanced) */}
             {item.type === 'code' && (
               <div className="mb-4">
                 <h5 className="text-sm font-medium text-text-secondary mb-2">

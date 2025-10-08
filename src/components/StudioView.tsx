@@ -23,6 +23,8 @@ const Inspector = React.lazy(() =>
 import { ExportDialog } from './ExportDialog';
 import { RecorderDialog } from './RecorderDialog';
 import { ExportProvider } from '../state/exportContext';
+import { UploadManagerProvider } from '../state/uploadManager';
+import UploadCenter from './UploadCenter';
 import { StudioLoader } from './ui/StudioLoader';
 import { InspectorSkeleton, MediaBinSkeleton, TimelineSkeleton } from './ui/PanelSkeletons';
 import { prefetchOnIdle } from '../lib/prefetch';
@@ -623,9 +625,13 @@ export function StudioView() {
     } catch {}
   }, []);
 
-  return (
-    <ExportProvider>
-      <StudioViewContent />
-    </ExportProvider>
+return (
+    <UploadManagerProvider>
+      <ExportProvider>
+        <StudioViewContent />
+        {/* Floating uploader panel */}
+        <UploadCenter />
+      </ExportProvider>
+    </UploadManagerProvider>
   );
 }

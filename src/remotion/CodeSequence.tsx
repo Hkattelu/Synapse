@@ -88,6 +88,24 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
     }
     return item.properties.codeText || item.properties.text || '// No code content';
   }, [item.properties.codeSteps, item.properties.codeText, item.properties.text, frame, startFrame, fps]);
+
+  // Determine active step index (for diff compare sources)
+  const activeStepIndex = useMemo(() => {
+    const steps = item.properties.codeSteps;
+    if (!Array.isArray(steps) || steps.length === 0) return -1;
+    const localFrame = Math.max(0, frame - startFrame);
+    let acc = 0;
+    for (let i = 0; i < steps.length; i++) {
+      const stepFrames = Math.max(1, Math.round((steps[i].duration || 0) * fps));
+      const start = acc;
+      const end = acc + stepFrames; // exclusive
+      if (localFrame >= start && localFrame < end) {
+        return i;
+      }
+      acc = end;
+    }
+    return steps.length - 1;
+  }, [item.properties.codeSteps, frame, startFrame, fps]);
   const language = item.properties.language || 'javascript';
   const theme = item.properties.theme || 'dark';
   // Get font settings from theme or fallback to item properties
@@ -411,22 +429,105 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
     }
 
     if (animationMode === 'diff') {
-      const a = (item.properties.codeText || '').replace(/\r?\n$/, '');
-      const b = (item.properties.codeTextB || '').replace(/\r?\n$/, '');
-      const parts = diffLines(a + '\n', b + '\n');
+      // Determine compare sources based on controls
+      const compareAgainst = (item.properties as any).compareAgainst || 'previous-step';
+      const viewMode = (item.properties as any).diffViewMode || 'inline';
+      const showOnlyChanged = Boolean((item.properties as any).diffShowOnlyChanged);
+
+      // Compute previous/base code
+      let oldCode = '';
+      const steps = item.properties.codeSteps;
+      if (Array.isArray(steps) && steps.length > 0) {
+        if (compareAgainst === 'base') {
+          oldCode = steps[0].code || '';
+        } else {
+          // previous-step
+          const prevIdx = Math.max(0, (activeStepIndex ?? 0) - 1);
+          oldCode = steps[prevIdx]?.code || steps[0].code || '';
+        }
+      } else if (item.properties.codeTextB) {
+        // Legacy fallback to second block if provided
+        oldCode = (item.properties.codeText || '').replace(/\r?\n$/, '');
+      } else {
+        oldCode = '';
+      }
+
+      const newCode = (codeContent || '').replace(/\r?\n$/, '');
+      const parts = diffLines(oldCode + '\n', newCode + '\n');
+
+      if (viewMode === 'side-by-side') {
+        // Build side-by-side HTML columns
+        const leftLines: string[] = [];
+        const rightLines: string[] = [];
+
+        parts.forEach((p) => {
+          const linesArr = p.value.split(/\r?\n/);
+          // Remove the last empty line introduced by diff
+          if (linesArr.length > 0 && linesArr[linesArr.length - 1] === '') linesArr.pop();
+          if (p.added) {
+            linesArr.forEach((ln) => {
+              // left blank, right added
+              leftLines.push('<span class="diff-blank"></span>');
+              try {
+                const inner = Prism.highlight(ln, Prism.languages[prismLanguage], prismLanguage);
+                rightLines.push(`<span class="diff-added">${inner}</span>`);
+              } catch {
+                rightLines.push(`<span class="diff-added">${encodeForHtml(ln)}</span>`);
+              }
+            });
+          } else if (p.removed) {
+            linesArr.forEach((ln) => {
+              try {
+                const inner = Prism.highlight(ln, Prism.languages[prismLanguage], prismLanguage);
+                leftLines.push(`<span class="diff-removed">${inner}</span>`);
+              } catch {
+                leftLines.push(`<span class="diff-removed">${encodeForHtml(ln)}</span>`);
+              }
+              rightLines.push('<span class="diff-blank"></span>');
+            });
+          } else {
+            linesArr.forEach((ln) => {
+              if (!showOnlyChanged) {
+                // unchanged visible only if toggled off
+                try {
+                  const inner = Prism.highlight(ln, Prism.languages[prismLanguage], prismLanguage);
+                  leftLines.push(`<span class="diff-unchanged">${inner}</span>`);
+                  rightLines.push(`<span class="diff-unchanged">${inner}</span>`);
+                } catch {
+                  const safe = encodeForHtml(ln);
+                  leftLines.push(`<span class="diff-unchanged">${safe}</span>`);
+                  rightLines.push(`<span class="diff-unchanged">${safe}</span>`);
+                }
+              }
+            });
+          }
+        });
+
+        const leftHtml = leftLines.join('\n');
+        const rightHtml = rightLines.join('\n');
+        return `
+          <div class="code-diff-sbs">
+            <div class="code-diff-col code-diff-left">${leftHtml}</div>
+            <div class="code-diff-col code-diff-right">${rightHtml}</div>
+          </div>
+        `;
+      }
+
+      // Inline view
       return parts
         .map((p) => {
           const cls = p.added ? 'added' : p.removed ? 'removed' : 'unchanged';
+          if (showOnlyChanged && cls === 'unchanged') return '';
           try {
             const inner = Prism.highlight(
               p.value,
               Prism.languages[prismLanguage],
               prismLanguage
             );
-            return `<span class="diff-${cls}">${inner}</span>`;
+            return `<span class=\"diff-${cls}\">${inner}</span>`;
           } catch {
             const safe = encodeForHtml(p.value);
-            return `<span class="diff-${cls}">${safe}</span>`;
+            return `<span class=\"diff-${cls}\">${safe}</span>`;
           }
         })
         .join('');
@@ -541,10 +642,28 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
   const codeContainerStyle: React.CSSProperties = {
     position: 'relative',
     zIndex: 1,
+    whiteSpace: (item.properties as any).diffWrapLines ? 'pre-wrap' : 'pre',
+    wordBreak: (item.properties as any).diffWrapLines ? 'break-word' : 'normal',
   };
 
   // Enhanced CSS for comprehensive syntax highlighting
   const syntaxStyles = `
+    /* Side-by-side diff layout */
+    .code-diff-sbs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+    }
+    .code-diff-col {
+      background: transparent;
+      padding: 0;
+      border: 0;
+    }
+    .code-diff-left .diff-added { opacity: 0.35; }
+    .code-diff-right .diff-removed { opacity: 0.35; }
+    .diff-blank { display: inline-block; height: 1em; }
+
     .token.comment,
     .token.prolog,
     .token.doctype,

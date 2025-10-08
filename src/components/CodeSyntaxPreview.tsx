@@ -86,7 +86,7 @@ export function CodeSyntaxPreview({
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
+      .replace(/\"/g, '&quot;')
       .replace(/'/g, '&#39;');
   };
 
@@ -138,6 +138,9 @@ export function CodeSyntaxPreview({
     [themeColors]
   );
 
+  // Enforce an 80-character max visual width for preview content
+  const maxPreviewWidthCh = 80;
+
   return (
     <div className={`code-syntax-preview ${className}`}>
       <style>{syntaxStyles}</style>
@@ -155,8 +158,8 @@ export function CodeSyntaxPreview({
         </div>
       )}
 
-      <div className="code-preview rounded border overflow-hidden">
-        <pre className="text-xs p-2 m-0 overflow-hidden">
+      <div className="code-preview rounded border overflow-hidden" style={{ maxWidth: `${maxPreviewWidthCh}ch` }}>
+        <pre className="text-xs p-2 m-0 overflow-hidden" style={{ maxWidth: `${maxPreviewWidthCh}ch`, whiteSpace: 'pre-wrap' }}>
           <code
             dangerouslySetInnerHTML={{ __html: highlightedCode }}
             style={{
@@ -165,6 +168,10 @@ export function CodeSyntaxPreview({
                 'Monaco, Menlo, "Ubuntu Mono", monospace',
               fontSize: Math.min(item.properties.fontSize || 14, 12),
               lineHeight: 1.3,
+              overflowWrap: 'anywhere',
+              wordBreak: 'break-word',
+              display: 'inline-block',
+              maxWidth: '100%'
             }}
           />
         </pre>

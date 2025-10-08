@@ -16,6 +16,7 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
   // If talking head overlay is enabled on this item, render as a small corner bubble
   const talkingHead = item.properties.talkingHeadEnabled === true;
   const bubbleCorner = item.properties.talkingHeadCorner ?? 'bottom-right';
+  const bubblePosition = item.properties.talkingHeadPosition ?? bubbleCorner;
   const bubbleSize = item.properties.talkingHeadSize ?? 'sm';
   const bubbleShape = item.properties.talkingHeadShape ?? 'circle';
   const bubbleHidden = item.properties.talkingHeadHidden === true;
@@ -39,12 +40,37 @@ export const VideoSequence: React.FC<VideoSequenceProps> = ({
     ? {
         // Corner-anchored bubble
         position: 'absolute',
+        zIndex: 1000,
         width: bubbleSize === 'md' ? 256 : 176,
         height: bubbleSize === 'md' ? 256 : 176,
         // Add a small margin to avoid covering edges
-        ...(bubbleCorner.includes('top') ? { top: 24 } : { bottom: 24 }),
-        ...(bubbleCorner.includes('left') ? { left: 24 } : { right: 24 }),
-        transform: 'none',
+        ...(() => {
+          switch (bubblePosition) {
+            case 'top-left':
+              return { top: 24, left: 24, transform: 'none' };
+            case 'top-center':
+              return { top: 24, left: '50%', transform: 'translateX(-50%)' };
+            case 'top-right':
+              return { top: 24, right: 24, transform: 'none' };
+            case 'center':
+              return {
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+              };
+            case 'left-center':
+              return { top: '50%', left: 24, transform: 'translateY(-50%)' };
+            case 'right-center':
+              return { top: '50%', right: 24, transform: 'translateY(-50%)' };
+            case 'bottom-left':
+              return { bottom: 24, left: 24, transform: 'none' };
+            case 'bottom-center':
+              return { bottom: 24, left: '50%', transform: 'translateX(-50%)' };
+            case 'bottom-right':
+            default:
+              return { bottom: 24, right: 24, transform: 'none' };
+          }
+        })(),
         opacity: (animStyles.opacity ?? 1) * opacity,
         overflow: 'hidden',
         borderRadius: bubbleShape === 'circle' ? 9999 : 16,
