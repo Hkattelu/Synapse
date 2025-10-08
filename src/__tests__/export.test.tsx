@@ -17,6 +17,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ExportDialog } from '../components/ExportDialog';
 import { ExportProvider } from '../state/exportContext';
 import { AppProvider } from '../state/context';
+import { UploadManagerProvider } from '../state/uploadManager';
 import {
   exportManager,
   DEFAULT_EXPORT_PRESETS,
@@ -97,7 +98,9 @@ const mockProject: Project = {
 // Test wrapper component
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AppProvider>
-    <ExportProvider>{children}</ExportProvider>
+    <UploadManagerProvider>
+      <ExportProvider>{children}</ExportProvider>
+    </UploadManagerProvider>
   </AppProvider>
 );
 

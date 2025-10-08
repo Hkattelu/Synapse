@@ -370,15 +370,17 @@ export function DashboardView() {
       {/* New from Template Modal */}
       {showTemplateModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           onClick={() => setShowTemplateModal(false)}
         >
           <div
-            className="bg-synapse-surface rounded-xl shadow-synapse-lg w-full max-w-3xl p-6"
+            className="bg-synapse-surface rounded-2xl shadow-synapse-lg w-full max-w-5xl p-6 border border-border-subtle"
             onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-labelledby="template-dialog-title"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-text-primary">Start from Template</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 id="template-dialog-title" className="text-xl font-bold text-text-primary">Start from a Template</h3>
               <button
                 className="text-text-secondary hover:text-text-primary"
                 onClick={() => setShowTemplateModal(false)}
@@ -390,7 +392,7 @@ export function DashboardView() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {starterTemplates.map((tpl) => (
                 <button
                   key={tpl.id}
@@ -400,19 +402,45 @@ export function DashboardView() {
                     setShowTemplateModal(false);
                     navigate('/studio');
                   }}
-                  className="text-left bg-synapse-surface border border-border-subtle hover:border-synapse-border-hover rounded-lg p-4 transition-colors"
+                  className="group text-left bg-synapse-surface border border-border-subtle hover:border-synapse-border-hover rounded-xl overflow-hidden transition-all hover:shadow-synapse-md focus:outline-none focus:ring-2 focus:ring-synapse-border-focus"
                 >
-                  <div className="font-semibold text-text-primary mb-1">{tpl.name}</div>
-                  <div className="text-sm text-text-secondary mb-2">{tpl.description}</div>
-                  {tpl.tags && (
-                    <div className="flex flex-wrap gap-2">
-                      {tpl.tags.map((t) => (
-                        <span key={t} className="text-[10px] uppercase tracking-wide px-2 py-0.5 bg-synapse-surface-active rounded text-text-secondary border border-border-subtle">
-                          {t}
-                        </span>
-                      ))}
+                  {/* Visual banner */}
+                  <div
+                    className="h-28 relative"
+                    style={{
+                      background: `linear-gradient(135deg, ${tpl.colorFrom || '#6366f1'}, ${tpl.colorTo || '#a855f7'})`,
+                    }}
+                  >
+                    {tpl.recommended && (
+                      <span className="absolute top-2 left-2 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-white/80 text-gray-800 border border-white/90 shadow-sm">
+                        Recommended
+                      </span>
+                    )}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-4xl drop-shadow-sm">
+                        {tpl.emoji || '✨'}
+                      </div>
                     </div>
-                  )}
+                  </div>
+
+                  {/* Card body */}
+                  <div className="p-5">
+                    <div className="font-semibold text-text-primary mb-1 text-base">
+                      {tpl.name}
+                    </div>
+                    <div className="text-sm text-text-secondary mb-3 line-clamp-2">
+                      {tpl.description}
+                    </div>
+                    {tpl.tags && (
+                      <div className="flex flex-wrap gap-2">
+                        {tpl.tags.map((t) => (
+                          <span key={t} className="text-[10px] uppercase tracking-wide px-2 py-0.5 bg-synapse-surface-active rounded text-text-secondary border border-border-subtle">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </button>
               ))}
             </div>

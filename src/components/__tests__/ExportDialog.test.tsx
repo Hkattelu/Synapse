@@ -31,6 +31,8 @@ const getEstimatedFileSize = vi.fn(() => 1024 * 1024 * 50);
 const mockUpdateSettings = vi.fn();
 const mockApplyPreset = vi.fn();
 
+vi.mock('../../lib/flags', () => ({ FLAGS: { ALLOW_ANON_EXPORT: false } }));
+
 vi.mock('../../state/exportContext', () => ({
   useExport: () => ({ startExport, cancelExport, getEstimatedFileSize }),
   useExportSettings: () => ({
@@ -75,6 +77,17 @@ vi.mock('../../state/exportContext', () => ({
     isExporting: false,
     progress: null,
     canStartExport: true,
+  }),
+}));
+
+vi.mock('../../state/uploadManager', () => ({
+  useUploadManager: () => ({
+    counts: { total: 0, inProgress: 0, failed: 0, completed: 0 },
+    inProgress: [],
+    failed: [],
+    showPanel: vi.fn(),
+    setAutoExportWhenReady: vi.fn(),
+    allUploaded: true,
   }),
 }));
 

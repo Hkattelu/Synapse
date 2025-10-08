@@ -7,6 +7,10 @@ export interface ProjectTemplateMeta {
   description: string;
   tags?: string[];
   recommended?: boolean;
+  // Visual adornments for gallery cards
+  emoji?: string; // e.g. "💻"
+  colorFrom?: string; // e.g. "#6366F1"
+  colorTo?: string;   // e.g. "#A855F7"
 }
 
 export interface ProjectTemplate extends ProjectTemplateMeta {
@@ -37,6 +41,9 @@ function blankProjectTemplate(): ProjectTemplate {
     description: 'An empty project with default 1080p settings.',
     tags: ['default', 'clean'],
     recommended: true,
+    emoji: '🧪',
+    colorFrom: '#0ea5e9', // sky-500
+    colorTo: '#22d3ee',   // cyan-400
     build: ({ name } = {}) => {
       const now = new Date();
       const project: Project = {
@@ -68,6 +75,9 @@ function codeTutorialTemplate(): ProjectTemplate {
     description: 'A starter with a title card and a code snippet using typewriter animation.',
     tags: ['code', 'education'],
     recommended: true,
+    emoji: '💻',
+    colorFrom: '#6366f1', // indigo-500
+    colorTo: '#a855f7',   // purple-500
     build: ({ name } = {}) => {
       const now = new Date();
       const titleAsset = makeCodeAsset('Title', 'Getting Started', 'text');
@@ -139,6 +149,9 @@ function socialVerticalTitleTemplate(): ProjectTemplate {
     name: 'Social Vertical Title Card',
     description: '1080×1920 project with a bold title card. Great for short intros.',
     tags: ['social', 'vertical', 'title'],
+    emoji: '📱',
+    colorFrom: '#f43f5e', // rose-500
+    colorTo: '#f97316',   // orange-500
     build: ({ name } = {}) => {
       const now = new Date();
       const titleText = 'Your Title Here';

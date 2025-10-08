@@ -4,6 +4,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ExportDialog } from '../components/ExportDialog';
 import { ExportProvider } from '../state/exportContext';
 import { AppProvider } from '../state/context';
+import { UploadManagerProvider } from '../state/uploadManager';
 
 // Mock auth so the Start Export button is enabled in tests
 vi.mock('../state/authContext', () => ({
@@ -69,7 +70,9 @@ vi.mock('../lib/api', () => {
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AppProvider>
-    <ExportProvider>{children}</ExportProvider>
+    <UploadManagerProvider>
+      <ExportProvider>{children}</ExportProvider>
+    </UploadManagerProvider>
   </AppProvider>
 );
 
