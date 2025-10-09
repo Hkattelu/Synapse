@@ -215,12 +215,9 @@ export function DashboardView() {
           {/* Header */}
           <div className="mb-8">
             <div className="bg-synapse-surface border border-border-subtle rounded-xl p-6 shadow-synapse-sm">
-              <h2 className="text-3xl md:text-4xl font-extrabold synapse-text-gradient mb-3">
-                Orchestrate video from code.
+              <h2 className="text-3xl md:text-4xl font-extrabold text-text-primary">
+                Projects
               </h2>
-              <p className="text-text-secondary max-w-2xl">
-                Studio-grade timeline, instant preview. Design, preview, and export programmatic videos — fast.
-              </p>
             </div>
           </div>
 
@@ -316,54 +313,6 @@ export function DashboardView() {
             </div>
           </div>
 
-          {/* Current Project Status */}
-          {project && (
-            <div className="mt-8 bg-synapse-primary/10 border border-synapse-primary rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-synapse-success rounded-full"></div>
-                  <h3 className="text-lg font-semibold text-text-primary">
-                    Active Project
-                  </h3>
-                </div>
-                <button
-                  onClick={() => handleOpenProject()}
-                  className="text-synapse-primary hover:opacity-80 font-medium"
-                >
-                  Open Studio →
-                </button>
-              </div>
-
-              <h4 className="text-xl font-bold text-text-primary mb-4">
-                {project.name}
-              </h4>
-
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="bg-synapse-surface rounded-lg p-4">
-                  <div className="text-2xl font-bold text-text-primary mb-1">
-                    {project.timeline.length}
-                  </div>
-                  <div className="text-sm text-text-secondary">
-                    Timeline Items
-                  </div>
-                </div>
-                <div className="bg-synapse-surface rounded-lg p-4">
-                  <div className="text-2xl font-bold text-text-primary mb-1">
-                    {project.mediaAssets.length}
-                  </div>
-                  <div className="text-sm text-text-secondary">
-                    Media Assets
-                  </div>
-                </div>
-                <div className="bg-synapse-surface rounded-lg p-4">
-                  <div className="text-2xl font-bold text-text-primary mb-1">
-                    {project.createdAt.toLocaleDateString()}
-                  </div>
-                  <div className="text-sm text-text-secondary">Created</div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

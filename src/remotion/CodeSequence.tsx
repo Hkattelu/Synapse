@@ -865,7 +865,6 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
             return `
             @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
             ${diffAnimationCss}
-            .code-line { display: block; }
             ${numberingCss}
             `;
           })()}

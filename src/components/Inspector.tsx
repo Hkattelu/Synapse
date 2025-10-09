@@ -534,6 +534,13 @@ function ClipProperties({
     item.properties
   );
 
+  // Manual recording detection simplified to a single flag used in JSX
+  const trackInfo = getEducationalTrackByNumber(item.track);
+  const isManualRecording =
+    (trackInfo?.name === 'Narration' && item.type === 'audio') ||
+    (trackInfo?.name === 'You' && item.type === 'video');
+  const showStepBasics = !isManualRecording;
+
   const { getMediaAssetById } = useMediaAssets();
 
   // Simplified theme dropdown options
@@ -1771,23 +1778,24 @@ function ClipProperties({
 
         {mode === 'properties' && (
           <>
-            {/* Step basics */}
-            <div className="mb-4">
-              <h5 className="text-sm font-medium text-text-secondary mb-2">Step basics</h5>
-              <TextInput
-                label="Title"
-                value={localProperties.title ?? ''}
-                onChange={(value) => updateProperty('title', value)}
-                error={validationErrors.title}
-              />
-              <TextInput
-                label="Description"
-                value={localProperties.description ?? ''}
-                onChange={(value) => updateProperty('description', value)}
-                error={validationErrors.description}
-                multiline
-              />
-            </div>
+            {showStepBasics && (
+              <div className="mb-4">
+                <h5 className="text-sm font-medium text-text-secondary mb-2">Step basics</h5>
+                <TextInput
+                  label="Title"
+                  value={localProperties.title ?? ''}
+                  onChange={(value) => updateProperty('title', value)}
+                  error={validationErrors.title}
+                />
+                <TextInput
+                  label="Description"
+                  value={localProperties.description ?? ''}
+                  onChange={(value) => updateProperty('description', value)}
+                  error={validationErrors.description}
+                  multiline
+                />
+              </div>
+            )}
 
             {/* If code, show Code properties grouped (Code change, Annotations, Transitions, Advanced) */}
             {item.type === 'code' && (

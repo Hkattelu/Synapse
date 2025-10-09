@@ -53,12 +53,12 @@ interface ContactFormProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({
-  title = 'Create Engaging Lessons and Tutorials',
-  subtitle = 'Built for educators and learning creators',
+  title = 'Make simple videos in minutes',
+  subtitle = 'Built for anyone, no learning curve',
   description =
-    'Plan, record, and polish educational videos with tools for AI-assisted drafting, accessible captions, interactive callouts, and gamified pacing — without sacrificing your voice.',
-  primaryCtaText = 'Create a Lesson',
-  secondaryCtaText = 'Get Notified',
+    'Record, trim, add captions, and export — all in one clean, friendly editor.',
+  primaryCtaText = 'Create a video',
+  secondaryCtaText = 'Try a template',
 }) => {
   const navigate = useNavigate();
   const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
@@ -140,17 +140,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({
 
       <div className="relative z-10 container mx-auto px-4">
         <div className="text-center max-w-4xl mx-auto">
-          {isEnabled('PRODUCT_HUNT') && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center px-4 py-2 rounded-full bg-synapse-primary/10 border border-synapse-primary text-sm font-medium text-synapse-primary mb-6 shadow-synapse-sm"
-            >
-              <span className="mr-2">🚀</span>
-              {subtitle}
-            </motion.div>
-          )}
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -182,24 +171,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({
 className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse px-8 py-4 rounded-full font-semibold text-lg shadow-synapse-md hover:shadow-synapse-lg synapse-glow transition-all duration-200 hover:scale-105"
             >
               <Play className="w-5 h-5 mr-2" />
-              Create a Lesson
+              Create a video
             </Button>
-            {isEnabled('PRODUCT_HUNT') && (
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() =>
-                  window.open(
-                    'https://www.producthunt.com/products/synapse-studio',
-                    '_blank'
-                  )
-                }
-                className="border-synapse-primary text-synapse-primary hover:bg-synapse-primary/10 px-8 py-4 rounded-full font-semibold text-lg shadow-synapse-sm"
-              >
-                <Heart className="w-5 h-5 mr-2" />
-                Support on Product Hunt
-              </Button>
-            )}
           </motion.div>
 
           {/* Credibility strip */}
@@ -211,7 +184,7 @@ className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-i
           >
             <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary text-xs">
               <Layers className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Built for devs</span>
+              <span>No learning curve</span>
             </div>
             <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary text-xs">
               <Zap className="w-3.5 h-3.5" aria-hidden="true" />
@@ -219,7 +192,7 @@ className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-i
             </div>
             <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full border border-border-subtle bg-synapse-surface text-text-secondary text-xs">
               <Shield className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Studio-grade timeline</span>
+              <span>Clean, simple timeline</span>
             </div>
           </motion.div>
 
@@ -229,33 +202,6 @@ className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-i
             transition={{ duration: 0.6, delay: 0.4 }}
             className="pt-12"
           >
-            {isEnabled('PRODUCT_HUNT') && (
-              <>
-                {/* Product Hunt Launch Countdown */}
-                <div className="bg-synapse-surface border border-synapse-border rounded-2xl p-6 mb-8 max-w-2xl mx-auto">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold text-text-primary mb-2">
-                      🎯 Product Hunt Launch
-                    </h3>
-                    <p className="text-text-secondary mb-4">
-                      Join us on September 5th, 2025 and help us reach #1
-                      Product of the Day!
-                    </p>
-                    <div className="flex items-center justify-center space-x-4 text-sm">
-                      <div className="bg-synapse-surface rounded-lg px-3 py-2 shadow-synapse-sm">
-                        <div className="font-bold text-synapse-primary text-lg">
-                          Sep 5
-                        </div>
-                        <div className="text-text-tertiary">2025</div>
-                      </div>
-                      <div className="text-synapse-primary font-medium">
-                        Mark your calendars!
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
 
             {/* Stats */}
             <div className="flex items-center justify-center space-x-8 text-sm text-text-tertiary">
@@ -372,28 +318,28 @@ const ProductHuntSection: React.FC = () => {
 const FeaturesSection: React.FC = () => {
   const features = [
     {
-      icon: <Sparkles className="w-8 h-8 text-synapse-primary" />,
-      title: 'AI Assist for Lesson Building',
+      icon: <Video className="w-8 h-8 text-synapse-primary" />,
+      title: 'Record and trim quickly',
       description:
-        'Draft outlines, objectives, and chapter markers faster — you stay in control of the final lesson.',
+        'Capture screen or camera and cut in seconds — no clutter, no fuss.',
     },
     {
-      icon: <Video className="w-8 h-8 text-synapse-primary" />,
-      title: 'Accessible by Design',
+      icon: <Sparkles className="w-8 h-8 text-synapse-primary" />,
+      title: 'Auto captions',
       description:
-        'Effortless captions, transcripts, and readable templates help every learner follow along.',
+        'One-click subtitles you can edit for clarity and accuracy.',
     },
     {
       icon: <Layers className="w-8 h-8 text-synapse-primary" />,
-      title: 'Tools for Teachers',
+      title: 'Easy overlays',
       description:
-        'Reusable lesson templates, brand kits, and curriculum-friendly timelines fit your classroom workflow.',
+        'Add text, shapes, and simple callouts that look good by default.',
     },
     {
-      icon: <Heart className="w-8 h-8 text-synapse-primary" />,
-      title: 'Student Wellness & Productivity',
+      icon: <ArrowRight className="w-8 h-8 text-synapse-primary" />,
+      title: 'Export anywhere',
       description:
-        'Clear pacing, distraction-aware layouts, and breaks built into templates support healthier learning.',
+        'Sizes for social, slides, and sharing — quick exports that just work.',
     },
   ];
 
@@ -411,10 +357,10 @@ const FeaturesSection: React.FC = () => {
               <span className="uppercase tracking-wider text-xs text-text-secondary">Features</span>
             </div>
 <h2 className="text-4xl md:text-5xl font-extrabold synapse-text-gradient mb-4">
-              Why Educators Choose Synapse Studio
+              Why creators choose Synapse
             </h2>
             <p className="text-xl text-text-secondary max-w-2xl mx-auto">
-              Build clear, inclusive, and engaging learning videos — with your expertise front and center.
+              Build quick, clear videos — with the basics done right.
             </p>
           </motion.div>
         </div>
@@ -447,10 +393,10 @@ const PowerSection: React.FC = () => {
               <span className="uppercase tracking-wider text-xs text-text-secondary">Why Synapse</span>
             </div>
 <h2 className="text-4xl md:text-5xl font-extrabold synapse-text-gradient mb-6">
-              Purpose-Built for Teaching Impact
+              Everything you need, nothing you don’t
             </h2>
             <p className="text-xl text-text-secondary max-w-3xl mx-auto">
-              Everything you need to shape effective lessons — from curriculum-friendly timelines to inclusive viewing experiences.
+              A straightforward editor for quick, clear videos. No timeline jargon — just the basics done right.
             </p>
           </motion.div>
 
@@ -466,23 +412,23 @@ const PowerSection: React.FC = () => {
                 <Zap className="w-8 h-8 text-synapse-primary" />
               </div>
 <h3 className="text-2xl font-bold text-text-primary mb-4">
-                Curriculum-Aligned Workflow
+                Simple timeline you’ll actually use
               </h3>
               <p className="text-text-secondary mb-6">
-                Plan modules, objectives, and chapter markers with a clear, flexible timeline.
+                Cut, split, and arrange without the clutter.
               </p>
               <ul className="space-y-2 text-sm text-text-secondary">
                 <li className="flex items-center">
                   <div className="w-1.5 h-1.5 bg-synapse-primary rounded-full mr-3"></div>
-                  Chapter and objective markers
+                  Trim and split clips
                 </li>
                 <li className="flex items-center">
                   <div className="w-1.5 h-1.5 bg-synapse-primary rounded-full mr-3"></div>
-                  Reusable lesson templates
+                  Drag-and-drop ordering
                 </li>
                 <li className="flex items-center">
                   <div className="w-1.5 h-1.5 bg-synapse-primary rounded-full mr-3"></div>
-                  Interactive callouts and overlays
+                  Keyboard shortcuts that make sense
                 </li>
               </ul>
             </motion.div>
@@ -498,23 +444,23 @@ const PowerSection: React.FC = () => {
                 <Shield className="w-8 h-8 text-synapse-success" />
               </div>
 <h3 className="text-2xl font-bold text-text-primary mb-4">
-                Accessible by Default
+                Captions made easy
               </h3>
               <p className="text-text-secondary mb-6">
-                Reach every learner with built-in accessibility tools and best practices.
+                One-click subtitles you can edit.
               </p>
               <ul className="space-y-2 text-sm text-text-secondary">
                 <li className="flex items-center">
                   <div className="w-1.5 h-1.5 bg-synapse-success rounded-full mr-3"></div>
-                  Captions and transcripts
+                  Auto-generate captions
+                </li>
+                <li className="flex items-center">
+                  <div className="w-1.5 h-1.5 bg-synapse-success rounded-full mr-3"></div>
+                  Quick inline edits
                 </li>
                 <li className="flex items-center">
                   <div className="w-1.5 h-1.5 bg-synapse-success rounded-full mr-3"></div>
                   Readable color contrast
-                </li>
-                <li className="flex items-center">
-                  <div className="w-1.5 h-1.5 bg-synapse-success rounded-full mr-3"></div>
-                  Keyboard-friendly UI
                 </li>
               </ul>
             </motion.div>
@@ -530,23 +476,23 @@ const PowerSection: React.FC = () => {
                 <Layers className="w-8 h-8 text-synapse-info" />
               </div>
 <h3 className="text-2xl font-bold text-text-primary mb-4">
-                Teacher-First Flexibility
+                Clean, readable UI
               </h3>
               <p className="text-text-secondary mb-6">
-                Fit lectures, tutorials, labs, and flipped-class workflows without friction.
+                Focus on your story, not settings.
               </p>
               <ul className="space-y-2 text-sm text-text-secondary">
                 <li className="flex items-center">
                   <div className="w-1.5 h-1.5 bg-synapse-info rounded-full mr-3"></div>
-                  Custom templates
+                  Distraction-free layout
                 </li>
                 <li className="flex items-center">
                   <div className="w-1.5 h-1.5 bg-synapse-info rounded-full mr-3"></div>
-                  Multi-track timeline
+                  Helpful defaults
                 </li>
                 <li className="flex items-center">
                   <div className="w-1.5 h-1.5 bg-synapse-info rounded-full mr-3"></div>
-                  Brand kits for courses
+                  Works offline; files stay with you
                 </li>
               </ul>
             </motion.div>
@@ -785,7 +731,7 @@ const Footer: React.FC = () => {
               />
             </div>
             <p className="text-text-tertiary text-sm">
-              Human-powered video creation for educators and learning creators.
+              Simple video creation for everyone.
             </p>
           </div>
 
@@ -800,21 +746,6 @@ const Footer: React.FC = () => {
                   Features
                 </a>
               </li>
-              {isEnabled('PRODUCT_HUNT') && (
-                <li>
-                  <button
-                    onClick={() =>
-                      window.open(
-                        'https://www.producthunt.com/products/synapse-studio',
-                        '_blank'
-                      )
-                    }
-                    className="hover:text-orange-400 transition-colors text-left"
-                  >
-                    🚀 Product Hunt
-                  </button>
-                </li>
-              )}
             </ul>
           </div>
 
@@ -887,19 +818,6 @@ const Navigation: React.FC = () => {
             >
               Why Choose Us
             </a>
-            {isEnabled('PRODUCT_HUNT') && (
-              <button
-                onClick={() =>
-                  window.open(
-                    'https://www.producthunt.com/products/synapse-studio',
-                    '_blank'
-                  )
-                }
-                className="text-orange-600 hover:text-orange-700 transition-colors font-medium"
-              >
-                🚀 Product Hunt
-              </button>
-            )}
             <a
               href="#contact"
               className="text-text-secondary hover:text-synapse-primary transition-colors"

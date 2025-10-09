@@ -23,6 +23,8 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
   const [isPaused, setIsPaused] = useState(false);
   const [withCamera, setWithCamera] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  // Keep a ref in sync with stream so cleanup always has the latest
+  const streamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -69,13 +71,18 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
 
     // Cleanup on dialog close/unmount: stop tracks, clear refs
     return () => {
-      mediaRecorderRef.current?.stop();
+      try {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+          mediaRecorderRef.current.stop();
+        }
+      } catch {}
       mediaRecorderRef.current = null;
       setIsPaused(false);
-      const s = stream;
+      const s = streamRef.current;
       if (s) {
-        s.getTracks().forEach((t) => t.stop());
+        try { s.getTracks().forEach((t) => t.stop()); } catch {}
       }
+      streamRef.current = null;
       setStream(null);
       if (videoRef.current) {
         try {
@@ -161,14 +168,34 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     };
   }, [stream, withMic]);
 
+  // Ensure we stop capture if the tab is closed/reloaded
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleBeforeUnload = () => {
+      try {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+          mediaRecorderRef.current.stop();
+        }
+      } catch {}
+      const s = streamRef.current;
+      if (s) {
+        try { s.getTracks().forEach((t) => t.stop()); } catch {}
+        streamRef.current = null;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isOpen]);
+
   // Note: URL revocation is handled explicitly in start/save/discard/cancel paths.
   const requestStream = async (): Promise<MediaStream | null> => {
     try {
       // Stop previous stream (if any) before requesting new constraints
-      if (stream) {
+      if (streamRef.current) {
         try {
-          stream.getTracks().forEach((t) => t.stop());
+          streamRef.current.getTracks().forEach((t) => t.stop());
         } catch {}
+        streamRef.current = null;
         setStream(null);
       }
       if (videoRef.current) {
@@ -202,6 +229,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
           : false,
       });
       setStream(media);
+      streamRef.current = media;
       if (videoRef.current && withCamera) {
         try {
           (videoRef.current as any).srcObject = media;
@@ -234,7 +262,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       } catch {}
       setPending(null);
     }
-    const s = stream ?? (await requestStream());
+    const s = streamRef.current ?? (await requestStream());
     if (!s) return;
     chunksRef.current = [];
     // Pick a supported mime type
@@ -270,6 +298,16 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
       setPending({ url, mime, duration: duration ?? null, withCamera, blob });
       setIsRecording(false);
       setIsPaused(false);
+      // Extra safety: ensure tracks are stopped
+      const s2 = streamRef.current;
+      if (s2) {
+        try { s2.getTracks().forEach((t) => t.stop()); } catch {}
+        streamRef.current = null;
+        setStream(null);
+      }
+      if (videoRef.current) {
+        try { (videoRef.current as any).srcObject = null; } catch {}
+      }
     };
     mr.start();
     setIsRecording(true);
@@ -288,10 +326,11 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     mediaRecorderRef.current = null;
     setIsPaused(false);
     // Always stop and release all device tracks (audio and video)
-    const s = stream;
+    const s = streamRef.current;
     if (s) {
-      s.getTracks().forEach((t) => t.stop());
+      try { s.getTracks().forEach((t) => t.stop()); } catch {}
     }
+    streamRef.current = null;
     setStream(null);
     if (videoRef.current) {
       try {
@@ -325,8 +364,11 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
     if (isRecording) {
       stopRecording();
     } else {
-      const s = stream;
-      if (s) s.getTracks().forEach((t) => t.stop());
+      const s = streamRef.current;
+      if (s) {
+        try { s.getTracks().forEach((t) => t.stop()); } catch {}
+      }
+      streamRef.current = null;
       setStream(null);
       if (videoRef.current) {
         try {
@@ -361,7 +403,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
         <div className="p-4 border-b flex items-center justify-between">
           <h3 className="font-semibold">Record Narration</h3>
           <button
-            onClick={onClose}
+            onClick={handleCancel}
             className="text-gray-500 hover:text-gray-700"
           >
             ✕
@@ -472,7 +514,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                     Stop
                   </button>
                 )}
-                <button onClick={onClose} className="px-4 py-2 rounded border">
+                <button onClick={handleCancel} className="px-4 py-2 rounded border">
                   Cancel
                 </button>
               </div>
@@ -504,11 +546,12 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
 
                     // Persist via UploadManager and swap URL
                     try {
-                      enqueueBlob(pending.blob, {
+enqueueBlob(pending.blob, {
                         assetId: id,
                         name,
                         mime: pending.mime || 'application/octet-stream',
                         onComplete: (u) => {
+                          try { console.log('[recorder] upload complete', { assetId: id, url: u }); } catch {}
                           let finalUrl = u;
                           try {
                             const loc = window.location;
@@ -607,6 +650,7 @@ export function RecorderDialog({ isOpen, onClose }: RecorderDialogProps) {
                         name,
                         mime: pending.mime || 'application/octet-stream',
                         onComplete: (u) => {
+                          try { console.log('[recorder] upload complete (bin only)', { assetId: id, url: u }); } catch {}
                           let finalUrl = u;
                           try {
                             const loc = window.location;

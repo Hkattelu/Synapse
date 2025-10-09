@@ -93,7 +93,43 @@ uploadsRouter.get('/:name', async (req, res) => {
   try {
     const file = path.join(config.storage.uploadsDir, req.params.name);
     await fs.promises.access(file, fs.constants.R_OK);
-    res.sendFile(path.resolve(file));
+
+    const stat = await fs.promises.stat(file);
+    const total = stat.size;
+    const range = req.headers.range;
+
+    res.set('Accept-Ranges', 'bytes');
+    // Set basic content type based on extension
+    try { res.type(path.extname(file)); } catch {}
+
+    if (range) {
+      const match = /bytes=(\d*)-(\d*)/.exec(range);
+      let start = 0;
+      let end = total - 1;
+      if (match) {
+        if (match[1]) start = parseInt(match[1], 10);
+        if (match[2]) end = parseInt(match[2], 10);
+        if (Number.isNaN(start)) start = 0;
+        if (Number.isNaN(end) || end >= total) end = total - 1;
+      }
+      if (start > end || start >= total) {
+        return res.status(416).set('Content-Range', `bytes */${total}`).end();
+      }
+      const chunkSize = end - start + 1;
+      res.status(206);
+      res.set({
+        'Content-Range': `bytes ${start}-${end}/${total}`,
+        'Content-Length': String(chunkSize),
+      });
+      const stream = fs.createReadStream(file, { start, end });
+      stream.on('error', () => res.status(500).end());
+      stream.pipe(res);
+    } else {
+      res.set('Content-Length', String(total));
+      const stream = fs.createReadStream(file);
+      stream.on('error', () => res.status(500).end());
+      stream.pipe(res);
+    }
   } catch {
     res.status(404).json({ error: 'Not found' });
   }

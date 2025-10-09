@@ -16,13 +16,13 @@
     </g>
     <g transform="translate(220,0)" fill="#E5E7EB">
       <text x="0" y="64" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="56">Synapse Studio</text>
-      <text x="0" y="120" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="28" fill="#94A3B8">Code-first video studio with a real timeline</text>
+      <text x="0" y="120" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="28" fill="#94A3B8">Simple video editor with a clean timeline</text>
     </g>
   </g>
   <g transform="translate(80,260)" fill="#E5E7EB" font-family="Inter, system-ui, sans-serif">
-    <text x="0" y="0" font-size="30" font-weight="700">Design, preview, and export programmatic videos — fast.</text>
+    <text x="0" y="0" font-size="30" font-weight="700">Make simple videos in minutes.</text>
     <g font-size="22" fill="#94A3B8">
-      <text x="0" y="52">• Studio-grade timeline • Remotion-powered • Local-first today</text>
+      <text x="0" y="52">• No learning curve • Local-first today</text>
       <text x="0" y="84">• Web export via FFmpeg WASM coming soon</text>
     </g>
   </g>

@@ -431,8 +431,16 @@ export class ClientExportManager {
             ? project.mediaAssets
             : [];
 
+          // Consider only assets that are actually referenced by timeline items
+          const usedAssetIds = new Set(
+            (Array.isArray(project.timeline) ? project.timeline : [])
+              .map((t: any) => t?.assetId)
+              .filter((x: any) => typeof x === 'string')
+          );
+          const relevantAssets = mediaAssets.filter((a) => usedAssetIds.has((a as any)?.id));
+
           const offending: { name: string; url: string }[] = [];
-          for (const a of mediaAssets) {
+          for (const a of relevantAssets) {
             const url = typeof a?.url === 'string' ? a.url : '';
             if (!url) continue;
             const name = String(a?.name || a?.id || 'unnamed');
@@ -442,6 +450,7 @@ export class ClientExportManager {
           }
 
           if (offending.length > 0) {
+            try { console.warn('[export] blocking: local-only assets', offending); } catch {}
             const details = offending
               .slice(0, 5)
               .map((o) => `${o.name} -> ${o.url.slice(0, 64)}…`)

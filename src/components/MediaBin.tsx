@@ -207,16 +207,32 @@ export function MediaBin({ className = '' }: MediaBinProps) {
 
   // Background: reconcile any existing blob: URLs by uploading them to the server
   const reconciledRef = React.useRef<Set<string>>(new Set());
-  const { enqueueBlob, enqueueFile } = useUploadManager();
+  const { enqueueBlob, enqueueFile, tasks, inProgress } = useUploadManager();
   React.useEffect(() => {
+    const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
     const run = async () => {
       for (const asset of mediaAssets) {
-        if (!asset.url || !asset.url.startsWith('blob:')) continue;
-        if (reconciledRef.current.has(asset.id)) continue;
-        reconciledRef.current.add(asset.id);
         try {
-          const resp = await fetch(asset.url);
-          const blob = await resp.blob();
+          if (!asset.url || !asset.url.startsWith('blob:')) continue;
+          // Skip if there is already an active/pending upload task for this asset
+          const hasTask = (inProgress || []).some((t: any) => t?.assetId === asset.id);
+          if (hasTask) continue;
+          if (reconciledRef.current.has(asset.id)) continue;
+          reconciledRef.current.add(asset.id);
+
+          const tryFetchBlob = async (): Promise<Blob> => {
+            // One retry to mitigate transient race conditions right after recorder/save
+            try {
+              const resp = await fetch(asset.url);
+              return await resp.blob();
+            } catch {
+              await delay(500);
+              const resp2 = await fetch(asset.url);
+              return await resp2.blob();
+            }
+          };
+
+          const blob = await tryFetchBlob();
           const filename = asset.name || `asset-${asset.id}`;
           enqueueBlob(blob, {
             assetId: asset.id,
@@ -230,16 +246,26 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                   finalUrl = finalUrl.replace(/^http:/, 'https:');
                 }
               } catch {}
-              updateMediaAsset(asset.id, { url: finalUrl });
+              updateMediaAsset(asset.id, { url: finalUrl, metadata: { ...asset.metadata, needsUpload: false } });
             },
           });
         } catch (e) {
           console.warn('Background upload failed for', asset.name, e);
+          try {
+            // Mark asset as needing upload so UI can surface it and export gating can handle gracefully
+            updateMediaAsset(asset.id, { metadata: { ...asset.metadata, needsUpload: true } });
+            notify({
+              type: 'info',
+              title: 'Upload needed',
+              message:
+                `Could not access local data for “${asset.name}”. If this was a recording, please keep the tab open until uploads finish. Otherwise, re-import the file from disk.`,
+            });
+          } catch {}
         }
       }
     };
     void run();
-  }, [mediaAssets, updateMediaAsset, enqueueBlob]);
+  }, [mediaAssets, updateMediaAsset, enqueueBlob, inProgress]);
 
   // Category counts for dropdown labels
   const categoryCounts = React.useMemo(() => {
@@ -883,6 +909,19 @@ export function MediaBin({ className = '' }: MediaBinProps) {
                   >
                     {/* Thumbnail */}
                     <div className="aspect-video bg-background-primary flex items-center justify-center relative">
+                      {/* Needs upload ribbon */}
+                      {(() => {
+                        try {
+                          const needs = Boolean((asset as any)?.metadata?.needsUpload) || (asset.url?.startsWith('blob:'));
+                          return needs ? (
+                            <div className="absolute top-1 left-1 bg-amber-600 text-white text-[10px] px-2 py-0.5 rounded">
+                              Needs upload
+                            </div>
+                          ) : null;
+                        } catch {
+                          return null;
+                        }
+                      })()}
                       {asset.thumbnail ? (
                         <img
                           src={asset.thumbnail}

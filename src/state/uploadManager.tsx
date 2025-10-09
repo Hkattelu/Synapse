@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from 'react';
 
 // Upload status for each task
 export type UploadStatus =
@@ -29,6 +29,7 @@ interface InternalTask extends UploadTask {
   _payload: File | Blob; // original payload
   _onComplete?: (url: string) => void;
   _onFinally?: () => void;
+  _fallbackTried?: boolean;
 }
 
 interface UploadState {
@@ -151,29 +152,53 @@ const UploadContext = createContext<{
 } | null>(null);
 
 export const UploadManagerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Keep latest tasks in a ref to avoid stale closures when starting uploads on next tick
+  const tasksRef = useRef<UploadState['tasks']>({});
+  const log = (...args: any[]) => {
+    try {
+      if (localStorage.getItem('debug:uploads') === '1') {
+        // eslint-disable-next-line no-console
+        console.log('[uploads]', ...args);
+      }
+    } catch {}
+  };
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const startInternal = useCallback((taskId: string) => {
-    const task = ((): InternalTask | undefined => state.tasks[taskId])();
-    if (!task) return;
+  useEffect(() => {
+    tasksRef.current = state.tasks;
+  }, [state.tasks]);
 
+  const startInternal = useCallback((taskId: string) => {
+    const t0 = Date.now();
+    const task = tasksRef.current[taskId];
+    if (!task) {
+      log('startInternal: task not found (will retry)', { id: taskId });
+      // In rare cases, state might not have updated yet; retry shortly
+      setTimeout(() => startInternal(taskId), 10);
+      return;
+    }
+    log('startInternal: starting', { id: taskId, name: task.name, size: task.size, mime: task.mime, source: task._source });
     // Build XHR request for progress and cancellation
     const xhr = new XMLHttpRequest();
     task._xhr = xhr;
 
     xhr.upload.onprogress = (e: ProgressEvent) => {
+      log('progress', { id: taskId, lengthComputable: e.lengthComputable, loaded: (e as any).loaded, total: (e as any).total });
       if (!e.lengthComputable) return;
       const pct = Math.min(100, Math.max(0, Math.round((e.loaded / e.total) * 100)));
       dispatch({ type: 'PROGRESS', id: taskId, progress: pct });
     };
 
     xhr.onload = () => {
+      log('onload', { id: taskId, status: xhr.status, statusText: xhr.statusText, responseBytes: (xhr.responseText || '').length, dtMs: Date.now() - t0 });
       try {
         if (xhr.status >= 200 && xhr.status < 300) {
           const body = JSON.parse(xhr.responseText || '{}');
           const url = body?.url as string | undefined;
+          log('success', { id: taskId, url });
           dispatch({ type: 'SUCCESS', id: taskId });
           if (url && typeof task._onComplete === 'function') task._onComplete(url);
+          else if (!url) log('warning: response missing url field', { id: taskId, body });
         } else if (xhr.status === 0) {
           // Aborted
           dispatch({ type: 'CANCEL', id: taskId });
@@ -181,6 +206,7 @@ export const UploadManagerProvider: React.FC<{ children: React.ReactNode }> = ({
           dispatch({ type: 'FAIL', id: taskId, error: `${xhr.status} ${xhr.statusText}` });
         }
       } catch (e: any) {
+        log('parse-fail', { id: taskId, error: String(e?.message || e), response: xhr.responseText });
         dispatch({ type: 'FAIL', id: taskId, error: String(e?.message || e) });
       } finally {
         try { task._onFinally?.(); } catch {}
@@ -189,16 +215,76 @@ export const UploadManagerProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     };
 
+    const tryFetchFallback = async () => {
+      if (task._fallbackTried) {
+        log('fallback: already tried', { id: taskId });
+        return false;
+      }
+      task._fallbackTried = true;
+      try {
+        // Choose API base: allow override via localStorage, else dev default to 8787, else same-origin
+        let apiBase = '';
+        try {
+          apiBase = localStorage.getItem('debug:apiBase') || '';
+        } catch {}
+        if (!apiBase) {
+          try {
+            const loc = window.location;
+            const devPorts = new Set(['5173', '5174']);
+            if (devPorts.has(String(loc.port))) apiBase = 'http://localhost:8787';
+          } catch {}
+        }
+        const endpoint = `${apiBase}/api/uploads`;
+        log('fallback: fetch begin', { id: taskId, endpoint });
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'x-filename': task.name || 'upload.bin',
+            'content-type': task.mime || 'application/octet-stream',
+          },
+          body: task._payload as any,
+          credentials: 'include',
+          mode: apiBase ? 'cors' : 'same-origin',
+        });
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          throw new Error(`${res.status} ${res.statusText} ${text}`);
+        }
+        const body = await res.json().catch(() => ({} as any));
+        const url = body?.url as string | undefined;
+        log('fallback: success', { id: taskId, url });
+        dispatch({ type: 'SUCCESS', id: taskId });
+        if (url && typeof task._onComplete === 'function') task._onComplete(url);
+        try { task._onFinally?.(); } catch {}
+        maybeAutoExport();
+        return true;
+      } catch (e: any) {
+        log('fallback: fail', { id: taskId, error: String(e?.message || e) });
+        dispatch({ type: 'FAIL', id: taskId, error: String(e?.message || e) });
+        try { task._onFinally?.(); } catch {}
+        maybeAutoExport();
+        return false;
+      }
+    };
+
     xhr.onerror = () => {
-      dispatch({ type: 'FAIL', id: taskId, error: 'Network error' });
-      try { task._onFinally?.(); } catch {}
-      maybeAutoExport();
+      log('onerror', { id: taskId, status: xhr.status, statusText: xhr.statusText });
+      // Try fetch-based fallback (bypasses Vite proxy) for dev
+      void tryFetchFallback();
     };
 
     // Start
     dispatch({ type: 'START', id: taskId });
     const endpoint = '/api/uploads';
-    xhr.open('POST', endpoint, true);
+    log('open', { id: taskId, endpoint });
+    try {
+      xhr.open('POST', endpoint, true);
+    } catch (e) {
+      log('open-failed', { id: taskId, error: String((e as any)?.message || e) });
+      // Fallback immediately if open fails
+      void tryFetchFallback();
+      return;
+    }
 
     const name = task.name || 'upload.bin';
     const contentType = task.mime || 'application/octet-stream';
@@ -207,9 +293,10 @@ export const UploadManagerProvider: React.FC<{ children: React.ReactNode }> = ({
       xhr.setRequestHeader('content-type', contentType);
     } catch {}
 
+    log('send', { id: taskId, bytes: (task._payload as any)?.size || 0 });
     xhr.send(task._payload);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.tasks]);
+  }, []);
 
   type EnqueueFileFn = (
     file: File,
@@ -217,6 +304,7 @@ export const UploadManagerProvider: React.FC<{ children: React.ReactNode }> = ({
   ) => string;
 
   const enqueueFile = useCallback<EnqueueFileFn>((file, opts) => {
+    log('enqueueFile', { name: file.name, size: file.size, type: file.type, assetId: opts.assetId });
     const id = `up_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const t: InternalTask = {
       id,
@@ -232,6 +320,7 @@ export const UploadManagerProvider: React.FC<{ children: React.ReactNode }> = ({
       _onFinally: opts.onFinally,
     };
     dispatch({ type: 'ENQUEUE', task: t });
+    log('enqueued', { id, name: t.name, size: t.size });
     // Autostart
     setTimeout(() => startInternal(id), 0);
     return id;
@@ -243,6 +332,7 @@ export const UploadManagerProvider: React.FC<{ children: React.ReactNode }> = ({
   ) => string;
 
   const enqueueBlob = useCallback<EnqueueBlobFn>((blob, opts) => {
+    log('enqueueBlob', { name: opts.name, size: (blob as any)?.size || 0, mime: opts.mime || (blob as any)?.type, assetId: opts.assetId });
     const id = `up_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const t: InternalTask = {
       id,
@@ -258,11 +348,13 @@ export const UploadManagerProvider: React.FC<{ children: React.ReactNode }> = ({
       _onFinally: opts.onFinally,
     };
     dispatch({ type: 'ENQUEUE', task: t });
+    log('enqueued', { id, name: t.name, size: t.size });
     setTimeout(() => startInternal(id), 0);
     return id;
   }, [startInternal]);
 
   const cancel = useCallback((id: string) => {
+    log('cancel', { id });
     const t = state.tasks[id];
     if (t?._xhr && (t.status === 'uploading' || t.status === 'queued')) {
       try { t._xhr.abort(); } catch {}
@@ -271,6 +363,7 @@ export const UploadManagerProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [state.tasks]);
 
   const retry = useCallback((id: string) => {
+    log('retry', { id });
     const t = state.tasks[id];
     if (!t) return;
     // Reset minimal fields
@@ -279,14 +372,22 @@ export const UploadManagerProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [state.tasks, startInternal]);
 
   const remove = useCallback((id: string) => {
+    log('remove', { id });
     dispatch({ type: 'REMOVE', id });
   }, []);
 
   const showPanel = useCallback((show: boolean) => {
+    log('showPanel', { show });
     dispatch({ type: 'SHOW_PANEL', show });
   }, []);
 
   const maybeAutoExport = useCallback(() => {
+    log('maybeAutoExport', {
+      total: Object.keys(state.tasks).length,
+      allDone: Object.values(state.tasks).every((t) => t.status === 'uploaded' || t.status === 'cancelled'),
+      autoExportWhenReady: state.autoExportWhenReady,
+      hasCallback: typeof state.onAllComplete === 'function',
+    });
     const allDone = Object.values(state.tasks).every((t) => t.status === 'uploaded' || t.status === 'cancelled');
     if (allDone && state.autoExportWhenReady && typeof state.onAllComplete === 'function') {
       // Clear the flag before invoking to avoid re-entry

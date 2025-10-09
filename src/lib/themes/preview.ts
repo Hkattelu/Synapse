@@ -125,7 +125,7 @@ export function generateThemePreview(
           `<span class="boolean">$1</span>`
         );
 
-      return `<span class="code-line">${highlighted}</span>`;
+      return `<span>${highlighted}</span>`;
     })
     .join('\n');
 
@@ -156,7 +156,6 @@ export function generateThemePreview(
           user-select: none;
           opacity: 0.7;
         }
-        .theme-preview .code-line { display: block; }
       </style>
       <div style="display: flex;">
         ${showLineNumbers ? `<div class="line-numbers" style="margin-right: 8px;">${lineNumbersHtml}</div>` : ''}
