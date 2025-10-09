@@ -34,6 +34,8 @@ export interface AssetMetadata {
   // Visual asset metadata
   visualAssetType?: VisualAssetType;
   defaultProperties?: Partial<ItemProperties>;
+  // Upload state hints for UI/export gating (optional)
+  needsUpload?: boolean;
 }
 
 export interface MediaAsset {

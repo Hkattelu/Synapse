@@ -65,6 +65,9 @@ function codeTutorialTemplate(): ProjectTemplate {
           properties: {
             text: 'Getting Started',
             color: '#ffffff',
+            // Center the title by default
+            x: 960,
+            y: 540,
           },
           animations: [],
           keyframes: [],

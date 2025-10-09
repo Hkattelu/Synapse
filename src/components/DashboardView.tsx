@@ -276,7 +276,7 @@ export function DashboardView() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() => setShowCreateForm(true)}
-                  className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse font-medium px-6 py-3 rounded-lg transition-colors flex items-center space-x-2"
+                  className="bg-synapse-primary hover:bg-synapse-primary-hover text-synapse-text-inverse font-medium px-6 py-3 rounded-lg transition-colors flex items-center space-x-2 border border-border-subtle"
                 >
                   <Plus className="w-5 h-5" />
                   <span>New Project</span>
