@@ -550,13 +550,19 @@ enqueueBlob(pending.blob, {
                         assetId: id,
                         name,
                         mime: pending.mime || 'application/octet-stream',
-                        onComplete: (u) => {
+onComplete: (u) => {
                           try { console.log('[recorder] upload complete', { assetId: id, url: u }); } catch {}
                           let finalUrl = u;
                           try {
                             const loc = window.location;
-                            if (loc.protocol === 'https:' && finalUrl.startsWith('http://') && finalUrl.includes(loc.host)) {
-                              finalUrl = finalUrl.replace(/^http:/, 'https:');
+                            const parsed = new URL(u, loc.origin);
+                            // If same host, prefer same-origin path to avoid cross-origin issues
+                            if (parsed.host === loc.host) {
+                              finalUrl = parsed.pathname + parsed.search;
+                            }
+                            // Upgrade same-host http to https if needed
+                            if (loc.protocol === 'https:' && parsed.protocol === 'http:' && parsed.host === loc.host) {
+                              finalUrl = 'https://' + parsed.host + parsed.pathname + parsed.search;
                             }
                           } catch {}
                           updateMediaAsset(id, { url: finalUrl });
@@ -649,13 +655,17 @@ enqueueBlob(pending.blob, {
                         assetId: id,
                         name,
                         mime: pending.mime || 'application/octet-stream',
-                        onComplete: (u) => {
+onComplete: (u) => {
                           try { console.log('[recorder] upload complete (bin only)', { assetId: id, url: u }); } catch {}
                           let finalUrl = u;
                           try {
                             const loc = window.location;
-                            if (loc.protocol === 'https:' && finalUrl.startsWith('http://') && finalUrl.includes(loc.host)) {
-                              finalUrl = finalUrl.replace(/^http:/, 'https:');
+                            const parsed = new URL(u, loc.origin);
+                            if (parsed.host === loc.host) {
+                              finalUrl = parsed.pathname + parsed.search;
+                            }
+                            if (loc.protocol === 'https:' && parsed.protocol === 'http:' && parsed.host === loc.host) {
+                              finalUrl = 'https://' + parsed.host + parsed.pathname + parsed.search;
                             }
                           } catch {}
                           updateMediaAsset(id, { url: finalUrl });

@@ -7,6 +7,20 @@ import { config } from '../config.mjs';
 
 export const uploadsRouter = Router();
 
+// Basic CORS for uploads API (allow cross-origin media access)
+uploadsRouter.use((req, res, next) => {
+  try {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'content-type,x-filename,range');
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Length,Content-Range');
+  } catch {}
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
 // Ensure uploads directory exists
 async function ensureUploadsDir() {
   try {
@@ -65,7 +79,7 @@ uploadsRouter.post(
         if (responded) return;
         responded = true;
         const absoluteUrl = `${protocol}://${host}/api/uploads/${encodeURIComponent(filename)}`;
-        res.json({ id: filename, url: absoluteUrl });
+        res.json({ id: filename, url: absoluteUrl, path: `/api/uploads/${encodeURIComponent(filename)}` });
       };
 
       const fail = (err) => {
