@@ -85,6 +85,17 @@ const ensureBundle = async (inputProps) => {
 
   // Build (or rebuild) if we don't have a valid bundle yet
   if (!bundleLocation || !(await hasIndexHtml(bundleLocation))) {
+    // Validate entry point exists before attempting to bundle
+    try {
+      await fs.promises.access(config.render.entryPoint, fs.constants.R_OK);
+    } catch {
+      throw new Error(
+        `[render] Remotion entry not found: ${config.render.entryPoint}. ` +
+          `Set REMOTION_ENTRY to a valid path in your environment. ` +
+          `For example: REMOTION_ENTRY=/workspace/src/remotion/index.ts`
+      );
+    }
+
     // Use a unique temp dir to avoid partial/locked bundles on Windows
     const outDir = path.join(
       os.tmpdir(),
@@ -97,10 +108,14 @@ const ensureBundle = async (inputProps) => {
       outDir,
     });
 
-    const serveUrl = await bundle({
-      entryPoint: config.render.entryPoint,
-      outDir,
-    });
+    // Bundle with a soft timeout to avoid infinite hangs; if timeout, surface a helpful error
+    const BUNDLE_TIMEOUT_MS = Number(process.env.BUNDLE_TIMEOUT_MS || 120000); // 2 minutes default
+    const doBundle = bundle({ entryPoint: config.render.entryPoint, outDir });
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(`[render] Bundling timed out after ${BUNDLE_TIMEOUT_MS}ms`)), BUNDLE_TIMEOUT_MS)
+    );
+
+    const serveUrl = await Promise.race([doBundle, timeout]);
 
     // Validate bundle has index.html; if not, fail fast with a helpful error
     if (!(await hasIndexHtml(serveUrl))) {
