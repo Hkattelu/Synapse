@@ -38,6 +38,8 @@ steps:
         '--region',
         '$_REGION',
         '--allow-unauthenticated',
+        '--set-env-vars',
+        'REMOTION_ENTRY=/app/src/remotion/index.ts,BUNDLE_TIMEOUT_MS=60000,RENDER_CONCURRENCY=1'
       ]
 
 images:

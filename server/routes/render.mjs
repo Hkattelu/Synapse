@@ -44,6 +44,45 @@ renderRouter.get('/:id/status', (req, res) => {
   res.json(enriched);
 });
 
+// Diagnostics endpoint to verify server render configuration and filesystem access
+renderRouter.get('/diagnostics', async (_req, res) => {
+  try {
+    const entryPoint = config.render.entryPoint;
+    let entryExists = false;
+    try {
+      await fs.promises.access(entryPoint, fs.constants.R_OK);
+      entryExists = true;
+    } catch {}
+
+    const outDir = config.render.outputDir;
+    let outDirWritable = false;
+    try {
+      await fs.promises.mkdir(outDir, { recursive: true });
+      await fs.promises.access(outDir, fs.constants.W_OK);
+      outDirWritable = true;
+    } catch {}
+
+    const concurrency = Number(config.render.concurrency || 1);
+
+    res.json({
+      ok: true,
+      nodeEnv: process.env.NODE_ENV || 'unknown',
+      render: {
+        entryPoint,
+        entryExists,
+        outputDir: outDir,
+        outputDirWritable,
+        concurrency,
+      },
+      versions: {
+        node: process.version,
+      },
+    });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: String(e?.message || e) });
+  }
+});
+
 renderRouter.get('/:id/download', async (req, res) => {
   // TODO(auth): Ensure the requester has access to the render (same project / owner).
   const job = getJob(req.params.id);
