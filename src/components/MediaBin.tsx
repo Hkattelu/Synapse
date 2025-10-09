@@ -209,6 +209,14 @@ export function MediaBin({ className = '' }: MediaBinProps) {
   const reconciledRef = React.useRef<Set<string>>(new Set());
   const { enqueueBlob, enqueueFile, tasks, inProgress } = useUploadManager();
   React.useEffect(() => {
+    // Disable blob reconciliation in production to avoid cross-origin blob fetch errors and noise
+    try {
+      // Vite: import.meta.env.DEV
+      // Fallback to NODE_ENV
+      const isDev = (import.meta as any)?.env?.DEV ?? process.env.NODE_ENV === 'development';
+      if (!isDev) return;
+    } catch {}
+
     const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
     const run = async () => {
       for (const asset of mediaAssets) {
