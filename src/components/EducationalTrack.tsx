@@ -235,6 +235,8 @@ function EducationalTimelineClip({
         ${isDragging ? 'z-10 cursor-grabbing' : 'cursor-grab'}
         hover:border-text-secondary
       `}
+      data-testid="timeline-clip"
+      data-item-id={item.id}
       style={{
         ...style,
         backgroundColor: track.color,

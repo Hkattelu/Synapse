@@ -784,7 +784,7 @@ export const CodeSequence: React.FC<CodeSequenceProps> = ({
         )}
 
         {/* Code content layer */}
-        <div style={codePanelStyle}>
+        <div style={codePanelStyle} data-testid="code-panel">
           {/* Panel local background layer */}
           {panelBackgroundConfig && (
             <BackgroundRenderer

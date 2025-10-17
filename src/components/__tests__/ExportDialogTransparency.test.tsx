@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ExportDialog } from '../ExportDialog';
 import { ExportProvider } from '../../state/exportContext';
 import { AppProvider } from '../../state/context';
+import { UploadManagerProvider } from '../../state/uploadManager';
 import type { Project } from '../../lib/types';
 
 // Mock the export manager client
@@ -136,11 +137,9 @@ vi.mock('../../state/exportContext', () => ({
 
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AppProvider>
-    <ExportProvider>{children}</ExportProvider>
-  </AppProvider>
-);
-  <AppProvider>
-    <ExportProvider>{children}</ExportProvider>
+    <UploadManagerProvider>
+      <ExportProvider>{children}</ExportProvider>
+    </UploadManagerProvider>
   </AppProvider>
 );
 

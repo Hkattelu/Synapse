@@ -204,18 +204,19 @@ describe('Export System', () => {
       expect(screen.getByText('Instagram Square')).toBeInTheDocument();
     });
 
-    it('should switch between presets and custom settings tabs', () => {
+    it('should allow selecting a different preset', () => {
       render(
         <TestWrapper>
           <ExportDialog isOpen={true} onClose={() => {}} />
         </TestWrapper>
       );
 
-      const customTab = screen.getByText('Custom Settings');
-      fireEvent.click(customTab);
-
-      expect(screen.getByText('Video Settings')).toBeInTheDocument();
-      expect(screen.getByText('Audio Settings')).toBeInTheDocument();
+      const twitterPreset = screen.getByText('Twitter/X 720p');
+      fireEvent.click(twitterPreset);
+      // The selected preset shows a small "Selected" badge in the card
+      expect(
+        twitterPreset.closest('div')?.querySelector('span')?.textContent
+      ).toContain('Selected');
     });
 
     it('should display estimated file size and duration', () => {

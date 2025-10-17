@@ -45,10 +45,10 @@ describe('ProjectManager (basic)', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Your Projects')).toBeInTheDocument();
-    expect(screen.getByText('Alpha')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /Open Project/i }));
+    // Project card is rendered with accessible name "Open project Alpha"
+    const openCard = screen.getByRole('button', { name: /Open project Alpha/i });
+    expect(openCard).toBeInTheDocument();
+    fireEvent.click(openCard);
     expect(switchProject).toHaveBeenCalledWith('a');
   });
 });

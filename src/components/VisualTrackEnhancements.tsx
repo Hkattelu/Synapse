@@ -93,6 +93,8 @@ export function VisualTrackClip({
         ${isDragging ? 'opacity-75 z-10' : 'opacity-100'}
         hover:border-text-secondary group
       `}
+      data-testid="timeline-clip"
+      data-item-id={item.id}
       style={{
         ...style,
         backgroundColor: track.color,

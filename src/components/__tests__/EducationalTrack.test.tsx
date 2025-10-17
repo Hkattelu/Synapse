@@ -207,10 +207,8 @@ describe('EducationalTrack', () => {
 
     render(<EducationalTrack {...props} />);
 
-    // Find the timeline clip container (the one with the border styling)
-    const clipElement = screen
-      .getByText('Test Asset test-asset-1')
-      .closest('.absolute.rounded.cursor-move');
+    // Use stable test id provided by the component for the clip container
+    const clipElement = screen.getByTestId('timeline-clip');
     expect(clipElement).toHaveClass('border-accent-yellow');
   });
 
@@ -226,10 +224,7 @@ describe('EducationalTrack', () => {
 
     render(<EducationalTrack {...props} />);
 
-    // Find the timeline clip container (the one with the border styling)
-    const clipElement = screen
-      .getByText('Test Asset test-asset-1')
-      .closest('.absolute.rounded.cursor-move');
+    const clipElement = screen.getByTestId('timeline-clip');
     expect(clipElement).toHaveClass('z-10');
   });
 
@@ -242,9 +237,7 @@ describe('EducationalTrack', () => {
 
     render(<EducationalTrack {...props} />);
 
-    const clipElement = screen
-      .getByText('Test Asset test-asset-1')
-      .closest('.absolute.rounded.cursor-move') as HTMLElement;
+    const clipElement = screen.getByTestId('timeline-clip') as HTMLElement;
     expect(clipElement).toBeInTheDocument();
     expect(clipElement).toHaveStyle({ backgroundColor: EDUCATIONAL_TRACKS[0].color });
   });

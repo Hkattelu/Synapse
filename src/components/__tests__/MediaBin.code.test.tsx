@@ -76,7 +76,7 @@ it('renders Add menu and shows New code clip item', () => {
     expect(addBtn).toBeInTheDocument();
 
     // Open the menu and check for the code clip action
-    addBtn.click();
+    fireEvent.click(addBtn);
     expect(screen.getByText('New code clip')).toBeInTheDocument();
   });
 
@@ -87,8 +87,9 @@ it('renders Add menu and shows New code clip item', () => {
       </TestProviders>
     );
 
-    const addCodeButton = screen.getByText('Add Code');
-    fireEvent.click(addCodeButton);
+    const addBtn = screen.getByTitle('Add');
+    fireEvent.click(addBtn);
+    fireEvent.click(screen.getByText('New code clip'));
 
     await waitFor(() => {
       expect(mockAddMediaAsset).toHaveBeenCalledWith(
@@ -203,11 +204,11 @@ render(
     const codeClipElement = screen.getByText('Code Clip 1').closest('.group');
     fireEvent.doubleClick(codeClipElement!);
 
-    // Double-click video asset
-    const videoAssetElement = screen
-      .getByText('test-video.mp4')
-      .closest('.group');
-    fireEvent.doubleClick(videoAssetElement!);
+    // Switch to Visual and double-click video asset
+    fireEvent.change(filter, { target: { value: 'visual' } });
+    const videoCard = screen.getByTitle('test-video.mp4');
+    const videoAssetElement = videoCard.closest('.group')!;
+    fireEvent.doubleClick(videoAssetElement);
 
     await waitFor(() => {
       // Code clip should create code timeline item
