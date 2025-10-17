@@ -12,8 +12,7 @@ import type {
   EducationalTrack,
 } from '../../lib/educationalTypes';
 import { EDUCATIONAL_TRACKS } from '../../lib/educationalTypes';
-import { beforeEach } from 'node:test';
-import { beforeEach } from 'node:test';
+// Remove stray node:test imports; using Vitest's beforeEach above
 
 // Mock data
 const mockConflicts: MigrationConflict[] = [

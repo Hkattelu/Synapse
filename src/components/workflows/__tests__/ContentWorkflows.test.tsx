@@ -1,35 +1,11 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { CodeEditorWorkflow } from '../CodeEditorWorkflow';
 import { VideoWorkflow } from '../VideoWorkflow';
 import { AssetsWorkflow } from '../AssetsWorkflow';
 import { ContextualHelp } from '../ContextualHelp';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { describe } from 'node:test';
+// Remove stray node:test imports
 
 // Mock hooks
 vi.mock('../../../state/hooks', () => ({

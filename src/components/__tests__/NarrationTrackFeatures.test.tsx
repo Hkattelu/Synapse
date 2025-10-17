@@ -10,6 +10,11 @@ import {
 } from '../../lib/educationalTypes';
 
 // Mock audio context and related APIs
+const fakeAudioBuffer: any = {
+  getChannelData: () => new Float32Array(44100).fill(0),
+  sampleRate: 44100,
+  duration: 1,
+};
 const mockAudioContext = {
   createAnalyser: vi.fn(() => ({
     fftSize: 256,
@@ -23,6 +28,7 @@ const mockAudioContext = {
     connect: vi.fn(),
     disconnect: vi.fn(),
   })),
+  decodeAudioData: vi.fn(async () => fakeAudioBuffer),
   close: vi.fn(),
 };
 

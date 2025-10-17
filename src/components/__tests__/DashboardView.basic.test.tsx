@@ -20,7 +20,7 @@ describe('DashboardView (basic)', () => {
       </MemoryRouter>
     );
 
-    const cta = screen.getByRole('button', { name: /New Project/i });
+    const [cta] = screen.getAllByRole('button', { name: /New Project/i });
     expect(cta).toBeInTheDocument();
 
     fireEvent.click(cta);

@@ -97,9 +97,9 @@ describe('CodeSequence', () => {
       />
     );
 
-    const codeContainer = getByTestId('absolute-fill');
-    expect(codeContainer.style.backgroundColor).toBe('rgb(255, 255, 255)');
-    expect(codeContainer.style.color).toBe('rgb(36, 41, 46)');
+    const codePanel = getByTestId('code-panel');
+    expect(codePanel.style.backgroundColor).toBe('rgb(255, 255, 255)');
+    expect(codePanel.style.color).toBe('rgb(36, 41, 46)');
   });
 
   it('applies correct font size', () => {
@@ -118,8 +118,8 @@ describe('CodeSequence', () => {
       />
     );
 
-    const codeContainer = getByTestId('absolute-fill');
-    expect(codeContainer.style.fontSize).toBe(`${fontSize}px`);
+    const codePanel = getByTestId('code-panel');
+    expect(codePanel.style.fontSize).toBe(`${fontSize}px`);
   });
 
   it('applies transform properties correctly', () => {
@@ -141,11 +141,11 @@ describe('CodeSequence', () => {
       />
     );
 
-    const codeContainer = getByTestId('absolute-fill');
-    expect(codeContainer.style.transform).toBe(
+    const codePanel = getByTestId('code-panel');
+    expect(codePanel.style.transform).toBe(
       'translate(100px, 50px) scale(1.5) rotate(45deg)'
     );
-    expect(codeContainer.style.opacity).toBe('0.8');
+    expect(codePanel.style.opacity).toBe('0.8');
   });
 
   it('handles empty code content', () => {
@@ -205,8 +205,8 @@ describe('CodeSequence', () => {
         />
       );
 
-      const codeContainer = getByTestId('absolute-fill');
-      expect(codeContainer.style.backgroundColor).toBeTruthy();
+      const codePanel = getByTestId('code-panel');
+      expect(codePanel.style.backgroundColor).toBeTruthy();
 
       // Clean up to prevent multiple elements in DOM
       unmount();
